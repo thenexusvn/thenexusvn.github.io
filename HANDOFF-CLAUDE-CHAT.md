@@ -24,7 +24,7 @@ A school super-app, rebuilt from v0-thenexus.vercel.app. Single-page vanilla JS 
 - Fonts: Inter and Space Grotesk.
 - Colours: `#08090c` dark background, `#c1f354` lime for free features, `#ad8dff` purple for paid ones.
 - three.js **r128 APIs only** (loaded from cdnjs). Keep the PMREM black-probe check. Keep the merged-mesh performance approach (`buildVC`).
-- No copyrighted music playback. SonicDeck plays synth tracks only; the Vietnamese and phonk list holds links only.
+- Music (changed Nov 2026 at the owner's request): SonicDeck plays real songs only through the embedded YouTube player (youtube-nocookie), and only uploads from official channels (artist, label, producer, TV station or YouTube "Topic"). Never host or stream copyrighted audio files. Community uploads require the "I made it or may share it" box; YouTube links are the way to share other people's songs. The generated synth tracks remain only as the Nexus City car radio.
 - Nexus City: no GTA names, characters or map.
 - Guns are allowed, with **no blood**: a hit knocks people out.
 - No fake data: online counts, files, messages and views come only from real users.
@@ -80,6 +80,8 @@ A school super-app, rebuilt from v0-thenexus.vercel.app. Single-page vanilla JS 
   - Plans live in `entitlements/{uid}` {pro, vaultPlus, premium} as expiry timestamps, read-only to clients (server or console writes). API: `NexusData.hasPlan(k)`, `planUntil(k)`; Pro implies the other two. Nothing is gated on plans yet.
   - Test: `tools/test_sync.py` with `tools/fakefb.js` (fake Firebase, two devices).
 - **Hosting:** GitHub Pages at https://thenexusvn.github.io from repo `thenexusvn/thenexusvn.github.io`; Firebase project `nexus-4012e` (branch main, root). Add `<user>.github.io` to Firebase authorized domains.
+
+- **SonicDeck (Nov 2026):** 177 catalog songs in `CAT` (title, artist, genre, year, YouTube id, seconds, channel), found and embed-checked through YouTube search plus oEmbed. Tabs: Nhạc Việt (cải lương, bolero, trữ tình, V-Pop, rap, remix, phonk), Quốc tế, Cộng đồng. Community songs: Firestore `songs` (file on Cloudinary via `NEXUS_VIDEO_UPLOAD`, or `yt` id), files fall back to IndexedDB on this device when Cloudinary is not set. Free users add 5 songs, `hasPlan('premium')` 100. Plays go to `stats/tracks` keyed `y_<id>` or `u_<docId>`; the home "most played" bar reads `window.NexusSongInfo`. Test: `tools/test_sd.py`.
 
 ## Public link
 https://thenexusvn.github.io (GitHub Pages). Firebase project `nexus-4012e`: Google, Email/Password and Anonymous sign-in on; Firestore in asia-southeast1 with `firestore.rules` published; authorized domain `thenexusvn.github.io`.
