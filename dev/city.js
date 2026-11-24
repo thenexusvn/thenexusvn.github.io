@@ -383,7 +383,7 @@ for(const b of blocks){
   SP.bigBridge={x:bx,z:bz};}
 // ground pieces around the city and river, sand split by the river mouth
 {const cx0=road(0)-RW/2,cx1=SAND0,cz0=road(0)-RW/2,cz1=road(N)+RW/2,G=new GB(),S=new GB(),R=new GB();
-  G.flat(-1600,1600,-.05,-1600,cz0,20);G.flat(-1600,1600,-.05,cz1,1600,20);G.flat(-1600,cx0,-.05,cz0,RZ0,20);G.flat(-1600,cx0,-.05,RZ1,cz1,20);G.flat(cx1,1600,-.05,cz0,RZ0,20);G.flat(cx1,1600,-.05,RZ1,cz1,20);
+  G.flat(-1600,cx1,-.05,-1700,cz0,20);G.flat(-1600,cx0,-.05,cz0,RZ0,20);G.flat(-1600,cx0,-.05,RZ1,cz1,20);
   const ggr=addMesh(G.geo(),new T.MeshStandardMaterial({map:TX.grass,color:lin('#9fb08a'),roughness:1}),false);
   for(let j=0;j<=N;j++)R.flat(cx0,SAND0,0,road(j)-RW/2,road(j)+RW/2,14);
   for(let i=0;i<=N;i++)for(let s=0;s<N;s++)R.flat(road(i)-RW/2,road(i)+RW/2,0,road(s)+RW/2,road(s+1)-RW/2,14);
@@ -399,7 +399,7 @@ const CZ1=road(N)+RW/2;
 function beachH(x,z){const dE=x-shoreE(z),dS=x<SAND0+30?z-shoreS(x):-1e9,d=Math.max(dE,dS);
   const rE=x>=SAND0?clamp((x-SAND0)/6,0,1):0,rS=z>=CZ1?clamp((z-CZ1)/6,0,1):0,dry=.02+.23*Math.max(rE,rS);return Math.max(-3,dry-Math.max(0,d+10)*.055);}
 /* one water grid shaped like an L: everything east of the beach plus everything south of the city */
-const WST=MOBILE?48:24,WX0=-1600,WX1=WATER+1400,WZ0=-1000,WZ1=2000,WNX=Math.round((WX1-WX0)/WST)+1,WNZ=Math.round((WZ1-WZ0)/WST)+1;
+const WST=MOBILE?48:24,WX0=-1600,WX1=WATER+1400,WZ0=-1700,WZ1=2000,WNX=Math.round((WX1-WX0)/WST)+1,WNZ=Math.round((WZ1-WZ0)/WST)+1;
 const waterG=new T.BufferGeometry();
 {const pos=[],idx=[];for(let iz=0;iz<WNZ;iz++)for(let ix=0;ix<WNX;ix++)pos.push(WX0+ix*WST,0,WZ0+iz*WST);
   const sea=(x,z)=>x>SAND0+10||z>HALF+40;
@@ -412,7 +412,7 @@ const waterBase=Float32Array.from(waterG.attributes.position.array);
   const grid=(x0,x1,z0,z1,st,skip)=>{const nx=Math.round((x1-x0)/st)+1,nz=Math.round((z1-z0)/st)+1,o=pos.length/3;
     for(let iz=0;iz<nz;iz++)for(let ix=0;ix<nx;ix++){const x=x0+ix*st,z=z0+iz*st,y=beachH(x,z);pos.push(x,y,z);uv.push(x/6,z/6);cc.copy(dry).lerp(wet,clamp((.32-y)/.3,0,1));col.push(cc.r,cc.g,cc.b);}
     for(let iz=0;iz<nz-1;iz++)for(let ix=0;ix<nx-1;ix++){const z=z0+(iz+.5)*st;if(skip&&skip(z))continue;const a=o+iz*nx+ix,b=a+1,c=a+nx,d=c+1;idx.push(a,c,b,b,c,d);}};
-  grid(SAND0,WATER+90,-HALF-300,CZ1,3,z=>z>RZ0-1&&z<RZ1+1);
+  grid(SAND0,WATER+90,-1700,CZ1,3,z=>z>RZ0-1&&z<RZ1+1);
   grid(-1600,WATER+90,CZ1,HALF+150,3);
   const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(pos,3));g.setAttribute('uv',new T.Float32BufferAttribute(uv,2));g.setAttribute('color',new T.Float32BufferAttribute(col,3));g.setIndex(idx);g.computeVertexNormals();g.computeBoundingSphere();
   const m=addMesh(g,new T.MeshStandardMaterial({map:TX.sand,vertexColors:true,roughness:1}),false);m.frustumCulled=false;}
@@ -421,7 +421,7 @@ const foamTex=makeTex(256,64,(g,w,h)=>{g.clearRect(0,0,w,h);for(let i=0;i<900;i+
   const gr=g.createLinearGradient(0,0,0,h);gr.addColorStop(0,'rgba(255,255,255,0)');gr.addColorStop(.5,'rgba(255,255,255,.55)');gr.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=gr;g.fillRect(0,0,w,h);});
 const foamMat=new T.MeshBasicMaterial({map:foamTex,transparent:true,opacity:.6,depthWrite:false,fog:true,polygonOffset:true,polygonOffsetFactor:-3});
 {const gb=new GB(),W=2.6;let u=0;const line=[];
-  for(let z=-HALF-300;z<CZ1;z+=4){if(z>RZ0-6&&z<RZ1+6){if(line.length){addFoam(line);line.length=0;}continue;}line.push([shoreE(z)-8.2,z]);}
+  for(let z=-1700;z<CZ1;z+=4){if(z>RZ0-6&&z<RZ1+6){if(line.length){addFoam(line);line.length=0;}continue;}line.push([shoreE(z)-8.2,z]);}
   for(let x=shoreE(CZ1)-8.2;x>-1600;x-=4)line.push([x,shoreS(x)-8.2]);
   addFoam(line);
   function addFoam(L){for(let k=0;k<L.length-1;k++){const a=L[k],b=L[k+1],tx=b[0]-a[0],tz=b[1]-a[1],l=hyp(tx,tz)||1,nx=-tz/l*W,nz=tx/l*W;const y=.28;
@@ -1842,7 +1842,7 @@ function step(dt){
   const on=Math.floor(time*5)%2===0;BAR.r.emissiveIntensity=on?4:.2;BAR.b.emissiveIntensity=on?.2:4;
   if(bag){bag.vel+=(-bag.swing*14-bag.vel*2.5)*dt;bag.swing+=bag.vel*dt;bag.piv.rotation.x=bag.swing;}
   // water waves
-  foamUpdate();if(Math.floor(time*20)%2===0){const pa=waterG.attributes.position;for(let i=0;i<pa.count;i++){const x=waterBase[i*3],z=waterBase[i*3+2];pa.array[i*3+1]=Math.sin(x*.06+time*1.3)*.35+Math.cos(z*.05+time*.9)*.3;}pa.needsUpdate=true;waterG.computeVertexNormals();}
+  foamUpdate();if(Math.floor(time*20)%2===0){const pa=waterG.attributes.position;for(let i=0;i<pa.count;i++){const x=waterBase[i*3],z=waterBase[i*3+2];pa.array[i*3+1]=Math.sin(x*.06+time*1.3)*.13+Math.cos(z*.05+time*.9)*.11+Math.sin((x+z)*.13+time*2.1)*.05;}pa.needsUpdate=true;waterG.computeVertexNormals();}
 }
 let perfT=0,perfN=0,lowQ=false;
 function adapt(raw){if(lowQ||paused)return;perfT+=raw;perfN++;if(perfT>4){const avg=perfT/perfN;perfT=0;perfN=0;if(avg>.045){lowQ=true;renderer.setPixelRatio(1);if(renderer.shadowMap.enabled){renderer.shadowMap.enabled=false;sun.castShadow=false;scene.traverse(o=>{if(o.material){(Array.isArray(o.material)?o.material:[o.material]).forEach(m=>m.needsUpdate=true);}});}resize();}}}
