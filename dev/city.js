@@ -18,6 +18,7 @@ const road=i=>i*CELL-HALF;
 const SAND0=HALF+RW/2,WATER=HALF+72;
 const EXT={x0:-HALF-26,x1:WATER-3,z0:-HALF-26,z1:HALF+26};
 /* west hills: terrain heights live in HGRID (built later); heightAt is 0 everywhere else */
+EXT.z1=HALF+70;EXT.x1=WATER+18;
 const HZ={x0:-800,x1:-456,z0:-110,z1:480};let HGRID=null;
 function inHills(x,z){return x<HZ.x1&&x>HZ.x0&&z>HZ.z0&&z<HZ.z1;}
 function heightAt(x,z){const G=HGRID;if(!G||!inHills(x,z))return 0;const fx=(x-G.X0)/G.ST,fz=(z-G.Z0)/G.ST,ix=clamp(Math.floor(fx),0,G.NX-2),iz=clamp(Math.floor(fz),0,G.NZ-2),tx=fx-ix,tz=fz-iz,H=G.H,a=H[iz*G.NX+ix],b=H[iz*G.NX+ix+1],c=H[(iz+1)*G.NX+ix],d=H[(iz+1)*G.NX+ix+1];return(a*(1-tx)+b*tx)*(1-tz)+(c*(1-tx)+d*tx)*tz;}
@@ -384,16 +385,50 @@ for(const b of blocks){
 {const cx0=road(0)-RW/2,cx1=SAND0,cz0=road(0)-RW/2,cz1=road(N)+RW/2,G=new GB(),S=new GB(),R=new GB();
   G.flat(-1600,1600,-.05,-1600,cz0,20);G.flat(-1600,1600,-.05,cz1,1600,20);G.flat(-1600,cx0,-.05,cz0,RZ0,20);G.flat(-1600,cx0,-.05,RZ1,cz1,20);G.flat(cx1,1600,-.05,cz0,RZ0,20);G.flat(cx1,1600,-.05,RZ1,cz1,20);
   const ggr=addMesh(G.geo(),new T.MeshStandardMaterial({map:TX.grass,color:lin('#9fb08a'),roughness:1}),false);
-  S.flat(SAND0,WATER+40,.02,-HALF-300,RZ0,6);S.flat(SAND0,WATER+40,.02,RZ1,HALF+300,6);addMesh(S.geo(),new T.MeshStandardMaterial({map:TX.sand,roughness:1}),false);
   for(let j=0;j<=N;j++)R.flat(cx0,SAND0,0,road(j)-RW/2,road(j)+RW/2,14);
   for(let i=0;i<=N;i++)for(let s=0;s<N;s++)R.flat(road(i)-RW/2,road(i)+RW/2,0,road(s)+RW/2,road(s+1)-RW/2,14);
   addMesh(R.geo(),ASPH=new T.MeshStandardMaterial({map:TX.asphalt,roughness:.92}),false);
   addCol({t:'b',x0:EXT.x0-5,x1:cx0+.4,z0:RZ0,z1:RZ1,h:.3});addCol({t:'b',x0:SAND0-.4,x1:EXT.x1+5,z0:RZ0,z1:RZ1,h:.3});}
 // meshes for static city
 function addMesh(geo,m,cast){const me=new T.Mesh(geo,m);me.castShadow=!!cast&&Q.shadows;me.receiveShadow=Q.shadows;scene.add(me);return me;}
-const waterG=new T.PlaneGeometry(1400,2000,MOBILE?30:70,MOBILE?40:90);waterG.rotateX(-Math.PI/2);
-const water=new T.Mesh(waterG,new T.MeshStandardMaterial({color:lin('#1d7f99'),roughness:.12,metalness:.25,envMapIntensity:1.1,transparent:true,opacity:.95}));water.position.set(WATER+700,.15,0);water.receiveShadow=Q.shadows;scene.add(water);
+/* ---------- the sea (east and south) and curved beaches ---------- */
+const shoreE=z=>WATER+8+16*Math.sin(z*.011+.7)+8*Math.sin(z*.029+2.1)+28*Math.exp(-Math.pow((z+HALF-96)/80,2));
+const shoreS=x=>HALF+64+14*Math.sin(x*.012+1.3)+7*Math.sin(x*.033);
+const CZ1=road(N)+RW/2;
+/* sand height: dry and level near the city, sloping under the water past the shore */
+function beachH(x,z){const dE=x-shoreE(z),dS=x<SAND0+30?z-shoreS(x):-1e9,d=Math.max(dE,dS);
+  const rE=x>=SAND0?clamp((x-SAND0)/6,0,1):0,rS=z>=CZ1?clamp((z-CZ1)/6,0,1):0,dry=.02+.23*Math.max(rE,rS);return Math.max(-3,dry-Math.max(0,d+10)*.055);}
+/* one water grid shaped like an L: everything east of the beach plus everything south of the city */
+const WST=MOBILE?48:24,WX0=-1600,WX1=WATER+1400,WZ0=-1000,WZ1=2000,WNX=Math.round((WX1-WX0)/WST)+1,WNZ=Math.round((WZ1-WZ0)/WST)+1;
+const waterG=new T.BufferGeometry();
+{const pos=[],idx=[];for(let iz=0;iz<WNZ;iz++)for(let ix=0;ix<WNX;ix++)pos.push(WX0+ix*WST,0,WZ0+iz*WST);
+  const sea=(x,z)=>x>SAND0+10||z>HALF+40;
+  for(let iz=0;iz<WNZ-1;iz++)for(let ix=0;ix<WNX-1;ix++){const x=WX0+(ix+.5)*WST,z=WZ0+(iz+.5)*WST;if(!sea(x,z))continue;const a=iz*WNX+ix,b=a+1,c=a+WNX,d=c+1;idx.push(a,c,b,b,c,d);}
+  waterG.setAttribute('position',new T.Float32BufferAttribute(pos,3));waterG.setIndex(idx);waterG.computeVertexNormals();waterG.computeBoundingSphere();}
+const water=new T.Mesh(waterG,new T.MeshStandardMaterial({color:lin('#1d7f99'),roughness:.12,metalness:.25,envMapIntensity:1.1,transparent:true,opacity:.95}));water.position.set(0,.15,0);water.receiveShadow=Q.shadows;water.frustumCulled=false;scene.add(water);
 const waterBase=Float32Array.from(waterG.attributes.position.array);
+/* beach mesh: east strip and south strip, wet sand darker near the waterline; the river mouth stays open */
+{const pos=[],uv=[],col=[],idx=[];const dry=new T.Color('#ffffff'),wet=new T.Color('#b39673'),cc=new T.Color();
+  const grid=(x0,x1,z0,z1,st,skip)=>{const nx=Math.round((x1-x0)/st)+1,nz=Math.round((z1-z0)/st)+1,o=pos.length/3;
+    for(let iz=0;iz<nz;iz++)for(let ix=0;ix<nx;ix++){const x=x0+ix*st,z=z0+iz*st,y=beachH(x,z);pos.push(x,y,z);uv.push(x/6,z/6);cc.copy(dry).lerp(wet,clamp((.32-y)/.3,0,1));col.push(cc.r,cc.g,cc.b);}
+    for(let iz=0;iz<nz-1;iz++)for(let ix=0;ix<nx-1;ix++){const z=z0+(iz+.5)*st;if(skip&&skip(z))continue;const a=o+iz*nx+ix,b=a+1,c=a+nx,d=c+1;idx.push(a,c,b,b,c,d);}};
+  grid(SAND0,WATER+90,-HALF-300,CZ1,3,z=>z>RZ0-1&&z<RZ1+1);
+  grid(-1600,WATER+90,CZ1,HALF+150,3);
+  const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(pos,3));g.setAttribute('uv',new T.Float32BufferAttribute(uv,2));g.setAttribute('color',new T.Float32BufferAttribute(col,3));g.setIndex(idx);g.computeVertexNormals();g.computeBoundingSphere();
+  const m=addMesh(g,new T.MeshStandardMaterial({map:TX.sand,vertexColors:true,roughness:1}),false);m.frustumCulled=false;}
+/* foam: a soft white band along the waterline that breathes in and out */
+const foamTex=makeTex(256,64,(g,w,h)=>{g.clearRect(0,0,w,h);for(let i=0;i<900;i++){const y=h*.5+(Math.random()-.5)*h*.8*Math.random();g.fillStyle=`rgba(255,255,255,${.15+Math.random()*.5})`;g.fillRect(Math.random()*w,y,2+Math.random()*7,1+Math.random()*2);}
+  const gr=g.createLinearGradient(0,0,0,h);gr.addColorStop(0,'rgba(255,255,255,0)');gr.addColorStop(.5,'rgba(255,255,255,.55)');gr.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=gr;g.fillRect(0,0,w,h);});
+const foamMat=new T.MeshBasicMaterial({map:foamTex,transparent:true,opacity:.6,depthWrite:false,fog:true,polygonOffset:true,polygonOffsetFactor:-3});
+{const gb=new GB(),W=2.6;let u=0;const line=[];
+  for(let z=-HALF-300;z<CZ1;z+=4){if(z>RZ0-6&&z<RZ1+6){if(line.length){addFoam(line);line.length=0;}continue;}line.push([shoreE(z)-8.2,z]);}
+  for(let x=shoreE(CZ1)-8.2;x>-1600;x-=4)line.push([x,shoreS(x)-8.2]);
+  addFoam(line);
+  function addFoam(L){for(let k=0;k<L.length-1;k++){const a=L[k],b=L[k+1],tx=b[0]-a[0],tz=b[1]-a[1],l=hyp(tx,tz)||1,nx=-tz/l*W,nz=tx/l*W;const y=.28;
+      const v=[[a[0]-nx,y,a[1]-nz],[b[0]-nx,y,b[1]-nz],[b[0]+nx,y,b[1]+nz],[a[0]+nx,y,a[1]+nz]];const cr=(v[1][0]-v[0][0])*(v[3][2]-v[0][2])-(v[1][2]-v[0][2])*(v[3][0]-v[0][0]);const q=cr<0?v:[v[0],v[3],v[2],v[1]];
+      const u0=u/12,u1=(u+l)/12;gb.quad(q[0],q[1],q[2],q[3],[0,1,0],cr<0?[[u0,0],[u1,0],[u1,1],[u0,1]]:[[u0,0],[u0,1],[u1,1],[u1,0]]);u+=l;}}
+  const m=new T.Mesh(gb.geo(),foamMat);m.frustumCulled=false;m.renderOrder=2;scene.add(m);}
+function foamUpdate(){foamTex.offset.y=Math.sin(time*.9)*.18;foamTex.offset.x+=.0006;foamMat.opacity=.42+.22*Math.sin(time*.9+1);}
 addMesh(SWB.geo(),new T.MeshStandardMaterial({map:TX.walk,roughness:.9}),false);
 addMesh(GRB.geo(),new T.MeshStandardMaterial({map:TX.grass,roughness:1}),false);
 if(PKB.p.length)addMesh(PKB.geo(),new T.MeshStandardMaterial({map:TX.asphalt,roughness:.95}),false);
@@ -1606,13 +1641,18 @@ let banT=0,promptT=0,promptTxt='';
 function banner(t,d,dur){hud.banner.querySelector('b').textContent=t;hud.banner.querySelector('span').textContent=d||'';hud.banner.classList.add('on');clearTimeout(banT);banT=setTimeout(()=>hud.banner.classList.remove('on'),(dur||2.6)*1000);}
 function showPrompt(t,dur){promptTxt=t;promptT=dur||1.5;}
 // minimap background
-const MAPX0=EXT.x0-10,MAPX1=WATER+60,MAPZ0=EXT.z0-10,MAPZ1=EXT.z1+10,MK1=1.2;
+const MAPX0=Math.min(EXT.x0,HZ.x0)-10,MAPX1=WATER+60,MAPZ0=EXT.z0-10,MAPZ1=EXT.z1+10,MK1=1.2;
 const mapBg=document.createElement('canvas');mapBg.width=Math.ceil((MAPX1-MAPX0)*MK1);mapBg.height=Math.ceil((MAPZ1-MAPZ0)*MK1);
 {const g=mapBg.getContext('2d'),X=x=>(x-MAPX0)*MK1,Z=z=>(z-MAPZ0)*MK1;g.fillStyle='#55683f';g.fillRect(0,0,mapBg.width,mapBg.height);g.fillStyle='#3b3a40';g.fillRect(X(-HALF-RW/2-3),Z(-HALF-RW/2-3),(2*HALF+RW+6)*MK1,(2*HALF+RW+6)*MK1);
-  g.fillStyle='#d9c08c';g.fillRect(X(SAND0),0,X(WATER)-X(SAND0),mapBg.height);g.fillStyle='#2b86a3';g.fillRect(X(WATER),0,mapBg.width,mapBg.height);
+  g.fillStyle='#d9c08c';g.fillRect(X(SAND0),0,mapBg.width,mapBg.height);g.fillRect(0,Z(road(N)+RW/2),mapBg.width,mapBg.height);
+  g.fillStyle='#2b86a3';g.beginPath();g.moveTo(X(shoreE(MAPZ0)-8),0);for(let z=MAPZ0;z<=MAPZ1;z+=4)g.lineTo(X(shoreE(z)-8),Z(z));for(let x=shoreE(MAPZ1)-8;x>=MAPX0;x-=4)g.lineTo(X(x),Z(Math.min(MAPZ1,shoreS(x)-8)));g.lineTo(0,mapBg.height);g.lineTo(mapBg.width,mapBg.height);g.lineTo(mapBg.width,0);g.closePath();g.fill();
   for(const b of blocks){g.fillStyle=b.d==='river'?'#2b86a3':b.d==='park'||b.d==='stadium'?'#5f9442':b.d==='res'?'#6f9a52':'#a39d94';g.fillRect(X(b.x0),Z(b.z0),(b.x1-b.x0)*MK1,(b.z1-b.z0)*MK1);}
   g.fillStyle='#2b86a3';g.fillRect(0,Z(RZ0),X(road(0)-RW/2),(RZ1-RZ0)*MK1);g.fillRect(X(SAND0),Z(RZ0),mapBg.width,(RZ1-RZ0)*MK1);
-  for(const c of blds){g.fillStyle=c.h>40?'#57545e':'#6f6b74';g.fillRect(X(c.x0),Z(c.z0),(c.x1-c.x0)*MK1,(c.z1-c.z0)*MK1);}}
+  for(const c of blds){g.fillStyle=c.h>40?'#57545e':'#6f6b74';g.fillRect(X(c.x0),Z(c.z0),(c.x1-c.x0)*MK1,(c.z1-c.z0)*MK1);}
+  /* west hills: shaded by height, mountain road and lookout */
+  if(HGRID){const G=HGRID;for(let iz=0;iz<G.NZ-1;iz++)for(let ix=0;ix<G.NX-1;ix++){const v=G.H[iz*G.NX+ix];if(v<.5)continue;const k=clamp(v/70,0,1);g.fillStyle=`rgb(${85+k*70|0},${104+k*50|0},${63+k*40|0})`;g.fillRect(X(G.X0+ix*G.ST),Z(G.Z0+iz*G.ST),G.ST*MK1+1,G.ST*MK1+1);}}
+  if(HZ.road){g.lineJoin='round';g.lineCap='round';g.beginPath();HZ.road.forEach((p,k)=>{k?g.lineTo(X(p[0]),Z(p[1])):g.moveTo(X(p[0]),Z(p[1]));});g.strokeStyle='#3b3a40';g.lineWidth=10*MK1;g.stroke();
+    const L=HZ.road[HZ.road.length-1];g.fillStyle='#d8cfbf';g.beginPath();g.arc(X(L[0]),Z(L[1]),17*MK1,0,7);g.fill();}}
 const mm=hud.mini.getContext('2d');
 function icon(g,x,y,type,s){s=s||1;g.save();g.translate(x,y);g.scale(s,s);g.lineWidth=2;g.strokeStyle='#000';
   if(type==='bank'){g.fillStyle='#4ade80';g.beginPath();g.arc(0,0,9,0,7);g.fill();g.stroke();g.fillStyle='#062';g.font='700 12px Inter';g.textAlign='center';g.textBaseline='middle';g.fillText('$',0,1);}
@@ -1802,7 +1842,7 @@ function step(dt){
   const on=Math.floor(time*5)%2===0;BAR.r.emissiveIntensity=on?4:.2;BAR.b.emissiveIntensity=on?.2:4;
   if(bag){bag.vel+=(-bag.swing*14-bag.vel*2.5)*dt;bag.swing+=bag.vel*dt;bag.piv.rotation.x=bag.swing;}
   // water waves
-  if(Math.floor(time*20)%2===0){const pa=waterG.attributes.position;for(let i=0;i<pa.count;i++){const x=waterBase[i*3],z=waterBase[i*3+2];pa.array[i*3+1]=Math.sin(x*.06+time*1.3)*.35+Math.cos(z*.05+time*.9)*.3;}pa.needsUpdate=true;waterG.computeVertexNormals();}
+  foamUpdate();if(Math.floor(time*20)%2===0){const pa=waterG.attributes.position;for(let i=0;i<pa.count;i++){const x=waterBase[i*3],z=waterBase[i*3+2];pa.array[i*3+1]=Math.sin(x*.06+time*1.3)*.35+Math.cos(z*.05+time*.9)*.3;}pa.needsUpdate=true;waterG.computeVertexNormals();}
 }
 let perfT=0,perfN=0,lowQ=false;
 function adapt(raw){if(lowQ||paused)return;perfT+=raw;perfN++;if(perfT>4){const avg=perfT/perfN;perfT=0;perfN=0;if(avg>.045){lowQ=true;renderer.setPixelRatio(1);if(renderer.shadowMap.enabled){renderer.shadowMap.enabled=false;sun.castShadow=false;scene.traverse(o=>{if(o.material){(Array.isArray(o.material)?o.material:[o.material]).forEach(m=>m.needsUpdate=true);}});}resize();}}}
