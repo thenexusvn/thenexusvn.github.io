@@ -88,6 +88,8 @@ A school super-app, rebuilt from v0-thenexus.vercel.app. Single-page vanilla JS 
 
 - **Nexus City interiors (Nov 2026):** house, hospital and bank rebuilt with canvas-drawn textures (planks, tiles, marble, wallpaper, fabric, stone), detailed furniture, window views, signs, and up to 3 point lights moved into the room the player is in (`interiorLights()`, called after `todApply()`; dims sun and hides rain indoors). Helpers live inside create(): `itb` (textured box), `ceilQ`, `cyl`, `sph`, `glow`, `pframe`, `iwin`, `plant`, `room`. Camera indoors: shorter distance, lower pitch, pulled in along the ray. `/dev/` holds a preview copy of the site for trying changes before they go live.
 
+- **Nexus City streets (Nov 2026):** street lamps can be knocked down by any car faster than 4.5 m/s (`lampHits` in carStep, `knockLamp`, `lampUpdate`; collider gets `off`, which `query()` skips; head swaps to a dark instance, glow and ground pool hidden; respawns after 120 s once the player is 80 m away). Night light pools under lamps (`poolMat`, additive, two quads per lamp: road and pavement). 1024px asphalt with patches, cracks, oil; instanced manholes and drains. Lit windows vary in tint and brightness, with blinds, curtains or a person.
+
 ## Public link
 https://thenexusvn.github.io (GitHub Pages). Firebase project `nexus-4012e`: Google, Email/Password and Anonymous sign-in on; Firestore in asia-southeast1 with `firestore.rules` published; authorized domain `thenexusvn.github.io`.
 
