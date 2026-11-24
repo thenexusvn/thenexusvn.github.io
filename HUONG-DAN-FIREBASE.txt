@@ -1,0 +1,80 @@
+KẾT NỐI NEXUS VỚI FIREBASE (miễn phí, khoảng 10 phút)
+
+Khi chưa kết nối, app vẫn chạy nhưng tài liệu, trận đấu, tin nhắn chỉ lưu trên máy đang dùng.
+Sau khi kết nối, mọi người dùng chung một dữ liệu thật: thấy bài, trận, tin nhắn của nhau và số người online.
+
+1. Tạo dự án
+   - Vào https://console.firebase.google.com, đăng nhập Google, bấm "Create a project".
+   - Đặt tên (VD: nexus-truong-em). Google Analytics có thể tắt.
+
+2. Bật đăng nhập
+   - Menu Build > Authentication > Get started > tab "Sign-in method".
+   - Bật 3 mục: Email/Password, Google, Anonymous.
+     (Anonymous dùng để đếm người online khi họ chưa đăng nhập. Họ vẫn phải đăng nhập mới đăng bài, nhắn tin, tạo trận.)
+
+3. Tạo cơ sở dữ liệu
+   - Menu Build > Firestore Database > Create database.
+   - Chọn vị trí gần Việt Nam (VD: asia-southeast1), chọn "Start in production mode".
+   - Mở tab "Rules", xoá hết nội dung cũ, dán toàn bộ file firestore.rules (đi kèm trong thư mục này), bấm Publish.
+
+4. Lấy cấu hình web
+   - Bấm bánh răng > Project settings > mục "Your apps" > biểu tượng </> (Web).
+   - Đặt tên app, KHÔNG cần tick Firebase Hosting, bấm Register.
+   - Copy phần firebaseConfig (apiKey, authDomain, projectId, appId...).
+   - Mở file firebase-config.js, thay null bằng cấu hình đó. Ví dụ:
+       window.NEXUS_FIREBASE_CONFIG = {
+         apiKey: "AIza...",
+         authDomain: "nexus-truong-em.firebaseapp.com",
+         projectId: "nexus-truong-em",
+         appId: "1:123:web:abc"
+       };
+   - apiKey này được phép công khai, an toàn là nhờ luật trong firestore.rules.
+
+5. Web chạy trên GitHub Pages
+   - Web đã nằm trên GitHub Pages, link dạng https://<tên-github>.github.io/nexus/.
+   - Sửa firebase-config.js ngay trên github.com: mở file > bấm biểu tượng bút chì > dán cấu hình > Commit changes.
+     Khoảng 1 phút sau web tự cập nhật.
+   - Quay lại Firebase > Authentication > Settings > Authorized domains > Add domain,
+     thêm <tên-github>.github.io (không có https://, không có /nexus).
+     Thiếu bước này thì nút "Tiếp tục với Google" sẽ báo lỗi.
+
+6. Kiểm tra
+   - Mở link, vào Đăng nhập > Tiếp tục với Google > chọn tài khoản. Thanh bên sẽ hiện tên bạn và không còn dòng "Chưa kết nối máy chủ".
+   - Chơi Last Zone, mua một skin súng. Mở link trên máy khác, đăng nhập cùng tài khoản Google: skin, kim cương,
+     thành tích và tiền trong Nexus City phải còn nguyên.
+   - Mở link trên một máy khác: tin nhắn, trận đấu, bài trong Vault phải giống nhau.
+
+   Dữ liệu tài khoản hoạt động thế nào
+   - Dữ liệu game của mỗi người nằm trong Firestore > saves > <mã người dùng>.
+   - Nếu chơi trước khi đăng nhập, lần đăng nhập đầu tiên sẽ gộp vào tài khoản: giữ skin của cả hai, phần còn lại lấy số cao hơn.
+   - Bấm Đăng xuất thì dữ liệu game bị xoá khỏi máy đó (vẫn còn trong tài khoản), để người dùng chung máy không lấy được skin của bạn.
+   - Kim cương và skin vẫn do trình duyệt ghi, nên người rành máy tính có thể tự sửa của chính mình. Không ảnh hưởng người khác.
+
+   Gói thành viên (Nexus Pro, Vault+, SonicDeck Premium)
+   - Nằm trong Firestore > entitlements > <mã người dùng>, gồm các trường pro, vaultPlus, premium kiểu timestamp (ngày hết hạn).
+   - Trình duyệt chỉ được ĐỌC. Không ai tự cấp gói cho mình được.
+   - Khi chưa nối cổng thanh toán, muốn tặng gói cho ai: vào Firestore > entitlements > Add document,
+     Document ID = mã người dùng (xem ở Authentication > Users > cột User UID), thêm trường pro (timestamp) = ngày hết hạn.
+   - Khi nối cổng thanh toán (VNPay, MoMo...), máy chủ nhận tiền sẽ ghi vào đây bằng Firebase Admin SDK.
+
+7. Nơi lưu video cho Loopy (Cloudinary, miễn phí 25 GB)
+   - Đăng ký tại https://cloudinary.com (gói Free). Trên trang Dashboard, ghi lại "Cloud name".
+   - Vào Settings (bánh răng) > Upload > Upload presets > Add upload preset.
+     Signing mode: Unsigned. Đặt tên preset, VD: loopy_unsigned. Có thể đặt Folder: loopy. Bấm Save.
+   - Mở firebase-config.js, sửa:
+       window.NEXUS_VIDEO_UPLOAD = { cloudName: "ten-cloud-cua-ban", uploadPreset: "loopy_unsigned" };
+   - Mỗi video tối đa 100 MB (giới hạn gói Free của Cloudinary).
+
+8. Chỉ người trong trường mới được đăng video (tuỳ chọn)
+   - Nếu trường có email riêng (VD ten@truong.edu.vn), trong firebase-config.js đặt:
+       window.NEXUS_SCHOOL_EMAIL_DOMAIN = "@truong.edu.vn";
+   - Và trong firestore.rules, sửa hàm canPost() theo dòng hướng dẫn ngay phía trên nó, rồi Publish lại.
+   - Nếu trường không có email riêng: để trống, chỉ chia sẻ link web cho học sinh trong trường.
+
+Giới hạn cần biết
+   - Xoá video trên Loopy chỉ xoá khỏi app. File gốc vẫn nằm trên Cloudinary, vào Cloudinary > Media Library để xoá hẳn.
+   - File bài tập tối đa 700 KB mỗi bài (lưu thẳng trong Firestore, không cần gói trả phí).
+   - Gói miễn phí của Firestore: khoảng 50.000 lượt đọc và 20.000 lượt ghi mỗi ngày, đủ cho vài trăm học sinh dùng hằng ngày.
+   - Chưa có quyền quản trị viên: người đăng chỉ xoá được bài, tin nhắn, trận của chính mình.
+     Muốn xoá nội dung xấu của người khác, vào Firebase console > Firestore Database > Data để xoá tay.
+   - Lên Google Search sẽ mất vài ngày đến vài tuần. Gửi link qua https://search.google.com/search-console để nhanh hơn.

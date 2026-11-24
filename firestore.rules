@@ -1,0 +1,137 @@
+rules_version = '2';
+// Luật bảo mật cho Nexus. Dán toàn bộ file này vào Firebase console > Firestore Database > Rules, rồi bấm Publish.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    // tài khoản thật (email hoặc Google), không phải khách ẩn danh
+    function member() { return signedIn() && request.auth.token.firebase.sign_in_provider != 'anonymous'; }
+    function str(v, max) { return v is string && v.size() <= max; }
+
+    // The 7-Vault: ai cũng xem được, thành viên đăng bài, chỉ người đăng được xoá
+    match /docs/{id} {
+      allow read: if true;
+      allow create: if member()
+        && request.resource.data.uid == request.auth.uid
+        && str(request.resource.data.t, 120) && request.resource.data.t.size() > 0
+        && str(request.resource.data.author, 40)
+        && request.resource.data.views == 0;
+      // ai cũng chỉ được tăng lượt xem thêm 1
+      allow update: if signedIn()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views'])
+        && request.resource.data.views == resource.data.views + 1;
+      allow delete: if member() && resource.data.uid == request.auth.uid;
+    }
+    match /docFiles/{id} {
+      allow read: if true;
+      allow create: if member() && request.resource.data.uid == request.auth.uid && request.resource.data.data.size() < 1000000;
+      allow delete: if member() && resource.data.uid == request.auth.uid;
+    }
+
+    // CourtDraft: thành viên tạo trận, vào hoặc rời đội; chủ trận được huỷ
+    match /matches/{id} {
+      allow read: if true;
+      allow create: if member()
+        && request.resource.data.hostUid == request.auth.uid
+        && str(request.resource.data.name, 60) && request.resource.data.name.size() > 0
+        && request.resource.data.n in [3, 4, 5];
+      allow update: if member()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['A', 'B'])
+        && request.resource.data.A.size() <= resource.data.n
+        && request.resource.data.B.size() <= resource.data.n;
+      allow delete: if member() && resource.data.hostUid == request.auth.uid;
+    }
+
+    // CommsHub: ai cũng đọc, thành viên nhắn (tối đa 500 ký tự), chỉ người viết được xoá
+    match /channels/{ch}/messages/{id} {
+      allow read: if true;
+      allow create: if member()
+        && request.resource.data.uid == request.auth.uid
+        && str(request.resource.data.text, 500) && request.resource.data.text.size() > 0
+        && str(request.resource.data.name, 40);
+      allow delete: if member() && resource.data.uid == request.auth.uid;
+    }
+
+    // số người online: mỗi người chỉ ghi dòng của chính mình
+    match /presence/{uid} {
+      allow read: if true;
+      allow write: if signedIn() && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['t']);
+    }
+
+    // ===== Loopy (video) =====
+    // Ai được đăng video. Muốn chỉ email trường mới đăng được, đổi dòng return thành (thay tên miền của trường):
+    //   return member() && request.auth.token.email.matches('.*@truong[.]edu[.]vn$');
+    function canPost() { return member(); }
+    function plusMinusOne(field) {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly([field])
+        && (request.resource.data[field] == resource.data[field] + 1 || request.resource.data[field] == resource.data[field] - 1);
+    }
+    match /videos/{vid} {
+      allow read: if true;
+      allow create: if canPost()
+        && request.resource.data.uid == request.auth.uid
+        && str(request.resource.data.title, 100) && request.resource.data.title.size() > 0
+        && str(request.resource.data.desc, 500)
+        && request.resource.data.kind in ['short', 'long']
+        && request.resource.data.url is string && request.resource.data.url.matches('https://res[.]cloudinary[.]com/.*')
+        && request.resource.data.likes == 0 && request.resource.data.views == 0 && request.resource.data.comments == 0
+        && (!('thumb' in request.resource.data) || request.resource.data.thumb.size() < 200000);
+      // lượt xem +1; lượt thích chỉ đổi khi dòng like tương ứng được tạo hoặc xoá; số bình luận ±1
+      allow update: if signedIn() && (
+        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views']) && request.resource.data.views == resource.data.views + 1)
+        || (member() && plusMinusOne('likes') && (
+              (request.resource.data.likes == resource.data.likes + 1 && existsAfter(/databases/$(database)/documents/likes/$(vid + '_' + request.auth.uid)) && !exists(/databases/$(database)/documents/likes/$(vid + '_' + request.auth.uid)))
+           || (request.resource.data.likes == resource.data.likes - 1 && !existsAfter(/databases/$(database)/documents/likes/$(vid + '_' + request.auth.uid)) && exists(/databases/$(database)/documents/likes/$(vid + '_' + request.auth.uid)))))
+        || (member() && plusMinusOne('comments')));
+      allow delete: if member() && resource.data.uid == request.auth.uid;
+      match /comments/{cid} {
+        allow read: if true;
+        allow create: if member() && request.resource.data.uid == request.auth.uid
+          && str(request.resource.data.text, 300) && request.resource.data.text.size() > 0 && str(request.resource.data.name, 40);
+        allow delete: if member() && resource.data.uid == request.auth.uid;
+      }
+    }
+    match /likes/{id} {
+      allow read: if signedIn();
+      allow create: if member() && request.resource.data.uid == request.auth.uid && id == request.resource.data.vid + '_' + request.auth.uid;
+      allow delete: if member() && resource.data.uid == request.auth.uid;
+    }
+    match /follows/{id} {
+      allow read: if true;
+      allow create: if member() && request.resource.data.from == request.auth.uid && request.resource.data.to != request.auth.uid
+        && id == request.auth.uid + '_' + request.resource.data.to;
+      allow delete: if member() && resource.data.from == request.auth.uid;
+    }
+    // hồ sơ: chủ hồ sơ sửa tên, giới thiệu; người khác chỉ được đổi số người theo dõi ±1 khi theo dõi hoặc bỏ theo dõi
+    match /users/{uid} {
+      allow read: if true;
+      allow create, update: if member() && (
+        (request.auth.uid == uid && request.resource.data.diff(resource == null ? {} : resource.data).affectedKeys().hasOnly(['name', 'bio', 'following', 'videos'])
+          && (!('bio' in request.resource.data) || str(request.resource.data.bio, 150)))
+        || (request.auth.uid != uid && request.resource.data.diff(resource == null ? {} : resource.data).affectedKeys().hasOnly(['followers'])));
+    }
+
+    // dữ liệu game của từng tài khoản (Last Zone: kim cương, skin súng, thành tích; Nexus City: tiền, xe, đồ)
+    // chỉ chủ tài khoản đọc và ghi được
+    match /saves/{uid} {
+      allow read: if member() && request.auth.uid == uid;
+      allow write: if member() && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['lastzone', 'city', 'at'])
+        && (!('lastzone' in request.resource.data) || str(request.resource.data.lastzone, 200000))
+        && (!('city' in request.resource.data) || str(request.resource.data.city, 200000));
+    }
+    // gói thành viên: { pro, vaultPlus, premium } là thời điểm hết hạn (Timestamp).
+    // Trình duyệt chỉ được đọc. Chỉ máy chủ thanh toán (Firebase Admin SDK) hoặc bạn trong Firebase console được ghi,
+    // để không ai tự cấp gói cho mình.
+    match /entitlements/{uid} {
+      allow read: if signedIn() && request.auth.uid == uid;
+      allow write: if false;
+    }
+
+    // lượt nghe SonicDeck
+    match /stats/tracks {
+      allow read: if true;
+      allow write: if signedIn();
+    }
+  }
+}
