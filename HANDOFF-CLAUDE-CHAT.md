@@ -90,6 +90,20 @@ A school super-app, rebuilt from v0-thenexus.vercel.app. Single-page vanilla JS 
 
 - **Nexus City streets (Nov 2026):** street lamps can be knocked down by any car faster than 4.5 m/s (`lampHits` in carStep, `knockLamp`, `lampUpdate`; collider gets `off`, which `query()` skips; head swaps to a dark instance, glow and ground pool hidden; respawns after 120 s once the player is 80 m away). Night light pools under lamps (`poolMat`, additive, two quads per lamp: road and pavement). 1024px asphalt with patches, cracks, oil; instanced manholes and drains. Lit windows vary in tint and brightness, with blinds, curtains or a person.
 
+- **Nexus City map (Nov 2026):** the map is no longer a square.
+  - **West hills:** zone `HZ` (x -800..-456, z -110..480), height grid `HGRID`, `heightAt(x,z)` (0 outside), `inHills()`. A mountain road is a Catmull-Rom spline from (-452,128) up to a lookout plaza at (-694,184), about 60 m high. It has guard rails, a "NEXUS" hillside sign and pines. Cars tilt in `syncCar` and feel slope gravity in carStep. Player, NPCs and camera follow `heightAt`.
+  - **Sea:** wraps east and south. Curved shores come from `shoreE(z)` and `shoreS(x)`, and sand height from `beachH`.
+    - The water is one L-shaped grid `waterG` (y .02, small waves). Cells are kept only where sand is under water, so it never shows above dry sand.
+    - Foam strip: `foamUpdate`. The pier starts on the sand.
+    - Grass `G` no longer extends under the sea, because waves would show it through.
+  - **City:** sidewalks are rounded slabs (`rslab`, `CRAD`=3.2) with asphalt filling the corners. `inCut()` keeps the player at road level on a cut corner.
+    - Parks have diagonal paths (`dpath`).
+    - More street trees, benches and blue mailboxes come from their own random stream `sr2`, so the rest of the layout stays put.
+  - **Smashables:** cars knock hydrants, bins and mailboxes flying, and topple traffic lights. A hydrant leaves a water jet for about 22 s.
+    - Code: `smashProp`, `smashUpdate`, `SMI` instanced meshes, and `col.smash={k,i}` on colliders.
+    - They respawn after 90–120 s once the player is 80 m away.
+  - **Night headlights:** the 18 nearest cars (8 on mobile) cast additive beam quads on the road (`BEAM`, `beamUpdate`).
+
 ## Public link
 https://thenexusvn.github.io (GitHub Pages). Firebase project `nexus-4012e`: Google, Email/Password and Anonymous sign-in on; Firestore in asia-southeast1 with `firestore.rules` published; authorized domain `thenexusvn.github.io`.
 
