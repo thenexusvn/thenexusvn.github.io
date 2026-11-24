@@ -86,6 +86,8 @@ A school super-app, rebuilt from v0-thenexus.vercel.app. Single-page vanilla JS 
 - **Feedback (Nov 2026):** pop-up rating (1-5 stars, area, comment) opens from "Góp ý" in the sidebar, and by itself once after 3 minutes (not on #arena, #admin, #sign-in; "Để sau" snoozes 7 days, close 14). Saved to Firestore `feedback` (anyone signed in, guests too, may create). Admin page `#admin` (sidebar link only for admins) shows average, distribution, filters, delete. Admins = `window.NEXUS_ADMIN_EMAILS` in firebase-config.js AND `isAdmin()` in firestore.rules: keep both lists the same. Test: `tools/test_fb.py`.
 - **CommsHub fix (Nov 2026):** the channel listener restarts on the `mode` event, so it listens to Firestore once Firebase is ready. Test: `tools/test_chat.py`.
 
+- **Nexus City interiors (Nov 2026):** house, hospital and bank rebuilt with canvas-drawn textures (planks, tiles, marble, wallpaper, fabric, stone), detailed furniture, window views, signs, and up to 3 point lights moved into the room the player is in (`interiorLights()`, called after `todApply()`; dims sun and hides rain indoors). Helpers live inside create(): `itb` (textured box), `ceilQ`, `cyl`, `sph`, `glow`, `pframe`, `iwin`, `plant`, `room`. Camera indoors: shorter distance, lower pitch, pulled in along the ray. `/dev/` holds a preview copy of the site for trying changes before they go live.
+
 ## Public link
 https://thenexusvn.github.io (GitHub Pages). Firebase project `nexus-4012e`: Google, Email/Password and Anonymous sign-in on; Firestore in asia-southeast1 with `firestore.rules` published; authorized domain `thenexusvn.github.io`.
 
