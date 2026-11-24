@@ -554,6 +554,41 @@ textarea.input{resize:vertical;font:inherit}
 .chip-dev{background:var(--muted);color:var(--mfg);border:1px dashed var(--line)}
 @media (max-width:1100px){.deck>.player{order:-1;position:static}}
 @media (max-width:560px){.up-row{grid-template-columns:minmax(0,1fr)}.sd-row{grid-template-columns:24px minmax(0,1fr) 30px}.sd-row .meta{grid-column:2;grid-row:2}.sd-row .x{grid-column:3;grid-row:1/3}}
+
+/* feedback popup + admin */
+.side-foot{display:flex;flex-wrap:wrap;gap:8px}
+.fbpop{position:fixed;right:20px;bottom:20px;z-index:45;width:min(380px,calc(100vw - 32px));background:var(--raise);border:1px solid var(--line);border-radius:var(--r-lg);padding:20px;box-shadow:0 20px 60px rgba(0,0,0,.55);display:grid;gap:10px;animation:fbin .25s ease-out}
+@keyframes fbin{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.fbpop{animation:none}}
+.fbpop h3{font-size:18px;margin:0 0 4px;padding-right:28px}
+.fbx{position:absolute;top:10px;right:10px;width:36px;height:36px;border-radius:10px;background:none;border:0;color:var(--mfg);font-size:24px;line-height:1;cursor:pointer}
+.fbx:hover{background:var(--hover);color:var(--fg)}
+.fbstars{display:flex;gap:6px;margin-top:6px}
+.fbstars button{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--dim);display:grid;place-items:center;cursor:pointer}
+.fbstars button .i{width:24px;height:24px}
+.fbstars button.on{color:#ffc53d;border-color:rgba(255,197,61,.45);background:rgba(255,197,61,.1)}
+.fbstars button.on .i,.adst .on{fill:#ffc53d}
+.fblab{margin:0}
+#fbForm{display:grid;gap:10px}
+.fbacts{display:flex;justify-content:flex-end;gap:8px}
+textarea.input{height:auto;padding:10px 12px;resize:vertical;font:inherit;line-height:1.5}
+.adtop{display:grid;grid-template-columns:minmax(0,240px) minmax(0,1fr);gap:16px;margin-bottom:16px}
+.adscore{padding:20px;display:grid;gap:6px;align-content:center;justify-items:start}
+.adscore .big{font:700 52px/1 var(--display)}
+.adst{display:flex;gap:2px;color:#ffc53d}.adst .i{width:18px;height:18px}
+.addist{padding:16px 20px;display:grid;gap:8px;align-content:center}
+.addist .r{display:grid;grid-template-columns:44px minmax(0,1fr) 40px;gap:10px;align-items:center;font-size:13px;color:var(--mfg)}
+.addist .bar{height:8px;background:var(--muted);border-radius:4px;overflow:hidden}.addist .bar span{display:block;height:100%;background:#ffc53d}
+.addist .r .num{text-align:right}
+.adfil{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:12px}
+.adlist{display:grid;gap:10px}
+.adit{padding:16px 18px;display:grid;gap:6px}
+.adit .top{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.adit .who{font-size:13px;color:var(--mfg)}
+.adit .txt{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.55}
+.adit .del{margin-left:auto}
+.adno{padding:24px;display:grid;gap:10px;justify-items:start}
+@media (max-width:700px){.adtop{grid-template-columns:minmax(0,1fr)}.fbpop{right:16px;bottom:16px}}
 </style>
 </head>
 <body>
@@ -693,9 +728,11 @@ const D={
 "Không mở được camera. Kiểm tra quyền truy cập camera và micro.":"Could not open the camera. Check camera and microphone permissions.","Trình duyệt này không quay video được. Hãy chọn video từ máy.":"This browser cannot record video. Choose a file instead.","Không quay được trên trình duyệt này":"Recording does not work in this browser","Chọn hoặc quay một video trước.":"Choose or record a video first.","Video này không đọc được.":"This video cannot be read.","Đặt tiêu đề cho video.":"Give the video a title.","Shorts tối đa 60 giây. Chọn Video dài.":"Shorts are 60 seconds max. Choose Long video.","Đã đăng video":"Video posted","Đăng thất bại. Thử lại.":"Posting failed. Try again.",
 "19 bot, bắn chậm, bo co từ từ":"19 bots, slow aim, slow zone","29 bot, cân bằng":"29 bots, balanced","39 bot, ngắm tốt hơn, bo nhanh":"39 bots, better aim, faster zone","49 bot có súng ngay khi đáp, bo rất nhanh":"49 bots armed on landing, very fast zone","7 khu vực, rừng, đồi, bãi biển và bo thu hẹp 7 lần. Nhảy dù, nhặt đồ, sống sót tới cuối.":"7 areas, forests, hills, beaches and a zone that shrinks 7 times. Drop in, loot up, survive to the end.","Bo sắp xuất hiện":"Zone appearing soon","Bo xanh co lại theo thời gian, ở ngoài sẽ mất máu. Nhà, nhà kho và container có nhiều đồ. Áo giáp và mũ giảm sát thương tới khi hỏng.":"The blue zone shrinks over time and hurts you outside it. Houses, warehouses and containers hold lots of loot. Vests and helmets reduce damage until they break.","Bo đang thu hẹp!":"The zone is shrinking!","Bung dù sớm · W để lao nhanh":"Open your chute early · W to dive faster","Băng gạc":"Bandage","Băng gạc chỉ hồi tới 75 máu":"Bandages only heal up to 75 HP","Bạn chưa có skin nào. Mua ở Cửa hàng skin, hoặc dùng súng mặc định.":"You have no skins yet. Buy some in the Skin shop or use the default guns.","Bấm vào bản đồ để đánh dấu · M để đóng":"Click the map to place a marker · M to close","BẮT ĐẦU":"START","Bắn":"Fire","Bắn tỉa L96":"L96 sniper","Cao (bóng đổ, cỏ dày)":"High (shadows, thick grass)","Chơi tiếp":"Play again","Chế độ":"Mode","Click vào màn hình để điều khiển bằng chuột":"Click the screen to control with the mouse","Cài đặt":"Settings","Cách chơi":"How to play","Còn sống":"Alive","Cảng Cũ":"Old Harbor","Cấp":"Level","Cổng thanh toán chưa được kết nối. Chơi để nhận kim cương miễn phí.":"The payment gateway is not connected. Play matches to earn free diamonds.","Cửa hàng skin":"Skin shop","Dùng":"Equip","Dễ":"Easy","Gỗ Cổ":"Old Wood","H để hồi máu":"H to heal","Hiếm":"Rare","Hoàng Kim":"Gold","Huyền thoại":"Legendary","Hạ":"Kills","Hạ gục":"Kills","Hồi":"Heal","Hộp cứu thương":"Medkit","Kho súng":"Armory","Khu Mỏ":"The Mine","Khó":"Hard","Không có đồ hồi máu":"No healing items","Không đủ kim cương":"Not enough diamonds","Kim cương":"Diamonds","Kim cương dùng để mua skin súng. Bạn cũng nhận kim cương miễn phí khi chơi: Top 1 được 100, mỗi lần hạ gục được 5.":"Diamonds buy gun skins. You also earn them for free by playing: 100 for a Top 1, 5 for every kill.","Kẹo Ngọt":"Candy","Làng Chài":"Fishing Village","Lên xe":"Get in","Lưu":"Save","Máu đã đầy":"Health is full","Máy bay đang bay qua đảo. Bấm Space để nhảy.":"The plane is crossing the island. Press Space to jump.","Mũ cấp 1":"Helmet lv1","Mũ cấp 2":"Helmet lv2","Mũ cấp 3":"Helmet lv3","Mặc định":"Default","Mẹo:":"Tips:","Mục tiêu:":"Goal:","Neon Đêm":"Night Neon","Ngân Hà":"Galaxy","Ngắm":"Aim","Ngồi":"Crouch","Nhà Máy":"The Factory","Nhảy":"Jump","Nhảy khỏi máy bay":"Jump out of the plane","Nhảy khỏi máy bay, nhặt súng và giáp, ở trong bo và là người cuối cùng còn trụ lại.":"Jump out of the plane, grab guns and armor, stay in the zone and be the last one standing.","Nhặt":"Pick up","Nạp":"Reload","Nạp kim cương":"Top up diamonds","Rồng Lửa":"Fire Dragon","Rừng Rậm":"Jungle","Sa Mạc":"Desert","Sát thương":"Damage","Súng lục G9":"G9 pistol","Súng trường AR-7":"AR-7 rifle","Súng trường K47":"K47 rifle","Sống sót":"Survived","Sợi Carbon":"Carbon Fiber","Sử thi":"Epic","Tay không":"Unarmed","Thường":"Normal","Thấp (máy yếu, điện thoại)":"Low (older devices, phones)","Thần thoại":"Mythic","Tiểu liên V10":"V10 SMG","Trường Bắn":"Firing Range","Trạm Radar":"Radar Station","Trận":"Matches","Tên trong trận":"In-match name","Tìm súng trong nhà, kho, container":"Find guns in houses, warehouses, containers","Tặng thêm 10%":"10% bonus","Về sảnh":"Back to lobby","Vừa":"Medium","WASD di chuyển · Chuột nhìn · Click trái bắn · Click phải ngắm · Shift chạy · Space nhảy, bung dù · C ngồi · R nạp đạn · E nhặt đồ · F lên xe, xuống xe · H hồi máu · 1 2 3 đổi súng · M bản đồ":"WASD move · Mouse look · Left click fire · Right click aim · Shift sprint · Space jump, open chute · C crouch · R reload · E pick up · F enter/exit vehicle · H heal · 1 2 3 switch guns · M map","Xuống xe · W/S lái · Space phanh":"Get out · W/S drive · Space brake","· Bạn ở ngoài bo!":"· You are outside the zone!","Ác mộng":"Nightmare","Áo giáp cấp 1":"Vest lv1","Áo giáp cấp 2":"Vest lv2","Áo giáp cấp 3":"Vest lv3","Đang băng bó":"Bandaging","Đang dùng":"Equipped","Đang dùng hộp cứu thương":"Using medkit","Đang nạp đạn":"Reloading","Đang tìm trận...":"Finding a match...","Điều khiển:":"Controls:","Đã lưu. Thoát và mở lại game để đổi đồ hoạ.":"Saved. Exit and reopen the game to change graphics.","Đã nhảy! Bấm Space để bung dù sớm.":"You jumped! Press Space to open your chute early.","Đạn nhẹ":"Light ammo","Đạn nặng":"Heavy ammo","Đạn shotgun":"Shotgun shells","Đạn vừa":"Medium ammo","Đảo Ngọc Lam":"Jade Island","Đồ hoạ":"Graphics","Đồi Thông":"Pine Hill","Đổi mức đồ hoạ cần mở lại game để áp dụng hết.":"Reopen the game to fully apply a graphics change.","Độ nhạy chuột:":"Mouse sensitivity:","Bạc":"Silver","Băng Giá":"Frost","Bóng Đêm":"Nightfall","Dung Nham":"Lava","Mới · Sinh tồn 3D":"New · 3D survival","Nhảy dù xuống đảo, nhặt súng và giáp, lái xe, chạy bo và hạ hết bot để giành Top 1. 4 chế độ từ Dễ tới Ác mộng, sảnh chờ, skin súng.":"Parachute onto the island, grab guns and armor, drive, outrun the zone and take out every bot for the Top 1. 4 modes from Easy to Nightmare, a lobby and gun skins.","Chưa chơi trận nào":"No matches played yet","Vào sảnh":"Enter lobby","Thế giới mở 3D":"3D open world","Sinh tồn 3D · Bạn và tới 49 bot":"3D survival · You vs up to 49 bots","Đang dựng đảo, chờ vài giây...":"Building the island, give it a few seconds...","Ảnh bìa Last Zone":"Last Zone cover","Chiến thắng! Bạn là người cuối cùng còn trụ lại.":"Victory! You are the last one standing.","Shotgun S12":"S12 shotgun","Nexus, trang chủ":"Nexus, home","Nhà":"Home","Mở khoá":"Unlock","Xem miễn phí":"Free preview","Chia lại đội":"Reshuffle teams","1-4: đổi vũ khí":"1-4: switch weapon","H: còi xe":"H: horn","Đang dựng":"Building","Chỉ đường tới":"Directions to","Đã tới nơi":"Arrived","Tiền của bạn":"Your money","Hot":"Hot",
 "Tiếp tục với Google":"Continue with Google","hoặc dùng email":"or use email","hoặc đặt tên để dùng trên máy này":"or set a name to use on this device","Tiến độ game, skin súng và gói thành viên được lưu vào tài khoản này. Đăng nhập trên máy khác là có lại.":"Game progress, gun skins and membership plans are saved to this account. Sign in on another device to get them back.","Gói của bạn: Miễn phí":"Your plan: Free","Đăng nhập để gói thành viên đi theo tài khoản của bạn.":"Sign in so your membership plans follow your account.","Không tải được dữ liệu tài khoản. Kiểm tra mạng rồi tải lại trang.":"Could not load your account data. Check your connection and reload the page.","Đã đăng xuất. Dữ liệu game đã được xoá khỏi máy này.":"Signed out. Game data was removed from this device.","Đã tải dữ liệu từ tài khoản của bạn":"Loaded data from your account","Đăng nhập Google chưa bật trên bản web này.":"Google sign-in is not turned on for this copy of the site.","Trình duyệt chặn cửa sổ đăng nhập. Cho phép cửa sổ bật lên rồi thử lại.":"The browser blocked the sign-in window. Allow pop-ups and try again.","Mất kết nối mạng. Thử lại.":"No network connection. Try again.","Trang này không mở được cửa sổ đăng nhập Google. Mở web bằng trình duyệt thường.":"This page cannot open the Google sign-in window. Open the site in a normal browser.",
-"Nhạc Việt":"Vietnamese","Quốc tế":"International","Cải lương, bolero, trữ tình, V-Pop, rap và phonk.":"Cai luong opera, bolero, ballads, V-Pop, rap and phonk.","Hit quốc tế":"International hits","Những bài kinh điển và hit toàn cầu từ 1947 đến nay.":"Classics and global hits from 1947 to today.","Phát tất cả":"Play all","Tìm bài hát hoặc ca sĩ...":"Search songs or artists...","Tìm bài hát hoặc ca sĩ":"Search songs or artists","Phát từ kênh YouTube chính thức của ca sĩ, hãng đĩa hoặc nhà sản xuất, ngay trong SonicDeck.":"Played inside SonicDeck from the official YouTube channels of artists, labels or producers.","Nhạc cộng đồng":"Community music","Bài học sinh tự làm và tải lên, hoặc chia sẻ bằng link YouTube.":"Songs students made and uploaded, or shared as YouTube links.","Thêm bài của bạn":"Add your song","Tải file nhạc":"Upload a file","Dán link YouTube":"Paste a YouTube link","File nhạc (MP3, M4A, WAV, OGG, tối đa 25 MB)":"Audio file (MP3, M4A, WAV, OGG, up to 25 MB)","Link YouTube":"YouTube link","Ca sĩ hoặc người làm":"Artist or creator","VD: Mưa Trên Sân Trường":"E.g. Rain on the Schoolyard","VD: Lớp 9A2":"E.g. Class 9A2","Thể loại":"Genre","Bài này do tôi tự làm, hoặc tôi được tác giả cho phép chia sẻ.":"I made this song, or its author allowed me to share it.","Thêm vào SonicDeck":"Add to SonicDeck","Tìm trong nhạc cộng đồng...":"Search community music...","Tìm trong nhạc cộng đồng":"Search community music","Chọn một bài để nghe":"Pick a song to play","Sẵn sàng":"Ready","Hết bài sẽ tự chuyển sang bài tiếp theo trong danh sách.":"When a song ends, the next one in the list starts.","Nghe nhạc thật ngay trong app: cải lương, bolero, nhạc Việt và hit quốc tế. Bạn cũng có thể đăng nhạc của chính mình.":"Real music inside the app: cai luong, bolero, Vietnamese songs and international hits. You can post your own music too.","nghe mọi bài, thêm 5 bài của bạn":"every song, add 5 of your own","thêm tới 100 bài của bạn lên SonicDeck":"add up to 100 of your own songs","Đăng nhiều nhạc lên SonicDeck và mở khoá tài liệu điểm cao.":"Post more music to SonicDeck and unlock top-scoring papers.","Cải lương, bolero, nhạc Việt và 100 hit quốc tế phát ngay trong app. Học sinh đăng được nhạc tự làm.":"Cai luong, bolero, Vietnamese songs and 100 international hits play in the app. Students can post their own music.","Premium: đăng tới 100 bài":"Premium: post up to 100 songs","Cải lương":"Cai luong","Trữ tình & nhạc xưa":"Ballads & classics","Nhạc tự làm":"Original","Trên máy này":"On this device","Nhạc cộng đồng ":"Community","Danh sách đang trống.":"This list is empty.","Đã bật phát ngẫu nhiên":"Shuffle on","Đã tắt phát ngẫu nhiên":"Shuffle off","Bài này hiện không phát được ở đây. Chuyển sang bài tiếp.":"This song can't play here right now. Skipping to the next one.","Không tải được trình phát YouTube. Kiểm tra mạng rồi thử lại.":"Could not load the YouTube player. Check your connection and try again.","Không đọc được file này trên máy.":"Could not read this file on this device.","File nhạc này không phát được.":"This audio file can't be played.","Không có bài nào khớp. Thử từ khoá khác.":"No songs match. Try another search.","Chưa có bài nào. Bấm \"Thêm bài của bạn\" để đăng bài đầu tiên.":"No songs yet. Press \"Add your song\" to post the first one.","Đăng nhập để thêm bài.":"Sign in to add songs.","Đặt tên hiển thị ở trang Đăng nhập để thêm bài.":"Set a display name on the sign-in page to add songs.","Web chưa có nơi lưu file nhạc chung, nên file sẽ chỉ nằm trên máy này. Link YouTube thì ai cũng nghe được.":"The site has no shared storage for audio files yet, so files stay on this device. YouTube links can be heard by everyone.","Chưa kết nối máy chủ: bài chỉ hiện trên máy này.":"Not connected to a server: songs only show on this device.","Bản miễn phí thêm được 5 bài. SonicDeck Premium thêm được 100 bài.":"Free accounts can add 5 songs. SonicDeck Premium can add 100.","Bạn đã thêm đủ 100 bài.":"You have added 100 songs.","Link YouTube không hợp lệ.":"That YouTube link is not valid.","Chọn một file nhạc.":"Choose an audio file.","File này không phải file nhạc.":"This file is not an audio file.","File lớn hơn 25 MB.":"The file is larger than 25 MB.","Đánh dấu xác nhận bạn có quyền chia sẻ bài này.":"Tick the box to confirm you may share this song.","Máy chủ chưa cho phép đăng nhạc. Cần cập nhật luật bảo mật Firestore.":"The server does not allow posting music yet. The Firestore security rules need updating.","Không xoá được. Thử lại.":"Could not delete. Try again."
+"Nhạc Việt":"Vietnamese","Quốc tế":"International","Cải lương, bolero, trữ tình, V-Pop, rap và phonk.":"Cai luong opera, bolero, ballads, V-Pop, rap and phonk.","Hit quốc tế":"International hits","Những bài kinh điển và hit toàn cầu từ 1947 đến nay.":"Classics and global hits from 1947 to today.","Phát tất cả":"Play all","Tìm bài hát hoặc ca sĩ...":"Search songs or artists...","Tìm bài hát hoặc ca sĩ":"Search songs or artists","Phát từ kênh YouTube chính thức của ca sĩ, hãng đĩa hoặc nhà sản xuất, ngay trong SonicDeck.":"Played inside SonicDeck from the official YouTube channels of artists, labels or producers.","Nhạc cộng đồng":"Community music","Bài học sinh tự làm và tải lên, hoặc chia sẻ bằng link YouTube.":"Songs students made and uploaded, or shared as YouTube links.","Thêm bài của bạn":"Add your song","Tải file nhạc":"Upload a file","Dán link YouTube":"Paste a YouTube link","File nhạc (MP3, M4A, WAV, OGG, tối đa 25 MB)":"Audio file (MP3, M4A, WAV, OGG, up to 25 MB)","Link YouTube":"YouTube link","Ca sĩ hoặc người làm":"Artist or creator","VD: Mưa Trên Sân Trường":"E.g. Rain on the Schoolyard","VD: Lớp 9A2":"E.g. Class 9A2","Thể loại":"Genre","Bài này do tôi tự làm, hoặc tôi được tác giả cho phép chia sẻ.":"I made this song, or its author allowed me to share it.","Thêm vào SonicDeck":"Add to SonicDeck","Tìm trong nhạc cộng đồng...":"Search community music...","Tìm trong nhạc cộng đồng":"Search community music","Chọn một bài để nghe":"Pick a song to play","Sẵn sàng":"Ready","Hết bài sẽ tự chuyển sang bài tiếp theo trong danh sách.":"When a song ends, the next one in the list starts.","Nghe nhạc thật ngay trong app: cải lương, bolero, nhạc Việt và hit quốc tế. Bạn cũng có thể đăng nhạc của chính mình.":"Real music inside the app: cai luong, bolero, Vietnamese songs and international hits. You can post your own music too.","nghe mọi bài, thêm 5 bài của bạn":"every song, add 5 of your own","thêm tới 100 bài của bạn lên SonicDeck":"add up to 100 of your own songs","Đăng nhiều nhạc lên SonicDeck và mở khoá tài liệu điểm cao.":"Post more music to SonicDeck and unlock top-scoring papers.","Cải lương, bolero, nhạc Việt và 100 hit quốc tế phát ngay trong app. Học sinh đăng được nhạc tự làm.":"Cai luong, bolero, Vietnamese songs and 100 international hits play in the app. Students can post their own music.","Premium: đăng tới 100 bài":"Premium: post up to 100 songs","Cải lương":"Cai luong","Trữ tình & nhạc xưa":"Ballads & classics","Nhạc tự làm":"Original","Trên máy này":"On this device","Nhạc cộng đồng ":"Community","Danh sách đang trống.":"This list is empty.","Đã bật phát ngẫu nhiên":"Shuffle on","Đã tắt phát ngẫu nhiên":"Shuffle off","Bài này hiện không phát được ở đây. Chuyển sang bài tiếp.":"This song can't play here right now. Skipping to the next one.","Không tải được trình phát YouTube. Kiểm tra mạng rồi thử lại.":"Could not load the YouTube player. Check your connection and try again.","Không đọc được file này trên máy.":"Could not read this file on this device.","File nhạc này không phát được.":"This audio file can't be played.","Không có bài nào khớp. Thử từ khoá khác.":"No songs match. Try another search.","Chưa có bài nào. Bấm \"Thêm bài của bạn\" để đăng bài đầu tiên.":"No songs yet. Press \"Add your song\" to post the first one.","Đăng nhập để thêm bài.":"Sign in to add songs.","Đặt tên hiển thị ở trang Đăng nhập để thêm bài.":"Set a display name on the sign-in page to add songs.","Web chưa có nơi lưu file nhạc chung, nên file sẽ chỉ nằm trên máy này. Link YouTube thì ai cũng nghe được.":"The site has no shared storage for audio files yet, so files stay on this device. YouTube links can be heard by everyone.","Chưa kết nối máy chủ: bài chỉ hiện trên máy này.":"Not connected to a server: songs only show on this device.","Bản miễn phí thêm được 5 bài. SonicDeck Premium thêm được 100 bài.":"Free accounts can add 5 songs. SonicDeck Premium can add 100.","Bạn đã thêm đủ 100 bài.":"You have added 100 songs.","Link YouTube không hợp lệ.":"That YouTube link is not valid.","Chọn một file nhạc.":"Choose an audio file.","File này không phải file nhạc.":"This file is not an audio file.","File lớn hơn 25 MB.":"The file is larger than 25 MB.","Đánh dấu xác nhận bạn có quyền chia sẻ bài này.":"Tick the box to confirm you may share this song.","Máy chủ chưa cho phép đăng nhạc. Cần cập nhật luật bảo mật Firestore.":"The server does not allow posting music yet. The Firestore security rules need updating.","Không xoá được. Thử lại.":"Could not delete. Try again.",
+"Góp ý":"Feedback","Quản trị":"Admin","Bạn thấy Nexus thế nào?":"How do you like Nexus?","Góp ý của bạn giúp Nexus tốt hơn. Chỉ người quản lý web đọc được.":"Your feedback makes Nexus better. Only the site's manager can read it.","Chọn số sao":"Pick a rating","Về phần nào?":"About which part?","Cả web":"The whole site","Bạn muốn nói gì thêm? (không bắt buộc)":"Anything else to say? (optional)","Điều bạn thích, lỗi bạn gặp, hoặc tính năng bạn muốn có...":"What you like, a bug you hit, or a feature you want...","Để sau":"Later","Gửi đánh giá":"Send feedback","Cảm ơn bạn!":"Thank you!","Đánh giá đã được gửi tới người quản lý Nexus.":"Your feedback was sent to the Nexus manager.","Chấm điểm từ 1 đến 5 sao":"Rate from 1 to 5 stars","Rất tệ":"Very bad","Chưa tốt":"Not good","Tạm được":"Okay","Tốt":"Good","Tuyệt vời":"Excellent","Đánh giá của người dùng":"User feedback","Chỉ tài khoản quản trị mới mở được trang này. Đánh giá mới hiện ra ngay khi có người gửi.":"Only admin accounts can open this page. New feedback appears as soon as someone sends it.","Trang này chỉ dành cho người quản lý Nexus":"This page is only for the Nexus manager","Đăng nhập bằng tài khoản quản trị để xem đánh giá.":"Sign in with an admin account to read feedback.","Tài khoản này không có quyền quản trị.":"This account has no admin rights.","Lọc theo số sao":"Filter by rating","Chỉ đánh giá có nhận xét":"Only feedback with comments","Chưa có đánh giá nào.":"No feedback yet.","Không có đánh giá nào khớp bộ lọc.":"No feedback matches the filter.","Khách":"Guest","Đã xoá đánh giá":"Feedback deleted","Máy chủ chưa cho phép đọc đánh giá. Cần cập nhật luật bảo mật Firestore.":"The server does not allow reading feedback yet. The Firestore security rules need updating.","Máy chủ chưa nhận đánh giá. Cần cập nhật luật bảo mật Firestore.":"The server is not accepting feedback yet. The Firestore security rules need updating."
 };
 const R=[
+[/^(\d+) đánh giá$/,m=>m[1]+(m[1]==='1'?' review':' reviews')],[/^(\d) sao$/,m=>m[1]+(m[1]==='1'?' star':' stars')],
 [/^Bạn thêm được tối đa (\d+) bài(.*)$/,m=>'You can add up to '+m[1]+' songs'+(m[2]?' (SonicDeck Premium: 100 songs)':'')+'.'],[/^(\d+) bài$/,m=>m[1]+' songs'],[/^đăng bởi (.+)$/,m=>'posted by '+m[1]],[/^Phát (.+)$/,m=>'Play '+m[1]],[/^Xoá bài (.+)$/,m=>'Delete '+m[1]],[/^Đã thêm "(.+)" vào SonicDeck$/,m=>'Added "'+m[1]+'" to SonicDeck'],[/^Không thêm được bài\. (.*)$/,m=>'Could not add the song. '+t(m[1])],
 [/^Gói của bạn: (.+) đến (.+)$/,m=>'Your plan: '+m[1]+' until '+m[2]],
 [/^(\d+) bài$/,m=>m[1]+' songs'],[/^Bo thu hẹp sau (\d+)s$/,m=>'Zone shrinks in '+m[1]+'s'],[/^Bo đang thu hẹp · (\d+)s$/,m=>'Zone shrinking · '+m[1]+'s'],[/^Băng gạc (\d+)$/,m=>'Bandages '+m[1]],[/^Cứu thương (\d+)$/,m=>'Medkits '+m[1]],
@@ -771,7 +808,9 @@ return{t,setLang,get lang(){return lang;},D};
       <a class="btn btn-pro btn-sm" href="#pro">Nâng cấp</a>
     </div>
     <div class="side-foot">
-      <a class="btn btn-ghost btn-sm" href="#sign-in" data-nav="sign-in"><svg class="i"><use href="#i-login"/></svg>Đăng nhập</a>
+      <a class="btn btn-ghost btn-sm" href="#sign-in" data-nav="sign-in" id="sideSignIn"><svg class="i"><use href="#i-login"/></svg>Đăng nhập</a>
+      <button class="btn btn-ghost btn-sm" type="button" id="fbOpen"><svg class="i"><use href="#i-star"/></svg>Góp ý</button>
+      <a class="btn btn-ghost btn-sm" href="#admin" data-nav="admin" id="sideAdmin" hidden><svg class="i"><use href="#i-spark"/></svg>Quản trị</a>
     </div>
   </aside>
 
@@ -1029,6 +1068,27 @@ return{t,setLang,get lang(){return lang;},D};
     </div>
   </div></section>
 
+  <!-- ADMIN -->
+  <section class="view" data-view="admin" hidden><div class="wrap">
+    <div class="head">
+      <span class="eyebrow"><svg class="i"><use href="#i-spark"/></svg>Quản trị</span>
+      <h1>Đánh giá của người dùng</h1>
+      <p class="lede">Chỉ tài khoản quản trị mới mở được trang này. Đánh giá mới hiện ra ngay khi có người gửi.</p>
+    </div>
+    <div class="card adno" id="adNo" hidden><h3>Trang này chỉ dành cho người quản lý Nexus</h3><p class="muted" id="adNoTxt">Đăng nhập bằng tài khoản quản trị để xem đánh giá.</p><a class="btn btn-lime btn-sm" href="#sign-in">Đăng nhập</a></div>
+    <div id="adBody" hidden>
+      <div class="adtop">
+        <div class="card adscore"><div class="big num" id="adAvg">0</div><div class="adst" id="adAvgStars"></div><p class="muted small" id="adCount">0 đánh giá</p></div>
+        <div class="card addist" id="adDist"></div>
+      </div>
+      <div class="adfil">
+        <div class="chips" id="adStarsF" role="group" aria-label="Lọc theo số sao"></div>
+        <label class="check"><input type="checkbox" id="adTextOnly"><span>Chỉ đánh giá có nhận xét</span></label>
+      </div>
+      <div class="adlist" id="adList"></div>
+    </div>
+  </div></section>
+
   <!-- SIGN IN -->
   <section class="view" data-view="sign-in" hidden><div class="wrap">
     <form class="card signin" id="signin" novalidate>
@@ -1053,6 +1113,22 @@ return{t,setLang,get lang(){return lang;},D};
   </main>
 </div>
 
+<div class="fbpop" id="fbPop" hidden role="dialog" aria-modal="false" aria-labelledby="fbTitle">
+  <button class="fbx" type="button" id="fbClose" aria-label="Đóng">&times;</button>
+  <div id="fbAsk">
+    <h3 id="fbTitle">Bạn thấy Nexus thế nào?</h3>
+    <p class="muted small">Góp ý của bạn giúp Nexus tốt hơn. Chỉ người quản lý web đọc được.</p>
+    <div class="fbstars" role="radiogroup" aria-label="Chấm điểm từ 1 đến 5 sao" id="fbStars"></div>
+    <p class="muted small fblab" id="fbLab">Chọn số sao</p>
+    <form id="fbForm" hidden novalidate>
+      <div class="field"><label for="fbArea">Về phần nào?</label><select class="input" id="fbArea"><option value="">Cả web</option><option>The 7-Vault</option><option>CourtDraft</option><option>TheArena</option><option>SonicDeck</option><option>CommsHub</option><option>Loopy</option><option>Nexus Pro</option></select></div>
+      <div class="field"><label for="fbText">Bạn muốn nói gì thêm? (không bắt buộc)</label><textarea class="input" id="fbText" rows="3" maxlength="1000" placeholder="Điều bạn thích, lỗi bạn gặp, hoặc tính năng bạn muốn có..."></textarea></div>
+      <p class="err" id="fbErr" hidden></p>
+      <div class="fbacts"><button class="btn btn-ghost btn-sm" type="button" id="fbLater">Để sau</button><button class="btn btn-lime btn-sm" type="submit" id="fbSend">Gửi đánh giá</button></div>
+    </form>
+  </div>
+  <div id="fbThanks" hidden><h3>Cảm ơn bạn!</h3><p class="muted small">Đánh giá đã được gửi tới người quản lý Nexus.</p></div>
+</div>
 <div class="modal" id="modal" hidden role="dialog" aria-modal="true" aria-labelledby="mdTitle">
   <div class="card">
     <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start"><div><h3 id="mdTitle" style="font-size:20px"></h3><p class="muted small" id="mdMeta"></p></div><button class="btn btn-ghost btn-sm" id="mdClose">Đóng</button></div>
@@ -1203,6 +1279,7 @@ return{t,setLang,get lang(){return lang;},D};
   <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></symbol>
   <symbol id="i-shuffle" viewBox="0 0 24 24"><path d="M16 3h5v5"/><path d="M4 20 21 3"/><path d="M21 16v5h-5"/><path d="m15 15 6 6"/><path d="M4 4l5 5"/></symbol>
   <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.3 6.4 20.2l1.1-6.2L3 9.6l6.2-.9z"/></symbol>
   <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
   <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4v16l13-8z" fill="currentColor"/></symbol>
   <symbol id="i-pause" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16" rx="1" fill="currentColor"/><rect x="14" y="4" width="4" height="16" rx="1" fill="currentColor"/></symbol>
@@ -1319,6 +1396,14 @@ return{
   async sendMessage(ch,text){needUser();text=String(text).slice(0,500);if(mode==='cloud'){await db.collection('channels').doc(ch).collection('messages').add({text,uid:user.uid,name:String(user.name||'Ẩn danh').slice(0,40),createdAt:FV.serverTimestamp()});return;}
     const k='msg-'+ch,a=LS.get(k,[]);a.push({id:'x'+Date.now(),text,uid:user.uid,name:user.name,createdAt:Date.now()});LS.set(k,a.slice(-200));emit(k);},
   async deleteMessage(ch,id){needUser();if(mode==='cloud'){await db.collection('channels').doc(ch).collection('messages').doc(id).delete();return;}const k='msg-'+ch;LS.set(k,LS.get(k,[]).filter(m=>m.id!==id));emit(k);},
+  /* feedback (anyone may send; only admins read) */
+  isAdmin(){if(mode!=='cloud')return true;const L=(window.NEXUS_ADMIN_EMAILS||[]).map(x=>String(x).toLowerCase());return !!(user&&!user.anon&&user.email&&L.includes(user.email.toLowerCase()));},
+  async addFeedback(f){const d={stars:Math.max(1,Math.min(5,f.stars|0)),text:String(f.text||'').slice(0,1000),area:String(f.area||'').slice(0,30),name:user&&!user.anon?String(user.name||'').slice(0,40):'',uid:user?user.uid:'',lang:String(f.lang||'vi').slice(0,5),page:String(f.page||'').slice(0,30)};
+    if(mode==='cloud'){if(!user)throw err('auth','Đang kết nối máy chủ, thử lại sau vài giây.');d.createdAt=FV.serverTimestamp();await db.collection('feedback').add(d);return;}
+    d.id='f'+Date.now();d.createdAt=Date.now();const a=LS.get('feedback',[]);a.push(d);LS.set('feedback',a.slice(-500));emit('feedback');},
+  watchFeedback(cb,onErr){if(mode==='cloud'){return db.collection('feedback').orderBy('createdAt','desc').limit(500).onSnapshot(x=>cb(x.docs.map(d=>Object.assign({id:d.id},d.data()))),e=>{if(onErr)onErr(e);});}
+    const push=()=>cb(LS.get('feedback',[]).slice().reverse());push();return on('feedback',push);},
+  async deleteFeedback(id){if(mode==='cloud'){await db.collection('feedback').doc(id).delete();return;}LS.set('feedback',LS.get('feedback',[]).filter(x=>x.id!==id));emit('feedback');},
   /* sonicdeck community songs */
   watchSongs(cb){if(mode!=='cloud'){cb([]);return()=>{};}return db.collection('songs').orderBy('createdAt','desc').limit(300).onSnapshot(x=>cb(x.docs.map(d=>Object.assign({id:d.id},d.data()))),e=>{console.warn('songs',e);cb([]);});},
   async addSong(m){needUser();if(mode!=='cloud')throw err('offline','Chưa kết nối máy chủ');const d={uid:user.uid,name:(user.name||'').slice(0,40),title:m.title,artist:m.artist||'',genre:m.genre||'',kind:m.kind,dur:Math.round(m.dur||0),plays:0,createdAt:FV.serverTimestamp()};if(m.kind==='yt')d.yt=m.yt;else d.url=m.url;await db.collection('songs').add(d);},
@@ -1342,14 +1427,14 @@ window.NexusToast=toast;
   try{const l=document.createElement('link');l.rel='apple-touch-icon';l.href=c.toDataURL('image/png');document.head.appendChild(l);}catch(_){}};img.src=l0.href;})();
 
 /* router */
-const VIEWS=['home','vault','courtdraft','arena','sonicdeck','commshub','loopy','pro','sign-in'];
+const VIEWS=['home','vault','courtdraft','arena','sonicdeck','commshub','loopy','pro','sign-in','admin'];
 function route(){
   const hh=location.hash.slice(1),v=hh.startsWith('loopy-')?'loopy':VIEWS.includes(hh)?hh:'home';
   $$('.view').forEach(s=>s.hidden=s.dataset.view!==v);
   $$('[data-nav]').forEach(a=>a.dataset.nav===v?a.setAttribute('aria-current','page'):a.removeAttribute('aria-current'));
   $('#main').classList.toggle('flush',v==='commshub'||v==='loopy');
   $('#main').scrollTop=0;
-  const titles={home:'Nexus',vault:'The 7-Vault · Nexus',courtdraft:'CourtDraft · Nexus',arena:'TheArena · Nexus',sonicdeck:'SonicDeck · Nexus',commshub:'CommsHub · Nexus',loopy:'Loopy · Nexus',pro:'Nexus Pro · Nexus','sign-in':'Đăng nhập · Nexus'};
+  const titles={home:'Nexus',vault:'The 7-Vault · Nexus',courtdraft:'CourtDraft · Nexus',arena:'TheArena · Nexus',sonicdeck:'SonicDeck · Nexus',commshub:'CommsHub · Nexus',loopy:'Loopy · Nexus',pro:'Nexus Pro · Nexus','sign-in':'Đăng nhập · Nexus',admin:'Quản trị · Nexus'};
   document.title=titles[v];
   closeMenu();
   if(v==='commshub') setTimeout(()=>{const m=$('#msgs');m.scrollTop=m.scrollHeight},0);
@@ -1829,6 +1914,57 @@ $('#chans').addEventListener('click',e=>{const b=e.target.closest('[data-ch]');i
 $('#msgs').addEventListener('click',async e=>{const b=e.target.closest('[data-delmsg]');if(!b)return;try{await ND.deleteMessage(chCur,b.dataset.delmsg);}catch(err){toast(err.message||'Không xoá được');}});
 $('#compose').addEventListener('submit',async e=>{e.preventDefault();const v=$('#msgIn').value.trim();if(!v)return;if(!signedIn()){needSignIn('nhắn tin');return;}
   $('#msgIn').value='';$('#msgs').dataset.init='';try{await ND.sendMessage(chCur,v);}catch(err){$('#msgIn').value=v;toast(err.message||'Không gửi được. Thử lại.');}});
+
+/* ===== FEEDBACK: pop-up rating, saved to Firestore `feedback` (only admins can read it) ===== */
+const FBK='nexus-feedback';
+const fbState=()=>{try{return JSON.parse(localStorage.getItem(FBK)||'{}')||{};}catch(_){return {};}};
+const fbSave=o=>{try{localStorage.setItem(FBK,JSON.stringify(Object.assign(fbState(),o)));}catch(_){}};
+const FBLAB=['Chọn số sao','Rất tệ','Chưa tốt','Tạm được','Tốt','Tuyệt vời'];
+const FBAREA={vault:'The 7-Vault',courtdraft:'CourtDraft',arena:'TheArena',sonicdeck:'SonicDeck',commshub:'CommsHub',loopy:'Loopy',pro:'Nexus Pro'};
+let fbStars=0;
+$('#fbStars').innerHTML=[1,2,3,4,5].map(n=>`<button type="button" role="radio" aria-checked="false" data-s="${n}" aria-label="${n} sao">${ic('star')}</button>`).join('');
+function fbPaint(n){$$('#fbStars button').forEach(b=>{const v=+b.dataset.s;b.classList.toggle('on',v<=n);b.setAttribute('aria-checked',String(v===fbStars));});$('#fbLab').textContent=FBLAB[n]||FBLAB[0];}
+$('#fbStars').addEventListener('click',e=>{const b=e.target.closest('[data-s]');if(!b)return;fbStars=+b.dataset.s;fbPaint(fbStars);$('#fbForm').hidden=false;});
+$('#fbStars').addEventListener('mouseover',e=>{const b=e.target.closest('[data-s]');if(b)fbPaint(+b.dataset.s);});
+$('#fbStars').addEventListener('mouseleave',()=>fbPaint(fbStars));
+function fbShow(){fbStars=0;$('#fbForm').reset();fbPaint(0);$('#fbForm').hidden=true;$('#fbErr').hidden=true;$('#fbAsk').hidden=false;$('#fbThanks').hidden=true;
+  const h=location.hash.slice(1);$('#fbArea').value=FBAREA[h.startsWith('loopy')?'loopy':h]||'';$('#fbPop').hidden=false;
+  setTimeout(()=>{const b=$('#fbStars button');if(b)b.focus();},50);}
+function fbHide(snoozeDays){$('#fbPop').hidden=true;if(snoozeDays)fbSave({snooze:Date.now()+snoozeDays*864e5});}
+$('#fbOpen').addEventListener('click',()=>{closeMenu();fbShow();});
+$('#fbClose').addEventListener('click',()=>fbHide(fbState().done?0:14));
+$('#fbLater').addEventListener('click',()=>fbHide(7));
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#fbPop').hidden)fbHide(fbState().done?0:14);});
+$('#fbForm').addEventListener('submit',async e=>{e.preventDefault();if(!fbStars)return;const btn=$('#fbSend');btn.disabled=true;$('#fbErr').hidden=true;
+  try{await ND.addFeedback({stars:fbStars,text:$('#fbText').value.trim(),area:$('#fbArea').value,lang:document.documentElement.lang||'vi',page:location.hash.slice(1,30)});
+    fbSave({done:Date.now()});$('#fbAsk').hidden=true;$('#fbThanks').hidden=false;setTimeout(()=>fbHide(0),2500);}
+  catch(err){$('#fbErr').textContent=err&&err.code==='permission-denied'?'Máy chủ chưa nhận đánh giá. Cần cập nhật luật bảo mật Firestore.':(err&&err.message)||'Không gửi được. Thử lại.';$('#fbErr').hidden=false;}
+  btn.disabled=false;});
+/* ask once by itself: after 3 minutes on the site, never during a game, not again after an answer (Later = 7 days, close = 14 days) */
+setTimeout(function fbAsk(){const st=fbState();if(st.done||(st.snooze&&st.snooze>Date.now()))return;
+  const h=location.hash.slice(1),busy=h==='arena'||h==='admin'||h==='sign-in'||!$('#fbPop').hidden||document.querySelector('.modal:not([hidden])')||document.fullscreenElement;
+  if(busy){setTimeout(fbAsk,60000);return;}fbShow();},180000);
+
+/* ===== ADMIN: read the feedback ===== */
+let adList=[],adStar=0,adUnsub=null,adErr=null;
+const adStarsHTML=n=>[1,2,3,4,5].map(i=>`<svg class="i${i<=n?' on':''}" aria-hidden="true"><use href="#i-star"/></svg>`).join('');
+function renderAdminNav(){const u=me();$('#sideAdmin').hidden=!(ND.mode==='cloud'&&ND.isAdmin());$('#sideSignIn').hidden=!!(u&&!u.anon);}
+function adStart(){if(adUnsub){adUnsub();adUnsub=null;}adList=[];adErr=null;
+  if(ND.isAdmin())adUnsub=ND.watchFeedback(l=>{adList=l;adErr=null;renderAdmin();},e=>{adErr=e;renderAdmin();});renderAdmin();}
+function renderAdmin(){const ok=ND.isAdmin(),u=me();$('#adNo').hidden=ok;$('#adBody').hidden=!ok;
+  if(!ok){$('#adNoTxt').textContent=u&&!u.anon?'Tài khoản này không có quyền quản trị.':'Đăng nhập bằng tài khoản quản trị để xem đánh giá.';return;}
+  const n=adList.length,avg=n?adList.reduce((a,x)=>a+(x.stars||0),0)/n:0,cnt=[0,0,0,0,0,0];adList.forEach(x=>{cnt[x.stars|0]=(cnt[x.stars|0]||0)+1;});
+  $('#adAvg').textContent=n?avg.toFixed(1).replace('.',','):'–';$('#adAvgStars').innerHTML=adStarsHTML(Math.round(avg));$('#adCount').textContent=n+' đánh giá';
+  $('#adDist').innerHTML=[5,4,3,2,1].map(k=>`<div class="r"><span>${k} sao</span><span class="bar"><span style="width:${n?Math.round(cnt[k]/n*100):0}%"></span></span><span class="num">${cnt[k]}</span></div>`).join('');
+  $('#adStarsF').innerHTML=[0,5,4,3,2,1].map(k=>`<button type="button" data-st="${k}" aria-pressed="${k===adStar}">${k?k+' sao':'Tất cả'}</button>`).join('');
+  if(adErr){$('#adList').innerHTML=`<p class="err">${esc(adErr.code==='permission-denied'?'Máy chủ chưa cho phép đọc đánh giá. Cần cập nhật luật bảo mật Firestore.':(adErr.message||'Lỗi'))}</p>`;return;}
+  const only=$('#adTextOnly').checked,rows=adList.filter(x=>(!adStar||x.stars===adStar)&&(!only||String(x.text||'').trim()));
+  $('#adList').innerHTML=rows.length?rows.map(x=>`<article class="card adit"><div class="top"><span class="adst" aria-label="${x.stars|0} sao">${adStarsHTML(x.stars|0)}</span>${x.area?`<span class="chip chip-grey">${esc(x.area)}</span>`:''}<span class="who">${esc(x.name||'Khách')} · ${hhmm(ND.tsMs(x.createdAt))}</span><button class="btn btn-ghost btn-sm del" type="button" data-fdel="${esc(x.id)}">Xoá</button></div>${x.text?`<div class="txt">${esc(x.text)}</div>`:''}</article>`).join('')
+    :`<p class="muted">${n?'Không có đánh giá nào khớp bộ lọc.':'Chưa có đánh giá nào.'}</p>`;}
+$('#adStarsF').addEventListener('click',e=>{const b=e.target.closest('[data-st]');if(!b)return;adStar=+b.dataset.st;renderAdmin();});
+$('#adTextOnly').addEventListener('change',renderAdmin);
+$('#adList').addEventListener('click',async e=>{const b=e.target.closest('[data-fdel]');if(!b)return;b.disabled=true;try{await ND.deleteFeedback(b.dataset.fdel);toast('Đã xoá đánh giá');}catch(err){b.disabled=false;toast(err.message||'Không xoá được. Thử lại.');}});
+ND.on('user',()=>{renderAdminNav();adStart();});ND.on('mode',()=>{renderAdminNav();adStart();});
 
 /* ===== SIGN IN ===== */
 let siMode='in';

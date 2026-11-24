@@ -83,6 +83,9 @@ A school super-app, rebuilt from v0-thenexus.vercel.app. Single-page vanilla JS 
 
 - **SonicDeck (Nov 2026):** 177 catalog songs in `CAT` (title, artist, genre, year, YouTube id, seconds, channel), found and embed-checked through YouTube search plus oEmbed. Tabs: Nhạc Việt (cải lương, bolero, trữ tình, V-Pop, rap, remix, phonk), Quốc tế, Cộng đồng. Community songs: Firestore `songs` (file on Cloudinary via `NEXUS_VIDEO_UPLOAD`, or `yt` id), files fall back to IndexedDB on this device when Cloudinary is not set. Free users add 5 songs, `hasPlan('premium')` 100. Plays go to `stats/tracks` keyed `y_<id>` or `u_<docId>`; the home "most played" bar reads `window.NexusSongInfo`. Test: `tools/test_sd.py`.
 
+- **Feedback (Nov 2026):** pop-up rating (1-5 stars, area, comment) opens from "Góp ý" in the sidebar, and by itself once after 3 minutes (not on #arena, #admin, #sign-in; "Để sau" snoozes 7 days, close 14). Saved to Firestore `feedback` (anyone signed in, guests too, may create). Admin page `#admin` (sidebar link only for admins) shows average, distribution, filters, delete. Admins = `window.NEXUS_ADMIN_EMAILS` in firebase-config.js AND `isAdmin()` in firestore.rules: keep both lists the same. Test: `tools/test_fb.py`.
+- **CommsHub fix (Nov 2026):** the channel listener restarts on the `mode` event, so it listens to Firestore once Firebase is ready. Test: `tools/test_chat.py`.
+
 ## Public link
 https://thenexusvn.github.io (GitHub Pages). Firebase project `nexus-4012e`: Google, Email/Password and Anonymous sign-in on; Firestore in asia-southeast1 with `firestore.rules` published; authorized domain `thenexusvn.github.io`.
 

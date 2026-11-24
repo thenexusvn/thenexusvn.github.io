@@ -6,6 +6,9 @@ service cloud.firestore {
     // tài khoản thật (email hoặc Google), không phải khách ẩn danh
     function member() { return signedIn() && request.auth.token.firebase.sign_in_provider != 'anonymous'; }
     function str(v, max) { return v is string && v.size() <= max; }
+    // người quản lý web: đọc và xoá được đánh giá. Thêm email vào danh sách nếu muốn nhiều người cùng quản lý.
+    function isAdmin() { return signedIn() && request.auth.token.email_verified == true
+      && request.auth.token.email in ['nguyenphucvy08@gmail.com']; }
 
     // The 7-Vault: ai cũng xem được, thành viên đăng bài, chỉ người đăng được xoá
     match /docs/{id} {
@@ -143,6 +146,17 @@ service cloud.firestore {
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['plays'])
         && request.resource.data.plays == resource.data.plays + 1;
       allow delete: if member() && resource.data.uid == request.auth.uid;
+    }
+
+    // Góp ý / đánh giá web: ai cũng gửi được (kể cả khách), chỉ người quản lý đọc và xoá
+    match /feedback/{id} {
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['stars', 'text', 'area', 'name', 'uid', 'lang', 'page', 'createdAt'])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.stars is int && request.resource.data.stars >= 1 && request.resource.data.stars <= 5
+        && str(request.resource.data.text, 1000) && str(request.resource.data.area, 30) && str(request.resource.data.name, 40)
+        && str(request.resource.data.lang, 5) && str(request.resource.data.page, 30);
+      allow read, delete: if isAdmin();
     }
 
     // lượt nghe SonicDeck
