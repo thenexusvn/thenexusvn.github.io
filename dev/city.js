@@ -322,6 +322,8 @@ for(const b of blocks){
     const pW=ix1-ix0,pH=iz1-iz0,dDiag=(x,z)=>{const u=(x-ix0)/pW,v=(z-iz0)/pH;return Math.min(Math.abs(u-v),Math.abs(u+v-1))*Math.min(pW,pH)/1.414;};
     for(let k=0;k<9;k++){const x=sr(ix0+3,ix1-3),z=sr(iz0+3,iz1-3);if(Math.abs(x-cx)<4||Math.abs(z-cz)<4||dDiag(x,z)<3)continue;props.palm.push([x,z]);}
     for(let k=0;k<12;k++){const x=sr(ix0+3,ix1-3),z=sr(iz0+3,iz1-3);if(Math.abs(x-cx)<5||Math.abs(z-cz)<5||dDiag(x,z)<3.5||props.palm.some(p=>hyp(p[0]-x,p[1]-z)<4))continue;props.tree.push([x,z,sr(1,1.5)]);addCol({t:'c',x,z,r:.4});}
+    for(let k=0,n=0;k<60&&n<16;k++){const x=sr2(ix0+2.5,ix1-2.5),z=sr2(iz0+2.5,iz1-2.5);if(Math.abs(x-cx)<4.5||Math.abs(z-cz)<4.5||dDiag(x,z)<3.4||props.tree.some(p=>hyp(p[0]-x,p[1]-z)<5)||props.palm.some(p=>hyp(p[0]-x,p[1]-z)<4))continue;n++;
+      if(sr2(0,1)<.3)props.palm.push([x,z]);else{props.tree.push([x,z,sr2(.9,1.45)]);addCol({t:'c',x,z,r:.4});}}
     for(const[x,z,r]of[[cx+5,cz-2.6,0],[cx-5,cz+2.6,Math.PI],[cx-2.6,cz-6,Math.PI/2]])props.bench.push([x,z,r]);
     SP['park'+b.i+b.j]={x:cx,z:cz};if(b.i===9&&b.j===9)SP.parkMain={x:cx,z:cz};
   }else if(d==='bank'){
