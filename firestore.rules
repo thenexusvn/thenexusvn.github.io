@@ -128,6 +128,23 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // SonicDeck: nhạc cộng đồng. Ai cũng nghe được; thành viên đăng file (Cloudinary) hoặc link YouTube; chỉ người đăng được xoá
+    match /songs/{id} {
+      allow read: if true;
+      allow create: if member()
+        && request.resource.data.keys().hasOnly(['uid', 'name', 'title', 'artist', 'genre', 'kind', 'url', 'yt', 'dur', 'plays', 'createdAt'])
+        && request.resource.data.uid == request.auth.uid
+        && str(request.resource.data.title, 100) && request.resource.data.title.size() > 0
+        && str(request.resource.data.artist, 60) && str(request.resource.data.genre, 40) && str(request.resource.data.name, 40)
+        && request.resource.data.dur is int && request.resource.data.plays == 0
+        && ((request.resource.data.kind == 'file' && request.resource.data.url is string && request.resource.data.url.matches('https://res[.]cloudinary[.]com/.*'))
+          || (request.resource.data.kind == 'yt' && request.resource.data.yt is string && request.resource.data.yt.matches('[A-Za-z0-9_-]{11}')));
+      allow update: if signedIn()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['plays'])
+        && request.resource.data.plays == resource.data.plays + 1;
+      allow delete: if member() && resource.data.uid == request.auth.uid;
+    }
+
     // lượt nghe SonicDeck
     match /stats/tracks {
       allow read: if true;

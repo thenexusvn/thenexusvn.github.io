@@ -527,6 +527,33 @@ textarea.input{resize:vertical;font:inherit}
 .langsw{display:flex;gap:4px;padding:4px;border:1px solid rgba(255,255,255,.1);border-radius:10px;margin:10px 0}.langsw button{flex:1;background:none;border:0;color:inherit;opacity:.65;padding:6px 8px;border-radius:7px;font:500 13px Inter,sans-serif;cursor:pointer}.langsw button[aria-pressed=true]{background:rgba(193,243,84,.15);color:#c1f354;opacity:1}
 .langmini[aria-pressed=true]{display:none}.topbar{gap:8px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* SonicDeck (real music) */
+.sd-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
+.sd-row{grid-template-columns:28px minmax(0,1fr) auto 30px;cursor:pointer;text-align:left;width:100%;color:inherit;background:none;border:0;font:inherit}
+.sd-row:hover,.sd-row:focus-visible{background:var(--hover)}
+.sd-row.now{background:var(--lime-soft)}.sd-row.now .t{color:var(--lime)}
+.sd-row .t{font-weight:600}.sd-row .a{color:var(--mfg);font-size:12.5px}
+.sd-row .meta{display:flex;gap:8px;align-items:center;color:var(--mfg);font-size:12.5px;white-space:nowrap}
+.sd-row .x{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;color:var(--dim)}
+.sd-row .x:hover{color:var(--hot);background:var(--hot-soft)}
+.sd-screen{position:relative;border-radius:12px;overflow:hidden;aspect-ratio:16/9;background:#000}
+#ytWrap,#ytWrap iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.sd-cover{position:absolute;inset:0;display:grid;place-items:center;background:radial-gradient(circle at 30% 20%,rgba(193,243,84,.25),transparent 55%),linear-gradient(135deg,#141a0c,#2a1f4a);color:var(--lime)}
+.sd-cover .i{width:56px;height:56px;opacity:.8}
+.sd-add{border:1px solid var(--line);border-radius:var(--r);background:var(--raise)}
+.sd-add summary{cursor:pointer;list-style:none;display:flex;gap:8px;align-items:center;padding:12px 14px;font-weight:600;color:var(--lime)}
+.sd-add summary::-webkit-details-marker{display:none}
+.sd-up{display:grid;gap:12px;padding:0 14px 14px}
+.up-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+.check{display:flex;gap:10px;align-items:flex-start;font-size:13.5px;line-height:1.45}
+.check input{margin-top:3px;width:16px;height:16px;accent-color:var(--lime)}
+.up-prog{height:6px;background:var(--muted);border-radius:4px;overflow:hidden}.up-prog span{display:block;height:100%;width:0;background:var(--lime);transition:width .2s}
+.controls [aria-pressed=true]{color:var(--lime)}
+.ctl-gap{width:40px}
+.chip-dev{background:var(--muted);color:var(--mfg);border:1px dashed var(--line)}
+@media (max-width:1100px){.deck>.player{order:-1;position:static}}
+@media (max-width:560px){.up-row{grid-template-columns:minmax(0,1fr)}.sd-row{grid-template-columns:24px minmax(0,1fr) 30px}.sd-row .meta{grid-column:2;grid-row:2}.sd-row .x{grid-column:3;grid-row:1/3}}
 </style>
 </head>
 <body>
@@ -665,9 +692,11 @@ const D={
 "Đăng nhập để đăng video":"Sign in to post videos","Đặt tên hiển thị để đăng video":"Set a display name to post videos","Chỉ tài khoản email của trường mới được đăng video":"Only school email accounts can post videos","Chưa cấu hình nơi lưu video (Cloudinary)":"Video storage (Cloudinary) is not set up yet","Tải video lên thất bại":"Video upload failed","Mất kết nối khi tải video lên":"Lost connection while uploading","Video lớn hơn 100 MB":"The video is over 100 MB","Không đọc được video này. Thử file MP4 khác.":"Could not read this video. Try another MP4 file.","Chọn file video":"Choose a video file",
 "Không mở được camera. Kiểm tra quyền truy cập camera và micro.":"Could not open the camera. Check camera and microphone permissions.","Trình duyệt này không quay video được. Hãy chọn video từ máy.":"This browser cannot record video. Choose a file instead.","Không quay được trên trình duyệt này":"Recording does not work in this browser","Chọn hoặc quay một video trước.":"Choose or record a video first.","Video này không đọc được.":"This video cannot be read.","Đặt tiêu đề cho video.":"Give the video a title.","Shorts tối đa 60 giây. Chọn Video dài.":"Shorts are 60 seconds max. Choose Long video.","Đã đăng video":"Video posted","Đăng thất bại. Thử lại.":"Posting failed. Try again.",
 "19 bot, bắn chậm, bo co từ từ":"19 bots, slow aim, slow zone","29 bot, cân bằng":"29 bots, balanced","39 bot, ngắm tốt hơn, bo nhanh":"39 bots, better aim, faster zone","49 bot có súng ngay khi đáp, bo rất nhanh":"49 bots armed on landing, very fast zone","7 khu vực, rừng, đồi, bãi biển và bo thu hẹp 7 lần. Nhảy dù, nhặt đồ, sống sót tới cuối.":"7 areas, forests, hills, beaches and a zone that shrinks 7 times. Drop in, loot up, survive to the end.","Bo sắp xuất hiện":"Zone appearing soon","Bo xanh co lại theo thời gian, ở ngoài sẽ mất máu. Nhà, nhà kho và container có nhiều đồ. Áo giáp và mũ giảm sát thương tới khi hỏng.":"The blue zone shrinks over time and hurts you outside it. Houses, warehouses and containers hold lots of loot. Vests and helmets reduce damage until they break.","Bo đang thu hẹp!":"The zone is shrinking!","Bung dù sớm · W để lao nhanh":"Open your chute early · W to dive faster","Băng gạc":"Bandage","Băng gạc chỉ hồi tới 75 máu":"Bandages only heal up to 75 HP","Bạn chưa có skin nào. Mua ở Cửa hàng skin, hoặc dùng súng mặc định.":"You have no skins yet. Buy some in the Skin shop or use the default guns.","Bấm vào bản đồ để đánh dấu · M để đóng":"Click the map to place a marker · M to close","BẮT ĐẦU":"START","Bắn":"Fire","Bắn tỉa L96":"L96 sniper","Cao (bóng đổ, cỏ dày)":"High (shadows, thick grass)","Chơi tiếp":"Play again","Chế độ":"Mode","Click vào màn hình để điều khiển bằng chuột":"Click the screen to control with the mouse","Cài đặt":"Settings","Cách chơi":"How to play","Còn sống":"Alive","Cảng Cũ":"Old Harbor","Cấp":"Level","Cổng thanh toán chưa được kết nối. Chơi để nhận kim cương miễn phí.":"The payment gateway is not connected. Play matches to earn free diamonds.","Cửa hàng skin":"Skin shop","Dùng":"Equip","Dễ":"Easy","Gỗ Cổ":"Old Wood","H để hồi máu":"H to heal","Hiếm":"Rare","Hoàng Kim":"Gold","Huyền thoại":"Legendary","Hạ":"Kills","Hạ gục":"Kills","Hồi":"Heal","Hộp cứu thương":"Medkit","Kho súng":"Armory","Khu Mỏ":"The Mine","Khó":"Hard","Không có đồ hồi máu":"No healing items","Không đủ kim cương":"Not enough diamonds","Kim cương":"Diamonds","Kim cương dùng để mua skin súng. Bạn cũng nhận kim cương miễn phí khi chơi: Top 1 được 100, mỗi lần hạ gục được 5.":"Diamonds buy gun skins. You also earn them for free by playing: 100 for a Top 1, 5 for every kill.","Kẹo Ngọt":"Candy","Làng Chài":"Fishing Village","Lên xe":"Get in","Lưu":"Save","Máu đã đầy":"Health is full","Máy bay đang bay qua đảo. Bấm Space để nhảy.":"The plane is crossing the island. Press Space to jump.","Mũ cấp 1":"Helmet lv1","Mũ cấp 2":"Helmet lv2","Mũ cấp 3":"Helmet lv3","Mặc định":"Default","Mẹo:":"Tips:","Mục tiêu:":"Goal:","Neon Đêm":"Night Neon","Ngân Hà":"Galaxy","Ngắm":"Aim","Ngồi":"Crouch","Nhà Máy":"The Factory","Nhảy":"Jump","Nhảy khỏi máy bay":"Jump out of the plane","Nhảy khỏi máy bay, nhặt súng và giáp, ở trong bo và là người cuối cùng còn trụ lại.":"Jump out of the plane, grab guns and armor, stay in the zone and be the last one standing.","Nhặt":"Pick up","Nạp":"Reload","Nạp kim cương":"Top up diamonds","Rồng Lửa":"Fire Dragon","Rừng Rậm":"Jungle","Sa Mạc":"Desert","Sát thương":"Damage","Súng lục G9":"G9 pistol","Súng trường AR-7":"AR-7 rifle","Súng trường K47":"K47 rifle","Sống sót":"Survived","Sợi Carbon":"Carbon Fiber","Sử thi":"Epic","Tay không":"Unarmed","Thường":"Normal","Thấp (máy yếu, điện thoại)":"Low (older devices, phones)","Thần thoại":"Mythic","Tiểu liên V10":"V10 SMG","Trường Bắn":"Firing Range","Trạm Radar":"Radar Station","Trận":"Matches","Tên trong trận":"In-match name","Tìm súng trong nhà, kho, container":"Find guns in houses, warehouses, containers","Tặng thêm 10%":"10% bonus","Về sảnh":"Back to lobby","Vừa":"Medium","WASD di chuyển · Chuột nhìn · Click trái bắn · Click phải ngắm · Shift chạy · Space nhảy, bung dù · C ngồi · R nạp đạn · E nhặt đồ · F lên xe, xuống xe · H hồi máu · 1 2 3 đổi súng · M bản đồ":"WASD move · Mouse look · Left click fire · Right click aim · Shift sprint · Space jump, open chute · C crouch · R reload · E pick up · F enter/exit vehicle · H heal · 1 2 3 switch guns · M map","Xuống xe · W/S lái · Space phanh":"Get out · W/S drive · Space brake","· Bạn ở ngoài bo!":"· You are outside the zone!","Ác mộng":"Nightmare","Áo giáp cấp 1":"Vest lv1","Áo giáp cấp 2":"Vest lv2","Áo giáp cấp 3":"Vest lv3","Đang băng bó":"Bandaging","Đang dùng":"Equipped","Đang dùng hộp cứu thương":"Using medkit","Đang nạp đạn":"Reloading","Đang tìm trận...":"Finding a match...","Điều khiển:":"Controls:","Đã lưu. Thoát và mở lại game để đổi đồ hoạ.":"Saved. Exit and reopen the game to change graphics.","Đã nhảy! Bấm Space để bung dù sớm.":"You jumped! Press Space to open your chute early.","Đạn nhẹ":"Light ammo","Đạn nặng":"Heavy ammo","Đạn shotgun":"Shotgun shells","Đạn vừa":"Medium ammo","Đảo Ngọc Lam":"Jade Island","Đồ hoạ":"Graphics","Đồi Thông":"Pine Hill","Đổi mức đồ hoạ cần mở lại game để áp dụng hết.":"Reopen the game to fully apply a graphics change.","Độ nhạy chuột:":"Mouse sensitivity:","Bạc":"Silver","Băng Giá":"Frost","Bóng Đêm":"Nightfall","Dung Nham":"Lava","Mới · Sinh tồn 3D":"New · 3D survival","Nhảy dù xuống đảo, nhặt súng và giáp, lái xe, chạy bo và hạ hết bot để giành Top 1. 4 chế độ từ Dễ tới Ác mộng, sảnh chờ, skin súng.":"Parachute onto the island, grab guns and armor, drive, outrun the zone and take out every bot for the Top 1. 4 modes from Easy to Nightmare, a lobby and gun skins.","Chưa chơi trận nào":"No matches played yet","Vào sảnh":"Enter lobby","Thế giới mở 3D":"3D open world","Sinh tồn 3D · Bạn và tới 49 bot":"3D survival · You vs up to 49 bots","Đang dựng đảo, chờ vài giây...":"Building the island, give it a few seconds...","Ảnh bìa Last Zone":"Last Zone cover","Chiến thắng! Bạn là người cuối cùng còn trụ lại.":"Victory! You are the last one standing.","Shotgun S12":"S12 shotgun","Nexus, trang chủ":"Nexus, home","Nhà":"Home","Mở khoá":"Unlock","Xem miễn phí":"Free preview","Chia lại đội":"Reshuffle teams","1-4: đổi vũ khí":"1-4: switch weapon","H: còi xe":"H: horn","Đang dựng":"Building","Chỉ đường tới":"Directions to","Đã tới nơi":"Arrived","Tiền của bạn":"Your money","Hot":"Hot",
-"Tiếp tục với Google":"Continue with Google","hoặc dùng email":"or use email","hoặc đặt tên để dùng trên máy này":"or set a name to use on this device","Tiến độ game, skin súng và gói thành viên được lưu vào tài khoản này. Đăng nhập trên máy khác là có lại.":"Game progress, gun skins and membership plans are saved to this account. Sign in on another device to get them back.","Gói của bạn: Miễn phí":"Your plan: Free","Đăng nhập để gói thành viên đi theo tài khoản của bạn.":"Sign in so your membership plans follow your account.","Không tải được dữ liệu tài khoản. Kiểm tra mạng rồi tải lại trang.":"Could not load your account data. Check your connection and reload the page.","Đã đăng xuất. Dữ liệu game đã được xoá khỏi máy này.":"Signed out. Game data was removed from this device.","Đã tải dữ liệu từ tài khoản của bạn":"Loaded data from your account","Đăng nhập Google chưa bật trên bản web này.":"Google sign-in is not turned on for this copy of the site.","Trình duyệt chặn cửa sổ đăng nhập. Cho phép cửa sổ bật lên rồi thử lại.":"The browser blocked the sign-in window. Allow pop-ups and try again.","Mất kết nối mạng. Thử lại.":"No network connection. Try again.","Trang này không mở được cửa sổ đăng nhập Google. Mở web bằng trình duyệt thường.":"This page cannot open the Google sign-in window. Open the site in a normal browser."
+"Tiếp tục với Google":"Continue with Google","hoặc dùng email":"or use email","hoặc đặt tên để dùng trên máy này":"or set a name to use on this device","Tiến độ game, skin súng và gói thành viên được lưu vào tài khoản này. Đăng nhập trên máy khác là có lại.":"Game progress, gun skins and membership plans are saved to this account. Sign in on another device to get them back.","Gói của bạn: Miễn phí":"Your plan: Free","Đăng nhập để gói thành viên đi theo tài khoản của bạn.":"Sign in so your membership plans follow your account.","Không tải được dữ liệu tài khoản. Kiểm tra mạng rồi tải lại trang.":"Could not load your account data. Check your connection and reload the page.","Đã đăng xuất. Dữ liệu game đã được xoá khỏi máy này.":"Signed out. Game data was removed from this device.","Đã tải dữ liệu từ tài khoản của bạn":"Loaded data from your account","Đăng nhập Google chưa bật trên bản web này.":"Google sign-in is not turned on for this copy of the site.","Trình duyệt chặn cửa sổ đăng nhập. Cho phép cửa sổ bật lên rồi thử lại.":"The browser blocked the sign-in window. Allow pop-ups and try again.","Mất kết nối mạng. Thử lại.":"No network connection. Try again.","Trang này không mở được cửa sổ đăng nhập Google. Mở web bằng trình duyệt thường.":"This page cannot open the Google sign-in window. Open the site in a normal browser.",
+"Nhạc Việt":"Vietnamese","Quốc tế":"International","Cải lương, bolero, trữ tình, V-Pop, rap và phonk.":"Cai luong opera, bolero, ballads, V-Pop, rap and phonk.","Hit quốc tế":"International hits","Những bài kinh điển và hit toàn cầu từ 1947 đến nay.":"Classics and global hits from 1947 to today.","Phát tất cả":"Play all","Tìm bài hát hoặc ca sĩ...":"Search songs or artists...","Tìm bài hát hoặc ca sĩ":"Search songs or artists","Phát từ kênh YouTube chính thức của ca sĩ, hãng đĩa hoặc nhà sản xuất, ngay trong SonicDeck.":"Played inside SonicDeck from the official YouTube channels of artists, labels or producers.","Nhạc cộng đồng":"Community music","Bài học sinh tự làm và tải lên, hoặc chia sẻ bằng link YouTube.":"Songs students made and uploaded, or shared as YouTube links.","Thêm bài của bạn":"Add your song","Tải file nhạc":"Upload a file","Dán link YouTube":"Paste a YouTube link","File nhạc (MP3, M4A, WAV, OGG, tối đa 25 MB)":"Audio file (MP3, M4A, WAV, OGG, up to 25 MB)","Link YouTube":"YouTube link","Ca sĩ hoặc người làm":"Artist or creator","VD: Mưa Trên Sân Trường":"E.g. Rain on the Schoolyard","VD: Lớp 9A2":"E.g. Class 9A2","Thể loại":"Genre","Bài này do tôi tự làm, hoặc tôi được tác giả cho phép chia sẻ.":"I made this song, or its author allowed me to share it.","Thêm vào SonicDeck":"Add to SonicDeck","Tìm trong nhạc cộng đồng...":"Search community music...","Tìm trong nhạc cộng đồng":"Search community music","Chọn một bài để nghe":"Pick a song to play","Sẵn sàng":"Ready","Hết bài sẽ tự chuyển sang bài tiếp theo trong danh sách.":"When a song ends, the next one in the list starts.","Nghe nhạc thật ngay trong app: cải lương, bolero, nhạc Việt và hit quốc tế. Bạn cũng có thể đăng nhạc của chính mình.":"Real music inside the app: cai luong, bolero, Vietnamese songs and international hits. You can post your own music too.","nghe mọi bài, thêm 5 bài của bạn":"every song, add 5 of your own","thêm tới 100 bài của bạn lên SonicDeck":"add up to 100 of your own songs","Đăng nhiều nhạc lên SonicDeck và mở khoá tài liệu điểm cao.":"Post more music to SonicDeck and unlock top-scoring papers.","Cải lương, bolero, nhạc Việt và 100 hit quốc tế phát ngay trong app. Học sinh đăng được nhạc tự làm.":"Cai luong, bolero, Vietnamese songs and 100 international hits play in the app. Students can post their own music.","Premium: đăng tới 100 bài":"Premium: post up to 100 songs","Cải lương":"Cai luong","Trữ tình & nhạc xưa":"Ballads & classics","Nhạc tự làm":"Original","Trên máy này":"On this device","Nhạc cộng đồng ":"Community","Danh sách đang trống.":"This list is empty.","Đã bật phát ngẫu nhiên":"Shuffle on","Đã tắt phát ngẫu nhiên":"Shuffle off","Bài này hiện không phát được ở đây. Chuyển sang bài tiếp.":"This song can't play here right now. Skipping to the next one.","Không tải được trình phát YouTube. Kiểm tra mạng rồi thử lại.":"Could not load the YouTube player. Check your connection and try again.","Không đọc được file này trên máy.":"Could not read this file on this device.","File nhạc này không phát được.":"This audio file can't be played.","Không có bài nào khớp. Thử từ khoá khác.":"No songs match. Try another search.","Chưa có bài nào. Bấm \"Thêm bài của bạn\" để đăng bài đầu tiên.":"No songs yet. Press \"Add your song\" to post the first one.","Đăng nhập để thêm bài.":"Sign in to add songs.","Đặt tên hiển thị ở trang Đăng nhập để thêm bài.":"Set a display name on the sign-in page to add songs.","Web chưa có nơi lưu file nhạc chung, nên file sẽ chỉ nằm trên máy này. Link YouTube thì ai cũng nghe được.":"The site has no shared storage for audio files yet, so files stay on this device. YouTube links can be heard by everyone.","Chưa kết nối máy chủ: bài chỉ hiện trên máy này.":"Not connected to a server: songs only show on this device.","Bản miễn phí thêm được 5 bài. SonicDeck Premium thêm được 100 bài.":"Free accounts can add 5 songs. SonicDeck Premium can add 100.","Bạn đã thêm đủ 100 bài.":"You have added 100 songs.","Link YouTube không hợp lệ.":"That YouTube link is not valid.","Chọn một file nhạc.":"Choose an audio file.","File này không phải file nhạc.":"This file is not an audio file.","File lớn hơn 25 MB.":"The file is larger than 25 MB.","Đánh dấu xác nhận bạn có quyền chia sẻ bài này.":"Tick the box to confirm you may share this song.","Máy chủ chưa cho phép đăng nhạc. Cần cập nhật luật bảo mật Firestore.":"The server does not allow posting music yet. The Firestore security rules need updating.","Không xoá được. Thử lại.":"Could not delete. Try again."
 };
 const R=[
+[/^Bạn thêm được tối đa (\d+) bài(.*)$/,m=>'You can add up to '+m[1]+' songs'+(m[2]?' (SonicDeck Premium: 100 songs)':'')+'.'],[/^(\d+) bài$/,m=>m[1]+' songs'],[/^đăng bởi (.+)$/,m=>'posted by '+m[1]],[/^Phát (.+)$/,m=>'Play '+m[1]],[/^Xoá bài (.+)$/,m=>'Delete '+m[1]],[/^Đã thêm "(.+)" vào SonicDeck$/,m=>'Added "'+m[1]+'" to SonicDeck'],[/^Không thêm được bài\. (.*)$/,m=>'Could not add the song. '+t(m[1])],
 [/^Gói của bạn: (.+) đến (.+)$/,m=>'Your plan: '+m[1]+' until '+m[2]],
 [/^(\d+) bài$/,m=>m[1]+' songs'],[/^Bo thu hẹp sau (\d+)s$/,m=>'Zone shrinks in '+m[1]+'s'],[/^Bo đang thu hẹp · (\d+)s$/,m=>'Zone shrinking · '+m[1]+'s'],[/^Băng gạc (\d+)$/,m=>'Bandages '+m[1]],[/^Cứu thương (\d+)$/,m=>'Medkits '+m[1]],
 [/^Giáp (.+)$/,m=>'Vest '+m[1].replace(/^C/,'L')],[/^Mũ (.+)$/,m=>'Helmet '+m[1].replace(/^C/,'L')],[/^Nhặt (.+)$/,m=>'Pick up '+t(m[1])],[/^(.+) · còn (\d+)$/,m=>t(m[1])+' · '+m[2]+' left'],[/^Đã tìm thấy (\d+) đối thủ$/,m=>'Found '+m[1]+' opponents'],[/^Đã mua skin (.+)$/,m=>'Bought skin '+t(m[1])],
@@ -738,7 +767,7 @@ return{t,setLang,get lang(){return lang;},D};
     <div class="userbox" id="userbox"></div>
     <div class="procard">
       <h4><svg class="i"><use href="#i-spark"/></svg>Nexus Pro</h4>
-      <p>Bỏ quảng cáo, nghe nhạc theo ý và mở khoá tài liệu điểm cao.</p>
+      <p>Đăng nhiều nhạc lên SonicDeck và mở khoá tài liệu điểm cao.</p>
       <a class="btn btn-pro btn-sm" href="#pro">Nâng cấp</a>
     </div>
     <div class="side-foot">
@@ -770,7 +799,7 @@ return{t,setLang,get lang(){return lang;},D};
       <a class="card zone" href="#vault"><span class="ic"><svg class="i"><use href="#i-vault"/></svg></span><h3>The 7-Vault</h3><p>Bài thi điểm cao từ các kỳ trước, lọc theo môn và khối.</p><span class="chip chip-pro">Vault+ mở khoá bài điểm cao nhất</span></a>
       <a class="card zone" href="#courtdraft"><span class="ic"><svg class="i"><use href="#i-trophy"/></svg></span><h3>CourtDraft</h3><p>Tạo trận, chia đội và rủ nhau ra sân bóng rổ.</p><span class="chip chip-lime">Miễn phí hoàn toàn</span></a>
       <a class="card zone" href="#arena"><span class="ic"><svg class="i"><use href="#i-game"/></svg></span><h3>TheArena</h3><p>Game trình duyệt chơi online nhiều người với cả trường.</p><span class="chip chip-pro">Chơi miễn phí</span></a>
-      <a class="card zone" href="#sonicdeck"><span class="ic"><svg class="i"><use href="#i-head"/></svg></span><h3>SonicDeck</h3><p>Nhạc Nexus Originals phát ngay trong app, có cả phonk và remix. Kèm 100 bài thế giới và kho nhạc Việt.</p><span class="chip chip-pro">Premium: theo thứ tự, không quảng cáo</span></a>
+      <a class="card zone" href="#sonicdeck"><span class="ic"><svg class="i"><use href="#i-head"/></svg></span><h3>SonicDeck</h3><p>Cải lương, bolero, nhạc Việt và 100 hit quốc tế phát ngay trong app. Học sinh đăng được nhạc tự làm.</p><span class="chip chip-pro">Premium: đăng tới 100 bài</span></a>
       <a class="card zone" href="#commshub"><span class="ic"><svg class="i"><use href="#i-chat"/></svg></span><h3>CommsHub</h3><p>Kênh chat theo chủ đề cho lớp, CLB và đội.</p><span class="chip chip-lime">Miễn phí hoàn toàn</span></a>
       <a class="card zone" href="#loopy"><span class="ic"><svg class="i"><use href="#i-reel"/></svg></span><h3>Loopy</h3><p>Shorts và video dài của bạn bè cùng trường, có bộ lọc, bình luận, theo dõi.</p><span class="chip chip-lime">Mới · Miễn phí</span></a>
       <a class="card zone pro" href="#pro"><span class="ic"><svg class="i"><use href="#i-spark"/></svg></span><h3>Nexus Pro</h3><div class="price num">79.000đ<small>/tháng</small></div><p>Gộp SonicDeck Premium và Vault+ trong một gói, rẻ hơn mua lẻ.</p></a>
@@ -880,49 +909,59 @@ return{t,setLang,get lang(){return lang;},D};
     <div class="head">
       <span class="eyebrow"><svg class="i"><use href="#i-head"/></svg>Âm nhạc</span>
       <h1>SonicDeck</h1>
-      <p class="lede">Bản Free phát ngẫu nhiên và có quảng cáo. Premium cho bạn nghe theo thứ tự, chọn bài bất kỳ và không quảng cáo.</p>
+      <p class="lede">Nghe nhạc thật ngay trong app: cải lương, bolero, nhạc Việt và hit quốc tế. Bạn cũng có thể đăng nhạc của chính mình.</p>
     </div>
     <div class="deck">
       <div class="card plist">
-        <div class="seg lime" role="group" aria-label="Danh sách nhạc" id="deckTabs" style="justify-self:start"><button type="button" data-tab="hits" aria-pressed="true">Nexus Hits</button><button type="button" data-tab="world" aria-pressed="false">100 bài thế giới</button><button type="button" data-tab="vn" aria-pressed="false">Nhạc Việt &amp; Phonk</button></div>
-        <div class="plist-body" id="panelHits">
-        <div class="plist-top">
-          <div><h3>Nexus Hits</h3><p class="muted small">9 bài · Nexus Originals có cả phonk và remix, phát ngay trong app</p></div>
-          <div class="seg pro" role="group" aria-label="Chế độ nghe"><button id="modeFree" aria-pressed="true">Free</button><button id="modePrem" class="is-pro" aria-pressed="false">Premium</button></div>
+        <div class="seg lime" role="group" aria-label="Danh sách nhạc" id="deckTabs" style="justify-self:start"><button type="button" data-tab="vn" aria-pressed="true">Nhạc Việt</button><button type="button" data-tab="world" aria-pressed="false">Quốc tế</button><button type="button" data-tab="up" aria-pressed="false">Cộng đồng</button></div>
+        <div class="plist-body" id="panelCat">
+          <div class="sd-head"><div><h3 id="catTitle">Nhạc Việt</h3><p class="muted small" id="catSub">Cải lương, bolero, trữ tình, V-Pop, rap và phonk.</p></div>
+            <button class="btn btn-lime btn-sm" type="button" id="playAllBtn"><svg class="i"><use href="#i-play"/></svg><span>Phát tất cả</span></button></div>
+          <div class="searchbox"><svg class="i"><use href="#i-search"/></svg><input class="input" id="sdQ" type="search" placeholder="Tìm bài hát hoặc ca sĩ..." aria-label="Tìm bài hát hoặc ca sĩ"></div>
+          <div class="chips" id="sdGenres" role="group" aria-label="Lọc theo thể loại"></div>
+          <p class="muted small" id="sdCount"></p>
+          <div class="wlist" id="sdList"></div>
+          <p class="muted small">Phát từ kênh YouTube chính thức của ca sĩ, hãng đĩa hoặc nhà sản xuất, ngay trong SonicDeck.</p>
         </div>
-        <button class="btn btn-lime" id="shuffleBtn" style="justify-self:start"><svg class="i"><use href="#i-shuffle"/></svg><span>Phát ngẫu nhiên</span></button>
-        <div class="tracks" id="tracks"></div>
-        <p class="lockline" id="lockline"><svg class="i"><use href="#i-lock"/></svg>Chọn bài và nghe theo thứ tự cần SonicDeck Premium.</p>
-        </div>
-        <div class="plist-body" id="panelWorld" hidden>
-          <div><h3>100 bài kinh điển và hit toàn cầu</h3><p class="muted small">Từ 1947 đến 2023, xếp theo năm phát hành</p></div>
-          <div class="searchbox"><svg class="i"><use href="#i-search"/></svg><input class="input" id="wQ" type="search" placeholder="Tìm bài hát, nghệ sĩ hoặc năm..." aria-label="Tìm bài hát"></div>
-          <div class="w-filters"><div class="chips" id="wGenres" role="group" aria-label="Lọc theo thể loại"></div><select class="input" id="wDecade" aria-label="Lọc theo thập niên"><option value="">Mọi thập niên</option><option value="old">Trước 1970</option><option value="1970">Thập niên 70</option><option value="1980">Thập niên 80</option><option value="1990">Thập niên 90</option><option value="2000">Thập niên 2000</option><option value="2010">Thập niên 2010</option><option value="2020">Thập niên 2020</option></select></div>
-          <p class="muted small" id="wCount"></p>
-          <div class="wlist" id="wList"></div>
-          <p class="muted small">Các bài này có bản quyền nên SonicDeck không phát trực tiếp. Nút YouTube và Spotify mở bài trong tab mới.</p>
-        </div>
-        <div class="plist-body" id="panelVN" hidden>
-          <div><h3>Nhạc Việt, remix và phonk</h3><p class="muted small">V-Pop, rap Việt, remix, nhạc xưa và phonk đang hot. Muốn nghe phonk ngay trong app thì mở Nexus Hits.</p></div>
-          <div class="searchbox"><svg class="i"><use href="#i-search"/></svg><input class="input" id="vQ" type="search" placeholder="Tìm bài hát hoặc nghệ sĩ..." aria-label="Tìm bài nhạc Việt hoặc phonk"></div>
-          <div class="w-filters"><div class="chips" id="vGenres" role="group" aria-label="Lọc theo thể loại"></div></div>
-          <p class="muted small" id="vCount"></p>
-          <div class="wlist" id="vList"></div>
-          <p class="muted small">Các bài này có bản quyền nên SonicDeck không phát trực tiếp. Nút YouTube và Spotify mở bài trong tab mới.</p>
+        <div class="plist-body" id="panelUp" hidden>
+          <div class="sd-head"><div><h3>Nhạc cộng đồng</h3><p class="muted small">Bài học sinh tự làm và tải lên, hoặc chia sẻ bằng link YouTube.</p></div>
+            <button class="btn btn-lime btn-sm" type="button" id="playUpBtn"><svg class="i"><use href="#i-play"/></svg><span>Phát tất cả</span></button></div>
+          <details class="sd-add" id="upBox"><summary><svg class="i"><use href="#i-plus"/></svg>Thêm bài của bạn</summary>
+          <form class="sd-up" id="upForm" novalidate>
+            <div class="seg lime" role="group" aria-label="Cách thêm bài" id="upMode" style="justify-self:start"><button type="button" data-m="file" aria-pressed="true">Tải file nhạc</button><button type="button" data-m="yt" aria-pressed="false">Dán link YouTube</button></div>
+            <div class="field" id="upFileF"><label for="upFile">File nhạc (MP3, M4A, WAV, OGG, tối đa 25 MB)</label><input class="input" id="upFile" type="file" accept="audio/*,.mp3,.m4a,.wav,.ogg,.aac,.flac"></div>
+            <div class="field" id="upLinkF" hidden><label for="upLink">Link YouTube</label><input class="input" id="upLink" type="url" inputmode="url" placeholder="https://www.youtube.com/watch?v=..."></div>
+            <div class="up-row">
+              <div class="field"><label for="upTitle">Tên bài</label><input class="input" id="upTitle" maxlength="100" placeholder="VD: Mưa Trên Sân Trường"></div>
+              <div class="field"><label for="upArtist">Ca sĩ hoặc người làm</label><input class="input" id="upArtist" maxlength="60" placeholder="VD: Lớp 9A2"></div>
+            </div>
+            <div class="field"><label for="upGenre">Thể loại</label><select class="input" id="upGenre"></select></div>
+            <label class="check" id="upRightsF"><input type="checkbox" id="upRights"><span>Bài này do tôi tự làm, hoặc tôi được tác giả cho phép chia sẻ.</span></label>
+            <p class="err" id="upErr" hidden></p>
+            <div class="up-prog" id="upProg" hidden><span id="upBar"></span></div>
+            <button class="btn btn-lime" type="submit" id="upGo">Thêm vào SonicDeck</button>
+            <p class="muted small" id="upNote"></p>
+          </form>
+          </details>
+          <div class="searchbox"><svg class="i"><use href="#i-search"/></svg><input class="input" id="upQ" type="search" placeholder="Tìm trong nhạc cộng đồng..." aria-label="Tìm trong nhạc cộng đồng"></div>
+          <p class="muted small" id="upCount"></p>
+          <div class="wlist" id="upList"></div>
         </div>
       </div>
       <div class="card player">
-        <div class="cover" id="bigCover"><canvas id="viz" width="400" height="400" aria-hidden="true"></canvas><div class="ad" id="adBox" hidden><span class="chip chip-grey" style="justify-self:center">Quảng cáo</span><strong>Nâng cấp Premium để nghe không quảng cáo</strong><span class="muted small num" id="adLeft">Bài tiếp theo sau 5 giây</span></div></div>
-        <div class="np"><div><h3 id="npTitle">Giờ Ra Chơi</h3><p class="muted" id="npArtist">Nexus Originals</p></div><span class="chip chip-grey" id="npMode">Free</span></div>
-        <div class="bar"><input type="range" id="seek" min="0" max="184" value="0" aria-label="Vị trí phát"><div class="num"><span id="tCur">0:00</span><span id="tDur">3:04</span></div></div>
+        <div class="sd-screen"><div id="ytWrap" hidden><div id="ytFrame"></div></div><div class="sd-cover" id="sdCover"><svg class="i"><use href="#i-head"/></svg></div></div>
+        <div class="np"><div><h3 id="npTitle">Chọn một bài để nghe</h3><p class="muted" id="npArtist">SonicDeck</p></div><span class="chip chip-grey" id="npSrc">Sẵn sàng</span></div>
+        <div class="bar"><input type="range" id="seek" min="0" max="0" value="0" step="1" aria-label="Vị trí phát"><div class="num"><span id="tCur">0:00</span><span id="tDur">0:00</span></div></div>
         <div class="controls">
+          <button id="shufBtn" aria-label="Phát ngẫu nhiên" aria-pressed="false"><svg class="i"><use href="#i-shuffle"/></svg></button>
           <button id="prevBtn" aria-label="Bài trước"><svg class="i"><use href="#i-prev"/></svg></button>
           <button class="play" id="playBtn" aria-label="Phát"><svg class="i"><use href="#i-play"/></svg></button>
           <button id="nextBtn" aria-label="Bài tiếp"><svg class="i"><use href="#i-next"/></svg></button>
+          <span class="ctl-gap" aria-hidden="true"></span>
         </div>
         <div class="vol"><svg class="i"><use href="#i-vol"/></svg><input type="range" id="vol" min="0" max="100" value="70" aria-label="Âm lượng"></div>
-        <p class="pnote num" id="pnote">Còn 6/6 lượt bỏ qua · Quảng cáo sau mỗi 3 bài</p>
-        <p class="muted small" style="text-align:center" id="audioNote">Nexus Originals do trình duyệt tự chơi, không cần tải file.</p>
+        <p class="pnote" id="pnote">Hết bài sẽ tự chuyển sang bài tiếp theo trong danh sách.</p>
+        <audio id="sdAudio" preload="metadata"></audio>
       </div>
     </div>
   </div></section>
@@ -968,7 +1007,7 @@ return{t,setLang,get lang(){return lang;},D};
           <li><svg class="i"><use href="#i-check"/></svg><span><b>CommsHub</b> đầy đủ mọi kênh</span></li>
           <li><svg class="i"><use href="#i-check"/></svg><span><b>CourtDraft</b> tạo trận, chia đội không giới hạn</span></li>
           <li><svg class="i"><use href="#i-check"/></svg><span><b>The 7-Vault</b> bài xem miễn phí</span></li>
-          <li><svg class="i"><use href="#i-check"/></svg><span><b>SonicDeck</b> phát ngẫu nhiên, có quảng cáo</span></li>
+          <li><svg class="i"><use href="#i-check"/></svg><span><b>SonicDeck</b> nghe mọi bài, thêm 5 bài của bạn</span></li>
           <li><svg class="i"><use href="#i-check"/></svg><span><b>TheArena</b> chơi mọi game miễn phí</span></li>
         </ul>
         <span class="btn btn-ghost" aria-disabled="true">Gói hiện tại</span>
@@ -978,7 +1017,7 @@ return{t,setLang,get lang(){return lang;},D};
         <div class="price num">79.000đ<small>/tháng</small></div>
         <ul>
           <li><svg class="i"><use href="#i-check"/></svg><span><b>Vault+</b> mở khoá bài điểm cao nhất</span></li>
-          <li><svg class="i"><use href="#i-check"/></svg><span><b>SonicDeck Premium</b> nghe theo thứ tự, chọn bài bất kỳ, không quảng cáo</span></li>
+          <li><svg class="i"><use href="#i-check"/></svg><span><b>SonicDeck Premium</b> thêm tới 100 bài của bạn lên SonicDeck</span></li>
         </ul>
         <button class="btn btn-pro" data-pay>Nâng cấp lên Pro</button>
       </div>
@@ -1164,6 +1203,7 @@ return{t,setLang,get lang(){return lang;},D};
   <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></symbol>
   <symbol id="i-shuffle" viewBox="0 0 24 24"><path d="M16 3h5v5"/><path d="M4 20 21 3"/><path d="M21 16v5h-5"/><path d="m15 15 6 6"/><path d="M4 4l5 5"/></symbol>
   <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
   <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4v16l13-8z" fill="currentColor"/></symbol>
   <symbol id="i-pause" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16" rx="1" fill="currentColor"/><rect x="14" y="4" width="4" height="16" rx="1" fill="currentColor"/></symbol>
   <symbol id="i-next" viewBox="0 0 24 24"><path d="M5 4v16l11-8z" fill="currentColor"/><path d="M19 4v16"/></symbol>
@@ -1279,8 +1319,12 @@ return{
   async sendMessage(ch,text){needUser();text=String(text).slice(0,500);if(mode==='cloud'){await db.collection('channels').doc(ch).collection('messages').add({text,uid:user.uid,name:user.name,createdAt:FV.serverTimestamp()});return;}
     const k='msg-'+ch,a=LS.get(k,[]);a.push({id:'x'+Date.now(),text,uid:user.uid,name:user.name,createdAt:Date.now()});LS.set(k,a.slice(-200));emit(k);},
   async deleteMessage(ch,id){needUser();if(mode==='cloud'){await db.collection('channels').doc(ch).collection('messages').doc(id).delete();return;}const k='msg-'+ch;LS.set(k,LS.get(k,[]).filter(m=>m.id!==id));emit(k);},
+  /* sonicdeck community songs */
+  watchSongs(cb){if(mode!=='cloud'){cb([]);return()=>{};}return db.collection('songs').orderBy('createdAt','desc').limit(300).onSnapshot(x=>cb(x.docs.map(d=>Object.assign({id:d.id},d.data()))),e=>{console.warn('songs',e);cb([]);});},
+  async addSong(m){needUser();if(mode!=='cloud')throw err('offline','Chưa kết nối máy chủ');const d={uid:user.uid,name:(user.name||'').slice(0,40),title:m.title,artist:m.artist||'',genre:m.genre||'',kind:m.kind,dur:Math.round(m.dur||0),plays:0,createdAt:FV.serverTimestamp()};if(m.kind==='yt')d.yt=m.yt;else d.url=m.url;await db.collection('songs').add(d);},
+  async deleteSong(id){needUser();await db.collection('songs').doc(id).delete();},
   /* sonicdeck plays */
-  countPlay(i){if(mode==='cloud'){if(user)db.collection('stats').doc('tracks').set({['p'+i]:FV.increment(1)},{merge:true}).catch(()=>{});return;}state.plays['p'+i]=(state.plays['p'+i]||0)+1;LS.set('plays',state.plays);emit('plays',state.plays);}
+  countPlay(i){const f=typeof i==='number'?'p'+i:String(i).replace(/[^A-Za-z0-9_-]/g,'_').slice(0,60);if(mode==='cloud'){if(user)db.collection('stats').doc('tracks').set({[f]:FV.increment(1)},{merge:true}).catch(()=>{});return;}state.plays[f]=(state.plays[f]||0)+1;LS.set('plays',state.plays);emit('plays',state.plays);}
 };})();
 </script>
 <script>
@@ -1405,8 +1449,8 @@ function renderHome(){const docs=ND.state.docs,ms=ND.state.matches;
   const ld=$('#liveDoc'),d=docs.slice().sort((a,b)=>(b.views||0)-(a.views||0))[0];
   if(d){ld.innerHTML=`<span class="k">THE 7-VAULT</span><h3></h3><p class="muted small"></p><span class="foot"><span class="dot on"></span><span class="num"></span></span>`;
     ld.querySelector('h3').textContent=d.t;ld.querySelector('p').textContent=`${d.s} · ${d.g}`;ld.querySelector('.foot span:last-child').textContent=`${fmt(d.views||0)} lượt xem`;}
-  const P=ND.state.plays||{};let best=-1,bv=0;for(const k in P){const i=+k.slice(1);if(P[k]>bv&&window.NexusTracks&&window.NexusTracks[i]){bv=P[k];best=i;}}
-  $('#hotbar').hidden=best<0;if(best>=0){$('#hotTitle').textContent=window.NexusTracks[best].t;$('#hotMeta').textContent=`· ${window.NexusTracks[best].a} · ${fmt(bv)} lượt nghe`;}}
+  const P=ND.state.plays||{};let best=null,bv=0;for(const k in P){const inf=window.NexusSongInfo&&window.NexusSongInfo(k);if(inf&&P[k]>bv){bv=P[k];best=inf;}}
+  $('#hotbar').hidden=!best;if(best){$('#hotTitle').textContent=best.t;$('#hotMeta').textContent=`· ${best.a} · ${fmt(bv)} lượt nghe`;}}
 ND.on('online',renderHome);ND.on('plays',renderHome);
 /* user box in the sidebar */
 function renderUser(){const u=me(),box=$('#userbox');box.innerHTML='';const row=document.createElement('div');row.className='row';
@@ -1598,81 +1642,165 @@ const TRACKS=[
  {t:'Remix Tan Trường',a:'DJ Lớp Trưởng',d:204,g:['#3ef0e0','#ff5fd2']}
 ];
 window.NexusTracks=TRACKS;
-const mmss=s=>Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0');
-const grad=g=>`linear-gradient(135deg,${g[0]},${g[1]})`;
-let prem=false,cur=0,pos=0,playing=false,timer=null,skips=6,sinceAd=0,adLeft=0;
-function renderTracks(){
-  $('#tracks').innerHTML=TRACKS.map((x,i)=>`<button class="trk${i===cur?' now':''}" data-t="${i}" ${prem?'':'aria-disabled="true"'}><span class="n num">${i+1}</span><span class="cover" style="background:${grad(x.g)}"></span><span><span class="t">${esc(x.t)}</span><br><span class="a">${esc(x.a)}</span></span><span class="d num">${mmss(x.d)}</span></button>`).join('');
-}
-function renderPlayer(){
-  const x=TRACKS[cur];$('#npTitle').textContent=x.t;$('#npArtist').textContent=x.a;$('#bigCover').style.background=grad(x.g);
-  $('#seek').max=x.d;$('#seek').value=pos;$('#tCur').textContent=mmss(pos);$('#tDur').textContent=mmss(x.d);
-  $('#playBtn').innerHTML=ic(playing&&!adLeft?'pause':'play');$('#playBtn').setAttribute('aria-label',playing?'Tạm dừng':'Phát');
-  $('#npMode').textContent=prem?'Premium':'Free';$('#npMode').className='chip '+(prem?'chip-pro':'chip-grey');
-  $('#prevBtn').disabled=!prem;$('#lockline').hidden=prem;
-  $('#shuffleBtn span').textContent=prem?'Phát từ đầu':'Phát ngẫu nhiên';
-  $('#pnote').textContent=prem?'Premium · Nghe theo thứ tự, không quảng cáo':`Còn ${skips}/6 lượt bỏ qua · Quảng cáo sau mỗi 3 bài`;
-  $('#adBox').hidden=!adLeft;if(adLeft)$('#adLeft').textContent=`Bài tiếp theo sau ${adLeft} giây`;
-}
-function tick(){
-  if(adLeft){adLeft--;if(!adLeft){pos=0;audioSync();}renderPlayer();return;}
-  pos++;if(pos>=TRACKS[cur].d){advance(false);return;}
-  $('#seek').value=pos;$('#tCur').textContent=mmss(pos);
-}
-function audioSync(){if(playing&&!adLeft&&pos===0&&window.NexusData)window.NexusData.countPlay(cur);if(playing){if(adLeft)Synth.jingle();else if(!Synth.play(cur,pos))$('#audioNote').textContent='Trình duyệt này chưa hỗ trợ phát âm thanh.';}else Synth.stop();}
-function setPlaying(on){playing=on;clearInterval(timer);if(on)timer=setInterval(tick,1000);audioSync();renderPlayer();}
-function load(i){cur=i;pos=0;
-  if(!prem){sinceAd++;if(sinceAd>3){sinceAd=1;adLeft=5;}}
-  renderTracks();renderPlayer();if(playing)audioSync();}
-function randomOther(){let i;do{i=Math.floor(Math.random()*TRACKS.length)}while(i===cur);return i;}
-function advance(manual){
-  if(!prem&&manual){if(skips<=0){toast('Hết lượt bỏ qua hôm nay. Premium bỏ qua không giới hạn.');return;}skips--;}
-  load(prem?(cur+1)%TRACKS.length:randomOther());if(!playing)setPlaying(true);
-}
-$('#playBtn').addEventListener('click',()=>setPlaying(!playing));
-$('#nextBtn').addEventListener('click',()=>advance(true));
-$('#prevBtn').addEventListener('click',()=>{if(prem){load((cur-1+TRACKS.length)%TRACKS.length);setPlaying(true);}});
-$('#seek').addEventListener('input',e=>{if(adLeft)return;pos=+e.target.value;$('#tCur').textContent=mmss(pos);});
-$('#seek').addEventListener('change',()=>{if(playing&&!adLeft)Synth.play(cur,pos);});
-$('#vol').addEventListener('input',e=>Synth.setVol(+e.target.value/100*.9));
-$('#shuffleBtn').addEventListener('click',()=>{load(prem?0:randomOther());setPlaying(true);});
-$('#tracks').addEventListener('click',e=>{const b=e.target.closest('[data-t]');if(!b)return;if(!prem){toast('Chọn bài cần SonicDeck Premium. Bản Free phát ngẫu nhiên.');return;}load(+b.dataset.t);setPlaying(true);});
-function setMode(p){const hadAd=adLeft;prem=p;adLeft=0;if(hadAd&&playing){pos=0;audioSync();}$('#modeFree').setAttribute('aria-pressed',String(!p));$('#modePrem').setAttribute('aria-pressed',String(p));renderTracks();renderPlayer();}
-$('#modeFree').addEventListener('click',()=>setMode(false));
-$('#modePrem').addEventListener('click',()=>{setMode(true);toast('Đang xem thử chế độ Premium');});
-renderTracks();renderPlayer();
-/* visualizer */
-{const cv=$('#viz'),g=cv.getContext('2d'),buf=new Uint8Array(32);let drawn=false;
-  (function viz(){requestAnimationFrame(viz);const vis=playing&&!adLeft&&!document.querySelector('[data-view="sonicdeck"]').hidden;if(!vis){if(drawn){g.clearRect(0,0,400,400);drawn=false;}return;}
-    if(!Synth.levels(buf))return;g.clearRect(0,0,400,400);const n=24,w=400/n;for(let i=0;i<n;i++){const v=buf[i+1]/255,h=Math.max(3,v*170);g.fillStyle=`rgba(255,255,255,${.25+v*.5})`;g.beginPath();g.roundRect?g.roundRect(i*w+3,392-h,w-6,h,4):g.rect(i*w+3,392-h,w-6,h);g.fill();}drawn=true;})();}
-/* 100 world songs */
-const WORLD=[["La Vie en rose", "Édith Piaf", 1947, "Jazz & Chanson"], ["Hound Dog", "Elvis Presley", 1956, "Rock"], ["Johnny B. Goode", "Chuck Berry", 1958, "Rock"], ["La Bamba", "Ritchie Valens", 1958, "Latin"], ["Can't Help Falling in Love", "Elvis Presley", 1961, "Pop"], ["Sukiyaki (Ue o Muite Arukō)", "Kyu Sakamoto", 1961, "Châu Á"], ["Fly Me to the Moon", "Frank Sinatra", 1964, "Jazz & Chanson"], ["Yesterday", "The Beatles", 1965, "Pop"], ["(I Can't Get No) Satisfaction", "The Rolling Stones", 1965, "Rock"], ["Like a Rolling Stone", "Bob Dylan", 1965, "Rock"], ["Unchained Melody", "The Righteous Brothers", 1965, "Pop"], ["Good Vibrations", "The Beach Boys", 1966, "Pop"], ["Respect", "Aretha Franklin", 1967, "Soul & Funk"], ["What a Wonderful World", "Louis Armstrong", 1967, "Jazz & Chanson"], ["Hey Jude", "The Beatles", 1968, "Rock"], ["My Way", "Frank Sinatra", 1969, "Jazz & Chanson"], ["Let It Be", "The Beatles", 1970, "Rock"], ["Imagine", "John Lennon", 1971, "Pop"], ["What's Going On", "Marvin Gaye", 1971, "Soul & Funk"], ["Stairway to Heaven", "Led Zeppelin", 1971, "Rock"], ["Superstition", "Stevie Wonder", 1972, "Soul & Funk"], ["Waterloo", "ABBA", 1974, "Pop"], ["No Woman, No Cry", "Bob Marley & The Wailers", 1974, "Reggae"], ["Bohemian Rhapsody", "Queen", 1975, "Rock"], ["Dancing Queen", "ABBA", 1976, "Dance & Disco"], ["Hotel California", "Eagles", 1976, "Rock"], ["Stayin' Alive", "Bee Gees", 1977, "Dance & Disco"], ["Wonderful Tonight", "Eric Clapton", 1977, "Rock"], ["I Will Survive", "Gloria Gaynor", 1978, "Dance & Disco"], ["September", "Earth, Wind & Fire", 1978, "Soul & Funk"], ["Don't Stop Believin'", "Journey", 1981, "Rock"], ["Billie Jean", "Michael Jackson", 1982, "Pop"], ["Africa", "Toto", 1982, "Rock"], ["Every Breath You Take", "The Police", 1983, "Rock"], ["Girls Just Want to Have Fun", "Cyndi Lauper", 1983, "Pop"], ["Sweet Dreams (Are Made of This)", "Eurythmics", 1983, "Pop"], ["Purple Rain", "Prince", 1984, "Rock"], ["Careless Whisper", "George Michael", 1984, "Pop"], ["Take On Me", "a-ha", 1985, "Pop"], ["Livin' on a Prayer", "Bon Jovi", 1986, "Rock"], ["Never Gonna Give You Up", "Rick Astley", 1987, "Pop"], ["With or Without You", "U2", 1987, "Rock"], ["Sweet Child O' Mine", "Guns N' Roses", 1987, "Rock"], ["I Wanna Dance with Somebody", "Whitney Houston", 1987, "Pop"], ["Like a Prayer", "Madonna", 1989, "Pop"], ["Smells Like Teen Spirit", "Nirvana", 1991, "Rock"], ["Losing My Religion", "R.E.M.", 1991, "Rock"], ["I Will Always Love You", "Whitney Houston", 1992, "Pop"], ["Creep", "Radiohead", 1992, "Rock"], ["Tears in Heaven", "Eric Clapton", 1992, "Rock"], ["Zombie", "The Cranberries", 1994, "Rock"], ["Wonderwall", "Oasis", 1995, "Rock"], ["Wannabe", "Spice Girls", 1996, "Pop"], ["My Heart Will Go On", "Céline Dion", 1997, "Nhạc phim"], ["...Baby One More Time", "Britney Spears", 1998, "Pop"], ["Smooth", "Santana ft. Rob Thomas", 1999, "Latin"], ["Yellow", "Coldplay", 2000, "Rock"], ["In the End", "Linkin Park", 2000, "Rock"], ["Lose Yourself", "Eminem", 2002, "Hip-hop & R&B"], ["Crazy in Love", "Beyoncé ft. Jay-Z", 2003, "Hip-hop & R&B"], ["Hey Ya!", "OutKast", 2003, "Hip-hop & R&B"], ["In da Club", "50 Cent", 2003, "Hip-hop & R&B"], ["Seven Nation Army", "The White Stripes", 2003, "Rock"], ["Mr. Brightside", "The Killers", 2003, "Rock"], ["Gasolina", "Daddy Yankee", 2004, "Latin"], ["Boulevard of Broken Dreams", "Green Day", 2004, "Rock"], ["Hips Don't Lie", "Shakira ft. Wyclef Jean", 2006, "Latin"], ["Umbrella", "Rihanna ft. Jay-Z", 2007, "Hip-hop & R&B"], ["Viva la Vida", "Coldplay", 2008, "Rock"], ["Poker Face", "Lady Gaga", 2008, "Pop"], ["Single Ladies (Put a Ring on It)", "Beyoncé", 2008, "Hip-hop & R&B"], ["Bad Romance", "Lady Gaga", 2009, "Pop"], ["Rolling in the Deep", "Adele", 2010, "Pop"], ["Waka Waka (This Time for Africa)", "Shakira", 2010, "Latin"], ["Someone Like You", "Adele", 2011, "Pop"], ["Somebody That I Used to Know", "Gotye ft. Kimbra", 2011, "Pop"], ["Titanium", "David Guetta ft. Sia", 2011, "Dance & Disco"], ["Gangnam Style", "PSY", 2012, "Châu Á"], ["Radioactive", "Imagine Dragons", 2012, "Rock"], ["Get Lucky", "Daft Punk ft. Pharrell Williams", 2013, "Dance & Disco"], ["Happy", "Pharrell Williams", 2013, "Pop"], ["Wake Me Up", "Avicii", 2013, "Dance & Disco"], ["Let It Go", "Idina Menzel", 2013, "Nhạc phim"], ["Uptown Funk", "Mark Ronson ft. Bruno Mars", 2014, "Soul & Funk"], ["Shake It Off", "Taylor Swift", 2014, "Pop"], ["See You Again", "Wiz Khalifa ft. Charlie Puth", 2015, "Hip-hop & R&B"], ["Hello", "Adele", 2015, "Pop"], ["Faded", "Alan Walker", 2015, "Dance & Disco"], ["Shape of You", "Ed Sheeran", 2017, "Pop"], ["Despacito", "Luis Fonsi ft. Daddy Yankee", 2017, "Latin"], ["Believer", "Imagine Dragons", 2017, "Rock"], ["Shallow", "Lady Gaga & Bradley Cooper", 2018, "Nhạc phim"], ["Blinding Lights", "The Weeknd", 2019, "Pop"], ["Bad Guy", "Billie Eilish", 2019, "Pop"], ["Dance Monkey", "Tones and I", 2019, "Pop"], ["Dynamite", "BTS", 2020, "Châu Á"], ["Levitating", "Dua Lipa", 2020, "Pop"], ["drivers license", "Olivia Rodrigo", 2021, "Pop"], ["As It Was", "Harry Styles", 2022, "Pop"], ["Flowers", "Miley Cyrus", 2023, "Pop"]];
+/* ===== SonicDeck: real music only =====
+   Catalog: official YouTube uploads (artist, label or producer channels), played in the embedded YouTube player.
+   Community: songs students add, either an audio file (Cloudinary when configured, otherwise kept on this device)
+   or a YouTube link. The old generated "Nexus Originals" are no longer listed here (the Nexus City car radio still uses them). */
+const CAT=[["Lan Và Điệp","Vũ Linh, Tài Linh","Cải lương",0,"-6Mo0LVJuZE",8181,"blueoceanmusiconline [Official]"],["Tiếng Trống Mê Linh","Thanh Nga, Thanh Sang","Cải lương",0,"h6PpdE8OWbQ",9381,"HTV Giải Trí"],["Nửa Đời Hương Phấn","Như Quỳnh, Mạnh Quỳnh, Hương Lan","Cải lương",0,"UmHjeExtJcE",10211,"Thuy Nga"],["Kiếp Nào Có Yêu Nhau","Minh Phụng, Tấn Tài, Lệ Thủy","Cải lương",0,"6FitiIifOQE",3695,"Minh Phụng - Tấn Tài - Lệ Thủy - Topic"],["Đêm Lạnh Chùa Hoang","Minh Vương, Lệ Thủy","Cải lương",0,"QtjUxtMo9SM",9253,"blueoceanmusiconline [Official]"],["Tình Anh Bán Chiếu","Cô Tư Sạng","Cải lương",0,"Q8-QeRu2dI4",398,"Cô Tư Sạng - Topic"],["Võ Đông Sơ","Minh Phụng, Bạch Thu Hà","Cải lương",0,"v7Yas8LGrH8",510,"Asia Entertainment Official"],["Dạ Cổ Hoài Lang","Hương Lan","Cải lương",0,"QQ9S_vZl0bg",322,"Thuy Nga"],["Con Gái Chị Hằng","","Cải lương",0,"r43PQ0L5wr0",8951,"blueoceanmusiconline [Official]"],["Sầu Tím Thiệp Hồng","Quang Lê, Lệ Quyên","Bolero",0,"RVP5N4QXHeQ",291,"Quang Lê Official"],["Đắp Mộ Cuộc Tình","Đan Nguyên","Bolero",0,"RFTXAivBmNs",342,"Đan Nguyên Official"],["Đêm Buồn Tỉnh Lẻ","Chế Linh","Bolero",0,"vZTGFOC_qd4",359,"Che Linh"],["Mưa Nửa Đêm","Hương Lan","Bolero",0,"TDWBYiBCYpo",195,"Làng Văn"],["Hoa Nở Về Đêm","Hương Lan","Bolero",0,"-rZAq0_kCzU",289,"Huong Lan Music"],["Duyên Phận","Như Quỳnh","Bolero",0,"ycGfvA1vkR8",343,"Thuy Nga"],["Chuyện Hoa Sim","Như Quỳnh","Bolero",0,"F4CRACyOaBA",340,"Như Quỳnh Official"],["Vùng Lá Me Bay","Như Quỳnh","Bolero",0,"_8m2g7edcwQ",303,"Như Quỳnh Official"],["Sa Mưa Giông","Mạnh Quỳnh","Bolero",0,"8BcYtYD8PHM",379,"Mạnh Quỳnh Official"],["Hoa Tím Người Xưa","Như Quỳnh","Bolero",0,"sD78zWek1kQ",525,"Thuy Nga"],["Tình Lỡ","Tuấn Vũ","Bolero",0,"X5OHy6qNeow",312,"Tuấn Vũ"],["Đôi Mắt Người Xưa","Tuấn Vũ","Bolero",0,"x-Z1uFnO3II",275,"Tuấn Vũ"],["Áo Mới Cà Mau","Phi Nhung","Bolero",0,"A-ZZJA18BuQ",328,"Phi Nhung"],["Sương Trắng Miền Quê Ngoại","Phi Nhung","Bolero",0,"o5U6Z5-pGZ4",312,"Phi Nhung"],["Gõ Cửa Trái Tim","Quang Lê, Mai Thiên Vân","Bolero",0,"BMobQWXESwg",322,"Thuy Nga"],["Về Đâu Mái Tóc Người Thương","Quang Lê","Bolero",0,"B2w0-cw-6Uw",278,"Quang Lê Official"],["Chiều Sân Ga","Băng Tâm","Bolero",0,"JVsJq2aRRrM",380,"Thuy Nga"],["Mưa Rừng","Hương Lan","Bolero",0,"y_C15Ab2jBY",248,"Huong Lan Music"],["Lâu Đài Tình Ái","Đàm Vĩnh Hưng, Lệ Quyên","Bolero",0,"Wk3OydH3jZQ",300,"Đàm Vĩnh Hưng"],["Ai Cho Tôi Tình Yêu","Băng Tâm","Bolero",0,"1ZJ19_dlYP0",218,"Asia Entertainment Official"],["Người Tình Không Đến","Như Quỳnh","Bolero",0,"ufEFKYaA2mw",339,"Như Quỳnh Official"],["Căn Nhà Ngoại Ô","Hà Thanh Xuân","Bolero",0,"ocCYOqmtDAo",410,"Hà Thanh Xuân Official"],["Hạ Trắng","Khánh Ly","Trữ tình & nhạc xưa",0,"5KVZS1ulb50",308,"Asia Entertainment Official"],["Diễm Xưa","Khánh Ly","Trữ tình & nhạc xưa",0,"R0mpl0Az4Q8",212,"Ca Sĩ Khánh Ly"],["Nối Vòng Tay Lớn","Tốp ca (Trịnh Công Sơn)","Trữ tình & nhạc xưa",0,"8Q_egXwU9WU",163,"Tốp ca - Topic"],["Bèo Dạt Mây Trôi","Thanh Huyền","Trữ tình & nhạc xưa",0,"OEqNgc4IUX0",308,"Thanh Huyền - Topic"],["Lý Cây Đa","Ái Vân","Trữ tình & nhạc xưa",0,"-Gnuhgfjtbc",238,"Asia Entertainment Official"],["Quê Hương","Cẩm Ly","Trữ tình & nhạc xưa",0,"SVGCaLqMHN8",276,"Cẩm Ly Official"],["Ru Con Mùa Đông","Tố Nga","Trữ tình & nhạc xưa",0,"VYDN3OXHypo",330,"Tố Nga Singer Official"],["Hà Nội Mùa Vắng Những Cơn Mưa","Cẩm Vân","Trữ tình & nhạc xưa",0,"O_IXN0Y2cUw",292,"Cẩm Vân - Topic"],["Ước Gì","Mỹ Tâm","V-Pop",2001,"On81-1xvt8o",335,"My Tam"],["Em Của Ngày Hôm Qua","Sơn Tùng M-TP","V-Pop",2014,"Vt4kAu-ziRY",295,"Sơn Tùng M-TP"],["Phía Sau Một Cô Gái","Soobin Hoàng Sơn","V-Pop",2016,"vCIc1g_4JWM",330,"SOOBIN Official"],["Lạc Trôi","Sơn Tùng M-TP","V-Pop",2017,"Llw9Q6akRo4",273,"Sơn Tùng M-TP Official"],["Nơi Này Có Anh","Sơn Tùng M-TP","V-Pop",2017,"FN7ALfpGxiI",279,"Sơn Tùng M-TP Official"],["Ghen","Khắc Hưng, MIN, ERIK","V-Pop",2017,"Vk8_0QaJr3I",321,"MIN OFFICIAL"],["Chạy Ngay Đi","Sơn Tùng M-TP","V-Pop",2018,"32sYGCOYJUM",274,"Sơn Tùng M-TP Official"],["Anh Ơi Ở Lại","Chi Pu","V-Pop",2018,"3fi7uwBU-CE",342,"Chi Pu Official"],["Một Bước Yêu Vạn Dặm Đau","Mr. Siro","V-Pop",2018,"EYJimpsoE3g",299,"Mr. Siro"],["Hãy Trao Cho Anh","Sơn Tùng M-TP ft. Snoop Dogg","V-Pop",2019,"knW7-x7Y7RE",263,"Sơn Tùng M-TP Official"],["Có Chàng Trai Viết Lên Cây","Phan Mạnh Quỳnh","V-Pop",2019,"EUEUZDV-in0",310,"Phan Mạnh Quỳnh Official"],["Chúng Ta Của Hiện Tại","Sơn Tùng M-TP","V-Pop",2020,"psZ1g9fMfeo",891,"Sơn Tùng M-TP Official"],["Nàng Thơ","Hoàng Dũng","V-Pop",2020,"Zzn9-ATB9aU",306,"Hoàng Dũng"],["Bước Qua Mùa Cô Đơn","Vũ.","V-Pop",2020,"n6Pnzi6r9NU",343,"Vũ Official"],["Waiting For You","MONO","V-Pop",2022,"CHw1b_1LVBA",266,"Mono Official"],["Ngày Đầu Tiên","Đức Phúc","V-Pop",2022,"AfNbehFKJ7o",214,"ĐỨC PHÚC OFFICIAL"],["See Tình","Hoàng Thùy Linh","V-Pop",2022,"gJHSDZfJrRY",237,"Hoàng Thùy Linh"],["Thằng Điên","JustaTee ft. Phương Ly","Rap Việt",2018,"HXkh7EOqcQ4",287,"JustaTeeMusic"],["Bài Này Chill Phết","Đen ft. MIN","Rap Việt",2019,"ddaEtFOsFeM",274,"Đen Vâu Official"],["Lối Nhỏ","Đen ft. Phương Anh Đào","Rap Việt",2019,"KKc_RMln5UY",297,"Đen Vâu Official"],["Bigcityboi","Binz, Touliver","Rap Việt",2020,"jgZkrA8E5do",224,"Binz Da Poet"],["Đi Về Nhà","Đen, JustaTee","Rap Việt",2020,"vTJdVE_gjI0",206,"Đen Vâu Official"],["Hai Phút Hơn","Pháo, CM1X","Rap Việt",2020,"IF7iwRZ_pJM",195,"CM1X Official"],["Mang Tiền Về Cho Mẹ","Đen ft. Nguyên Thảo","Rap Việt",2021,"UVbv-PJXm14",402,"Đen Vâu Official"],["Ngày Mai Em Đi","Lê Hiếu, Soobin, Touliver","Remix Việt",2017,"YI_b3NgCr3Q",219,"Lê Hiếu"],["Bạc Phận","Jack, K-ICM","Remix Việt",2019,"WX7dUj14Z00",257,"ICM Entertainment"],["Sóng Gió","Jack, K-ICM, Chấn Quốc","Remix Việt",2019,"2eiRAp_PuAg",333,"Chấn Quốc Official"],["Để Mị Nói Cho Mà Nghe","Hoàng Thùy Linh","Remix Việt",2019,"JAhdeizXpaQ",282,"Hoàng Thùy Linh"],["Hai Phút Hơn (KAIZ Remix)","Pháo, KAIZ","Remix Việt",2021,"mw7Y0jQ8_BU",191,"Spinnin' Records"],["Gieo Quẻ","Hoàng Thùy Linh, Đen","Remix Việt",2022,"Q6ZNsHvspEg",260,"Hoàng Thùy Linh"],["Bắc Bling (Bắc Ninh)","Hòa Minzy, Xuân Hinh, Tuấn Cry, Masew","Remix Việt",2025,"GqZK1g-7Z-s",243,"Xuân Hinh Official"],["Close Eyes","DVRST","Phonk",2021,"ao4RCon11eY",133,"DVRST"],["Sahara","Hensonn","Phonk",2021,"pIZ0QRWK0zg",172,"Hensonn"],["Murder In My Mind","Kordhell","Phonk",2022,"w-sQRS-Lc9k",145,"KORDHELL"],["Live Another Day","Kordhell","Phonk",2022,"7pmUQJ5KAlU",134,"KORDHELL"],["Neon Blade","MoonDeity","Phonk",2022,"Mu965dWgMMQ",266,"MoonDeity"],["Fainted","Narvent","Phonk",2022,"dJWFUBAUM0E",251,"Narvent"],["Memory Reboot","VØJ, Narvent","Phonk",2023,"wL8DVHuWI7Y",237,"Narvent"],["La Vie en rose","Édith Piaf","Jazz & Chanson",1947,"qPU8mENUBXk",188,"Edith Piaf Officiel"],["Hound Dog","Elvis Presley","Rock",1956,"cYwDUonrGFQ",134,"Elvis Presley"],["Johnny B. Goode","Chuck Berry","Rock",1958,"TReqmJ7iX2M",163,"Release - Topic"],["La Bamba","Ritchie Valens","Latin",1958,"BycLmWI97Nc",127,"Ritchie Valens - Topic"],["Can't Help Falling in Love","Elvis Presley","Pop",1961,"vGJTaP6anOU",181,"Elvis Presley"],["Sukiyaki (Ue o Muite Arukō)","Kyu Sakamoto","Châu Á",1961,"lAbInOKklN8",190,"Kyu Sakamoto - Topic"],["Fly Me to the Moon","Frank Sinatra","Jazz & Chanson",1964,"JYuyWrkwpok",148,"Frank Sinatra"],["Yesterday","The Beatles","Pop",1965,"NrgmdOz227I",126,"The Beatles"],["(I Can't Get No) Satisfaction","The Rolling Stones","Rock",1965,"nrIPxlFzDi0",235,"ABKCOVEVO"],["Like a Rolling Stone","Bob Dylan","Rock",1965,"IwOfCgkyEj0",360,"Bob Dylan"],["Unchained Melody","The Righteous Brothers","Pop",1965,"Zv8czIoAw5w",214,"The Righteous Brothers - Topic"],["Good Vibrations","The Beach Boys","Pop",1966,"apBWI6xrbLY",215,"The Beach Boys"],["Respect","Aretha Franklin","Soul & Funk",1967,"A134hShx_gw",151,"Aretha Franklin"],["What a Wonderful World","Louis Armstrong","Jazz & Chanson",1967,"CaCSuzR4DwM",146,"Louis Armstrong"],["Hey Jude","The Beatles","Rock",1968,"mQER0A0ej0M",426,"The Beatles"],["My Way","Frank Sinatra","Jazz & Chanson",1969,"qQzdAsjWGPg",277,"Frank Sinatra"],["Let It Be","The Beatles","Rock",1970,"AbNFLI720_U",244,"The Beatles"],["Imagine","John Lennon","Pop",1971,"YkgkThdzX-8",234,"John Lennon"],["What's Going On","Marvin Gaye","Soul & Funk",1971,"o5TmORitlKk",240,"Marvin Gaye"],["Stairway to Heaven","Led Zeppelin","Rock",1971,"QkF3oxziUI4",483,"Led Zeppelin"],["Superstition","Stevie Wonder","Soul & Funk",1972,"ftdZ363R9kQ",267,"Stevie Wonder"],["Waterloo","ABBA","Pop",1974,"Sj_9CiNkkn4",167,"ABBA"],["No Woman, No Cry","Bob Marley & The Wailers","Reggae",1974,"mZ6VezKMoRY",414,"Bob Marley"],["Bohemian Rhapsody","Queen","Rock",1975,"fJ9rUzIMcZQ",360,"Queen Official"],["Dancing Queen","ABBA","Dance & Disco",1976,"xFrGuyw1V8s",233,"ABBA"],["Hotel California","Eagles","Rock",1976,"09839DpTctU",405,"Eagles"],["Stayin' Alive","Bee Gees","Dance & Disco",1977,"fNFzfwLM72c",250,"Bee Gees"],["Wonderful Tonight","Eric Clapton","Rock",1977,"UprwkbzUX6g",371,"Eric Clapton"],["I Will Survive","Gloria Gaynor","Dance & Disco",1978,"6dYWe1c3OyU",195,"Gloria Gaynor"],["September","Earth, Wind & Fire","Soul & Funk",1978,"Gs069dndIYk",216,"Earth Wind & Fire"],["Don't Stop Believin'","Journey","Rock",1981,"VcjzHMhBtf0",252,"Journey"],["Billie Jean","Michael Jackson","Pop",1982,"Zi_XLOBDo_Y",296,"Michael Jackson"],["Africa","Toto","Rock",1982,"FTQbiNvZqaY",272,"TOTO"],["Every Breath You Take","The Police","Rock",1983,"OMOGaugKpzs",229,"The Police"],["Girls Just Want to Have Fun","Cyndi Lauper","Pop",1983,"PIb6AZdTr-A",267,"Cyndi Lauper"],["Sweet Dreams (Are Made of This)","Eurythmics","Pop",1983,"qeMFqkcPYcg",215,"Eurythmics"],["Purple Rain","Prince","Rock",1984,"iSBVeZrDfGY",525,"Prince"],["Careless Whisper","George Michael","Pop",1984,"izGwDsrQ1eQ",301,"George Michael"],["Take On Me","a-ha","Pop",1985,"djV11Xbc914",244,"a-ha"],["Livin' on a Prayer","Bon Jovi","Rock",1986,"lDK9QqIzhwk",249,"Bon Jovi"],["Never Gonna Give You Up","Rick Astley","Pop",1987,"dQw4w9WgXcQ",214,"Rick Astley"],["With or Without You","U2","Rock",1987,"ujNeHIo7oTE",293,"U2"],["Sweet Child O' Mine","Guns N' Roses","Rock",1987,"1w7OgIMMRc4",303,"Guns N' Roses"],["I Wanna Dance with Somebody","Whitney Houston","Pop",1987,"eH3giaIzONA",315,"Whitney Houston"],["Like a Prayer","Madonna","Pop",1989,"79fzeNUqQbQ",338,"Madonna"],["Smells Like Teen Spirit","Nirvana","Rock",1991,"hTWKbfoikeg",279,"Nirvana"],["Losing My Religion","R.E.M.","Rock",1991,"xwtdhWltSIg",294,"R.E.M."],["I Will Always Love You","Whitney Houston","Pop",1992,"3JWTaaS7LdU",274,"Whitney Houston"],["Creep","Radiohead","Rock",1992,"XFkzRNyygfk",237,"Radiohead"],["Tears in Heaven","Eric Clapton","Rock",1992,"tUU1GLMdnkM",277,"Eric Clapton"],["Zombie","The Cranberries","Rock",1994,"6Ejga4kJUts",308,"The Cranberries"],["Wonderwall","Oasis","Rock",1995,"6hzrDeceEKc",280,"Oasis"],["Wannabe","Spice Girls","Pop",1996,"gJLIiF15wjQ",236,"Spice Girls"],["My Heart Will Go On","Céline Dion","Nhạc phim",1997,"9bFHsd3o1w0",281,"Céline Dion"],["...Baby One More Time","Britney Spears","Pop",1998,"C-u5WLJ9Yk4",237,"Britney Spears"],["Smooth","Santana ft. Rob Thomas","Latin",1999,"6Whgn_iE5uc",257,"Santana"],["Yellow","Coldplay","Rock",2000,"yKNxeF4KMsY",273,"Coldplay"],["In the End","Linkin Park","Rock",2000,"eVTXPUF4Oz4",219,"Linkin Park"],["Lose Yourself","Eminem","Hip-hop & R&B",2002,"xFYQQPAOz7Y",328,"Eminem"],["Crazy in Love","Beyoncé ft. Jay-Z","Hip-hop & R&B",2003,"ViwtNLUqkMY",237,"Beyoncé"],["Hey Ya!","OutKast","Hip-hop & R&B",2003,"PWgvGjAhvIw",304,"Outkast"],["In da Club","50 Cent","Hip-hop & R&B",2003,"5qm8PH4xAss",248,"50 Cent"],["Seven Nation Army","The White Stripes","Rock",2003,"0J2QdDbelmY",239,"The White Stripes"],["Mr. Brightside","The Killers","Rock",2003,"gGdGFtwCNBE",228,"The Killers"],["Gasolina","Daddy Yankee","Latin",2004,"CCF1_jI8Prk",254,"Daddy Yankee"],["Boulevard of Broken Dreams","Green Day","Rock",2004,"Soa3gO7tL-c",288,"Green Day"],["Hips Don't Lie","Shakira ft. Wyclef Jean","Latin",2006,"DUT5rEU6pqM",219,"Shakira"],["Umbrella","Rihanna ft. Jay-Z","Hip-hop & R&B",2007,"CvBfHwUxHIk",255,"Rihanna"],["Viva la Vida","Coldplay","Rock",2008,"dvgZkm1xWPE",243,"Coldplay"],["Poker Face","Lady Gaga","Pop",2008,"bESGLojNYSo",214,"Lady Gaga"],["Single Ladies (Put a Ring on It)","Beyoncé","Hip-hop & R&B",2008,"4m1EFMoRFvY",201,"Beyoncé"],["Bad Romance","Lady Gaga","Pop",2009,"qrO4YZeyl0I",309,"Lady Gaga"],["Rolling in the Deep","Adele","Pop",2010,"bDtjO-R0QSo",228,"Adele - Topic"],["Waka Waka (This Time for Africa)","Shakira","Latin",2010,"pRpeEdMmmQ0",211,"Shakira"],["Someone Like You","Adele","Pop",2011,"22c3_LoIfZQ",291,"Adele - Topic"],["Somebody That I Used to Know","Gotye ft. Kimbra","Pop",2011,"8UVNT4wvIGY",244,"Gotye"],["Titanium","David Guetta ft. Sia","Dance & Disco",2011,"JRfuAukYTKg",246,"David Guetta"],["Gangnam Style","PSY","Châu Á",2012,"9bZkp7q19f0",253,"officialpsy"],["Radioactive","Imagine Dragons","Rock",2012,"w3viBe2Q0P8",186,"Imagine Dragons"],["Get Lucky","Daft Punk ft. Pharrell Williams","Dance & Disco",2013,"5NV6Rdv1a3I",249,"Daft Punk"],["Happy","Pharrell Williams","Pop",2013,"ZbZSe6N_BXs",241,"Pharrell Williams"],["Wake Me Up","Avicii","Dance & Disco",2013,"IcrbM1l_BoI",273,"Avicii"],["Let It Go","Idina Menzel","Nhạc phim",2013,"YVVTZgwYwVo",226,"DisneyMusicVEVO"],["Uptown Funk","Mark Ronson ft. Bruno Mars","Soul & Funk",2014,"OPf0YbXqDm0",271,"Mark Ronson"],["Shake It Off","Taylor Swift","Pop",2014,"nfWlot6h_JM",242,"Taylor Swift"],["See You Again","Wiz Khalifa ft. Charlie Puth","Hip-hop & R&B",2015,"RgKAFK5djSk",238,"Wiz Khalifa"],["Hello","Adele","Pop",2015,"T1tl66trXTQ",296,"Adele - Topic"],["Faded","Alan Walker","Dance & Disco",2015,"60ItHLz5WEA",213,"Alan Walker"],["Shape of You","Ed Sheeran","Pop",2017,"JGwWNGJdvx8",264,"Ed Sheeran"],["Despacito","Luis Fonsi ft. Daddy Yankee","Latin",2017,"kJQP7kiw5Fk",282,"Luis Fonsi"],["Believer","Imagine Dragons","Rock",2017,"7wtfhZwyrcc",217,"Imagine Dragons"],["Shallow","Lady Gaga & Bradley Cooper","Nhạc phim",2018,"bo_efYhYU2A",217,"Lady Gaga"],["Blinding Lights","The Weeknd","Pop",2019,"4NRXx6U8ABQ",263,"The Weeknd"],["Bad Guy","Billie Eilish","Pop",2019,"DyDfgMOUjCI",206,"Billie Eilish"],["Dance Monkey","Tones and I","Pop",2019,"q0hyYWKXF0Q",237,"Tones And I"],["Dynamite","BTS","Châu Á",2020,"gdZLi9oWNZg",224,"HYBE LABELS"],["Levitating","Dua Lipa","Pop",2020,"TUVcZfQe-Kw",231,"Dua Lipa"],["drivers license","Olivia Rodrigo","Pop",2021,"ZmDBbnmKpqQ",247,"Olivia Rodrigo"],["As It Was","Harry Styles","Pop",2022,"H5v3kku4y6Q",166,"Harry Styles"],["Flowers","Miley Cyrus","Pop",2023,"G7KNmW9a75Y",202,"MILEY"]];
+const VG=['Tất cả','Cải lương','Bolero','Trữ tình & nhạc xưa','V-Pop','Rap Việt','Remix Việt','Phonk'];
 const WG=['Tất cả','Pop','Rock','Hip-hop & R&B','Soul & Funk','Dance & Disco','Latin','Jazz & Chanson','Châu Á','Reggae','Nhạc phim'];
-let wGenre='Tất cả';
-$('#wGenres').innerHTML=WG.map(x=>`<button type="button" aria-pressed="${x===wGenre}">${x}</button>`).join('');
-$('#wGenres').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;wGenre=b.textContent;$$('#wGenres button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));renderWorld();});
-$('#wQ').addEventListener('input',renderWorld);$('#wDecade').addEventListener('change',renderWorld);
-function renderWorld(){const q=norm($('#wQ').value.trim()),dec=$('#wDecade').value;
-  const rows=WORLD.map((w,i)=>[i+1,...w]).filter(([,t,a,y,g])=>(wGenre==='Tất cả'||g===wGenre)&&(!dec||(dec==='old'?y<1970:y>=+dec&&y<+dec+10))&&(!q||norm(t+' '+a+' '+y).includes(q)));
-  $('#wCount').textContent=`${rows.length} bài`;
-  $('#wList').innerHTML=rows.length?rows.map(([n,t,a,y,g])=>{const k=encodeURIComponent(t+' '+a);return `<div class="wrow"><span class="n num">${n}</span><span><span class="t">${esc(t)}</span><br><span class="a">${esc(a)}</span></span><span class="meta"><span class="num">${y}</span><span class="chip chip-grey">${esc(g)}</span></span><span class="wlinks"><a class="yt" href="https://www.youtube.com/results?search_query=${k}" target="_blank" rel="noopener" aria-label="Nghe ${esc(t)} trên YouTube">${ic('play')}YouTube</a><a class="sp" href="https://open.spotify.com/search/${k}" target="_blank" rel="noopener" aria-label="Nghe ${esc(t)} trên Spotify">${ic('ext')}Spotify</a></span></div>`;}).join(''):`<div class="empty">Không có bài khớp. Thử bỏ bớt bộ lọc.</div>`;}
-renderWorld();
-/* Vietnamese songs, remixes and phonk: info + outbound links only */
-const VN=[["Ước Gì","Mỹ Tâm",2001,"V-Pop"],["Em Của Ngày Hôm Qua","Sơn Tùng M-TP",2014,"V-Pop"],["Phía Sau Một Cô Gái","Soobin Hoàng Sơn",2016,"V-Pop"],["Lạc Trôi","Sơn Tùng M-TP",2017,"V-Pop"],["Nơi Này Có Anh","Sơn Tùng M-TP",2017,"V-Pop"],["Ghen","Khắc Hưng, MIN, ERIK",2017,"V-Pop"],["Chạy Ngay Đi","Sơn Tùng M-TP",2018,"V-Pop"],["Anh Ơi Ở Lại","Chi Pu",2018,"V-Pop"],["Một Bước Yêu Vạn Dặm Đau","Mr. Siro",2018,"V-Pop"],["Hãy Trao Cho Anh","Sơn Tùng M-TP ft. Snoop Dogg",2019,"V-Pop"],["Có Chàng Trai Viết Lên Cây","Phan Mạnh Quỳnh",2019,"V-Pop"],["Chúng Ta Của Hiện Tại","Sơn Tùng M-TP",2020,"V-Pop"],["Nàng Thơ","Hoàng Dũng",2020,"V-Pop"],["Bước Qua Mùa Cô Đơn","Vũ.",2020,"V-Pop"],["Waiting For You","MONO",2022,"V-Pop"],["Ngày Đầu Tiên","Đức Phúc",2022,"V-Pop"],["See Tình","Hoàng Thùy Linh",2022,"V-Pop"],
- ["Thằng Điên","JustaTee ft. Phương Ly",2018,"Rap Việt"],["Bài Này Chill Phết","Đen ft. MIN",2019,"Rap Việt"],["Lối Nhỏ","Đen ft. Phương Anh Đào",2019,"Rap Việt"],["Bigcityboi","Binz, Touliver",2020,"Rap Việt"],["Đi Về Nhà","Đen, JustaTee",2020,"Rap Việt"],["Hai Phút Hơn","Pháo",2020,"Rap Việt"],["Mang Tiền Về Cho Mẹ","Đen ft. Nguyên Thảo",2021,"Rap Việt"],
- ["Ngày Mai Em Đi","Lê Hiếu, Soobin, Touliver",2017,"Remix Việt"],["Bạc Phận","Jack, K-ICM",2019,"Remix Việt"],["Sóng Gió","Jack, K-ICM",2019,"Remix Việt"],["Để Mị Nói Cho Mà Nghe","Hoàng Thùy Linh",2019,"Remix Việt"],["Hai Phút Hơn (KAIZ Remix)","Pháo, KAIZ",2021,"Remix Việt"],["Gieo Quẻ","Hoàng Thùy Linh, Đen",2022,"Remix Việt"],["See Tình (Speed Up)","Hoàng Thùy Linh",2022,"Remix Việt"],["Bắc Bling (Bắc Ninh)","Hòa Minzy, Xuân Hinh, Tuấn Cry, Masew",2025,"Remix Việt"],
- ["Diễm Xưa","Trịnh Công Sơn",1960,"Nhạc Việt xưa"],["Nối Vòng Tay Lớn","Trịnh Công Sơn",1968,"Nhạc Việt xưa"],["Như Có Bác Hồ Trong Ngày Vui Đại Thắng","Phạm Tuyên",1975,"Nhạc Việt xưa"],["Mùa Xuân Đầu Tiên","Văn Cao",1976,"Nhạc Việt xưa"],
- ["Close Eyes","DVRST",2021,"Phonk"],["Metamorphosis","Interworld",2021,"Phonk"],["Sahara","Hensonn",2021,"Phonk"],["Murder In My Mind","Kordhell",2022,"Phonk"],["Live Another Day","Kordhell",2022,"Phonk"],["Neon Blade","MoonDeity",2022,"Phonk"],["Fainted","Narvent",2022,"Phonk"],["Memory Reboot","VØJ, Narvent",2023,"Phonk"]];
-const VG=['Tất cả','V-Pop','Rap Việt','Remix Việt','Nhạc Việt xưa','Phonk'];let vGenre='Tất cả';
-$('#vGenres').innerHTML=VG.map(x=>`<button type="button" aria-pressed="${x===vGenre}">${x}</button>`).join('');
-$('#vGenres').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;vGenre=b.textContent;$$('#vGenres button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));renderVN();});
-$('#vQ').addEventListener('input',renderVN);
-function renderVN(){const q=norm($('#vQ').value.trim());
-  const rows=VN.map((w,i)=>[i+1,...w]).filter(([,t,a,y,g])=>(vGenre==='Tất cả'||g===vGenre)&&(!q||norm(t+' '+a+' '+y).includes(q)));
-  $('#vCount').textContent=`${rows.length} bài`;
-  $('#vList').innerHTML=rows.length?rows.map(([n,t,a,y,g])=>{const k=encodeURIComponent(t+' '+a);return `<div class="wrow"><span class="n num">${n}</span><span><span class="t">${esc(t)}</span><br><span class="a">${esc(a)}</span></span><span class="meta"><span class="num">${y}</span><span class="chip chip-grey">${esc(g)}</span></span><span class="wlinks"><a class="yt" href="https://www.youtube.com/results?search_query=${k}" target="_blank" rel="noopener" aria-label="Nghe ${esc(t)} trên YouTube">${ic('play')}YouTube</a><a class="sp" href="https://open.spotify.com/search/${k}" target="_blank" rel="noopener" aria-label="Nghe ${esc(t)} trên Spotify">${ic('ext')}Spotify</a></span></div>`;}).join(''):`<div class="empty">Không có bài khớp. Thử bỏ bớt bộ lọc.</div>`;}
-renderVN();
-$('#deckTabs').addEventListener('click',e=>{const b=e.target.closest('[data-tab]');if(!b)return;$$('#deckTabs button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));$('#panelHits').hidden=b.dataset.tab!=='hits';$('#panelWorld').hidden=b.dataset.tab!=='world';$('#panelVN').hidden=b.dataset.tab!=='vn';});
+const UG=['Nhạc tự làm',...VG.slice(1),...WG.slice(1),'Khác'];
+const VNS=new Set(VG.slice(1));
+const mmss=x=>{x=Math.max(0,Math.round(x||0));const h=Math.floor(x/3600),m=Math.floor(x%3600/60),r=String(x%60).padStart(2,'0');return h?h+':'+String(m).padStart(2,'0')+':'+r:m+':'+r;};
+const SONGS=CAT.map(([t,a,g,y,id,d,ch])=>({key:'y_'+id,kind:'yt',yt:id,t,a,g,y,d,ch}));
+const byKey=new Map(SONGS.map(x=>[x.key,x]));
+let upShared=[],upLocal=[];
+const allUp=()=>upLocal.concat(upShared);
+window.NexusSongInfo=k=>{const x=byKey.get(k)||allUp().find(y=>y.key===k);return x?{t:x.t,a:x.a||x.name||''}:null;};
+
+/* ---------- player ---------- */
+const audio=$('#sdAudio');
+const PL={queue:[],i:-1,cur:null,playing:false,shuffle:false,vol:70,yt:null,ytReady:false,ytLoading:null,seeking:false};
+function loadYT(){if(window.YT&&YT.Player)return Promise.resolve();if(PL.ytLoading)return PL.ytLoading;
+  PL.ytLoading=new Promise((res,rej)=>{const prev=window.onYouTubeIframeAPIReady;window.onYouTubeIframeAPIReady=()=>{if(typeof prev==='function')try{prev();}catch(_){}res();};
+    const sc=document.createElement('script');sc.src='https://www.youtube.com/iframe_api';sc.onerror=()=>{PL.ytLoading=null;sc.remove();rej(new Error('yt'));};document.head.appendChild(sc);});
+  return PL.ytLoading;}
+function onYTState(e){const st=e.data;if(st===0){next(true);return;}if(st===1){PL.playing=true;renderNow();}else if(st===2){PL.playing=false;renderNow();}}
+function onYTError(){toast('Bài này hiện không phát được ở đây. Chuyển sang bài tiếp.');setTimeout(()=>next(true),1500);}
+async function playYT(id){
+  try{await loadYT();}catch(_){toast('Không tải được trình phát YouTube. Kiểm tra mạng rồi thử lại.');PL.playing=false;renderNow();return;}
+  if(!PL.yt){PL.yt=new YT.Player('ytFrame',{host:'https://www.youtube-nocookie.com',width:'100%',height:'100%',videoId:id,
+      playerVars:{autoplay:1,playsinline:1,rel:0,modestbranding:1,origin:location.origin},
+      events:{onReady:e=>{PL.ytReady=true;e.target.setVolume(PL.vol);e.target.playVideo();},onStateChange:onYTState,onError:onYTError}});}
+  else if(PL.ytReady){PL.yt.loadVideoById(id);PL.yt.setVolume(PL.vol);}
+  else setTimeout(()=>playYT(id),300);}
+function stopYT(){if(PL.yt&&PL.ytReady)try{PL.yt.pauseVideo();}catch(_){}}
+/* files kept on this device (IndexedDB) */
+const IDB={db:null,open(){if(this.db)return Promise.resolve(this.db);return new Promise((res,rej)=>{let r;try{r=indexedDB.open('nexus-sonicdeck',1);}catch(e){rej(e);return;}
+  r.onupgradeneeded=()=>r.result.createObjectStore('songs',{keyPath:'id'});r.onsuccess=()=>{this.db=r.result;res(r.result);};r.onerror=()=>rej(r.error);});},
+  async tx(mode,fn){const db=await this.open();return new Promise((res,rej)=>{const t=db.transaction('songs',mode),st=t.objectStore('songs');const q=fn(st);t.oncomplete=()=>res(q&&q.result);t.onerror=()=>rej(t.error);});},
+  all(){return this.tx('readonly',st=>st.getAll());},put(v){return this.tx('readwrite',st=>st.put(v));},del(id){return this.tx('readwrite',st=>st.delete(id));},get(id){return this.tx('readonly',st=>st.get(id));}};
+let objUrl=null;
+async function playFile(x){stopYT();let u=x.url;
+  if(!u&&x.local){try{const rec=await IDB.get(x.id);if(!rec||!rec.blob)throw 0;if(objUrl)URL.revokeObjectURL(objUrl);objUrl=URL.createObjectURL(rec.blob);u=objUrl;}catch(_){toast('Không đọc được file này trên máy.');return;}}
+  audio.src=u;audio.volume=PL.vol/100;audio.play().catch(()=>{PL.playing=false;renderNow();});}
+audio.addEventListener('ended',()=>next(true));
+audio.addEventListener('play',()=>{PL.playing=true;renderNow();});
+audio.addEventListener('pause',()=>{if(!audio.ended){PL.playing=false;renderNow();}});
+audio.addEventListener('error',()=>{if(audio.getAttribute('src')){toast('File nhạc này không phát được.');}});
+function playAt(i){if(!PL.queue.length)return;PL.i=(i+PL.queue.length)%PL.queue.length;const x=PL.queue[PL.i];PL.cur=x;PL.playing=true;
+  const yt=x.kind==='yt';$('#ytWrap').hidden=!yt;$('#sdCover').hidden=yt;
+  if(yt){audio.pause();playYT(x.yt);}else playFile(x);
+  if(ND.countPlay)ND.countPlay(x.key);renderNow();renderLists();}
+function playList(list,start){if(!list.length){toast('Danh sách đang trống.');return;}PL.queue=list.slice();playAt(start==null?(PL.shuffle?Math.floor(Math.random()*list.length):0):start);}
+function next(auto){if(!PL.queue.length)return;if(PL.shuffle&&PL.queue.length>1){let j;do{j=Math.floor(Math.random()*PL.queue.length);}while(j===PL.i);playAt(j);}else playAt(PL.i+1);}
+function prev(){if(!PL.queue.length)return;if(curTime()>4){seekTo(0);return;}playAt(PL.i-1);}
+function curTime(){const x=PL.cur;if(!x)return 0;if(x.kind==='yt')return PL.yt&&PL.ytReady&&PL.yt.getCurrentTime?PL.yt.getCurrentTime()||0:0;return audio.currentTime||0;}
+function curDur(){const x=PL.cur;if(!x)return 0;if(x.kind==='yt'){const d=PL.yt&&PL.ytReady&&PL.yt.getDuration?PL.yt.getDuration():0;return d||x.d||0;}return isFinite(audio.duration)?audio.duration:(x.d||0);}
+function seekTo(t){const x=PL.cur;if(!x)return;if(x.kind==='yt'){if(PL.yt&&PL.ytReady)PL.yt.seekTo(t,true);}else audio.currentTime=t;}
+function togglePlay(){const x=PL.cur;if(!x){playList(visibleList());return;}
+  if(x.kind==='yt'){if(!PL.yt||!PL.ytReady)return;PL.playing?PL.yt.pauseVideo():PL.yt.playVideo();}else{audio.paused?audio.play().catch(()=>{}):audio.pause();}}
+function renderNow(){const x=PL.cur;
+  $('#playBtn').innerHTML=ic(PL.playing?'pause':'play');$('#playBtn').setAttribute('aria-label',PL.playing?'Tạm dừng':'Phát');
+  $('#shufBtn').setAttribute('aria-pressed',String(PL.shuffle));
+  if(!x)return;$('#npTitle').textContent=x.t;$('#npArtist').textContent=x.a||x.name||'';
+  $('#npSrc').textContent=x.kind==='yt'?(x.ch?'YouTube · '+x.ch:'YouTube'):(x.local?'Trên máy này':'Nhạc cộng đồng');}
+setInterval(()=>{if(!PL.cur||PL.seeking)return;const t=curTime(),d=curDur();$('#seek').max=Math.max(1,Math.floor(d));$('#seek').value=Math.floor(t);$('#tCur').textContent=mmss(t);$('#tDur').textContent=mmss(d);},500);
+$('#playBtn').addEventListener('click',togglePlay);
+$('#nextBtn').addEventListener('click',()=>next(false));
+$('#prevBtn').addEventListener('click',prev);
+$('#shufBtn').addEventListener('click',()=>{PL.shuffle=!PL.shuffle;renderNow();toast(PL.shuffle?'Đã bật phát ngẫu nhiên':'Đã tắt phát ngẫu nhiên');});
+$('#seek').addEventListener('input',e=>{PL.seeking=true;$('#tCur').textContent=mmss(+e.target.value);});
+$('#seek').addEventListener('change',e=>{seekTo(+e.target.value);PL.seeking=false;});
+$('#vol').addEventListener('input',e=>{PL.vol=+e.target.value;audio.volume=PL.vol/100;if(PL.yt&&PL.ytReady)PL.yt.setVolume(PL.vol);});
+
+/* ---------- catalog lists ---------- */
+let tab='vn',genre='Tất cả';
+function catList(){const vn=tab==='vn',q=norm($('#sdQ').value.trim());
+  return SONGS.filter(x=>VNS.has(x.g)===vn&&(genre==='Tất cả'||x.g===genre)&&(!q||norm(x.t+' '+x.a+' '+x.g).includes(q)));}
+function upList(){const q=norm($('#upQ').value.trim());return allUp().filter(x=>!q||norm(x.t+' '+(x.a||'')+' '+(x.name||'')+' '+x.g).includes(q));}
+const visibleList=()=>tab==='up'?upList():catList();
+function rowHTML(x,n,canDel){const now=PL.cur&&PL.cur.key===x.key;
+  const sub=x.kind==='yt'&&!x.uid?x.a:[x.a,x.name?'đăng bởi '+x.name:''].filter(Boolean).join(' · ');
+  const tag=x.local?'<span class="chip chip-dev">Trên máy này</span>':`<span class="chip chip-grey">${esc(x.g||'Khác')}</span>`;
+  return `<div class="wrow sd-row${now?' now':''}" role="button" tabindex="0" data-k="${esc(x.key)}" aria-label="Phát ${esc(x.t)}"><span class="n num">${now&&PL.playing?ic('vol'):n}</span><span><span class="t">${esc(x.t)}</span><br><span class="a">${esc(sub||'')}</span></span><span class="meta">${x.d?`<span class="num">${mmss(x.d)}</span>`:''}${tag}</span>${canDel?`<button class="x" type="button" data-del="${esc(x.key)}" aria-label="Xoá bài ${esc(x.t)}">${ic('x')}</button>`:'<span></span>'}</div>`;}
+function renderChips(){const G=tab==='vn'?VG:WG;if(!G.includes(genre))genre='Tất cả';
+  $('#sdGenres').innerHTML=G.map(x=>`<button type="button" aria-pressed="${x===genre}">${esc(x)}</button>`).join('');}
+function renderCat(){const rows=catList();$('#sdCount').textContent=rows.length+' bài';
+  $('#sdList').innerHTML=rows.length?rows.map((x,i)=>rowHTML(x,i+1,false)).join(''):'<p class="muted small" style="padding:16px 8px">Không có bài nào khớp. Thử từ khoá khác.</p>';}
+function renderUp(){const rows=upList(),u=me();$('#upCount').textContent=rows.length+' bài';
+  $('#upList').innerHTML=rows.length?rows.map((x,i)=>rowHTML(x,i+1,x.local||(u&&x.uid===u.uid))).join(''):'<p class="muted small" style="padding:16px 8px">Chưa có bài nào. Bấm "Thêm bài của bạn" để đăng bài đầu tiên.</p>';}
+function renderLists(){if(tab==='up')renderUp();else renderCat();}
+function setTab(t){if(t!==tab&&t!=='up'&&tab!=='up')$('#sdQ').value='';tab=t;$$('#deckTabs button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.tab===t)));
+  $('#panelCat').hidden=t==='up';$('#panelUp').hidden=t!=='up';
+  if(t!=='up'){$('#catTitle').textContent=t==='vn'?'Nhạc Việt':'Hit quốc tế';
+    $('#catSub').textContent=t==='vn'?'Cải lương, bolero, trữ tình, V-Pop, rap và phonk.':'Những bài kinh điển và hit toàn cầu từ 1947 đến nay.';renderChips();}
+  renderLists();}
+$('#deckTabs').addEventListener('click',e=>{const b=e.target.closest('[data-tab]');if(b)setTab(b.dataset.tab);});
+$('#sdGenres').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;genre=b.textContent;renderChips();renderCat();});
+$('#sdQ').addEventListener('input',renderCat);$('#upQ').addEventListener('input',renderUp);
+$('#playAllBtn').addEventListener('click',()=>playList(catList()));
+$('#playUpBtn').addEventListener('click',()=>playList(upList()));
+function rowClick(e,listFn){const del=e.target.closest('[data-del]');if(del){e.stopPropagation();removeSong(del.dataset.del);return;}
+  const r=e.target.closest('[data-k]');if(!r)return;const list=listFn(),i=list.findIndex(x=>x.key===r.dataset.k);if(i<0)return;
+  if(PL.cur&&PL.cur.key===r.dataset.k){togglePlay();return;}playList(list,i);}
+$('#sdList').addEventListener('click',e=>rowClick(e,catList));$('#upList').addEventListener('click',e=>rowClick(e,upList));
+for(const id of['#sdList','#upList'])$(id).addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('[data-k]')){e.preventDefault();e.target.click();}});
+
+/* ---------- community songs ---------- */
+const UPLIM=()=>ND.hasPlan&&ND.hasPlan('premium')?100:5;
+$('#upGenre').innerHTML=UG.map(x=>`<option>${esc(x)}</option>`).join('');
+let upMode='file';
+$('#upMode').addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(!b)return;upMode=b.dataset.m;$$('#upMode button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));
+  $('#upFileF').hidden=upMode!=='file';$('#upRightsF').hidden=upMode!=='file';$('#upLinkF').hidden=upMode!=='yt';$('#upErr').hidden=true;renderUpNote();});
+function hasCloudinary(){const C=window.NEXUS_VIDEO_UPLOAD;return !!(C&&C.cloudName&&C.uploadPreset);}
+function renderUpNote(){const cloud=ND.mode==='cloud',u=me(),lim=UPLIM();let t='';
+  if(!u||u.anon)t=cloud?'Đăng nhập để thêm bài.':'Đặt tên hiển thị ở trang Đăng nhập để thêm bài.';
+  else if(upMode==='file'&&!(cloud&&hasCloudinary()))t='Web chưa có nơi lưu file nhạc chung, nên file sẽ chỉ nằm trên máy này. Link YouTube thì ai cũng nghe được.';
+  else t=`Bạn thêm được tối đa ${lim} bài${lim===5?' (SonicDeck Premium: 100 bài)':''}.`;
+  if(!cloud&&upMode==='yt')t='Chưa kết nối máy chủ: bài chỉ hiện trên máy này.';
+  $('#upNote').textContent=t;}
+function ytId(v){v=String(v||'').trim();const m=v.match(/(?:youtu\.be\/|v=|\/shorts\/|\/embed\/|\/live\/)([A-Za-z0-9_-]{11})/)||v.match(/^([A-Za-z0-9_-]{11})$/);return m?m[1]:null;}
+function fileDur(f){return new Promise(res=>{const a=new Audio(),u=URL.createObjectURL(f);const done=d=>{URL.revokeObjectURL(u);res(isFinite(d)?d:0);};a.preload='metadata';a.onloadedmetadata=()=>done(a.duration);a.onerror=()=>done(0);setTimeout(()=>done(0),8000);a.src=u;});}
+function cloudUpload(f,onProg){const C=window.NEXUS_VIDEO_UPLOAD;return new Promise((res,rej)=>{const fd=new FormData();fd.append('file',f);fd.append('upload_preset',C.uploadPreset);
+  const x=new XMLHttpRequest();x.open('POST','https://api.cloudinary.com/v1_1/'+encodeURIComponent(C.cloudName)+'/video/upload');
+  x.upload.onprogress=e=>{if(e.lengthComputable)onProg(e.loaded/e.total);};
+  x.onload=()=>{try{const r=JSON.parse(x.responseText);if(x.status<300&&r.secure_url)res(r.secure_url);else rej(new Error((r.error&&r.error.message)||'upload'));}catch(e){rej(e);}};
+  x.onerror=()=>rej(new Error('network'));x.send(fd);});}
+async function loadLocal(){try{const rows=await IDB.all();upLocal=(rows||[]).sort((a,b)=>b.createdAt-a.createdAt).map(r=>({key:'l_'+r.id,id:r.id,local:true,kind:r.kind,yt:r.yt,t:r.title,a:r.artist,g:r.genre,d:r.dur||0}));}catch(_){upLocal=[];}renderUp();}
+let songsUnsub=null;
+function startShared(){if(songsUnsub){songsUnsub();songsUnsub=null;}upShared=[];
+  if(ND.mode!=='cloud'){renderUp();return;}
+  songsUnsub=ND.watchSongs(list=>{upShared=list.filter(d=>d.kind==='file'?/^https:\/\/res\.cloudinary\.com\//.test(d.url||''):/^[A-Za-z0-9_-]{11}$/.test(d.yt||''))
+    .map(d=>({key:'u_'+d.id,id:d.id,kind:d.kind,yt:d.yt,url:d.url,t:d.title,a:d.artist,g:d.genre,d:d.dur||0,uid:d.uid,name:d.name}));renderUp();if(typeof renderHome==='function')renderHome();});}
+ND.on('mode',()=>{startShared();renderUpNote();});ND.on('user',()=>{renderUp();renderUpNote();});ND.on('ent',renderUpNote);
+async function removeSong(key){const x=allUp().find(y=>y.key===key);if(!x)return;
+  try{if(x.local){await IDB.del(x.id);await loadLocal();}else{await ND.deleteSong(x.id);}toast('Đã xoá bài');}catch(e){toast(e.message||'Không xoá được. Thử lại.');}}
+$('#upForm').addEventListener('submit',async e=>{e.preventDefault();const fail=m=>{$('#upErr').textContent=m;$('#upErr').hidden=false;};$('#upErr').hidden=true;
+  const cloud=ND.mode==='cloud',u=me();
+  if(!u||u.anon)return fail(cloud?'Đăng nhập để thêm bài.':'Đặt tên hiển thị ở trang Đăng nhập để thêm bài.');
+  const title=$('#upTitle').value.trim().slice(0,100),artist=$('#upArtist').value.trim().slice(0,60),genre=$('#upGenre').value;
+  if(!title)return fail('Nhập tên bài.');
+  const mine=upShared.filter(x=>x.uid===u.uid).length+upLocal.length,lim=UPLIM();
+  if(mine>=lim)return fail(lim===5?'Bản miễn phí thêm được 5 bài. SonicDeck Premium thêm được 100 bài.':'Bạn đã thêm đủ 100 bài.');
+  const btn=$('#upGo');btn.disabled=true;
+  try{
+    if(upMode==='yt'){const id=ytId($('#upLink').value);if(!id){btn.disabled=false;return fail('Link YouTube không hợp lệ.');}
+      if(cloud)await ND.addSong({title,artist,genre,kind:'yt',yt:id,dur:0});
+      else{await IDB.put({id:'l'+Date.now(),kind:'yt',yt:id,title,artist,genre,dur:0,createdAt:Date.now()});await loadLocal();}}
+    else{const f=$('#upFile').files[0];
+      if(!f){btn.disabled=false;return fail('Chọn một file nhạc.');}
+      if(!/^audio\//.test(f.type)&&!/\.(mp3|m4a|wav|ogg|aac|flac)$/i.test(f.name)){btn.disabled=false;return fail('File này không phải file nhạc.');}
+      if(f.size>25*1024*1024){btn.disabled=false;return fail('File lớn hơn 25 MB.');}
+      if(!$('#upRights').checked){btn.disabled=false;return fail('Đánh dấu xác nhận bạn có quyền chia sẻ bài này.');}
+      const dur=await fileDur(f);
+      if(cloud&&hasCloudinary()){$('#upProg').hidden=false;const url=await cloudUpload(f,p=>{$('#upBar').style.width=Math.round(p*100)+'%';});await ND.addSong({title,artist,genre,kind:'file',url,dur});}
+      else{await IDB.put({id:'l'+Date.now(),kind:'file',blob:f,title,artist,genre,dur,createdAt:Date.now()});await loadLocal();}}
+    $('#upForm').reset();$('#upProg').hidden=true;$('#upBar').style.width='0';toast('Đã thêm "'+title+'" vào SonicDeck');
+  }catch(err){$('#upProg').hidden=true;fail(err&&err.code==='permission-denied'?'Máy chủ chưa cho phép đăng nhạc. Cần cập nhật luật bảo mật Firestore.':'Không thêm được bài. '+(err&&err.message?err.message:'Thử lại.'));}
+  btn.disabled=false;});
+
+setTab('vn');renderNow();loadLocal();renderUpNote();
 
 /* ===== COMMSHUB (real messages) ===== */
 const CH=[
