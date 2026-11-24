@@ -689,16 +689,16 @@ function smashUpdate(dt){for(let k=SMF.length-1;k>=0;k--){const f=SMF[k],S=f.col
   jetMat.opacity=.4+Math.sin(time*11)*.08;}
 /* car headlight beams on the road at night (nearest cars only, one instanced draw) */
 const BEAMN=MOBILE?8:18;let BEAM=null;
-{const tex=makeTex(128,256,(g,w,h)=>{const id=g.createImageData(w,h),D=id.data;for(let y=0;y<h;y++)for(let x=0;x<w;x++){const v=1-y/(h-1),u=(x/(w-1))*2-1,wid=.22+.78*v,e=1-Math.abs(u)/wid;
-      const a=e<=0?0:Math.pow(Math.min(1,e*1.6),1.4)*Math.pow(1-v,1.2)*Math.min(1,v/.06)*(.75+.25*Math.cos(u*9)*(1-v));const o=(y*w+x)*4;D[o]=255;D[o+1]=246;D[o+2]=220;D[o+3]=Math.round(clamp(a,0,1)*255);}g.putImageData(id,0,0);},{repeat:false});
+{const tex=makeTex(128,256,(g,w,h)=>{const id=g.createImageData(w,h),D=id.data;for(let y=0;y<h;y++)for(let x=0;x<w;x++){const v=1-y/(h-1),u=(x/(w-1))*2-1,wid=.3+.7*Math.sqrt(v),e=1-Math.abs(u)/wid;
+      const a=e<=0?0:Math.pow(Math.min(1,e*1.4),1.2)*Math.pow(1-v,.75)*Math.min(1,v/.04)*(.75+.25*Math.cos(u*9)*(1-v));const o=(y*w+x)*4;D[o]=255;D[o+1]=246;D[o+2]=220;D[o+3]=Math.round(clamp(a,0,1)*255);}g.putImageData(id,0,0);},{repeat:false});
   const g=new T.PlaneGeometry(1,1);g.rotateX(-Math.PI/2);g.rotateY(Math.PI);g.translate(0,0,.5);
   const m=new T.MeshBasicMaterial({map:tex,transparent:true,depthWrite:false,blending:T.AdditiveBlending,toneMapped:false,opacity:0,polygonOffset:true,polygonOffsetFactor:-4});
   BEAM=new T.InstancedMesh(g,m,BEAMN);BEAM.frustumCulled=false;BEAM.count=0;BEAM.renderOrder=1;BEAM.instanceMatrix.setUsage(T.DynamicDrawUsage);scene.add(BEAM);}
 const _bl=[];
-function beamUpdate(){const nk=1-tod.day;if(nk<.08||P.inside){BEAM.visible=false;return;}BEAM.visible=true;BEAM.material.opacity=Math.min(1,(nk-.08)*1.4)*.6;
+function beamUpdate(){const nk=1-tod.day;if(nk<.08||P.inside){BEAM.visible=false;return;}BEAM.visible=true;BEAM.material.opacity=Math.min(1,(nk-.08)*1.4)*.5;
   const cp=camera.position;_bl.length=0;for(const c of cars){if(!c.mesh.visible||c.hp<=0)continue;const d=hyp(c.x-cp.x,c.z-cp.z);if(d<170)_bl.push([d,c]);}_bl.sort((a,b)=>a[0]-b[0]);
   const n=Math.min(BEAMN,_bl.length);for(let k=0;k<n;k++){const c=_bl[k][1],fx=Math.sin(c.h),fz=Math.cos(c.h),L=(c.spec&&c.spec.len||4.6)/2-.2,x=c.x+fx*L,z=c.z+fz*L;
-    dummy.position.set(x,heightAt(x+fx*6,z+fz*6)+.06,z);dummy.rotation.set(0,c.h,0);dummy.scale.set(7,1,17);dummy.updateMatrix();BEAM.setMatrixAt(k,dummy.matrix);}
+    dummy.position.set(x,heightAt(x+fx*6,z+fz*6)+.06,z);dummy.rotation.set(0,c.h,0);dummy.scale.set(9,1,19);dummy.updateMatrix();BEAM.setMatrixAt(k,dummy.matrix);}
   BEAM.count=n;BEAM.instanceMatrix.needsUpdate=true;}
 function lampUpdate(dt){for(let k=LDOWN.length-1;k>=0;k--){const L=LDOWN[k];
     if(L.t<1.4){L.t+=dt;const u=Math.min(1,L.t/.8),top=Math.PI/2-.04;let a=top*u*u;if(L.t>.8){const b=(L.t-.8)/.6;a=top-Math.sin(Math.min(1,b)*Math.PI)*.12*(1-b);}L.ang=a;lampPose(L);}
