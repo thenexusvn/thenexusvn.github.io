@@ -1316,7 +1316,7 @@ return{
   /* commshub */
   watchMessages(ch,cb){if(mode==='cloud'){return db.collection('channels').doc(ch).collection('messages').orderBy('createdAt','desc').limit(80).onSnapshot(s=>cb(s.docs.map(d=>Object.assign({id:d.id},d.data())).reverse()),e=>{console.warn(e);cb([]);});}
     const k='msg-'+ch,push=()=>cb(LS.get(k,[]));push();return on(k,push);},
-  async sendMessage(ch,text){needUser();text=String(text).slice(0,500);if(mode==='cloud'){await db.collection('channels').doc(ch).collection('messages').add({text,uid:user.uid,name:user.name,createdAt:FV.serverTimestamp()});return;}
+  async sendMessage(ch,text){needUser();text=String(text).slice(0,500);if(mode==='cloud'){await db.collection('channels').doc(ch).collection('messages').add({text,uid:user.uid,name:String(user.name||'Ẩn danh').slice(0,40),createdAt:FV.serverTimestamp()});return;}
     const k='msg-'+ch,a=LS.get(k,[]);a.push({id:'x'+Date.now(),text,uid:user.uid,name:user.name,createdAt:Date.now()});LS.set(k,a.slice(-200));emit(k);},
   async deleteMessage(ch,id){needUser();if(mode==='cloud'){await db.collection('channels').doc(ch).collection('messages').doc(id).delete();return;}const k='msg-'+ch;LS.set(k,LS.get(k,[]).filter(m=>m.id!==id));emit(k);},
   /* sonicdeck community songs */
@@ -1458,7 +1458,7 @@ function renderUser(){const u=me(),box=$('#userbox');box.innerHTML='';const row=
   else{const s=document.createElement('span');s.textContent='Chưa đăng nhập';const a=document.createElement('a');a.href='#sign-in';a.textContent='Đăng nhập';row.append(s,a);}
   box.appendChild(row);
   if(ND.mode!=='cloud'){const n=document.createElement('span');n.className='note';n.textContent='Chưa kết nối máy chủ: dữ liệu chỉ lưu trên máy này.';box.appendChild(n);}}
-ND.on('user',()=>{renderUser();renderMatches();renderSignin();renderChat();});ND.on('mode',()=>{renderUser();renderSignin();});
+ND.on('user',()=>{renderUser();renderMatches();renderSignin();renderChat();});ND.on('mode',()=>{renderUser();renderSignin();openChannel(chCur);});
 
 /* ===== COURTDRAFT (real matches) ===== */
 function teamHTML(m,k,label){
@@ -1828,7 +1828,7 @@ function openChannel(id){chCur=id;if(chUnsub)chUnsub();chMsgs=[];$('#msgs').data
 $('#chans').addEventListener('click',e=>{const b=e.target.closest('[data-ch]');if(!b)return;openChannel(b.dataset.ch);});
 $('#msgs').addEventListener('click',async e=>{const b=e.target.closest('[data-delmsg]');if(!b)return;try{await ND.deleteMessage(chCur,b.dataset.delmsg);}catch(err){toast(err.message||'Không xoá được');}});
 $('#compose').addEventListener('submit',async e=>{e.preventDefault();const v=$('#msgIn').value.trim();if(!v)return;if(!signedIn()){needSignIn('nhắn tin');return;}
-  $('#msgIn').value='';try{await ND.sendMessage(chCur,v);}catch(err){$('#msgIn').value=v;toast(err.message||'Không gửi được. Thử lại.');}});
+  $('#msgIn').value='';$('#msgs').dataset.init='';try{await ND.sendMessage(chCur,v);}catch(err){$('#msgIn').value=v;toast(err.message||'Không gửi được. Thử lại.');}});
 
 /* ===== SIGN IN ===== */
 let siMode='in';
