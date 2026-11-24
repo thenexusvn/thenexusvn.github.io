@@ -438,7 +438,8 @@ function inst(geo,m,list,fn,cast){if(!list.length)return null;const im=new T.Ins
   const ss=(a,b,v)=>{const t=clamp((v-a)/(b-a),0,1);return t*t*(3-2*t);};
   const nz=(x,z)=>Math.sin(x*.021+z*.013)*.5+Math.sin(x*.047-z*.039+1.3)*.3+Math.sin(x*.11+z*.09+2.1)*.12;
   const mask=(x,z)=>ss(HZ.x1,HZ.x1-70,x)*ss(HZ.x0,HZ.x0+50,x)*ss(HZ.z0,HZ.z0+60,z)*ss(HZ.z1,HZ.z1-45,z);
-  const nat=(x,z)=>{const d=hyp(x+705,z-285)/300;const dome=Math.max(0,1-d*d);return mask(x,z)*(78*dome+12*nz(x,z)*dome+6*nz(z*1.7,x*1.3));};
+  const PCX=-694,PCZ=184;let TOPH=60;
+  const nat=(x,z)=>{const d=hyp(x-PCX,z-PCZ);const k=Math.pow(Math.max(0,1-d/340),1.3);return mask(x,z)*((TOPH+2)*k+5*nz(x,z)*Math.min(1,d/60)+3*nz(z*1.7,x*1.3));};
   /* road centre line: Catmull-Rom through hand-placed points, resampled every 2 m */
   const CP=[[-452,128],[-472,128],[-520,131],[-572,150],[-607,196],[-614,256],[-592,307],[-548,338],[-516,378],[-528,423],[-586,446],[-656,442],[-712,408],[-744,348],[-748,282],[-728,218],[-694,184]];
   const raw=[];for(let k=0;k<CP.length-1;k++){const p0=CP[Math.max(0,k-1)],p1=CP[k],p2=CP[k+1],p3=CP[Math.min(CP.length-1,k+2)];
@@ -447,8 +448,8 @@ function inst(geo,m,list,fn,cast){if(!list.length)return null;const im=new T.Ins
   const RP=[raw[0]];let acc=0;for(let k=1;k<raw.length;k++){const a=raw[k-1],b=raw[k],l=hyp(b[0]-a[0],b[1]-a[1]);acc+=l;if(acc>=2){RP.push(b);acc=0;}}
   const n=RP.length,DS=2;
   /* road heights follow the hill, smoothed, with a 9 % grade limit; flat where it meets the city */
-  let h=RP.map(p=>nat(p[0],p[1]));for(let pass=0;pass<4;pass++){const o=h.slice();for(let i=0;i<n;i++){let s=0,c=0;for(let k=-25;k<=25;k++){const j=i+k;if(j>=0&&j<n){s+=o[j];c++;}}h[i]=s/c;}}
-  for(let i=0;i<14;i++)h[i]=0;const G=.09*DS;for(let i=1;i<n;i++)h[i]=clamp(h[i],h[i-1]-G,h[i-1]+G);for(let i=n-2;i>=0;i--)h[i]=clamp(h[i],h[i+1]-G,h[i+1]+G);for(let i=0;i<14;i++)h[i]=0;
+  /* road climbs evenly from the city to the summit: at most about 9 % in the steepest part */
+  TOPH=Math.min(62,(n-16)*DS*.09/1.5);const h=RP.map((p,i)=>{const u=clamp((i-15)/(n-16),0,1);return TOPH*u*u*(3-2*u);});
   const TOP=h[n-1],PC=RP[n-1],PR=17;
   /* height grid: natural hill, blended into the road band and the lookout plaza */
   const HG=new Float32Array(NX*NZ),RW2=5,BL=16;
