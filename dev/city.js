@@ -455,7 +455,7 @@ function inst(geo,m,list,fn,cast){if(!list.length)return null;const im=new T.Ins
   for(let iz=0;iz<NZ;iz++)for(let ix=0;ix<NX;ix++){const x=X0+ix*ST,z=Z0+iz*ST;let v=nat(x,z),bd=1e9,bh=0;
     let bi=0;for(let i=0;i<n;i+=1){const dx=x-RP[i][0],dz=z-RP[i][1],d2=dx*dx+dz*dz;if(d2<bd){bd=d2;bi=i;}}bh=h[bi];
     for(const j of[bi-1,bi]){if(j<0||j>=n-1)continue;const ax=RP[j][0],az=RP[j][1],ex=RP[j+1][0]-ax,ez=RP[j+1][1]-az,L2=ex*ex+ez*ez||1,t=clamp(((x-ax)*ex+(z-az)*ez)/L2,0,1),qx=ax+ex*t-x,qz=az+ez*t-z,d2=qx*qx+qz*qz;if(d2<=bd){bd=d2;bh=h[j]+(h[j+1]-h[j])*t;}}
-    const d=Math.sqrt(bd);if(d<RW2+BL){const w=1-ss(RW2+1.5,RW2+BL,d);v=v*(1-w)+bh*w;}
+    const d=Math.sqrt(bd),reach=RW2+1.5+Math.max(10,Math.abs(v-bh)*1.8);if(d<reach){const w=1-ss(RW2+1.5,reach,d);v=v*(1-w)+bh*w;}
     const dp=hyp(x-PC[0],z-PC[1]);if(dp<PR+12){const w=1-ss(PR,PR+12,dp);v=v*(1-w)+TOP*w;}
     if(x>HZ.x1-8)v*=ss(HZ.x1,HZ.x1-8,x);HG[iz*NX+ix]=Math.max(.04,v);}
   HGRID={X0,Z0,ST,NX,NZ,H:HG};
