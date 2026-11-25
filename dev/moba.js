@@ -668,8 +668,8 @@ const CSS=`
 .nl-card img{width:100%;height:100%;object-fit:cover;display:block}.nl-card b{position:absolute;left:0;right:0;bottom:0;padding:6px;font-size:13px;background:linear-gradient(0deg,rgba(0,0,0,.85),transparent)}
 .nl-card .rl{position:absolute;top:6px;left:6px;font-size:10px;font-weight:800;background:rgba(0,0,0,.6);padding:2px 6px;border-radius:6px}
 .nl-card.on{border-color:#ffd54a;box-shadow:0 0 0 3px rgba(255,213,74,.35)}.nl-card.taken{opacity:.35;pointer-events:none}
-.nl-sel{flex:1;display:grid;grid-template-columns:230px 1fr 230px;gap:14px;padding:10px 18px 18px;min-height:0}
-.nl-team{display:flex;flex-direction:column;gap:8px}
+.nl-sel{flex:1;overflow:hidden;display:grid;grid-template-columns:230px 1fr 230px;gap:14px;padding:10px 18px 18px;min-height:0}
+.nl-team{display:flex;flex-direction:column;gap:8px;overflow:auto;min-height:0}
 .nl-slot{display:flex;gap:10px;align-items:center;padding:8px;border-radius:12px;background:rgba(20,40,80,.6);border:1px solid rgba(110,160,255,.25)}
 .nl-slot.red{background:rgba(80,20,25,.6);border-color:rgba(255,120,120,.25)}.nl-slot.me{border-color:#ffd54a}
 .nl-slot .pic{width:46px;height:46px;border-radius:10px;background:#0b1224 center/cover;flex:none;display:grid;place-items:center;font-weight:900;color:#5a6a8a}
@@ -800,7 +800,7 @@ const LS={scene:new T.Scene(),cam:new T.PerspectiveCamera(34,1,.1,300),model:nul
   const floor=new T.Mesh(new T.CircleGeometry(60,48),new T.MeshStandardMaterial({color:lin('#0b0e1c'),roughness:.35,metalness:.6}));floor.rotation.x=-Math.PI/2;floor.receiveShadow=true;s.add(floor);
   const N=MOBILE?120:260,pp=new Float32Array(N*3);for(let i=0;i<N;i++){pp[i*3]=rnd(-14,14);pp[i*3+1]=rnd(0,12);pp[i*3+2]=rnd(-14,4);}
   const pg=new T.BufferGeometry();pg.setAttribute('position',new T.BufferAttribute(pp,3));LS.pts=new T.Points(pg,new T.PointsMaterial({color:0x9fd0ff,size:.09,transparent:true,opacity:.8,map:glowTex,depthWrite:false,blending:T.AdditiveBlending}));s.add(LS.pts);
-  LS.cam.position.set(0,3.2,9.5);LS.cam.lookAt(0,2.2,0);}
+  LS.cam.position.set(0,3.3,12.5);LS.cam.lookAt(0,2.35,0);}
 function showcase(id){const h=HMAP[id];if(LS.model)LS.scene.remove(LS.model.g);const m=heroModel(h,0);m.ring.visible=false;m.g.scale.setScalar(1.55*(h.big||1));m.g.position.y=.66;LS.scene.add(m.g);LS.model=m;LS.rim.color.set(h.col);LS.ring.material.color.set(h.acc);LS.t=0;}
 function lobbyFrame(dt){LS.t+=dt;const m=LS.model;if(m){m.g.rotation.y=Math.sin(LS.t*.4)*.6+.2;const a=(LS.t%5)/5;poseHuman(m,dt,{mv:0,atk:a>.8?(a-.8)*5:0,ranged:!HMAP[selHero].melee});}
   LS.ring.rotation.z+=dt*.6;LS.ring2.rotation.z-=dt*.3;const p=LS.pts.geometry.attributes.position;for(let i=0;i<p.count;i++){let y=p.getY(i)+dt*.4;if(y>12)y=0;p.setY(i,y);}p.needsUpdate=true;
@@ -852,7 +852,7 @@ function drawSelect(){const S=SEL;
   const slot=(o,i,team,me)=>{const sh=me||i<S.shown;const h=HMAP[o.h];return `<div class="nl-slot ${team?'red':''} ${me?'me':''}"><div class="pic" style="${sh&&!team?`background-image:url(${portrait(o.h)})`:''}">${sh&&!team?'':'?'}</div><div><b>${escH(me?PNAME:S.names[i+(team?5:0)])}</b><small>${team?L('Đội đỏ','Red team'):sh?escH(h.n)+' · '+escH(ROLE[h.role]):L('Đang chọn…','Picking…')}</small></div></div>`;};
   ui.innerHTML=`<div class="nl-scr" style="background:linear-gradient(90deg,rgba(5,10,30,.85),rgba(5,10,30,.25) 30%,rgba(5,10,30,.25) 70%,rgba(30,5,10,.85))"><div class="nl-lob-top"><b style="font-size:18px">${L('CHỌN TƯỚNG','PICK YOUR HERO')}</b><span class="nl-cur"><span id="nlT">${Math.ceil(S.t)}s</span></span></div>
    <div class="nl-sel"><div class="nl-team">${slot({h:S.me},0,0,true)}${S.ally.map((o,i)=>slot(o,i,0)).join('')}</div>
-   <div style="display:flex;flex-direction:column;justify-content:flex-end;gap:10px;min-height:0"><div class="nl-grid pe" style="grid-template-columns:repeat(auto-fill,minmax(80px,1fr));max-height:42vh;overflow:auto">${HEROES.map(h=>{const taken=S.ally.slice(0,S.shown).some(o=>o.h===h.id);return `<div class="nl-card ${h.id===S.me?'on':''} ${taken||S.locked&&h.id!==S.me?'taken':''}" data-h="${h.id}"><img src="${portrait(h.id)}"><span class="rl">${escH(ROLE[h.role])}</span><b>${escH(h.n)}</b></div>`;}).join('')}</div>
+   <div style="display:flex;flex-direction:column;justify-content:flex-end;gap:10px;min-height:0"><div class="nl-grid pe" style="grid-template-columns:repeat(auto-fill,minmax(80px,1fr));max-height:34vh;overflow:auto">${HEROES.map(h=>{const taken=S.ally.slice(0,S.shown).some(o=>o.h===h.id);return `<div class="nl-card ${h.id===S.me?'on':''} ${taken||S.locked&&h.id!==S.me?'taken':''}" data-h="${h.id}"><img src="${portrait(h.id)}"><span class="rl">${escH(ROLE[h.role])}</span><b>${escH(h.n)}</b></div>`;}).join('')}</div>
      <button class="nl-btn" data-lock ${S.locked?'disabled':''} style="align-self:center;min-width:220px;font-size:20px">${S.locked?L('ĐÃ KHOÁ','LOCKED IN'):L('KHOÁ TƯỚNG','LOCK IN')}</button></div>
    <div class="nl-team">${S.enemy.map((o,i)=>slot(o,i,1)).join('')}<div class="nl-panel nl-info" style="margin-top:6px">${heroInfo(HMAP[S.me])}</div></div></div></div>`;
   ui.onclick=e=>{const c=e.target.closest('[data-h]');if(c&&!S.locked){S.me=c.dataset.h;selHero=S.me;// make sure no ally bot has it
@@ -973,7 +973,7 @@ function drawMinimap(){const g=H.mm,S=240,K=S/(MH*2),P=(x,z)=>[(x+MH)*K,(z+MH)*K
   const [cx,cy]=P(camera.position.x,camera.position.z-20);g.strokeStyle='rgba(255,255,255,.6)';g.lineWidth=1;g.strokeRect(cx-22,cy-14,44,28);}
 /* ---------------- camera ---------------- */
 let camZ=1;
-function camUpdate(dt){const u=M.me;const tx=u.x,tz=u.z;const off=MOBILE?{y:27,z:16}:{y:30,z:19};
+function camUpdate(dt){const u=M.me;const tx=u.x,tz=u.z;const off=MOBILE?{y:21,z:13}:{y:23,z:15};
   camera.position.x=lerp(camera.position.x,tx,Math.min(1,dt*8));camera.position.z=lerp(camera.position.z,tz+off.z*camZ,Math.min(1,dt*8));camera.position.y=lerp(camera.position.y,off.y*camZ,Math.min(1,dt*4));
   if(shakeA>0){camera.position.x+=rnd(-1,1)*shakeA*.4;camera.position.z+=rnd(-1,1)*shakeA*.4;shakeA=Math.max(0,shakeA-dt*2);}
   camera.lookAt(camera.position.x,0,camera.position.z-off.z*camZ);

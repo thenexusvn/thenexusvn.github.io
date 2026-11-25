@@ -2571,7 +2571,7 @@ const $=s=>document.querySelector(s);const wrap=$('#nlw');let game=null,loading=
 function recText(sv){const r=$('#nlRec');if(r&&sv&&sv.matches){r.textContent=`Cấp ${sv.lv} · ${sv.matches} trận · ${sv.wins} trận thắng · ${sv.mvp} MVP`;r.classList.remove('none');}}
 try{recText(JSON.parse(localStorage.getItem('nexus-moba-save')||'null'));}catch(_){}
 function load(src){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=()=>{s.remove();rej(new Error(src));};document.head.appendChild(s);});}
-async function ensure(){if(!window.THREE)await load('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js');if(!window.NexusMoba)await load('moba.js?v=2');}
+async function ensure(){if(!window.THREE)await load('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js');if(!window.NexusMoba)await load('moba.js?v=3');}
 async function open(){if(window.NexusCity)window.NexusCity.close();if(window.NexusLastZone)window.NexusLastZone.close();wrap.hidden=false;if(game){game.start();return;}if(loading)return;loading=true;$('#nlStatus').textContent='Đang dựng đấu trường, chờ vài giây...';
   try{await ensure();}catch(_){$('#nlStatus').textContent='Chưa tải được thư viện 3D. Kiểm tra mạng rồi thử lại.';loading=false;return;}
   await new Promise(r=>setTimeout(r,40));
