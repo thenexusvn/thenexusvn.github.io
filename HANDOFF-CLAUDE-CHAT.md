@@ -258,3 +258,7 @@ Python helper scripts used during development:
 - Thẻ trang cá nhân `#pcModal` (`openCard(uid)`, `window.NexusHub.card`): ảnh, tên, trạng thái online/bạn bè, số Video / Người theo dõi / Đang theo dõi (từ `users/{uid}` và video Loopy), nút Theo dõi, Kết bạn, Nhắn tin, Xem video. Mở bằng cách bấm ảnh hoặc tên trong danh sách mọi người, trong tin nhắn, hoặc tên người ở đầu chat riêng.
 - Trang Tài khoản (#sign-in) có phần sửa tên + chọn ảnh đại diện (`#siAcct`, `ND.setProfile`).
 - API dùng chung giữa hai script: `window.NexusHub` {ready, dm, friendToggle, friendLabel, card} và `window.NexusLoopy` {open, follow, isFollowing, videosOf}.
+
+## Cloudinary cho Loopy (11/2026)
+- Tài khoản Cloudinary của chủ web, cloud name `znot6i1w`, upload preset `loopy_unsigned` (Unsigned, thư mục `loopy`, bật Disallow public ID). Đã ghi vào `firebase-config.js` (`NEXUS_VIDEO_UPLOAD`).
+- Đã thử tải một video thử 1 giây lên thành công (nằm trong thư mục loopy trên Cloudinary, có thể xoá).
