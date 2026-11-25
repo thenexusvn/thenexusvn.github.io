@@ -104,6 +104,15 @@ A school super-app, rebuilt from v0-thenexus.vercel.app. Single-page vanilla JS 
     - They respawn after 90–120 s once the player is 80 m away.
   - **Night headlights:** the 18 nearest cars (8 on mobile) cast additive beam quads on the road (`BEAM`, `beamUpdate`).
 
+- **Admin powers (Nov 2026):** the admin account is `NEXUS_ADMIN_EMAILS` in firebase-config.js plus `isAdmin()` in firestore.rules (both list nguyenphucvy08@gmail.com). `ND.admin` is true only in cloud mode.
+  - **Look:** `body.is-admin` turns lime into gold, adds a ♛ ADMIN badge in the user box and hides the Pro upsell.
+  - **CommsHub:** admin messages carry `admin:true` (rules allow it only for admins) and show a crown and badge to everyone. Admins see Xoá on every message and Chặn/Bỏ chặn on other people's messages.
+  - **Bans:** stored in `banned/{uid}`. Rules function `poster()` = member and not banned, so banned users can't create messages, papers, matches, songs, videos or comments. A banned user's chat input is disabled.
+  - **Deleting content:** admins can delete anyone's Vault paper, match, song, video and comment.
+  - **Announcement:** a site-wide bar from `config/announce`. Admins post or remove it on #admin; each viewer can close it, and that hides only the current text.
+  - **Plans:** admins get every plan (`planUntil` returns about 10 years from now).
+  - **Test:** `tools/test_admin.py`.
+
 ## Public link
 https://thenexusvn.github.io (GitHub Pages). Firebase project `nexus-4012e`: Google, Email/Password and Anonymous sign-in on; Firestore in asia-southeast1 with `firestore.rules` published; authorized domain `thenexusvn.github.io`.
 

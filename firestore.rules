@@ -9,11 +9,14 @@ service cloud.firestore {
     // người quản lý web: đọc và xoá được đánh giá. Thêm email vào danh sách nếu muốn nhiều người cùng quản lý.
     function isAdmin() { return signedIn() && request.auth.token.email_verified == true
       && request.auth.token.email in ['nguyenphucvy08@gmail.com']; }
+    // người bị quản trị viên chặn thì không đăng gì được nữa
+    function notBanned() { return !exists(/databases/$(database)/documents/banned/$(request.auth.uid)); }
+    function poster() { return member() && notBanned(); }
 
     // The 7-Vault: ai cũng xem được, thành viên đăng bài, chỉ người đăng được xoá
     match /docs/{id} {
       allow read: if true;
-      allow create: if member()
+      allow create: if poster()
         && request.resource.data.uid == request.auth.uid
         && str(request.resource.data.t, 120) && request.resource.data.t.size() > 0
         && str(request.resource.data.author, 40)
@@ -22,18 +25,18 @@ service cloud.firestore {
       allow update: if signedIn()
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views'])
         && request.resource.data.views == resource.data.views + 1;
-      allow delete: if member() && resource.data.uid == request.auth.uid;
+      allow delete: if (member() && resource.data.uid == request.auth.uid) || isAdmin();
     }
     match /docFiles/{id} {
       allow read: if true;
-      allow create: if member() && request.resource.data.uid == request.auth.uid && request.resource.data.data.size() < 1000000;
-      allow delete: if member() && resource.data.uid == request.auth.uid;
+      allow create: if poster() && request.resource.data.uid == request.auth.uid && request.resource.data.data.size() < 1000000;
+      allow delete: if (member() && resource.data.uid == request.auth.uid) || isAdmin();
     }
 
     // CourtDraft: thành viên tạo trận, vào hoặc rời đội; chủ trận được huỷ
     match /matches/{id} {
       allow read: if true;
-      allow create: if member()
+      allow create: if poster()
         && request.resource.data.hostUid == request.auth.uid
         && str(request.resource.data.name, 60) && request.resource.data.name.size() > 0
         && request.resource.data.n in [3, 4, 5];
@@ -41,17 +44,30 @@ service cloud.firestore {
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['A', 'B'])
         && request.resource.data.A.size() <= resource.data.n
         && request.resource.data.B.size() <= resource.data.n;
-      allow delete: if member() && resource.data.hostUid == request.auth.uid;
+      allow delete: if (member() && resource.data.hostUid == request.auth.uid) || isAdmin();
     }
 
-    // CommsHub: ai cũng đọc, thành viên nhắn (tối đa 500 ký tự), chỉ người viết được xoá
+    // CommsHub: ai cũng đọc, thành viên nhắn (tối đa 500 ký tự); người viết hoặc quản trị viên được xoá.
+    // Chỉ quản trị viên được gắn nhãn admin vào tin nhắn của mình.
     match /channels/{ch}/messages/{id} {
       allow read: if true;
-      allow create: if member()
+      allow create: if poster()
+        && request.resource.data.keys().hasOnly(['text', 'uid', 'name', 'createdAt', 'admin'])
         && request.resource.data.uid == request.auth.uid
         && str(request.resource.data.text, 500) && request.resource.data.text.size() > 0
-        && str(request.resource.data.name, 40);
-      allow delete: if member() && resource.data.uid == request.auth.uid;
+        && str(request.resource.data.name, 40)
+        && (!('admin' in request.resource.data) || (request.resource.data.admin == true && isAdmin()));
+      allow delete: if (member() && resource.data.uid == request.auth.uid) || isAdmin();
+    }
+
+    // danh sách người bị chặn và thông báo cho cả web: ai cũng đọc, chỉ quản trị viên ghi
+    match /banned/{uid} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /config/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
     }
 
     // số người online: mỗi người chỉ ghi dòng của chính mình
@@ -64,7 +80,7 @@ service cloud.firestore {
     // ===== Loopy (video) =====
     // Ai được đăng video. Muốn chỉ email trường mới đăng được, đổi dòng return thành (thay tên miền của trường):
     //   return member() && request.auth.token.email.matches('.*@truong[.]edu[.]vn$');
-    function canPost() { return member(); }
+    function canPost() { return poster(); }
     function plusMinusOne(field) {
       return request.resource.data.diff(resource.data).affectedKeys().hasOnly([field])
         && (request.resource.data[field] == resource.data[field] + 1 || request.resource.data[field] == resource.data[field] - 1);
@@ -86,12 +102,12 @@ service cloud.firestore {
               (request.resource.data.likes == resource.data.likes + 1 && existsAfter(/databases/$(database)/documents/likes/$(vid + '_' + request.auth.uid)) && !exists(/databases/$(database)/documents/likes/$(vid + '_' + request.auth.uid)))
            || (request.resource.data.likes == resource.data.likes - 1 && !existsAfter(/databases/$(database)/documents/likes/$(vid + '_' + request.auth.uid)) && exists(/databases/$(database)/documents/likes/$(vid + '_' + request.auth.uid)))))
         || (member() && plusMinusOne('comments')));
-      allow delete: if member() && resource.data.uid == request.auth.uid;
+      allow delete: if (member() && resource.data.uid == request.auth.uid) || isAdmin();
       match /comments/{cid} {
         allow read: if true;
-        allow create: if member() && request.resource.data.uid == request.auth.uid
+        allow create: if poster() && request.resource.data.uid == request.auth.uid
           && str(request.resource.data.text, 300) && request.resource.data.text.size() > 0 && str(request.resource.data.name, 40);
-        allow delete: if member() && resource.data.uid == request.auth.uid;
+        allow delete: if (member() && resource.data.uid == request.auth.uid) || isAdmin();
       }
     }
     match /likes/{id} {
@@ -134,7 +150,7 @@ service cloud.firestore {
     // SonicDeck: nhạc cộng đồng. Ai cũng nghe được; thành viên đăng file (Cloudinary) hoặc link YouTube; chỉ người đăng được xoá
     match /songs/{id} {
       allow read: if true;
-      allow create: if member()
+      allow create: if poster()
         && request.resource.data.keys().hasOnly(['uid', 'name', 'title', 'artist', 'genre', 'kind', 'url', 'yt', 'dur', 'plays', 'createdAt'])
         && request.resource.data.uid == request.auth.uid
         && str(request.resource.data.title, 100) && request.resource.data.title.size() > 0
@@ -145,7 +161,7 @@ service cloud.firestore {
       allow update: if signedIn()
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['plays'])
         && request.resource.data.plays == resource.data.plays + 1;
-      allow delete: if member() && resource.data.uid == request.auth.uid;
+      allow delete: if (member() && resource.data.uid == request.auth.uid) || isAdmin();
     }
 
     // Góp ý / đánh giá web: ai cũng gửi được (kể cả khách), chỉ người quản lý đọc và xoá
