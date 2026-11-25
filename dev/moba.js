@@ -1121,7 +1121,7 @@ function frame(ts){if(!running)return;raf=requestAnimationFrame(frame);let dt=(t
   else if(state==='end'&&M){step(dt);syncModels(dt);present(scene,camera);}
   else{if(state==='select')selectTick(dt);if(state==='loading')loadingTick(dt);lobbyFrame(dt);LS.cam.aspect=camera.aspect;LS.cam.updateProjectionMatrix();renderer.domElement.style.filter='';present(LS.scene,LS.cam);}}
 ppSetup();screenLobby();
-return{start(){if(running)return;running=true;resize();last=performance.now();raf=requestAnimationFrame(frame);},stop(){running=false;cancelAnimationFrame(raf);keys.clear();attackHeld=false;},
+return{start(){if(running)return;running=true;try{if(AC&&AC.state==='suspended')AC.resume();}catch(_){}resize();last=performance.now();raf=requestAnimationFrame(frame);},stop(){running=false;cancelAnimationFrame(raf);keys.clear();attackHeld=false;try{if(AC&&AC.state==='running')AC.suspend();}catch(_){}},
   _dbg:{get M(){return M;},SET,Q,PP,applyGfx,openSettings,get AIM(){return AIM;},skillDown,skillUp,step,startMatch,screenLobby,screenSelect,HEROES,castSkill,tryAttack,get state(){return state;},syncModels,hudUpdate,camUpdate,get save(){return save;},quickBuy,endMatch}};
 }
 window.NexusMoba={create};

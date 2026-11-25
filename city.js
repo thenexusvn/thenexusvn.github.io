@@ -3358,9 +3358,9 @@ if(tut.on)banner('Chào mừng tới Nexus City','Làm theo hướng dẫn ở g
 else banner('Nexus City','Bấm M để mở bản đồ và chọn nơi muốn tới. Cột xanh lá giữa trung tâm là ngân hàng.');
 const api={
   setGfx(v){PP.on=v!=='low';resize();},
-  start(){paused=false;active=true;keys.clear();last=performance.now();cancelAnimationFrame(raf);raf=requestAnimationFrame(frame);resize();},
+  start(){paused=false;active=true;keys.clear();try{if(sfxAC&&sfxAC.state==='suspended')sfxAC.resume();}catch(_){}last=performance.now();cancelAnimationFrame(raf);raf=requestAnimationFrame(frame);resize();},
   setPaused(p){paused=p;active=!p;keys.clear();cam.rmb=false;tb.block=false;if(p)radioStop();else{last=performance.now();if(P.car&&radio.idx>=0)radioPlay();}},
-  stop(){cancelAnimationFrame(raf);active=false;paused=true;keys.clear();radioStop();writeSave();},
+  stop(){cancelAnimationFrame(raf);active=false;paused=true;keys.clear();radioStop();try{if(sfxAC&&sfxAC.state==='running')sfxAC.suspend();}catch(_){}writeSave();},
   resume(){active=true;paused=false;keys.clear();cam.rmb=false;last=performance.now();cancelAnimationFrame(raf);raf=requestAnimationFrame(frame);resize();if(P.car&&radio.idx>=0)radioPlay();},
   resize,
   get save(){return save;},

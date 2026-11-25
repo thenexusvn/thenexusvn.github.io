@@ -762,8 +762,8 @@ function frame(now){raf=requestAnimationFrame(frame);const raw=(now-last)/1000||
 function resize(){const w=view.clientWidth||innerWidth,h=view.clientHeight||innerHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();lobby.cam.aspect=w/h;lobby.cam.updateProjectionMatrix();}
 addEventListener('resize',()=>{if(!view.closest('[hidden]'))resize();});
 lobbyHero();renderLobby();hudShow('lobby');
-const api={start(){running=true;active=true;last=performance.now();cancelAnimationFrame(raf);raf=requestAnimationFrame(frame);resize();},
-  stop(){running=false;active=false;keys.clear();mouseL=false;cancelAnimationFrame(raf);if(locked)document.exitPointerLock();if(phase==='match'&&!ended){/* leaving mid-match counts as a loss without reward */phase='lobby';toLobby();}writeSave();},
+const api={start(){running=true;active=true;try{if(AC&&AC.state==='suspended')AC.resume();}catch(_){}last=performance.now();cancelAnimationFrame(raf);raf=requestAnimationFrame(frame);resize();},
+  stop(){running=false;active=false;keys.clear();mouseL=false;try{if(AC&&AC.state==='running')AC.suspend();}catch(_){}cancelAnimationFrame(raf);if(locked)document.exitPointerLock();if(phase==='match'&&!ended){/* leaving mid-match counts as a loss without reward */phase='lobby';toLobby();}writeSave();},
   setPaused(p){running=!p;active=!p;keys.clear();mouseL=false;if(p&&locked)document.exitPointerLock();if(!p){last=performance.now();}},
   resize,get save(){return save;},
   _dbg:{P,bots,items,cars,zone,plane,cam,keys,step,startMatch,beginMatch,toLobby,jump,openChute,playerFire,playerPick,heightAt,info:()=>renderer.info.render,render:()=>renderer.render(phase==='lobby'?lobby.scene:scene,phase==='lobby'?lobby.cam:camera),camUpdate,scene,camera,get phase(){return phase;},get alive(){return aliveCount;},MODES,SKINS,save,TOWNS,lootPts,openShop,openTopup,renderer}};

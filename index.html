@@ -2535,7 +2535,7 @@ const wrap=$('#city');let game=null,loading=false,char='joseph';
 function recText(sv){const r=$('#cityRec');if(r&&sv){r.textContent='Tiền của bạn: $'+Math.round(sv.money).toLocaleString('vi-VN')+(sv.heists?` · ${sv.heists} vụ cướp ngân hàng`:'');r.classList.remove('none');}}
 try{const sv=JSON.parse(localStorage.getItem('nexus-city2-save')||'null');if(sv){if(sv.char)char=sv.char;recText(sv);}}catch(_){}
 function load(src){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=()=>{s.remove();rej(new Error(src));};document.head.appendChild(s);});}
-async function ensure(){if(!window.THREE)await load('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js');if(!window.NexusCity2)await load('city.js?v=20261125g');}
+async function ensure(){if(!window.THREE)await load('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js');if(!window.NexusCity2)await load('city.js?v=20261125h');}
 let gfx=localStorage.getItem('nexus-city-gfx')||(matchMedia('(pointer:coarse)').matches?'low':'high');
 function setGfx(v){gfx=v;try{localStorage.setItem('nexus-city-gfx',v);}catch(_){}document.querySelectorAll('[data-gfx]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.gfx===v)));if(game&&game.setGfx)game.setGfx(v);}
 document.querySelectorAll('[data-gfx]').forEach(b=>b.addEventListener('click',()=>setGfx(b.dataset.gfx)));setGfx(gfx);
@@ -2558,7 +2558,7 @@ addEventListener('keydown',e=>{if(wrap.hidden||!game)return;if(e.key.toLowerCase
 addEventListener('blur',()=>{if(game&&!wrap.hidden&&$('#cStart').hidden)pause();});
 let stale=false;
 if(window.NexusData)window.NexusData.on('sync',e=>{if(!(e.changed||[]).includes('city'))return;try{const sv=JSON.parse(localStorage.getItem('nexus-city2-save')||'null');if(sv){if(sv.char)setChar(sv.char);recText(sv);}else{const r=$('#cityRec');if(r)r.classList.add('none');}}catch(_){}if(game)stale=true;});
-function open(){if(stale){location.reload();return;}wrap.hidden=false;if(game)pause();else showStart('new');}
+function open(){if(stale){location.reload();return;}if(window.NexusLastZone)window.NexusLastZone.close();if(window.NexusMobaUI)window.NexusMobaUI.close();wrap.hidden=false;if(game)pause();else showStart('new');}
 function close(){if(wrap.hidden)return;wrap.hidden=true;if(game){game.stop();$('#cPause').textContent='Tiếp tục';}}
 window.addEventListener('hashchange',close);
 window.NexusCity={open,close,get game(){return game;}};
@@ -2571,7 +2571,7 @@ const $=s=>document.querySelector(s);const wrap=$('#nlw');let game=null,loading=
 function recText(sv){const r=$('#nlRec');if(r&&sv&&sv.matches){r.textContent=`Cấp ${sv.lv} · ${sv.matches} trận · ${sv.wins} trận thắng · ${sv.mvp} MVP`;r.classList.remove('none');}}
 try{recText(JSON.parse(localStorage.getItem('nexus-moba-save')||'null'));}catch(_){}
 function load(src){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=()=>{s.remove();rej(new Error(src));};document.head.appendChild(s);});}
-async function ensure(){if(!window.THREE)await load('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js');if(!window.NexusMoba)await load('moba.js?v=7');}
+async function ensure(){if(!window.THREE)await load('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js');if(!window.NexusMoba)await load('moba.js?v=8');}
 async function open(){if(window.NexusCity)window.NexusCity.close();if(window.NexusLastZone)window.NexusLastZone.close();wrap.hidden=false;if(game){game.start();return;}if(loading)return;loading=true;$('#nlStatus').textContent='Đang dựng đấu trường, chờ vài giây...';
   try{await ensure();}catch(_){$('#nlStatus').textContent='Chưa tải được thư viện 3D. Kiểm tra mạng rồi thử lại.';loading=false;return;}
   await new Promise(r=>setTimeout(r,40));
@@ -2589,10 +2589,10 @@ const $=s=>document.querySelector(s);const wrap=$('#lz');let game=null,loading=f
 function recText(sv){const r=$('#lzRec');if(r&&sv&&sv.stats&&sv.stats.matches){r.textContent=`${sv.stats.matches} trận · ${sv.stats.wins} lần Top 1 · ${sv.stats.kills} hạ gục`;r.classList.remove('none');}}
 try{recText(JSON.parse(localStorage.getItem('lastzone-save')||'null'));}catch(_){}
 function load(src){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=()=>{s.remove();rej(new Error(src));};document.head.appendChild(s);});}
-async function ensure(){if(!window.THREE)await load('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js');if(!window.LastZone)await load('lastzone.js');}
+async function ensure(){if(!window.THREE)await load('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js');if(!window.LastZone)await load('lastzone.js?v=20261125h');}
 let stale=false;
 if(window.NexusData)window.NexusData.on('sync',e=>{if(!(e.changed||[]).includes('lastzone'))return;const sv=(()=>{try{return JSON.parse(localStorage.getItem('lastzone-save')||'null');}catch(_){return null;}})();const r=$('#lzRec');if(sv)recText(sv);else if(r)r.classList.add('none');if(game)stale=true;});
-async function open(){if(stale){location.reload();return;}if(window.NexusCity)window.NexusCity.close();wrap.hidden=false;if(game){game.start();return;}if(loading)return;loading=true;$('#lzStatus').textContent='Đang dựng đảo, chờ vài giây...';
+async function open(){if(stale){location.reload();return;}if(window.NexusCity)window.NexusCity.close();if(window.NexusMobaUI)window.NexusMobaUI.close();wrap.hidden=false;if(game){game.start();return;}if(loading)return;loading=true;$('#lzStatus').textContent='Đang dựng đảo, chờ vài giây...';
   try{await ensure();}catch(_){$('#lzStatus').textContent='Chưa tải được thư viện 3D. Kiểm tra mạng rồi thử lại.';loading=false;return;}
   await new Promise(r=>setTimeout(r,40));
   try{const u=window.NexusData&&window.NexusData.user;game=window.LastZone.create({view:$('#lzView'),hudRoot:$('#lzHud'),mobile:matchMedia('(pointer:coarse)').matches,playerName:u&&!u.anon?u.name:'',onSave:sv=>{recText(sv);if(!stale&&window.NexusData)window.NexusData.saveGame('lastzone',sv);}});}
