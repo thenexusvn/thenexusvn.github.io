@@ -252,3 +252,9 @@ Python helper scripts used during development:
   - `friends/{a_b}` {users, by, status}: lời mời (pending) → chấp nhận (ok).
   - `rooms/{id}` {type dm|group, members, owner, name, names, last, lastBy, lastAt} và `rooms/{id}/messages`. DM có id `dm_a_b`.
 - Chấm xanh online lấy từ `presence`. Chưa đọc: so `lastAt` với `localStorage['nexus-read-<id>']`.
+
+## Một tài khoản cho cả Nexus và Loopy, thẻ trang cá nhân (11/2026)
+- Loopy lấy tên và ảnh đại diện từ `profiles` (bảng `PROF` trong script Loopy, hàm `pname`, `av`), không còn dùng tên lưu riêng. Trang hồ sơ Loopy có nút Sửa tên & ảnh (→ #sign-in), Kết bạn, Nhắn tin.
+- Thẻ trang cá nhân `#pcModal` (`openCard(uid)`, `window.NexusHub.card`): ảnh, tên, trạng thái online/bạn bè, số Video / Người theo dõi / Đang theo dõi (từ `users/{uid}` và video Loopy), nút Theo dõi, Kết bạn, Nhắn tin, Xem video. Mở bằng cách bấm ảnh hoặc tên trong danh sách mọi người, trong tin nhắn, hoặc tên người ở đầu chat riêng.
+- Trang Tài khoản (#sign-in) có phần sửa tên + chọn ảnh đại diện (`#siAcct`, `ND.setProfile`).
+- API dùng chung giữa hai script: `window.NexusHub` {ready, dm, friendToggle, friendLabel, card} và `window.NexusLoopy` {open, follow, isFollowing, videosOf}.
