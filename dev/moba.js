@@ -90,7 +90,7 @@ opt=opt||{};
 const view=opt.view,hud=opt.hudRoot,MOBILE=!!opt.mobile;
 /* ---------- settings (saved per browser) ---------- */
 const SKEY='nexus-moba-set';
-const SET=Object.assign({gfx:MOBILE?'med':'high',dynres:true,fps:60,showFps:false,camAng:40,camDist:1,aim:'hold',prio:'lowhp',dmg:true,shake:true,hpNum:false,sfx:80,btn:100},(()=>{try{const o=JSON.parse(localStorage.getItem(SKEY)||'{}');if(!o.gfx&&localStorage.getItem('nexus-moba-gfx')==='low')o.gfx='low';return o;}catch(_){return{};}})());
+const SET=Object.assign({gfx:MOBILE?'med':'high',glow:true,dynres:true,fps:60,showFps:false,camAng:40,camDist:1,aim:'hold',prio:'lowhp',dmg:true,shake:true,hpNum:false,sfx:80,btn:100},(()=>{try{const o=JSON.parse(localStorage.getItem(SKEY)||'{}');if(!o.gfx&&localStorage.getItem('nexus-moba-gfx')==='low')o.gfx='low';return o;}catch(_){return{};}})());
 function saveSet(){try{localStorage.setItem(SKEY,JSON.stringify(SET));}catch(_){}}
 const GFX={low:{shadows:false,dpr:1,sm:0,pp:false,grass:.35},med:{shadows:true,dpr:1.25,sm:1024,pp:false,grass:.7},high:{shadows:true,dpr:MOBILE?1.5:2,sm:2048,pp:!MOBILE,grass:1},ultra:{shadows:true,dpr:2,sm:4096,pp:true,grass:1.6}};
 const Q={};function qFrom(){const g=GFX[SET.gfx]||GFX.high;Object.assign(Q,g,{dpr:Math.min(devicePixelRatio||1,g.dpr)});Q.dprBase=Q.dpr;}qFrom();
@@ -844,7 +844,7 @@ function playerControl(u,dt){let ix=0,iz=0;if(keys.has('w')||keys.has('arrowup')
   u.mv=0;}
 /* mobile joystick and skill buttons with drag-to-aim */
 const MOBILE_AIM={i:-1,dir:null,pt:null,tgt:null};let aimMesh=null;
-function aimShow(u,i,dx,dz,len){if(!aimMesh){aimMesh=new T.Group();const ag=new T.PlaneGeometry(1,1);ag.rotateX(-Math.PI/2);const a=new T.Mesh(ag,new T.MeshBasicMaterial({color:0x7df9ff,transparent:true,opacity:.35,depthWrite:false}));a.name='a';aimMesh.add(a);
+function aimShow(u,i,dx,dz,len){if(!aimMesh){aimMesh=new T.Group();const ag=new T.PlaneGeometry(1,1);ag.rotateX(-Math.PI/2);const a=new T.Mesh(ag,new T.MeshBasicMaterial({color:0x7df9ff,transparent:true,opacity:.5,depthWrite:false,depthTest:false}));a.renderOrder=5;a.name='a';aimMesh.add(a);
     const c=new T.Mesh(new T.RingGeometry(.9,1,40),new T.MeshBasicMaterial({color:0x7df9ff,transparent:true,opacity:.7,side:T.DoubleSide,depthWrite:false}));c.rotation.x=-Math.PI/2;c.name='c';aimMesh.add(c);
     const rg=new T.Mesh(new T.RingGeometry(.97,1,64),new T.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.35,side:T.DoubleSide,depthWrite:false}));rg.rotation.x=-Math.PI/2;rg.name='r';aimMesh.add(rg);scene.add(aimMesh);}
   const s=i===3?{k:'dir',r:5.5}:u.def.sk[i],R=s.r||6;aimMesh.visible=true;aimMesh.position.set(u.x,.12,u.z);const a=aimMesh.getObjectByName('a'),c=aimMesh.getObjectByName('c'),rg=aimMesh.getObjectByName('r');
@@ -1039,7 +1039,7 @@ function buildHud(){const me=M.me,h=me.def;
   H.qb.onclick=quickBuy;
   // skill pad: tap = auto aim, drag = aim
   H.pad.querySelectorAll('button').forEach(b=>{const k=b.dataset.k;let st=null;
-    b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture(e.pointerId);st={x:e.clientX,y:e.clientY,aim:false};if(k==='atk'){attackHeld=true;attackTapT=.6;}});
+    b.addEventListener('pointerdown',e=>{e.preventDefault();try{b.setPointerCapture(e.pointerId);}catch(_){}st={x:e.clientX,y:e.clientY,aim:false};if(k==='atk'){attackHeld=true;attackTapT=.6;}});
     b.addEventListener('pointermove',e=>{if(!st||k==='atk'||k==='rc')return;const dx=e.clientX-st.x,dy=e.clientY-st.y,l=hyp(dx,dy);if(l>16){st.aim=true;const i=+k;const s=i===3?{k:'dir'}:M.me.def.sk[i];if(s.k==='self'&&i!==3)return;AIM=null;aimShow(M.me,i,dx/l,dy/l,l/90);}});
     const up=e=>{if(!st)return;if(k==='atk'){attackHeld=false;}else if(k==='rc'){startRecall(M.me);}else{const i=+k;if(e.pointerType==='mouse'&&!st.aim){st=null;skillDown(i,'click');return;}if(i===3)playerFlash();else playerCast(i);}aimHide();st=null;};
     b.addEventListener('pointerup',up);b.addEventListener('pointercancel',()=>{st=null;attackHeld=false;aimHide();});});
