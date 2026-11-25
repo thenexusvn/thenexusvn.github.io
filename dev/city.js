@@ -93,11 +93,11 @@ const Q={peds:MOBILE?14:22,traffic:MOBILE?14:24,shadows:!MOBILE,pr:MOBILE?1:Math
 
 /* ---------- save ---------- */
 const SAVE_KEY='nexus-city2-save';
-let save={money:500,char:'minh',tutDone:false,bankCD:0,heists:0,hour:17,radio:0,outfit:'base',outfits:['base'],cap:false,capOwned:false,up:{str:0,hp:0,run:0},weapons:{},ammo:{pistol:0,smg:0,rifle:0},armor:0,garage:[],apt:false,lang:null};
+let save={money:500,char:'joseph',tutDone:false,bankCD:0,heists:0,hour:17,radio:0,outfit:'base',outfits:['base'],cap:false,capOwned:false,up:{str:0,hp:0,run:0},weapons:{},ammo:{pistol:0,smg:0,rifle:0},armor:0,garage:[],apt:false,lang:null};
 try{const s=JSON.parse(localStorage.getItem(SAVE_KEY)||'null');if(s)Object.assign(save,s);}catch(_){}
 save.up=Object.assign({str:0,hp:0,run:0},save.up);save.ammo=Object.assign({pistol:0,smg:0,rifle:0},save.ammo);save.weapons=save.weapons||{};save.garage=save.garage||[];save.outfits=save.outfits||['base'];
 const maxHp=()=>100+50*(save.up.hp|0);
-if(opt.char)save.char=opt.char;
+if(opt.char)save.char=opt.char;if(save.char==='minh'||!save.char)save.char='joseph';if(save.char==='vy')save.char='oscar';
 function writeSave(){try{save.hour=Math.round(tod.hour*100)/100;}catch(_){}try{localStorage.setItem(SAVE_KEY,JSON.stringify(save));}catch(_){}if(opt.onSave)opt.onSave(save);}
 
 /* ---------- renderer, scene, sky ---------- */
@@ -1199,32 +1199,66 @@ const SHIRT=['#e63946','#f1faee','#457b9d','#2a9d8f','#e9c46a','#f4a261','#fffff
 const shadowMat=new T.MeshBasicMaterial({color:0x000000,transparent:true,opacity:.28,depthWrite:false});
 const HUMAT=new T.MeshStandardMaterial({vertexColors:true,roughness:.82});
 const humanPool=[];
+/* realistic-ish people: smooth lathe-turned bodies, face with eyes, brows, ears and mouth, real hair styles, hands, sneakers, jackets */
+const HG2=(()=>{const V=(x,y)=>new T.Vector2(x,y);
+  const limb=(r0,r1,len,bul)=>{const p=[];const n=5;for(let i=0;i<=n;i++){const a=i/n*Math.PI/2;p.push(V(Math.sin(a)*r1,-len-Math.cos(a)*r1*.7));}
+    p.push(V(r1*1.03,-len*.78),V((r0+r1)/2*(1+bul),-len*.42),V(r0*1.02,-len*.12));for(let i=0;i<=n;i++){const a=(1-i/n)*Math.PI/2;p.push(V(Math.sin(a)*r0,Math.cos(a)*r0*.65));}return new T.LatheGeometry(p,14);};
+  const torso=(w,c,s)=>new T.LatheGeometry([V(0,-.02),V(w*.98,-.015),V(w,.05),V(w*1.08,.14),V(c,.28),V(c*1.02,.38),V(s,.47),V(s*.82,.54),V(.075,.585),V(0,.59)],18);
+  const pelvis=(w)=>new T.LatheGeometry([V(0,-.14),V(w*.72,-.13),V(w*.97,-.06),V(w,.03),V(w*.9,.085),V(0,.09)],18);
+  const belt=new T.TorusGeometry(.163,.014,6,28);belt.rotateX(Math.PI/2);
+  const pony=new T.CylinderGeometry(.045,.018,.34,10);pony.translate(0,-.17,0);pony.rotateX(.42);
+  const longH=new T.CylinderGeometry(.115,.09,.34,16,1,true,Math.PI*.55,Math.PI*.9);longH.translate(0,-.17,0);
+  const bun=new T.SphereGeometry(.06,12,10);
+  const thumb=new T.CylinderGeometry(.014,.012,.05,6);thumb.rotateZ(.6);
+  return{torsoM:torso(.15,.195,.205),torsoF:torso(.13,.175,.172),pelvisM:pelvis(.165),pelvisF:pelvis(.182),belt,
+    upper:limb(.058,.046,.3,.12),fore:limb(.047,.035,.27,.1),thigh:limb(.092,.064,.45,.08),shin:limb(.066,.044,.42,.14),
+    head:new T.SphereGeometry(.118,24,18),jaw:new T.SphereGeometry(.09,18,12),ear:new T.SphereGeometry(.026,8,6),nose:new T.SphereGeometry(.021,10,8),eye:new T.SphereGeometry(.0185,10,8),iris:new T.SphereGeometry(.0105,8,6),
+    brow:new T.BoxGeometry(.048,.011,.014),mouth:new T.BoxGeometry(.044,.009,.01),neck:new T.CylinderGeometry(.052,.058,.13,12),
+    hairCap:new T.SphereGeometry(.126,24,12,0,Math.PI*2,0,Math.PI*.5),hairBack:new T.SphereGeometry(.124,20,10,Math.PI*.2,Math.PI*1.6,Math.PI*.35,Math.PI*.3),pony,longH,bun,
+    bust:new T.SphereGeometry(.068,14,10),panel:new T.BoxGeometry(.17,.4,.016),collar:new T.TorusGeometry(.085,.016,6,20,Math.PI),
+    hand:new T.SphereGeometry(.048,12,10),thumb,shoe:new T.SphereGeometry(.07,14,10),sole:new T.BoxGeometry(.118,.03,.275),glasses:new T.TorusGeometry(.024,.004,6,14),cap:HG.cap,brim:HG.brim,skirt:HG.skirt,shadow:HG.shadow};})();
+const mixHex=(a,b,k)=>{const A=new T.Color(a),B=new T.Color(b);return '#'+A.lerp(B,k).getHexString();};
 function makeHuman(o){
   const mk=(parts,parent,pos)=>{const me=new T.Mesh(buildVC(parts),HUMAT);me.castShadow=Q.shadows;if(pos)me.position.set(...pos);parent.add(me);return me;};
-  const root=new T.Group(),hips=new T.Group();root.rotation.order='YXZ';hips.position.y=.95;root.add(hips);
-  const hp=[{geo:HG.pelvis,color:o.pants}];if(o.skirt)hp.push({geo:HG.skirt,color:o.pants,pos:[0,-.1,0]});mk(hp,hips);
+  const F=!!o.female,G=HG2,style=o.hairStyle||(o.longHair?'long':F?'pony':'short'),top=o.jacket||o.shirt;
+  const root=new T.Group(),hips=new T.Group();root.rotation.order='YXZ';hips.position.y=.95;root.add(hips);if(F)root.scale.setScalar(.95);
+  const hp=[{geo:F?G.pelvisF:G.pelvisM,color:o.pants,scale:[1,1,.72]},{geo:G.belt,color:'#2a2522',pos:[0,.06,0],scale:[F?1.08:1,1,.72]}];if(o.skirt)hp.push({geo:G.skirt,color:o.pants,pos:[0,-.1,0]});mk(hp,hips);
   const spine=new T.Group();spine.position.y=.06;hips.add(spine);
-  mk([{geo:HG.torso,color:o.shirt,pos:[0,.32,0],scale:[o.female?.9:1,1,.66]},{geo:HG.neck,color:o.skin,pos:[0,.66,0]}],spine);
-  const head=new T.Group();head.position.y=.82;spine.add(head);
-  const hd=[{geo:HG.head,color:o.skin,scale:[1,1.12,1.05]},{geo:HG.hair,color:o.hair,pos:[0,.022,0],scale:[1.03,1.04,1.1]},{geo:HG.eye,color:'#151515',pos:[-.048,.02,.133]},{geo:HG.eye,color:'#151515',pos:[.048,.02,.133]},{geo:HG.nose,color:o.skin,pos:[0,-.02,.145]}];
-  if(o.longHair)hd.push({geo:HG.hairLong,color:o.hair,pos:[0,-.13,-.1]});if(o.cap)hd.push({geo:HG.cap,color:o.cap,pos:[0,.1,0]},{geo:HG.brim,color:o.cap,pos:[0,.07,.13]});
+  const sp=[{geo:F?G.torsoF:G.torsoM,color:top,scale:[1,1,.64]},{geo:G.neck,color:o.skin,pos:[0,.63,0]}];
+  if(F)for(const s of[-1,1])sp.push({geo:G.bust,color:top,pos:[s*.068,.34,.075],scale:[1,.95,.85]});
+  if(o.jacket){sp.push({geo:G.panel,color:o.shirt,pos:[0,.27,F?.118:.124]});sp.push({geo:G.collar,color:o.jacket,pos:[0,.55,.02],scale:[1.2,1,1]});}
+  mk(sp,spine);
+  const head=new T.Group();head.position.y=.8;spine.add(head);
+  const sk=o.skin,dk=mixHex(sk,'#000000',.18),hd=[{geo:G.head,color:sk,scale:[.95,1.1,1.04]},{geo:G.jaw,color:o.beard?mixHex(sk,o.hair,.55):sk,pos:[0,-.062,.022],scale:[F?.86:.96,.74,.95]},
+    {geo:G.ear,color:dk,pos:[-.112,-.005,0],scale:[.5,1,.8]},{geo:G.ear,color:dk,pos:[.112,-.005,0],scale:[.5,1,.8]},{geo:G.nose,color:sk,pos:[0,-.018,.118],scale:[.8,1.35,1.1]},
+    {geo:G.mouth,color:F?'#b4505c':'#8f4a46',pos:[0,-.07,.104]}];
+  for(const s of[-1,1])hd.push({geo:G.eye,color:'#f3efe8',pos:[s*.041,.016,.097],scale:[1,.8,.8]},{geo:G.iris,color:'#2a1c12',pos:[s*.041,.016,.111]},{geo:G.brow,color:o.hair,pos:[s*.042,.05,.106]});
+  if(o.glasses)for(const s of[-1,1])hd.push({geo:G.glasses,color:'#1a1a1a',pos:[s*.041,.016,.118]});
+  if(style!=='bald'){hd.push({geo:G.hairCap,color:o.hair,pos:[0,.018,-.008],scale:style==='buzz'?[.98,1.02,1.02]:[1.02,1.12,1.1]},{geo:G.hairBack,color:o.hair,pos:[0,.0,-.006],scale:[1.02,1.12,1.1]});
+    if(style==='pony')hd.push({geo:G.pony,color:o.hair,pos:[0,.03,-.115]},{geo:G.bun,color:o.hair,pos:[0,.035,-.118],scale:[.7,.7,.7]});
+    if(style==='long')hd.push({geo:G.longH,color:o.hair,pos:[0,-.0,-.012],scale:[1,1.05,1.05]});
+    if(style==='bun')hd.push({geo:G.bun,color:o.hair,pos:[0,.1,-.09]});}
+  if(o.cap)hd.push({geo:G.cap,color:o.cap,pos:[0,.1,0]},{geo:G.brim,color:o.cap,pos:[0,.07,.13]});
   mk(hd,head);
-  const arm={},el={};
-  for(const s of[-1,1]){const sh=new T.Group();sh.position.set(s*.25,.56,0);sh.rotation.z=s*.07;spine.add(sh);mk([{geo:HG.upper,color:o.sleeve===false?o.skin:o.shirt}],sh);const e=new T.Group();e.position.y=-.3;sh.add(e);mk([{geo:HG.fore,color:o.longSleeve?o.shirt:o.skin},{geo:HG.hand,color:o.skin,pos:[0,-.29,0]}],e);arm[s]=sh;el[s]=e;}
-  const leg={},kn={};
-  for(const s of[-1,1]){const hpG=new T.Group();hpG.position.set(s*.1,-.04,0);hips.add(hpG);mk([{geo:HG.thigh,color:o.skirt?o.skin:o.pants}],hpG);const k=new T.Group();k.position.y=-.46;hpG.add(k);mk([{geo:HG.shin,color:o.skirt?o.skin:o.pants},{geo:HG.foot,color:o.shoes,pos:[0,-.44,.05]}],k);leg[s]=hpG;kn[s]=k;}
-  if(!Q.shadows){const sh=new T.Mesh(HG.shadow,shadowMat);sh.position.y=.03;root.add(sh);}
+  const arm={},el={},sleeve=o.sleeve===false?o.skin:top,fore=o.longSleeve||o.jacket?top:o.skin;
+  for(const s of[-1,1]){const sh=new T.Group();sh.position.set(s*(F?.21:.235),.55,0);sh.rotation.z=s*.07;spine.add(sh);mk([{geo:G.upper,color:sleeve,scale:F?[.9,1,.9]:[1,1,1]}],sh);const e=new T.Group();e.position.y=-.3;sh.add(e);
+    mk([{geo:G.fore,color:fore,scale:F?[.9,1,.9]:[1,1,1]},{geo:G.hand,color:o.skin,pos:[0,-.3,.005],scale:[.72,1,.42]},{geo:G.thumb,color:o.skin,pos:[-s*.03,-.28,.018]}],e);arm[s]=sh;el[s]=e;}
+  const leg={},kn={},legC=o.skirt?o.skin:o.pants;
+  for(const s of[-1,1]){const hpG=new T.Group();hpG.position.set(s*(F?.095:.09),-.04,0);hips.add(hpG);mk([{geo:G.thigh,color:legC,scale:F?[1.04,1,1]:[1,1,1]}],hpG);const k=new T.Group();k.position.y=-.46;hpG.add(k);
+    mk([{geo:G.shin,color:legC},{geo:G.shoe,color:o.shoes,pos:[0,-.43,.055],scale:[.85,.62,1.9]},{geo:G.sole,color:'#e9e7e2',pos:[0,-.465,.05]}],k);leg[s]=hpG;kn[s]=k;}
+  if(!Q.shadows){const sh=new T.Mesh(G.shadow,shadowMat);sh.position.y=.03;root.add(sh);}
   scene.add(root);
   return{root,hips,spine,head,armL:arm[-1],armR:arm[1],elL:el[-1],elR:el[1],legL:leg[-1],legR:leg[1],knL:kn[-1],knR:kn[1],ph:Math.random()*6,punchT:0,side:1,guard:0,ko:0,koK:0,hitT:0};
 }
 function resetHuman(H){H.ko=0;H.koK=0;H.guard=0;H.punchT=0;H.hitT=0;H.kickT=0;H.windT=0;H.block=0;H.blockHold=false;H.root.rotation.set(0,0,0);H.root.visible=true;}
-function randomLook(kind){const f=Math.random()<.45;const o={female:f,skin:pick(SKIN),hair:pick(HAIR),shirt:pick(SHIRT),pants:pick(PANTS),shoes:pick(SHOES),longHair:f&&Math.random()<.75,skirt:f&&Math.random()<.3,sleeve:Math.random()<.6};
-  if(kind==='cop')Object.assign(o,{shirt:'#1f2d4d',pants:'#18203a',shoes:'#111111',cap:'#16203a',longSleeve:false,skirt:false,longHair:false});
-  if(kind==='guard')Object.assign(o,{shirt:'#5b6470',pants:'#25292f',shoes:'#111111',cap:'#2a2e35',skirt:false});
-  if(kind==='fighter')Object.assign(o,{female:false,shirt:pick(['#b3261e','#151515','#f1c40f']),sleeve:false,pants:pick(['#1f1f1f','#2b2f3a']),longHair:false,skirt:false});
+function randomLook(kind){const f=Math.random()<.45;const o={female:f,skin:pick(SKIN),hair:pick(HAIR),shirt:pick(SHIRT),pants:pick(PANTS),shoes:pick(SHOES),hairStyle:f?pick(['long','long','pony','bun']):pick(['short','short','buzz','bald']),beard:!f&&Math.random()<.3,glasses:Math.random()<.15,jacket:Math.random()<.25?pick(['#3d5677','#2b2b2b','#6b4a32','#4a5d3a','#7a1f2b']):null,skirt:f&&Math.random()<.3,sleeve:Math.random()<.6};
+  if(kind==='cop')Object.assign(o,{shirt:'#1f2d4d',pants:'#18203a',shoes:'#111111',cap:'#16203a',longSleeve:false,skirt:false,longHair:false,jacket:null,hairStyle:o.female?'bun':'buzz'});
+  if(kind==='guard')Object.assign(o,{shirt:'#5b6470',pants:'#25292f',shoes:'#111111',cap:'#2a2e35',skirt:false,jacket:null});
+  if(kind==='fighter')Object.assign(o,{female:false,shirt:pick(['#b3261e','#151515','#f1c40f']),sleeve:false,pants:pick(['#1f1f1f','#2b2f3a']),longHair:false,skirt:false,hairStyle:pick(['buzz','bald','short']),jacket:null});
   return o;}
-const CHARS={minh:{female:false,skin:'#d6a17a',hair:'#15110e',shirt:'#2f6fa6',pants:'#262b36',shoes:'#f4f4f4',sleeve:true,cap:null},
-  vy:{female:true,skin:'#ecc2a0',hair:'#2a1c14',longHair:true,shirt:'#e85d75',pants:'#334a70',shoes:'#f4f4f4',sleeve:false}};
+const CHARS={joseph:{female:false,skin:'#c98e66',hair:'#17110d',hairStyle:'short',beard:true,shirt:'#ecebe6',jacket:'#3d5677',pants:'#27344b',shoes:'#f2f2f0',sleeve:true,longSleeve:true,cap:null},
+  oscar:{female:true,skin:'#e9bf9b',hair:'#3a2418',hairStyle:'pony',shirt:'#b23a48',pants:'#1e2127',shoes:'#f5f5f3',sleeve:false}};
+CHARS.minh=CHARS.joseph;CHARS.vy=CHARS.oscar;
 function animHuman(H,dt,spd,t){
   if(H.ko>0||H.koK>0){const tgt=H.ko>0?1:0;H.koK+=(tgt-H.koK)*Math.min(1,dt*(tgt?6:2.5));if(H.koK<.01&&!H.ko)H.koK=0;H.root.rotation.x=-Math.PI/2*H.koK;H.root.position.y+=.18*H.koK;if(H.ko>0)return;}
   const amp=Math.min(1,spd/5.5),run=spd>7;
@@ -1760,7 +1794,7 @@ function sleepHome(){stashAtHome();if(stars===0){const h=tod.hour;if(h>20||h<6){
 const OUTFITS={base:{n:'Đồ mặc định',p:0},white:{n:'Áo thun trắng',p:150,shirt:'#f1faee',pants:'#2b2f3a',sleeve:false},sport:{n:'Đồ thể thao đỏ',p:250,shirt:'#e63946',pants:'#1f1f1f',shoes:'#f4f4f4',sleeve:false},
   shirt:{n:'Sơ mi xanh dài tay',p:300,shirt:'#457b9d',pants:'#3a4a6b',longSleeve:true,sleeve:true},summer:{n:'Váy hè hồng',p:350,shirt:'#ffd6e8',pants:'#ff8fab',skirt:true,sleeve:false},hoodie:{n:'Hoodie đen',p:450,shirt:'#151515',pants:'#262b36',longSleeve:true,sleeve:true},
   leather:{n:'Áo khoác da nâu',p:700,shirt:'#4a2c1c',pants:'#111111',shoes:'#1d1d1d',longSleeve:true,sleeve:true},nexus:{n:'Bộ Nexus chanh tím',p:900,shirt:'#c1f354',pants:'#2a1d4a',shoes:'#ad8dff',sleeve:false}};
-function playerLook(){const b=Object.assign({},CHARS[save.char]||CHARS.minh),o=OUTFITS[save.outfit]||{};for(const k of['shirt','pants','shoes','sleeve','longSleeve','skirt'])if(o[k]!==undefined)b[k]=o[k];b.cap=save.cap?'#1d1d1d':null;if(save.outfit==='nexus'&&save.cap)b.cap='#ad8dff';return b;}
+function playerLook(){const b=Object.assign({},CHARS[save.char]||CHARS.minh),o=OUTFITS[save.outfit]||{};for(const k of['shirt','pants','shoes','sleeve','longSleeve','skirt'])if(o[k]!==undefined)b[k]=o[k];if(o.shirt!==undefined){b.jacket=null;if(o.longSleeve===undefined)b.longSleeve=false;}b.cap=save.cap?'#1d1d1d':null;if(save.outfit==='nexus'&&save.cap)b.cap='#ad8dff';return b;}
 function rebuildPlayer(){const old=P.H;const H=makeHuman(playerLook());H.root.position.copy(old.root.position);H.root.rotation.copy(old.root.rotation);H.root.visible=old.root.visible;scene.remove(old.root);old.root.traverse(o=>{if(o.geometry&&o.material===HUMAT)o.geometry.dispose();});P.H=H;if(weaponMesh)attachWeapon();}
 const VEH={bike:{n:'Xe máy',p:1500},sedan:{n:'Sedan gia đình',p:6000},suv:{n:'SUV 7 chỗ',p:11000},sports:{n:'Xe thể thao',p:24000},super:{n:'Siêu xe Nexus GT',p:60000}};
 const SHOPS={
@@ -2093,7 +2127,7 @@ function tutUpdate(dt){if(!tut.on)return;const s=TUT[tut.step];if(s.t==='Lái xe
 function endTut(){tut.on=false;save.tutDone=true;writeSave();if(!mis)MK.target.visible=false;hud.help.hidden=true;}
 
 /* ---------- world init ---------- */
-wildPark();const homeCar=newCar('sports',spots.driveway.length?SP.house.x+6.2:0,SP.house.z+5,Math.PI,'parked',save.char==='vy'?'#ff4d6d':'#c1f354');
+wildPark();const homeCar=newCar('sports',spots.driveway.length?SP.house.x+6.2:0,SP.house.z+5,Math.PI,'parked',save.char==='oscar'?'#ff4d6d':'#c1f354');
 homeCar.driver=false;{const rp=roadProj(SP.house.door.x,SP.house.door.z),hz=Math.abs(rp.z-SP.house.door.z)>Math.abs(rp.x-SP.house.door.x);SP.garage=hz?{x:rp.x+8,z:rp.z+(SP.house.door.z>rp.z?LANE:-LANE),h:SP.house.door.z>rp.z?Math.PI/2:-Math.PI/2}:{x:rp.x+(SP.house.door.x>rp.x?LANE:-LANE),z:rp.z,h:0};SP.garageBtn={x:SP.house.door.x+4.5,z:SP.house.door.z};}
 for(const s of spots.display)newCar(pick(['sports','super','suv']),s[0],s[1],s[2],'parked').driver=false;{const dw=spots.driveway.find(s=>Math.abs(s[0]-(SP.house.x+6))<6&&Math.abs(s[1]-SP.house.z)<12);if(dw){homeCar.x=dw[0];homeCar.z=dw[1];homeCar.h=dw[2];syncCar(homeCar);}}
 for(const s of spots.parking.slice(0,14))newCar(pick(['sedan','suv','sports']),s[0]+rnd(-3,3),s[1]+rnd(-3,3),pick([0,Math.PI/2,Math.PI,-Math.PI/2]),'parked');
@@ -2116,9 +2150,9 @@ const css=document.createElement('style');css.textContent=`
 .nc *{box-sizing:border-box}
 .nc [hidden]{display:none!important}
 .nc-tr{position:absolute;right:18px;top:62px;text-align:right;display:grid;gap:2px;justify-items:end}
-.nc-money{font:700 34px "Space Grotesk",Inter,sans-serif;letter-spacing:.01em;color:#fff;-webkit-text-stroke:1.2px #0a0a0a;paint-order:stroke fill;font-variant-numeric:tabular-nums}
+.nc-money{font:400 40px Impact,Haettenschweiler,"Arial Narrow Bold","Oswald",sans-serif;letter-spacing:.04em;color:#4fae4a;-webkit-text-stroke:2px #0a0a0a;text-shadow:0 2px 0 #000;paint-order:stroke fill;font-variant-numeric:tabular-nums}
 .nc-dirty{font:600 15px Inter,sans-serif;color:#7dffa0;-webkit-text-stroke:.8px #0a0a0a;paint-order:stroke fill}
-.nc-stars{font-size:26px;letter-spacing:2px;-webkit-text-stroke:1px #000;paint-order:stroke fill}
+.nc-stars{font-size:28px;letter-spacing:2px;color:#f2c230;-webkit-text-stroke:1.4px #000;paint-order:stroke fill}
 .nc-stars i{font-style:normal;color:rgba(255,255,255,.28)}.nc-stars i.on{color:#fff}
 .nc-stars.blink i.on{animation:ncb .6s steps(2) infinite}@keyframes ncb{50%{opacity:.3}}
 .nc-fist{min-width:44px;height:44px;padding:0 10px;border-radius:10px;background:rgba(0,0,0,.45);display:flex;align-items:center;gap:6px;justify-content:center;font:700 14px Inter,sans-serif;margin-top:4px;pointer-events:auto;cursor:pointer}.nc-fist .e{font-size:22px}
@@ -2126,7 +2160,7 @@ const css=document.createElement('style');css.textContent=`
 .nc-mini{position:absolute;left:18px;bottom:18px;width:230px}
 .nc-mini canvas{display:block;width:230px;height:150px;border-radius:10px;border:2px solid rgba(0,0,0,.6);box-shadow:0 4px 18px rgba(0,0,0,.35)}
 .nc-ar{height:5px!important;margin-top:3px!important}.nc-ar i{background:#5aa9ff!important}
-.nc-hp{height:8px;margin-top:6px;border-radius:4px;background:rgba(0,0,0,.55);overflow:hidden}.nc-hp i{display:block;width:100%;height:100%;background:#4ade80;transform-origin:left center;transition:transform .2s}
+.nc-hp{height:8px;margin-top:6px;border-radius:4px;background:rgba(0,0,0,.55);overflow:hidden}.nc-hp i{display:block;width:100%;height:100%;background:linear-gradient(180deg,#e0473b,#a8231b);transform-origin:left center;transition:transform .2s}
 .nc-help{position:absolute;left:18px;top:62px;max-width:340px;background:rgba(10,10,14,.82);border-radius:10px;padding:12px 14px;font-size:14px;line-height:1.45;pointer-events:auto}
 .nc-help b{display:block;color:#c1f354;font-size:12px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px}
 .nc-help button{margin-top:10px;background:none;border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:8px;padding:5px 10px;font:500 12px Inter,sans-serif;cursor:pointer}
@@ -2138,7 +2172,7 @@ const css=document.createElement('style');css.textContent=`
 .nc-banner{position:absolute;left:50%;top:34%;transform:translate(-50%,-50%);text-align:center;opacity:0;transition:opacity .3s}
 .nc-banner.on{opacity:1}.nc-banner b{display:block;font:700 clamp(40px,8vw,84px) "Space Grotesk",sans-serif;-webkit-text-stroke:2px #000;paint-order:stroke fill;letter-spacing:.02em}
 .nc-banner span{font-size:16px;font-weight:600;-webkit-text-stroke:.7px #000;paint-order:stroke fill}
-.nc-speed{position:absolute;right:22px;bottom:20px;font:700 46px "Space Grotesk",sans-serif;line-height:1;text-align:right;-webkit-text-stroke:1.2px #000;paint-order:stroke fill}
+.nc-speed{position:absolute;right:22px;bottom:20px;font:400 50px Impact,Haettenschweiler,"Arial Narrow Bold",sans-serif;letter-spacing:.03em;line-height:1;text-align:right;-webkit-text-stroke:1.2px #000;paint-order:stroke fill}
 .nc-speed small{display:block;font:600 12px Inter,sans-serif}
 .nc-bar{position:absolute;left:50%;top:60%;transform:translateX(-50%);width:min(360px,70vw);text-align:center;font-size:14px;font-weight:600}
 .nc-bar div{height:10px;border-radius:5px;background:rgba(0,0,0,.55);margin-top:6px;overflow:hidden}.nc-bar i{display:block;height:100%;background:#4ade80}
@@ -2155,7 +2189,7 @@ const css=document.createElement('style');css.textContent=`
 .nc-side .nc-row button{justify-content:center}
 .nc-gps{display:flex;align-items:center;gap:6px;margin-bottom:6px;font-size:13px;font-weight:600;-webkit-text-stroke:.6px #000;paint-order:stroke fill}
 .nc-gps:empty{display:none}.nc-gps i{width:10px;height:10px;border-radius:50%;flex:none;border:1.5px solid #000}
-.nc-clock{font:600 15px "Space Grotesk",Inter,sans-serif;-webkit-text-stroke:.8px #000;paint-order:stroke fill;font-variant-numeric:tabular-nums}
+.nc-clock{font:400 26px Impact,Haettenschweiler,"Arial Narrow Bold",sans-serif;letter-spacing:.05em;color:#e8e6df;-webkit-text-stroke:1.4px #000;paint-order:stroke fill;font-variant-numeric:tabular-nums}
 .nc-foe{position:absolute;left:50%;top:70px;transform:translateX(-50%);width:min(260px,60vw);text-align:center;font-size:12px;font-weight:600;-webkit-text-stroke:.6px #000;paint-order:stroke fill}
 .nc-foe div{height:7px;border-radius:4px;background:rgba(0,0,0,.6);margin-top:4px;overflow:hidden}.nc-foe i{display:block;height:100%;background:#ff6b5d;transform-origin:left center;transition:transform .15s}
 @media (max-width:760px){.nc-map{flex-direction:column;padding-top:52px}.nc-map canvas{max-width:92vw;max-height:56vh}.nc-side{width:92vw;max-height:30vh}}
