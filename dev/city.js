@@ -8,7 +8,7 @@ const clamp=(v,a,b)=>v<a?a:v>b?b:v, rnd=(a,b)=>a+Math.random()*(b-a), pick=a=>a[
 const angD=(a,b)=>{let d=a-b;while(d>Math.PI)d-=2*Math.PI;while(d<-Math.PI)d+=2*Math.PI;return d;};
 const lerpA=(a,b,k)=>a+angD(b,a)*k;
 const fmt$=n=>'$'+Math.round(n).toLocaleString('vi-VN');
-const L=(vi,en)=>(window.NexusI18n&&window.NexusI18n.lang==='en')?en:vi;
+const L=(vi,en)=>(window.NexusI18n&&window.NexusI18n.lang==='en')?en:vi;const LL=L;
 const TT=s=>(window.NexusI18n&&window.NexusI18n.t)?window.NexusI18n.t(s):s;
 const lin=c=>new T.Color(c).convertSRGBToLinear();
 
@@ -1875,7 +1875,7 @@ function poiList(){const L=[{n:'Nhà an toàn',x:SP.house.door.x,z:SP.house.door
   const SC={food:'#ffb703',mart:'#e63946',clothes:'#ad8dff',guns:'#8f1a20',cars:'#c1f354',gym:'#2d6a4f',garage:'#ffd166'};const seen={};for(const sh of SP.shops){if(sh.id==='mart'&&seen.mart)continue;seen[sh.id]=1;L.push({n:SHOPS[sh.id].n,x:sh.x,z:sh.z,i:SC[sh.id]||'#fff'});}
   if(SP.school)L.push({n:'Trường THPT Nexus',x:SP.school.x,z:SP.school.z,i:'#f1faee'});if(SP.stadium)L.push({n:'Sân vận động',x:SP.stadium.x,z:SP.stadium.z,i:'#9aa3ad'});if(SP.apt)L.push({n:save.apt?'Căn hộ của bạn':'Căn hộ ven biển (bán)',x:SP.apt.x,z:SP.apt.z,i:'#2a9d8f'});if(SP.bigBridge)L.push({n:'Cầu dây văng',x:SP.bigBridge.x,z:SP.bigBridge.z-40,i:'#e9edf2'});
   if(!mis)for(const k in GIVERS)if(giverPos[k])L.push({n:GIVERS[k].name,x:giverPos[k].x,z:giverPos[k].z,i:GIVERS[k].css});
-  if(WILD.places)for(const p of WILD.places)L.push({n:L(p.n,p.en)+(save.disc[p.id]?' ✓':''),x:p.x,z:p.z,i:save.disc[p.id]?'#7ef9a0':'#b9c2cc'});return L.map(p=>Object.assign(p,{n:TT(p.n)}));}
+  if(WILD.places)for(const p of WILD.places)L.push({n:LL(p.n,p.en)+(save.disc[p.id]?' ✓':''),x:p.x,z:p.z,i:save.disc[p.id]?'#7ef9a0':'#b9c2cc'});return L.map(p=>Object.assign(p,{n:TT(p.n)}));}
 /* ---------- car radio: plays the Nexus Originals from SonicDeck (original, generated music only) ---------- */
 const radio={on:false,idx:typeof save.radio==='number'?save.radio:0};
 function radioNames(){return(window.NexusTracks||[]).map(t=>t.t);}
