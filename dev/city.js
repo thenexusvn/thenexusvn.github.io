@@ -93,7 +93,7 @@ function speckle(g,w,h,base,n,a){g.fillStyle=base;g.fillRect(0,0,w,h);for(let i=
 /* ======================================================================= */
 function create(opt){
 const view=opt.view,root=opt.hudRoot,MOBILE=!!opt.mobile;
-const Q={peds:MOBILE?14:22,traffic:MOBILE?14:24,shadows:!MOBILE,pr:MOBILE?1:Math.min(window.devicePixelRatio||1,1.5),cull:MOBILE?130:175,tex:MOBILE?256:512};
+const Q={peds:MOBILE?16:34,traffic:MOBILE?16:34,shadows:!MOBILE,pr:MOBILE?1:Math.min(window.devicePixelRatio||1,1.5),cull:MOBILE?130:175,tex:MOBILE?256:512};
 
 /* ---------- save ---------- */
 const SAVE_KEY='nexus-city2-save';
