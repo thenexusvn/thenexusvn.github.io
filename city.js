@@ -86,13 +86,14 @@ function buildVC(parts){let tot=0;const arr=[];for(const p of parts){const g=p.g
   for(const[g,c]of arr){const n=g.attributes.position.count;pos.set(g.attributes.position.array,o*3);nor.set(g.attributes.normal.array,o*3);if(g.attributes.uv)uv.set(g.attributes.uv.array,o*2);for(let i=0;i<n;i++){col[(o+i)*3]=c.r;col[(o+i)*3+1]=c.g;col[(o+i)*3+2]=c.b;}o+=n;g.dispose();}
   const G=new T.BufferGeometry();G.setAttribute('position',new T.BufferAttribute(pos,3));G.setAttribute('normal',new T.BufferAttribute(nor,3));G.setAttribute('color',new T.BufferAttribute(col,3));G.setAttribute('uv',new T.BufferAttribute(uv,2));G.computeBoundingSphere();return G;}
 /* ---------- canvas textures ---------- */
-function makeTex(w,h,draw,o){o=o||{};const c=document.createElement('canvas');c.width=w;c.height=h;const g=c.getContext('2d');draw(g,w,h);const t=new T.CanvasTexture(c);if(o.repeat!==false)t.wrapS=t.wrapT=T.RepeatWrapping;if(o.srgb!==false)t.encoding=T.sRGBEncoding;t.anisotropy=o.aniso||4;return t;}
+let MAXANISO=0;
+function makeTex(w,h,draw,o){o=o||{};const c=document.createElement('canvas');c.width=w;c.height=h;const g=c.getContext('2d');draw(g,w,h);const t=new T.CanvasTexture(c);if(o.repeat!==false)t.wrapS=t.wrapT=T.RepeatWrapping;if(o.srgb!==false)t.encoding=T.sRGBEncoding;t.anisotropy=o.aniso||4;if(MAXANISO)t.anisotropy=Math.min(t.anisotropy,MAXANISO);return t;}
 function speckle(g,w,h,base,n,a){g.fillStyle=base;g.fillRect(0,0,w,h);for(let i=0;i<n;i++){const d=Math.random()<.5;g.fillStyle=d?`rgba(0,0,0,${Math.random()*a})`:`rgba(255,255,255,${Math.random()*a})`;g.fillRect(Math.random()*w,Math.random()*h,1+Math.random()*2.5,1+Math.random()*2.5);}}
 
 /* ======================================================================= */
 function create(opt){
 const view=opt.view,root=opt.hudRoot,MOBILE=!!opt.mobile;
-const Q={peds:MOBILE?14:22,traffic:MOBILE?14:24,shadows:!MOBILE,pr:MOBILE?1:Math.min(window.devicePixelRatio||1,1.5),cull:MOBILE?130:175,tex:MOBILE?256:512};
+const Q={peds:MOBILE?16:34,traffic:MOBILE?16:34,shadows:!MOBILE,pr:MOBILE?1:Math.min(window.devicePixelRatio||1,1.5),cull:MOBILE?130:175,tex:MOBILE?256:512};
 
 /* ---------- save ---------- */
 const SAVE_KEY='nexus-city2-save';
@@ -105,7 +106,7 @@ function writeSave(){try{save.hour=Math.round(tod.hour*100)/100;}catch(_){}try{l
 
 /* ---------- renderer, scene, sky ---------- */
 const renderer=new T.WebGLRenderer({antialias:!MOBILE,powerPreference:'high-performance'});
-renderer.setPixelRatio(Q.pr);
+renderer.setPixelRatio(Q.pr);MAXANISO=renderer.capabilities.getMaxAnisotropy()||4;
 renderer.outputEncoding=T.sRGBEncoding;renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.0;
 renderer.shadowMap.enabled=Q.shadows;renderer.shadowMap.type=T.PCFSoftShadowMap;
 view.appendChild(renderer.domElement);
@@ -192,10 +193,10 @@ function facade(style,p){
     if(style!=='glass'){for(let r=0;r<4;r++)for(let c=0;c<4;c++){const[wx,wy,ww,wh]=win,X=c*C+wx*C,Y=r*C+wy*C+wh*C,W=ww*C;for(let k=0;k<5;k++){const sx=X+Math.random()*W,len=C*(.15+Math.random()*.5);const gr=g.createLinearGradient(0,Y,0,Y+len);gr.addColorStop(0,'rgba(40,32,24,.22)');gr.addColorStop(1,'rgba(40,32,24,0)');g.fillStyle=gr;g.fillRect(sx,Y,1+Math.random()*2.5,len);}}
       for(let i=0;i<40;i++){const x=Math.random()*S,y=Math.random()*S,r=8+Math.random()*40;const gr=g.createRadialGradient(x,y,0,x,y,r);gr.addColorStop(0,'rgba(30,25,20,.06)');gr.addColorStop(1,'rgba(30,25,20,0)');g.fillStyle=gr;g.fillRect(x-r,y-r,r*2,r*2);}}
     else{for(let i=0;i<30;i++){g.fillStyle=`rgba(255,255,255,${Math.random()*.05})`;g.fillRect(Math.random()*S,Math.random()*S,Math.random()*S*.4,1);}}
-  });
+  },{aniso:16});
   const emi=makeTex(S,S,(g)=>{g.fillStyle='#000';g.fillRect(0,0,S,S);for(let r=0;r<4;r++)for(let c=0;c<4;c++)if(lit[r*4+c]){const[wx,wy,ww,wh]=win,X=c*C+wx*C,Y=r*C+wy*C,W=ww*C,H=wh*C;const tint=pick(style==='glass'?['#a88050','#8a7450','#7f8ea8','#b08a58']:['#ffbf70','#ffd394','#ffe2b5','#f4a95c','#bcd6ff','#ffc98a']),k=rnd(.55,1);const gr=g.createLinearGradient(0,Y,0,Y+H);gr.addColorStop(0,tint);gr.addColorStop(1,shadeHex(tint,-38*k));g.globalAlpha=k;g.fillStyle=gr;g.fillRect(X,Y,W,H);const v=Math.random();g.fillStyle='rgba(0,0,0,.55)';if(v<.25){for(let y=Y+H*.06;y<Y+H*.6;y+=H*.09)g.fillRect(X,y,W,H*.035);}else if(v<.5){g.fillRect(X,Y,W*rnd(.2,.38),H);g.fillRect(X+W*rnd(.62,.8),Y,W,H);}else if(v<.62){g.fillRect(X+W*.3,Y+H*.45,W*.22,H*.55);g.beginPath();g.arc(X+W*.41,Y+H*.38,W*.08,0,7);g.fill();}g.globalAlpha=1;}});
   const fm=new T.MeshStandardMaterial({map,emissiveMap:emi,emissive:new T.Color(1,1,1),emissiveIntensity:style==='glass'?.5:.75,roughness:style==='glass'?(ENV_OK?.18:.4):.85,metalness:style==='glass'&&ENV_OK?.55:0,envMapIntensity:style==='glass'?1:.4});
-  fm.userData.baseE=fm.emissiveIntensity;fm.userData.baseEnv=fm.envMapIntensity;NIGHTM.push(fm);return fm;
+  fm.userData.style=style;fm.userData.wall=p.wall||(style==='brick'?'#7d4535':p.frame);fm.userData.trim=p.trim;fm.userData.frame=p.frame;fm.userData.baseE=fm.emissiveIntensity;fm.userData.baseEnv=fm.envMapIntensity;NIGHTM.push(fm);return fm;
 }
 const NIGHTM=[];
 const FAC={
@@ -221,6 +222,65 @@ const FAC={
   white:facade('stone',{wall:'#d6d6d2',trim:'#e8e8e4'}),
   policeBlue:facade('apt',{wall:'#3f63a8',trim:'#e9eef8'})
 };
+/* ---------- foliage: alpha-tested leaf cards (much fuller and softer than solid blobs) ---------- */
+const LEAFTX=makeTex(256,256,(g,w,h)=>{g.clearRect(0,0,w,h);
+  for(let i=0;i<340;i++){const a=Math.random()*Math.PI*2,rr=Math.sqrt(Math.random())*112,x=128+Math.cos(a)*rr,y=128+Math.sin(a)*rr*.92,l=5+Math.random()*9,v=150+Math.random()*95|0;
+    g.save();g.translate(x,y);g.rotate(Math.random()*Math.PI);g.fillStyle=`rgb(${v*.82|0},${v},${v*.7|0})`;g.beginPath();g.ellipse(0,0,l,l*.48,0,0,7);g.fill();g.strokeStyle='rgba(40,60,30,.35)';g.lineWidth=1;g.beginPath();g.moveTo(-l,0);g.lineTo(l,0);g.stroke();g.restore();}
+  g.fillStyle='#ffffff';g.fillRect(0,236,20,20);},{repeat:false});
+const NEEDLETX=makeTex(256,128,(g,w,h)=>{g.clearRect(0,0,w,h);g.strokeStyle='#8a7a60';g.lineWidth=3;g.beginPath();g.moveTo(4,h/2);g.lineTo(w-6,h/2);g.stroke();
+  for(let x=6;x<w-8;x+=2.2){const t=x/w,len=(1-t*.7)*h*.46*(.75+Math.random()*.35);for(const s of[-1,1]){const v=140+Math.random()*90|0;g.strokeStyle=`rgb(${v*.8|0},${v},${v*.85|0})`;g.lineWidth=1.3;g.beginPath();g.moveTo(x,h/2);g.lineTo(x+len*.55,h/2+s*len);g.stroke();}}
+  g.fillStyle='#ffffff';g.fillRect(0,h-12,12,12);},{repeat:false});
+const FOLIAGE=(tex)=>{const m=new T.MeshStandardMaterial({map:tex,alphaTest:.45,vertexColors:true,roughness:.92});m.userData.depth=new T.MeshDepthMaterial({depthPacking:T.RGBADepthPacking,map:tex,alphaTest:.45});return m;};
+const LEAFM=FOLIAGE(LEAFTX),NEEDLEM=FOLIAGE(NEEDLETX);let PINEG=null,BROADG2=null;
+function folBuilder(){const P=[],N=[],U=[],C=[];const col=new T.Color();
+  return{P,N,U,C,
+    card(cx,cy,cz,ax,ay,az,bx,by,bz,nx,ny,nz,u0,u1,v0,v1,hex,k){col.copy(lin(hex)).multiplyScalar(k||1);
+      const v=[[cx-ax-bx,cy-ay-by,cz-az-bz,u0,v0],[cx+ax-bx,cy+ay-by,cz+az-bz,u1,v0],[cx+ax+bx,cy+ay+by,cz+az+bz,u1,v1],[cx-ax+bx,cy-ay+by,cz-az+bz,u0,v1]];
+      for(const i of[0,1,2,0,2,3,0,2,1,0,3,2]){const q=v[i];P.push(q[0],q[1],q[2]);N.push(nx,ny,nz);U.push(q[3],q[4]);C.push(col.r,col.g,col.b);}},
+    solid(geo,hex,uv){const g=geo.index?geo.toNonIndexed():geo;const p=g.attributes.position.array,n=g.attributes.normal.array;col.copy(lin(hex));for(let i=0;i<p.length/3;i++){P.push(p[i*3],p[i*3+1],p[i*3+2]);N.push(n[i*3],n[i*3+1],n[i*3+2]);U.push(uv[0],uv[1]);C.push(col.r,col.g,col.b);}},
+    geo(){const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(P,3));g.setAttribute('normal',new T.Float32BufferAttribute(N,3));g.setAttribute('uv',new T.Float32BufferAttribute(U,2));g.setAttribute('color',new T.Float32BufferAttribute(C,3));g.computeBoundingSphere();return g;}};}
+// broadleaf tree: trunk + a few branches + ~30 leaf cards spread through an ellipsoid crown, normals pointing out of the crown
+function broadleafGeo(o){o=o||{};let s=o.seed||7;const r=()=>{s=(s*16807)%2147483647;return(s-1)/2147483646;};
+  const B=folBuilder(),cy=o.cy||4.3,R=o.r||2.1,H=o.h||1.7,n=o.n||(MOBILE?20:32),hex=o.color||'#5f9a45';
+  B.solid(new T.CylinderGeometry(.13,.24,cy+.2,7).translate(0,(cy+.2)/2,0),'#5e4430',[.03,.03]);
+  for(let k=0;k<3;k++){const a=k/3*Math.PI*2+.4,br=new T.CylinderGeometry(.05,.09,1.6,5).translate(0,.8,0).rotateZ(.7).rotateY(a).translate(0,cy-.9,0);B.solid(br,'#5e4430',[.03,.03]);}
+  for(let i=0;i<n;i++){const th=r()*Math.PI*2,ph=Math.acos(1-2*r()),rr=Math.pow(r(),.45);const dx=Math.sin(ph)*Math.cos(th),dy=Math.cos(ph),dz=Math.sin(ph)*Math.sin(th);
+    const px=dx*R*rr*.85,py=cy+dy*H*rr*.85,pz=dz*R*rr*.85;const sz=(1.1+r()*.7)*(R/2.1);
+    // random card orientation
+    const a1=r()*Math.PI*2,a2=(r()-.5)*Math.PI;const ax=Math.cos(a1)*Math.cos(a2)*sz/2,ay=Math.sin(a2)*sz/2,az=Math.sin(a1)*Math.cos(a2)*sz/2;
+    let bx=-Math.sin(a1)*sz/2,by=(r()-.5)*sz*.6,bz=Math.cos(a1)*sz/2;
+    const nl=Math.hypot(dx,dy*1.2+.25,dz)||1,shade=.62+.48*rr+(dy>0?.12:0);B.card(px,py,pz,ax,ay,az,bx,by,bz,dx/nl,(dy*1.2+.25)/nl,dz/nl,.1,.9,.1,.9,hex,shade);}
+  return B.geo();}
+// conifer: tiers of drooping branch cards around a tall trunk
+function coniferGeo(o){o=o||{};let s=o.seed||11;const r=()=>{s=(s*16807)%2147483647;return(s-1)/2147483646;};
+  const B=folBuilder(),Ht=o.h||9.6,R0=o.r||3.0,hex=o.color||'#557f4c';
+  B.solid(new T.CylinderGeometry(.09,.3,Ht,7).translate(0,Ht/2,0),'#4e3a2a',[.02,.05]);
+  const tiers=MOBILE?9:14;for(let t=0;t<tiers;t++){const k=t/(tiers-1),y=1.5+k*(Ht-2.1),R=R0*(1-k*.88)+.3,nb=Math.max(5,Math.round((MOBILE?9:13)-k*7));
+    for(let j=0;j<nb;j++){const a=j/nb*Math.PI*2+t*.7+r()*.3,ca=Math.cos(a),sa=Math.sin(a),droop=.35+r()*.2;
+      const len=R*(.95+r()*.3),wid=len*.62;const ex=ca*len/2,ey=-Math.sin(droop)*len/2,ez=sa*len/2;const cx=ex,cy=y+ey,cz=ez;
+      const bx=-sa*wid/2,bz=ca*wid/2;const shade=.7+.45*(1-k*.3)*(.85+r()*.3);
+      B.card(cx,cy,cz,ex,ey,ez,bx,0,bz,ca*.35,.94,sa*.35,.06,.98,.06,.94,hex,shade);}}
+  // a small spike at the top
+  B.card(0,Ht+.2,0,0,.7,0,.35,0,0,0,0,1,.06,.98,.06,.94,hex,1.1);B.card(0,Ht+.2,0,0,.7,0,0,0,.35,1,0,0,.06,.98,.06,.94,hex,1.1);
+  return B.geo();}
+function instFol(geo,m,list,fn){const im=inst(geo,m,list,fn,true);if(im){im.customDepthMaterial=m.userData.depth;im.frustumCulled=false;}return im;}
+
+/* ---------- grass tufts around the player on the hills and in the wilds (one instanced mesh, recycled as you move) ---------- */
+const GRASSTX=makeTex(128,128,(g,w,h)=>{g.clearRect(0,0,w,h);for(let i=0;i<70;i++){const x=6+Math.random()*(w-12),ht=h*(.45+Math.random()*.55),lean=(Math.random()-.5)*26,v=120+Math.random()*110|0;
+  const gr=g.createLinearGradient(0,h,0,h-ht);gr.addColorStop(0,`rgb(${v*.62|0},${v*.8|0},${v*.45|0})`);gr.addColorStop(1,`rgb(${v*.88|0},${v},${v*.6|0})`);g.fillStyle=gr;g.beginPath();g.moveTo(x-2.2,h);g.quadraticCurveTo(x+lean*.4,h-ht*.6,x+lean,h-ht);g.quadraticCurveTo(x+lean*.4+1,h-ht*.6,x+2.2,h);g.fill();}},{repeat:false});
+const GRASS=(()=>{if(MOBILE)return null;const CELL=1.05,RAD=30,NC=Math.ceil(RAD*2/CELL),COUNT=NC*NC;
+  const q=[];for(let k=0;k<3;k++){const a=k/3*Math.PI;const ca=Math.cos(a)*.55,sa=Math.sin(a)*.55;q.push([-ca,0,-sa,0,0],[ca,0,sa,1,0],[ca,.42,sa,1,1],[-ca,0,-sa,0,0],[ca,.42,sa,1,1],[-ca,.42,-sa,0,1],[-ca,0,-sa,0,0],[ca,.42,sa,1,1],[ca,0,sa,1,0],[-ca,0,-sa,0,0],[-ca,.42,-sa,0,1],[ca,.42,sa,1,1]);}
+  const P=[],N=[],U=[];for(const v of q){P.push(v[0],v[1],v[2]);N.push(0,1,0);U.push(v[3],v[4]);}
+  const geo=new T.BufferGeometry();geo.setAttribute('position',new T.Float32BufferAttribute(P,3));geo.setAttribute('normal',new T.Float32BufferAttribute(N,3));geo.setAttribute('uv',new T.Float32BufferAttribute(U,2));
+  const m=new T.MeshStandardMaterial({map:GRASSTX,alphaTest:.4,color:lin('#8fb26a'),roughness:1});
+  const im=new T.InstancedMesh(geo,m,COUNT);im.frustumCulled=false;im.receiveShadow=Q.shadows;im.count=0;scene.add(im);
+  const hsh=(a,b)=>{const s=Math.sin(a*127.1+b*311.7)*43758.5453;return s-Math.floor(s);};const dm=new T.Object3D();let lx=1e9,lz=1e9;
+  return{update(px,pz){if(Math.abs(px-lx)<3&&Math.abs(pz-lz)<3)return;lx=px;lz=pz;let n=0;const ix0=Math.floor((px-RAD)/CELL),iz0=Math.floor((pz-RAD)/CELL);const RR=(HZ.road||[]).filter(p=>Math.abs(p[0]-px)<RAD+8&&Math.abs(p[1]-pz)<RAD+8);
+      for(let a=0;a<NC;a++)for(let b=0;b<NC;b++){const ix=ix0+a,iz=iz0+b,r1=hsh(ix,iz),r2=hsh(iz,ix);const x=(ix+r1)*CELL,z=(iz+r2)*CELL;if((x-px)*(x-px)+(z-pz)*(z-pz)>RAD*RAD)continue;
+        if(!inHills(x,z)||PADS.some(p=>x>p.x0-1&&x<p.x1+1&&z>p.z0-1&&z<p.z1+1))continue;if(RR.length&&inHZ(x,z)&&RR.some(p=>(p[0]-x)*(p[0]-x)+(p[1]-z)*(p[1]-z)<20))continue;const y=heightAt(x,z);if(y<.35)continue;if(inWild(x,z)&&WGRID&&WGRID.RD){const G=WGRID,gx=Math.round((x-G.X0)/G.ST),gz=Math.round((z-G.Z0)/G.ST);if(gx>=0&&gz>=0&&gx<G.NX&&gz<G.NZ&&G.RD[gz*G.NX+gx]<7)continue;}
+        const s=.75+hsh(ix*3,iz*7)*.6;dm.position.set(x,y-.04,z);dm.rotation.set(0,r1*6.28,0);dm.scale.set(s,s*(.8+r2*.6),s);dm.updateMatrix();im.setMatrixAt(n++,dm.matrix);}
+      im.count=n;im.instanceMatrix.needsUpdate=true;}};})();
+
 const ROOF=new T.MeshStandardMaterial({map:TX.gravel,roughness:.95});
 const SHINGLE={red:new T.MeshStandardMaterial({map:TX.shingleRed,roughness:.9}),grey:new T.MeshStandardMaterial({map:TX.shingleGrey,roughness:.9})};
 function textTex(text,o){o=o||{};const w=o.w||512,h=o.h||128;return makeTex(w,h,(g)=>{g.fillStyle=o.bg||'rgba(0,0,0,0)';g.fillRect(0,0,w,h);g.font=`700 ${o.size||64}px ${o.font||'"Space Grotesk",Inter,system-ui,sans-serif'}`;g.textAlign='center';g.textBaseline='middle';if(o.glow){g.shadowColor=o.glow;g.shadowBlur=18;}g.fillStyle=o.fg||'#fff';g.fillText(text,w/2,h/2+2);if(o.glow){g.shadowBlur=36;g.fillText(text,w/2,h/2+2);}},{repeat:false});}
@@ -249,7 +309,42 @@ function los(x0,z0,x1,z1){const n=Math.ceil(hyp(x1-x0,z1-z0)/3);for(let i=1;i<n;
 let seed=20261123;const sr=(a,b)=>{seed=(seed*16807)%2147483647;return a+((seed-1)/2147483646)*(b-a);};const spick=a=>a[Math.floor(sr(0,a.length-.001))];
 const blocks=[];for(let i=0;i<N;i++)for(let j=0;j<N;j++)blocks.push({i,j,x0:road(i)+RW/2,x1:road(i+1)-RW/2,z0:road(j)+RW/2,z1:road(j+1)-RW/2,d:district(i,j)});
 const BK=(i,j)=>blocks[i*N+j];
-const FB={};for(const k in FAC)FB[k]=new GB();
+/* ---------- architectural detail: floor ledges, cornices, plinths, corner pilasters, parapets, glass fins, roof plant ---------- */
+const BLD=[];
+function wrapGB(gb,k){const ob=gb.box.bind(gb);gb.box=(x0,x1,y0,y1,z0,z1,o)=>{ob(x0,x1,y0,y1,z0,z1,o);if(!(o&&o.top===null)&&y1-y0>4.5)BLD.push({k,x0,x1,y0,y1,z0,z1});};return gb;}
+function buildDetails(){if(!BLD.length)return;
+  let rs=9137;const r=(a,b)=>{rs=(rs*16807)%2147483647;return a+((rs-1)/2147483646)*(b-a);};
+  const P=[],N=[],C=[],I=[];const col=new T.Color();
+  const face=(a,b,c,d,n)=>{const o=P.length/3;for(const v of[a,b,c,d]){P.push(v[0],v[1],v[2]);N.push(n[0],n[1],n[2]);C.push(col.r,col.g,col.b);}I.push(o,o+1,o+2,o,o+2,o+3);};
+  const box=(x0,x1,y0,y1,z0,z1,hex,noTop)=>{col.copy(lin(hex));
+    face([x0,y0,z1],[x1,y0,z1],[x1,y1,z1],[x0,y1,z1],[0,0,1]);face([x1,y0,z0],[x0,y0,z0],[x0,y1,z0],[x1,y1,z0],[0,0,-1]);
+    face([x1,y0,z1],[x1,y0,z0],[x1,y1,z0],[x1,y1,z1],[1,0,0]);face([x0,y0,z0],[x0,y0,z1],[x0,y1,z1],[x0,y1,z0],[-1,0,0]);
+    if(!noTop)face([x0,y1,z1],[x1,y1,z1],[x1,y1,z0],[x0,y1,z0],[0,1,0]);face([x0,y0,z0],[x1,y0,z0],[x1,y0,z1],[x0,y0,z1],[0,-1,0]);};
+  // a ring of four boxes hugging the walls (dx = outward depth)
+  const band=(b,y0,y1,dx,hex)=>{box(b.x0-dx,b.x1+dx,y0,y1,b.z1,b.z1+dx,hex);box(b.x0-dx,b.x1+dx,y0,y1,b.z0-dx,b.z0,hex);box(b.x1,b.x1+dx,y0,y1,b.z0,b.z1,hex);box(b.x0-dx,b.x0,y0,y1,b.z0,b.z1,hex);};
+  const covered=b=>BLD.some(o=>o!==b&&o.y0>=b.y1-.3&&o.x0<b.x1&&o.x1>b.x0&&o.z0<b.z1&&o.z1>b.z0);
+  const lite=MOBILE;
+  for(const b of BLD){const m=FAC[b.k];if(!m)continue;const st=m.userData.style,wall=m.userData.wall||'#cccccc',trim=m.userData.trim||shadeHex(wall,12),dark=shadeHex(wall,-22);const W=b.x1-b.x0,D=b.z1-b.z0,H=b.y1-b.y0,top=!covered(b);
+    if(st==='glass'){const fin=m.userData.frame||'#2a3340';
+      if(!lite){for(const[ax,len]of[['x',W],['z',D]]){const n=Math.max(1,Math.round(len/BAY));for(let i=0;i<=n;i++){const t=i/n;if(ax==='x'){const x=b.x0+W*t;box(x-.05,x+.05,b.y0,b.y1,b.z1,b.z1+.22,fin,true);box(x-.05,x+.05,b.y0,b.y1,b.z0-.22,b.z0,fin,true);}else{const z=b.z0+D*t;box(b.x1,b.x1+.22,b.y0,b.y1,z-.05,z+.05,fin,true);box(b.x0-.22,b.x0,b.y0,b.y1,z-.05,z+.05,fin,true);}}}}
+      if(b.y0<1)band(b,b.y0,b.y0+4.2,.12,shadeHex(fin,-10));
+      if(top){band(b,b.y1,b.y1+.9,.06,fin);if(W>8&&D>8){const pw=W*r(.3,.45),pd=D*r(.3,.45),cx=(b.x0+b.x1)/2+r(-1,1),cz=(b.z0+b.z1)/2+r(-1,1);box(cx-pw/2,cx+pw/2,b.y1,b.y1+r(3,4.5),cz-pd/2,cz+pd/2,'#8d939a');
+          box(cx-pw/2+.5,cx-pw/2+1.6,b.y1,b.y1+r(4.5,6),cz+pd/2+.6,cz+pd/2+1.7,'#7a8088');}}
+      continue;}
+    // masonry styles
+    const floors=Math.round(H/FLOOR);
+    if(b.y0<1)band(b,b.y0,b.y0+.75,.04,dark);// plinth
+    const every=lite?2:1;for(let y=Math.ceil((b.y0+1)/FLOOR)*FLOOR;y<b.y1-1.2;y+=FLOOR*every)band(b,y-.09,y+.07,.05,trim);
+    if(st==='deco'||st==='stone'||st==='brick'){const pw=.55,pd=.12,hex=st==='brick'?'#6a3a2c':trim;for(const[x,z,sx,sz]of[[b.x0,b.z0,-1,-1],[b.x1,b.z0,1,-1],[b.x0,b.z1,-1,1],[b.x1,b.z1,1,1]]){box(Math.min(x,x-sx*pw+sx*pd),Math.max(x,x-sx*pw+sx*pd),b.y0,b.y1,Math.min(z,z-sz*pw+sz*pd),Math.max(z,z-sz*pw+sz*pd),hex,true);}}
+    if(top){band(b,b.y1-.55,b.y1+.05,.32,trim);band(b,b.y1+.05,b.y1+.95,.0001,trim);// cornice + parapet (inside face)
+      box(b.x0+.2,b.x1-.2,b.y1,b.y1+.95,b.z1-.25,b.z1,trim);box(b.x0+.2,b.x1-.2,b.y1,b.y1+.95,b.z0,b.z0+.25,trim);box(b.x1-.25,b.x1,b.y1,b.y1+.95,b.z0,b.z1,trim);box(b.x0,b.x0+.25,b.y1,b.y1+.95,b.z0,b.z1,trim);
+      if(W>7&&D>7){const sx=r(b.x0+1.5,b.x1-4.5),sz=r(b.z0+1.5,b.z1-4.5);box(sx,sx+3,b.y1,b.y1+2.6,sz,sz+3,shadeHex(wall,-8));// stair hut
+        if(!lite)for(let k=0;k<2;k++){const vx=r(b.x0+1,b.x1-1.5),vz=r(b.z0+1,b.z1-1.5);box(vx,vx+.35,b.y1,b.y1+r(.8,1.6),vz,vz+.35,'#6e7176');}}}
+  }
+  const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(P,3));g.setAttribute('normal',new T.Float32BufferAttribute(N,3));g.setAttribute('color',new T.Float32BufferAttribute(C,3));g.setIndex(I);g.computeBoundingSphere();
+  const me=addMesh(g,new T.MeshStandardMaterial({vertexColors:true,roughness:.82}),true);me.frustumCulled=false;BLD.length=0;}
+
+const FB={};for(const k in FAC)FB[k]=wrapGB(new GB(),k);
 const RB=new GB(),SWB=new GB(),GRB=new GB(),PKB=new GB(),SHB={red:new GB(),grey:new GB()},DRB=new GB();
 const props={lamp:[],palm:[],tank:[],ac:[],hedge:[],bench:[],door:[],column:[],tl:[],tree:[],hydrant:[],bin:[],mail:[],board:[],flood:[]};
 const spots={parking:[],parkedPolice:[],driveway:[],display:[]};
@@ -477,7 +572,7 @@ addMesh(SWB.geo(),new T.MeshStandardMaterial({map:TX.walk,roughness:.9}),false);
 addMesh(GRB.geo(),new T.MeshStandardMaterial({map:TX.grass,roughness:1}),false);
 if(PKB.p.length)addMesh(PKB.geo(),new T.MeshStandardMaterial({map:TX.asphalt,roughness:.95}),false);
 if(DRB.p.length)addMesh(DRB.geo(),new T.MeshStandardMaterial({map:TX.walk,roughness:.9}),false);
-for(const k in FB)if(FB[k].p.length)addMesh(FB[k].geo(),FAC[k],true);
+for(const k in FB)if(FB[k].p.length)addMesh(FB[k].geo(),FAC[k],true);buildDetails();
 addMesh(RB.geo(),ROOF,true);
 for(const k in SHB)if(SHB[k].p.length)addMesh(SHB[k].geo(),SHINGLE[k],true);
 for(const s of shieldSigns)sign(...s);
@@ -581,7 +676,7 @@ function inst(geo,m,list,fn,cast){if(!list.length)return null;const im=new T.Ins
       const y=heightAt(x,z);if(heightAt(x+3,z)-y>2.4||heightAt(x,z+3)-y>2.4)continue;trees.push([x,y,z,.8+rng()*.7]);if(bd<60*60)addCol({t:'c',x,z,r:.45});}
     const tr=new T.CylinderGeometry(.18,.28,3,6);tr.translate(0,1.5,0);const c1=new T.ConeGeometry(2.2,4.2,8);c1.translate(0,4.2,0);const c2=new T.ConeGeometry(1.6,3.4,8);c2.translate(0,6.4,0);const cones=mergeGeos([c1,c2]);cones.computeVertexNormals();
     const pl=(p,d,i)=>{d.position.set(p[0],p[1]-.1,p[2]);d.scale.setScalar(p[3]);d.rotation.y=i*1.7;};
-    const a=inst(tr,mat('#5a4030',.95),trees,pl,true),b=inst(cones,new T.MeshStandardMaterial({color:lin('#3d6e40'),map:TX.needles,roughness:.95}),trees,pl,true);if(a)a.frustumCulled=false;if(b)b.frustumCulled=false;}
+    instFol(PINEG||(PINEG=coniferGeo({seed:11})),NEEDLEM,trees,pl);}
   HZ.road=RP;HZ.roadH=h;}
 /* ===== the wilds: terrain + roads (pure math, no three.js) ===== */
 function wildBuild(ST,EXTX0,EXTZ0){
@@ -820,9 +915,9 @@ function wildBuild(ST,EXTX0,EXTZ0){
     for(let k=0;k<NR*6&&rocks.length<NR;k++){const x=W.WX0+rng()*(W.WX1-W.WX0),z=W.WZ0+rng()*(W.WZ1-W.WZ0);if(!ok(x,z,9))continue;const y=heightAt(x,z);if(y<30&&Math.hypot(x-L.x,z-L.z)>L.r+40&&rng()<.7)continue;const s=.6+rng()*2.2;rocks.push([x,y,z,s]);if(s>1)addCol({t:'c',x,z,r:s*.8});}
     const tr=new T.CylinderGeometry(.18,.3,3,6,1,true);tr.translate(0,1.5,0);const c1=new T.ConeGeometry(2.3,4.4,8,1,true);c1.translate(0,4.3,0);const c2=new T.ConeGeometry(1.7,3.6,8,1,true);c2.translate(0,6.6,0);const c3=new T.ConeGeometry(1.1,2.6,8,1,true);c3.translate(0,8.4,0);const cones=mergeGeos([c1,c2,c3]);cones.computeVertexNormals();
     const pl=(p,d,i)=>{d.position.set(p[0],p[1]-.15,p[2]);d.scale.setScalar(p[3]);d.rotation.y=i*1.7;};
-    for(const im of[inst(tr,mat('#5a4030',.95),pines,pl,true),inst(cones,new T.MeshStandardMaterial({color:lin('#3a6a3e'),map:TX.needles,roughness:.95}),pines,pl,true)])if(im)im.frustumCulled=false;
+    instFol(PINEG||(PINEG=coniferGeo({seed:11})),NEEDLEM,pines,pl);
     const bt=new T.CylinderGeometry(.22,.32,3.2,6);bt.translate(0,1.6,0);const cn=new T.IcosahedronGeometry(2.4,0);cn.translate(0,4.4,0);
-    for(const im of[inst(bt,mat('#6a4a34',.95),broad,pl,true),inst(cn,new T.MeshStandardMaterial({color:lin('#7aa84e'),map:TX.foliage,roughness:.9,flatShading:false}),broad,pl,true)])if(im)im.frustumCulled=false;
+    instFol(BROADG2||(BROADG2=broadleafGeo({seed:5,cy:4.4,r:2.4,h:1.9,color:'#6a9e48'})),LEAFM,broad,pl);
     const rg=new T.DodecahedronGeometry(1,0);const ri=inst(rg,mat('#8d877d',.95),rocks,(p,d,i)=>{d.position.set(p[0],p[1]+p[3]*.25,p[2]);d.scale.set(p[3]*1.2,p[3]*.8,p[3]);d.rotation.set(i*.7,i*1.3,0);},true);if(ri)ri.frustumCulled=false;}
   /* ---- 20 hidden Nexus gems to find around the wilds and the hills ---- */
   {const C=PL.camp,S=PL.summit,F=PL.farm,V=PL.village,M=WILD.mineIn;const pts=[[S.x-9,S.z-6],[L.x+14,L.z-L.r-24],[L.x+2,L.z+L.r-12],[C.x+10,C.z-14],[M.x,M.z],[F.x+36,F.z-46],[V.x+12,V.z+18],[SP.lighthouse.x+5,SP.lighthouse.z+4],
@@ -839,7 +934,7 @@ function wildBuild(ST,EXTX0,EXTZ0){
 {const PL=WILD.PL,RNG=(()=>{let s=777;return()=>{s=(s*16807)%2147483647;return s/2147483647;};})(),rr=(a,b)=>a+RNG()*(b-a),rp=a=>a[Math.floor(RNG()*a.length)];
   const FACG={},flatRoof=new GB(),tileR=new GB(),tileG=new GB(),gw={},VC=[],BOX1=new T.BoxGeometry(1,1,1),CYL=new T.CylinderGeometry(1,1,1,10);
   const LANT={'#ff3b30':[],'#ffcc33':[],'#ff8a1f':[],'#c86bff':[]},LAMPS=[],TREES=[],PINES=[],FLOW=[],STR=[],BOATS=[],MILLS=[];
-  const fb=k=>FACG[k]||(FACG[k]=new GB());
+  const fb=k=>FACG[k]||(FACG[k]=wrapGB(new GB(),k));
   const rdW=(x,z)=>{const G=WGRID;if(!G)return 1e9;const ix=Math.round((x-G.X0)/G.ST),iz=Math.round((z-G.Z0)/G.ST);if(ix<0||iz<0||ix>=G.NX||iz>=G.NZ)return 1e9;return G.RD[iz*G.NX+ix];};
   const vb=(x0,x1,y0,y1,z0,z1,c)=>VC.push({geo:BOX1,pos:[(x0+x1)/2,(y0+y1)/2,(z0+z1)/2],scale:[Math.max(.01,x1-x0),Math.max(.01,y1-y0),Math.max(.01,z1-z0)],color:c});
   const vc=(x,y0,y1,z,r,c)=>VC.push({geo:CYL,pos:[x,(y0+y1)/2,z],scale:[r,y1-y0,r],color:c});
@@ -1053,7 +1148,7 @@ function wildBuild(ST,EXTX0,EXTZ0){
     town('westside','Nexus Tây','West Nexus',-1100,150,190,800);}
 
   /* ======== build the shared meshes ======== */
-  for(const k in FACG)if(FACG[k].p.length)addMesh(FACG[k].geo(),FAC[k],true);
+  for(const k in FACG)if(FACG[k].p.length)addMesh(FACG[k].geo(),FAC[k],true);buildDetails();
   if(flatRoof.p.length)addMesh(flatRoof.geo(),ROOF,false);
   if(tileR.p.length)addMesh(tileR.geo(),SHINGLE.red,true);if(tileG.p.length)addMesh(tileG.geo(),SHINGLE.grey,true);
   for(const c in gw)addMesh(gw[c].geo(),mat(c,.9),false);
@@ -1064,9 +1159,9 @@ function wildBuild(ST,EXTX0,EXTZ0){
     const im1=inst(pole,mat('#2b2f36',.5,.5),LAMPS,(p,d)=>d.position.set(p[0],p[1],p[2]),true),im2=inst(head,new T.MeshBasicMaterial({color:0xfff1c8,toneMapped:false}),LAMPS,(p,d)=>d.position.set(p[0],p[1],p[2]),false);for(const im of[im1,im2])if(im)im.frustumCulled=false;}
   {const pl=(p,d,i)=>{d.position.set(p[0],p[1]-.15,p[2]);d.scale.setScalar(p[3]);d.rotation.y=i*1.7;};
     const bt=new T.CylinderGeometry(.22,.32,3.2,6);bt.translate(0,1.6,0);const cn=new T.IcosahedronGeometry(2.4,0);cn.translate(0,4.4,0);
-    for(const im of[inst(bt,mat('#6a4a34',.95),TREES,pl,true),inst(cn,new T.MeshStandardMaterial({color:lin('#6f9e48'),map:TX.foliage,roughness:.9}),TREES,pl,true)])if(im)im.frustumCulled=false;
+    instFol(BROADG2||(BROADG2=broadleafGeo({seed:5,cy:4.4,r:2.4,h:1.9,color:'#6a9e48'})),LEAFM,TREES,pl);
     const tr=new T.CylinderGeometry(.18,.3,3,6,1,true);tr.translate(0,1.5,0);const c1=new T.ConeGeometry(2.3,4.4,8,1,true);c1.translate(0,4.3,0);const c2=new T.ConeGeometry(1.7,3.6,8,1,true);c2.translate(0,6.6,0);const c3=new T.ConeGeometry(1.1,2.6,8,1,true);c3.translate(0,8.4,0);const cones=mergeGeos([c1,c2,c3]);cones.computeVertexNormals();
-    for(const im of[inst(tr,mat('#5a4030',.95),PINES,pl,true),inst(cones,new T.MeshStandardMaterial({color:lin('#3a6a3e'),map:TX.needles,roughness:.95}),PINES,pl,true)])if(im)im.frustumCulled=false;
+    instFol(PINEG||(PINEG=coniferGeo({seed:11})),NEEDLEM,PINES,pl);
     const fg=new T.SphereGeometry(.16,6,5);const groups={};for(const f of FLOW)(groups[f[3]]||(groups[f[3]]=[])).push(f);for(const c in groups){const im=inst(fg,mat(c,.7),groups[c],(p,d)=>{d.position.set(p[0],p[1]+.28,p[2]);},false);if(im)im.frustumCulled=false;}}
   // fishing boats that bob on the swell
   for(const b of BOATS){const g=new T.Group();const L2=b.len;g.add(new T.Mesh(buildVC([{geo:new T.BoxGeometry(2.6,1.1,L2),pos:[0,.35,0],color:b.c},{geo:new T.BoxGeometry(2.7,.18,L2+.1),pos:[0,.95,0],color:'#f4f1ea'},{geo:new T.CylinderGeometry(0,1.3,2.2,4).rotateX(Math.PI/2).rotateZ(Math.PI/4),pos:[0,.45,L2/2+1],color:b.c},
@@ -1253,8 +1348,7 @@ const VCM=new T.MeshStandardMaterial({vertexColors:true,roughness:.85}),VCMI=new
 // round street/park trees: trunk + lumpy canopy merged into one vertex-coloured geometry, one InstancedMesh
 {const can=new T.IcosahedronGeometry(1.9,1);const cp=can.attributes.position;for(let i=0;i<cp.count;i++){const x=cp.getX(i),y=cp.getY(i),z=cp.getZ(i),k=1+Math.sin(x*3.1+z*2.3)*.12+Math.cos(y*4.2)*.08;cp.setXYZ(i,x*k,y*k*.85,z*k);}can.computeVertexNormals();
   const can2=new T.IcosahedronGeometry(1.3,1);
-  const g=buildVC([{geo:new T.CylinderGeometry(.16,.24,3.2,7),pos:[0,1.6,0],color:'#6b4c34'},{geo:can,pos:[0,4.2,0],color:'#4f8a3a'},{geo:can2,pos:[.9,3.6,.5],color:'#5d9a42'},{geo:can2,pos:[-.8,4.9,-.4],color:'#46803a'}]);
-  const FOLM=new T.MeshStandardMaterial({vertexColors:true,roughness:.9,map:TX.foliage});const im=inst(g,FOLM,props.tree,(p,d,i)=>{d.position.set(p[0],.25,p[1]);d.rotation.y=i*1.7;d.scale.setScalar(p[2]);},true);
+  const g=broadleafGeo({seed:3,cy:4.1,r:2.0,h:1.6});const im=instFol(g,LEAFM,props.tree,(p,d,i)=>{d.position.set(p[0],.25,p[1]);d.rotation.y=i*1.7;d.scale.setScalar(p[2]);});
   if(im){const c=new T.Color();props.tree.forEach((p,i)=>{c.setHSL(.2+((i*13)%10)/90,.25+((i*7)%10)/50,.72+((i*11)%10)/60);c.multiplyScalar(1.25);im.setColorAt(i,c);});im.instanceColor.needsUpdate=true;}}
 // hydrants and bins
 {const hy=buildVC([{geo:new T.CylinderGeometry(.16,.18,.7,10),pos:[0,.35,0],color:'#c8281e'},{geo:new T.SphereGeometry(.17,10,6,0,Math.PI*2,0,Math.PI/2),pos:[0,.7,0],color:'#c8281e'},{geo:new T.CylinderGeometry(.06,.06,.42,6).rotateZ(Math.PI/2),pos:[0,.48,0],color:'#d8d8d8'}]);
@@ -1565,27 +1659,86 @@ Object.assign(CAR_T,{
 const CAR_BODY={sedan:'sedan',sports:'sports',suv:'suv',taxi:'sedan',police:'sedan',super:'super',bike:'bike',hatch:'hatch',coupe:'coupe',muscle:'muscle',pickup:'pickup',van:'van',minivan:'minivan',jeep:'jeep',limo:'limo',hyper:'hyper',bus:'bus'};
 const CARC=['#c0392b','#f4f4f2','#1d3557','#2a9d8f','#e9c46a','#111418','#8d99ae','#6c757d','#3a86ff','#ff8fab','#7b2cbf','#e76f51','#264653','#d4d8dd','#ffb703'];
 const CG={};
+/* ---------- car bodies: lofted from the side profile, with rounded plan view, tumblehome and real cross-sections ---------- */
+function carLoft(poly,hw0,opt){// poly: side-view points [z,y]; returns indexed geometry + sampler
+  const P=poly;const zs=P.map(p=>p[0]),zmin=Math.min(...zs),zmax=Math.max(...zs),zc=(zmin+zmax)/2,hl=(zmax-zmin)/2;
+  const span=z=>{let lo=1e9,hi=-1e9;for(let k=0;k<P.length;k++){const a=P[k],b=P[(k+1)%P.length];const z0=Math.min(a[0],b[0]),z1=Math.max(a[0],b[0]);if(z<z0-1e-6||z>z1+1e-6)continue;
+      if(Math.abs(b[0]-a[0])<1e-6){lo=Math.min(lo,a[1],b[1]);hi=Math.max(hi,a[1],b[1]);continue;}const t=(z-a[0])/(b[0]-a[0]),y=a[1]+(b[1]-a[1])*t;lo=Math.min(lo,y);hi=Math.max(hi,y);}return[lo,hi];};
+  const hwAt=z=>{const e=clamp((Math.abs((z-zc)/hl)-(opt.endStart||.68))/(1-(opt.endStart||.68)),0,1);return hw0*(1-(opt.endPinch||.13)*e*e);};
+  const nT=opt.nTop||5,nB=opt.nBot||6,tum=opt.tum||.06,tf=opt.tumFrom==null?.5:opt.tumFrom,M=opt.ring||24,bul=opt.bulge||0;
+  const tumF=yRel=>1-tum*clamp((yRel-tf)/(1-tf),0,1);
+  // unit ring: x factor and relative height for each of the M+1 points
+  const RX=[],RY=[];for(let k=0;k<=M;k++){const th=k/M*Math.PI*2,c=Math.cos(th),s=Math.sin(th),nn=s>=0?nT:nB;const sy=Math.sign(s)*Math.pow(Math.abs(s),2/nn),sx=Math.sign(c)*Math.pow(Math.abs(c),2/nn);RY.push((sy+1)/2);RX.push(sx);}
+  const xAt=(yRel,hw)=>{const up=yRel>=.5,nn=up?nT:nB,v=Math.abs(2*yRel-1);const sx=Math.pow(Math.max(0,1-Math.pow(v,nn)),1/nn);return hw*sx*tumF(yRel)*(1+bul*Math.sin(Math.PI*clamp(yRel,0,1)));};
+  // slice positions: dense, plus both sides of every profile vertex
+  let sl=[];const NS=opt.slices||44;for(let i=0;i<=NS;i++){const u=i/NS;sl.push(zmin+(zmax-zmin)*(.5-.5*Math.cos(Math.PI*u)));}
+  for(const z of zs){sl.push(z-.004,z+.004);}sl=sl.map(z=>clamp(z,zmin+.002,zmax-.002)).sort((a,b)=>a-b).filter((z,i,a)=>!i||z-a[i-1]>.0015);
+  const pos=[],uv=[],ring=[];
+  for(const z of sl){const[lo,hi]=span(z);const h=Math.max(.002,hi-lo),hw=hwAt(z);const r=[];
+    for(let k=0;k<=M;k++){const yRel=RY[k];const x=hw*RX[k]*tumF(yRel)*(1+bul*Math.sin(Math.PI*yRel));r.push(pos.length/3);pos.push(x,lo+h*yRel,z);uv.push(0,0);}
+    ring.push({z,lo,hi,r});}
+  const quads=[];// [a,b,c,d,meta]
+  for(let i=0;i<ring.length-1;i++){const A=ring[i],B=ring[i+1];for(let k=0;k<M;k++){const q=[A.r[k],B.r[k],B.r[k+1],A.r[k+1]];quads.push(q);}}
+  // caps
+  const caps=[];for(const[R,dir]of[[ring[0],-1],[ring[ring.length-1],1]]){const ci=pos.length/3;pos.push(0,(R.lo+R.hi)/2,R.z);uv.push(0,0);for(let k=0;k<M;k++)caps.push(dir>0?[ci,R.r[k],R.r[k+1]]:[ci,R.r[k+1],R.r[k]]);}
+  return{pos,uv,quads,caps,ring,M,span,hwAt,xAt,zmin,zmax,RY};}
+function loftGeo(L,filter){const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(L.pos,3));g.setAttribute('uv',new T.Float32BufferAttribute(L.uv,2));
+  const id=[];L.quads.forEach((q,i)=>{if(filter&&!filter(q,i))return;id.push(q[0],q[3],q[2],q[0],q[2],q[1]);});if(!filter||filter('cap'))for(const c of L.caps)id.push(c[0],c[1],c[2]);
+  g.setIndex(id);g.computeVertexNormals();return g;}
 function carGeos(b){if(CG[b])return CG[b];const s=CAR_T[b];
   const sh=new T.Shape();const L=s.lower;sh.moveTo(L[0][0],L[0][1]);for(let k=1;k<L.length;k++)sh.lineTo(L[k][0],L[k][1]);
   const R=s.wr+.07,ph=Math.asin(clamp((s.yb-s.wr)/R,-1,1));
   sh.lineTo(s.wz+R*Math.cos(ph),s.yb);sh.absarc(s.wz,s.wr,R,ph,Math.PI-ph,false);sh.lineTo(-s.wz+R*Math.cos(ph),s.yb);sh.absarc(-s.wz,s.wr,R,ph,Math.PI-ph,false);sh.lineTo(L[0][0],L[0][1]);
-  const ex=(shape,w)=>{const bv=.06,g=new T.ExtrudeGeometry(shape,{depth:w-2*bv,bevelEnabled:true,bevelThickness:bv,bevelSize:bv,bevelSegments:2,curveSegments:10});g.rotateY(-Math.PI/2);g.translate((w-2*bv)/2,0,0);g.computeVertexNormals();return g;};
-  const cs=new T.Shape();s.cabin.forEach((p,k)=>k?cs.lineTo(p[0],p[1]):cs.moveTo(p[0],p[1]));
-  const roof=new T.BoxGeometry(s.w-.2,.07,s.roof[1]-s.roof[0]);roof.translate(0,s.roof[2],(s.roof[0]+s.roof[1])/2);
-  const pil=new T.BoxGeometry(s.w-.16,(s.roof[2]-s.cabin[0][1])*.98,.09);pil.translate(0,(s.roof[2]+s.cabin[0][1])/2,(s.roof[0]+s.roof[1])/2-.15);
-  return CG[b]={lower:ex(sh,s.w),cabin:ex(cs,s.w-.22),roof,pil,tire:new T.CylinderGeometry(s.wr,s.wr,.26,18).rotateZ(Math.PI/2),rim:new T.CylinderGeometry(s.wr*.62,s.wr*.62,.27,12).rotateZ(Math.PI/2)};}
+  const poly=sh.getPoints(14).map(p=>[p.x,p.y]);
+  const tall=b==='van'||b==='bus';
+  const BL=carLoft(poly,s.w/2,{nTop:tall?8:5,nBot:tall?10:6,tum:tall?.03:.07,bulge:.02,endPinch:tall?.05:.15,endStart:tall?.85:.62,slices:tall?40:52});
+  const cabPoly=s.cabin.map(p=>[p[0],p[1]]);
+  const shoulder=BL.xAt(.94,s.w/2);const CL=carLoft(cabPoly,tall?s.w/2-.03:shoulder,{nTop:tall?9:3.2,nBot:16,tum:tall?.04:.26,tumFrom:0,endPinch:tall?.03:.12,endStart:.5,slices:tall?30:36});
+  // split the greenhouse: roof skin and B-pillars are paint, the rest is glass
+  const r0=s.roof[0],r1=s.roof[1],bp=(r0+r1)/2-.15,M=CL.M;
+  const isPaint=(q,i)=>{const ri=Math.floor(i/M),k=i%M,A=CL.ring[ri],B=CL.ring[ri+1];const zA=A.z,zB=B.z;const yRel=(CL.RY[k]+CL.RY[k+1])/2;
+    const inRoof=zA>=r0-.05&&zB<=r1+.05;if(inRoof&&yRel>(tall?.97:.86))return true;if(!tall&&zA>=bp-.06&&zB<=bp+.06&&yRel<.9)return true;return false;};
+  const glass=loftGeo(CL,(q,i)=>q==='cap'?true:!isPaint(q,i)),roof=loftGeo(CL,(q,i)=>q==='cap'?false:isPaint(q,i));
+  roof.scale(1.004,1.004,1);
+  // tyre: rounded sidewalls; rim: dark barrel, 5 silver spokes, lip ring and hub, brake disc
+  const wr=s.wr,tp=[[wr*.64,-.13],[wr*.9,-.134],[wr*.97,-.118],[wr,-.08],[wr*1.005,0],[wr,.08],[wr*.97,.118],[wr*.9,.134],[wr*.64,.13]].map(p=>new T.Vector2(p[0],p[1]));
+  const tire=new T.LatheGeometry(tp,26).rotateZ(Math.PI/2);
+  const rimParts=[{geo:new T.CylinderGeometry(wr*.64,wr*.64,.22,22).rotateZ(Math.PI/2),color:'#24272b'},{geo:new T.CylinderGeometry(wr*.46,wr*.46,.235,20).rotateZ(Math.PI/2),color:'#3a3d42'}];
+  for(const sx of[-1,1]){rimParts.push({geo:new T.TorusGeometry(wr*.62,.016,6,26).rotateY(Math.PI/2),pos:[sx*.112,0,0],color:'#d8dde2'},{geo:new T.CylinderGeometry(wr*.13,wr*.13,.02,10).rotateZ(Math.PI/2),pos:[sx*.118,0,0],color:'#c4c9cf'});
+    for(let k=0;k<5;k++){const a=k/5*Math.PI*2,sp=new T.BoxGeometry(.02,wr*.5,.055).translate(0,wr*.33,0).rotateX(a);rimParts.push({geo:sp,pos:[sx*.112,0,0],color:'#cfd4da'});}}
+  return CG[b]={BL,CL,lower:loftGeo(BL),cabin:glass,roof,tire,rimParts};}
 const lightBox=new T.BoxGeometry(.36,.12,.06),grille=new T.BoxGeometry(1,.16,.08),plate=new T.BoxGeometry(.42,.13,.03),mirror=new T.BoxGeometry(.18,.1,.12),barG=new T.BoxGeometry(.5,.12,.28);
 const BAR={r:new T.MeshStandardMaterial({color:0x220000,emissive:lin('#ff1a2a'),emissiveIntensity:3}),b:new T.MeshStandardMaterial({color:0x000022,emissive:lin('#1a5bff'),emissiveIntensity:3})};
 const copText=textTex('CẢNH SÁT',{fg:'#1b2a55',size:70,bg:'rgba(0,0,0,0)'}),taxiText=textTex('TAXI',{fg:'#111',size:90,bg:'#f5c518',w:256,h:128});
 const DETAILM=new T.MeshBasicMaterial({vertexColors:true,toneMapped:false}),WHEELM=new T.MeshStandardMaterial({vertexColors:true,roughness:.55,metalness:.4});
+const TRIMM=new T.MeshStandardMaterial({vertexColors:true,roughness:.35,metalness:.6});
 const CM={};
-function carMeshes(b){if(CM[b])return CM[b];const s=CAR_T[b],cg=carGeos(b);
-  const fz=s.lower.reduce((a,p)=>Math.max(a,p[0]),0)+.03,rz=s.lower.reduce((a,p)=>Math.min(a,p[0]),0)-.03;
-  const paint=buildVC([{geo:cg.lower},{geo:cg.roof},{geo:cg.pil},{geo:mirror,pos:[-(s.w/2+.04),s.cabin[0][1]+.1,s.cabin[3][0]-.15]},{geo:mirror,pos:[s.w/2+.04,s.cabin[0][1]+.1,s.cabin[3][0]-.15]}]);
-  const det=[];for(const x of[-1,1]){det.push({geo:lightBox,color:'#fff4dc',pos:[x*(s.w/2-.36),s.hl,fz]},{geo:lightBox,color:'#ff2020',pos:[x*(s.w/2-.34),s.tl,rz]});}
-  det.push({geo:grille,color:'#0c0c0c',pos:[0,s.hl-.2,fz]},{geo:plate,color:'#e8e8e8',pos:[0,s.tl-.3,rz]});
-  const wheel=buildVC([{geo:cg.tire,color:'#151515'},{geo:cg.rim,color:'#b9bec5'}]);
-  return CM[b]={paint,glass:cg.cabin,detail:buildVC(det),wheel,fz,rz};}
+function carMeshes(b){if(CM[b])return CM[b];const s=CAR_T[b],cg=carGeos(b),BL=cg.BL,tall=b==='van'||b==='bus';
+  const fz=BL.zmax+.012,rz=BL.zmin-.012,belt=s.cabin[0][1];
+  // side x of the body surface at height y, slice z
+  const sideX=(z,y)=>{const[lo,hi]=BL.span(z);const yRel=clamp((y-lo)/Math.max(.01,hi-lo),0,1);return BL.xAt(yRel,BL.hwAt(z));};
+  const mz=s.cabin[3][0]-.15,mx=sideX(mz,belt)+.06;
+  const paint=buildVC([{geo:cg.lower},{geo:cg.roof},{geo:mirror,pos:[-mx,belt+.08,mz]},{geo:mirror,pos:[mx,belt+.08,mz]}]);
+  const det=[],trim=[],add=(g,p,c,a)=>(a||det).push({geo:g,pos:p,color:c});
+  const fy=(z)=>BL.span(z),fw=BL.hwAt(BL.zmax-.01),rw=BL.hwAt(BL.zmin+.01);
+  for(const x of[-1,1]){// lamps: lens + bright core, indicators
+    add(new T.BoxGeometry(.42,.13,.05),[x*(fw-.3),s.hl,fz],'#c9d2dc',trim);add(new T.BoxGeometry(.26,.07,.03),[x*(fw-.3),s.hl,fz+.02],'#fffaf0');add(new T.BoxGeometry(.1,.05,.03),[x*(fw-.08),s.hl-.02,fz+.015],'#ffa526');
+    add(new T.BoxGeometry(.44,.14,.05),[x*(rw-.3),s.tl,rz],'#6a0a0a',trim);add(new T.BoxGeometry(.32,.07,.03),[x*(rw-.3),s.tl,rz-.02],'#ff1e1e');add(new T.BoxGeometry(.1,.06,.03),[x*(rw-.06),s.tl,rz-.02],'#ffb020');
+    // side: chrome belt strip, dark skirt, door handles, door seams, mirrors' glass
+    if(!tall){const z0=s.cabin[0][0]+.1,z1=s.cabin[3][0]-.1,zm=(z0+z1)/2;add(new T.BoxGeometry(.012,.025,z1-z0),[x*(sideX(zm,belt-.03)+.004),belt-.03,zm],'#cfd5dc',trim);
+      for(const hz of[zm+.35,zm-.75])add(new T.BoxGeometry(.02,.035,.17),[x*(sideX(hz,belt-.16)+.01),belt-.16,hz],'#c0c6cc',trim);
+      for(const dz of[zm+.95,zm-.15,zm-1.15])if(dz>s.lower[0][0]+.6&&dz<BL.zmax-.6)add(new T.BoxGeometry(.008,(belt-s.yb)*.82,.012),[x*(sideX(dz,(belt+s.yb)/2)+.003),(belt+s.yb)/2+.02,dz],'#1a1b1e');}
+    add(new T.BoxGeometry(.03,.12,s.wz*2-(s.wr+.07)*2-.1),[x*(sideX(0,s.yb+.07)-.01),s.yb+.06,0],'#141518');
+  }
+  // front: grille with chrome surround, lower intake, plate; rear: plate, diffuser, exhaust
+  add(new T.BoxGeometry(Math.min(1.1,fw*1.1),.2,.04),[0,s.hl-.04,fz],'#c4cad1',trim);add(new T.BoxGeometry(Math.min(1.0,fw),.15,.05),[0,s.hl-.04,fz+.01],'#0b0c0e');
+  add(new T.BoxGeometry(fw*1.3,.12,.04),[0,s.yb+.14,fz-.01],'#0f1012');add(new T.BoxGeometry(.5,.13,.02),[0,s.yb+.32,fz+.012],'#f0f0ec');
+  add(new T.BoxGeometry(.5,.13,.02),[0,s.tl-.27,rz-.012],'#f0f0ec');add(new T.BoxGeometry(rw*1.4,.1,.04),[0,s.yb+.1,rz+.01],'#121315');
+  add(new T.CylinderGeometry(.045,.045,.16,10).rotateX(Math.PI/2),[-rw*.55,s.yb+.08,rz-.05],'#9aa0a6',trim);
+  // dark wheel housings so you cannot see through the arches
+  for(const z of[s.wz,-s.wz])add(new T.BoxGeometry(s.w-.62,s.wr*1.5,(s.wr+.07)*2-.05),[0,s.wr+.05,z],'#0a0a0b');
+  const wheel=buildVC([{geo:cg.tire,color:'#121314'}].concat(cg.rimParts));
+  return CM[b]={paint,glass:cg.cabin,detail:buildVC(det),trim:trim.length?buildVC(trim):null,wheel,fz,rz};}
 /* driver-side front door (local +x) that can swing open, the dark opening behind it, and a seated driver */
 const DG={},ARMG=new T.BoxGeometry(.1,.1,.46).translate(0,0,.21).rotateX(.42),WHEELG=new T.TorusGeometry(.17,.025,6,18),HOLEM=new T.MeshBasicMaterial({color:'#121418'});
 function doorGeo(b){if(DG[b])return DG[b];const s=CAR_T[b],R=s.wr+.07,belt=s.cabin[0][1];
@@ -1610,7 +1763,7 @@ function makeCar(type,color){
   const b=CAR_BODY[type],s=CAR_T[b],M=carMeshes(b),g=new T.Group(),bg=new T.Group();g.add(bg);
   const pc={color:lin(type==='police'?'#14171d':type==='taxi'?'#f5c518':color),roughness:ENV_OK?.3:.35,metalness:ENV_OK?.5:.15};const paint=!MOBILE&&ENV_OK?new T.MeshPhysicalMaterial(Object.assign(pc,{clearcoat:1,clearcoatRoughness:.06,envMapIntensity:1.1})):new T.MeshStandardMaterial(pc);
   const body=new T.Mesh(M.paint,paint);body.castShadow=Q.shadows;bg.add(body);
-  const gl=new T.Mesh(M.glass,GLASS);gl.castShadow=Q.shadows;bg.add(gl);bg.add(new T.Mesh(M.detail,DETAILM));
+  const gl=new T.Mesh(M.glass,GLASS);gl.castShadow=Q.shadows;bg.add(gl);bg.add(new T.Mesh(M.detail,DETAILM));if(M.trim)bg.add(new T.Mesh(M.trim,TRIMM));
   if(type==='police'){const door=new T.Mesh(new T.BoxGeometry(s.w+.03,.4,2.1),mat('#f4f5f7',.35,.2));door.position.set(0,.66,-.1);bg.add(door);
     const tg=buildVC([{geo:new T.PlaneGeometry(1.5,.32).rotateY(Math.PI/2),pos:[s.w/2+.03,.66,-.1]},{geo:new T.PlaneGeometry(1.5,.32).rotateY(-Math.PI/2),pos:[-(s.w/2+.03),.66,-.1]}]);
     bg.add(new T.Mesh(tg,new T.MeshBasicMaterial({map:copText,transparent:true})));
@@ -3148,7 +3301,11 @@ function step(dt){
   foamUpdate();if(Math.floor(time*20)%2===0){const pa=waterG.attributes.position;for(let i=0;i<pa.count;i++){const x=waterBase[i*3],z=waterBase[i*3+2];pa.array[i*3+1]=Math.sin(x*.06+time*1.3)*.08+Math.cos(z*.05+time*.9)*.06+Math.sin((x+z)*.13+time*2.1)*.04;}pa.needsUpdate=true;waterG.computeVertexNormals();}
 }
 let perfT=0,perfN=0,lowQ=false;
-function adapt(raw){if(lowQ||paused)return;perfT+=raw;perfN++;if(perfT>4){const avg=perfT/perfN;perfT=0;perfN=0;if(avg>.036&&PP.on){PP.on=false;return;}if(avg>.045){lowQ=true;renderer.setPixelRatio(1);if(renderer.shadowMap.enabled){renderer.shadowMap.enabled=false;sun.castShadow=false;scene.traverse(o=>{if(o.material){(Array.isArray(o.material)?o.material:[o.material]).forEach(m=>m.needsUpdate=true);}});}resize();}}}
+function adapt(raw){if(lowQ||paused)return;perfT+=raw;perfN++;if(perfT>4){const avg=perfT/perfN;perfT=0;perfN=0;
+  // step down gently: resolution first, then bloom, then shadows (each only if it is still slow)
+  if(avg>.034&&renderer.getPixelRatio()>1){renderer.setPixelRatio(1);resize();return;}
+  if(avg>.04&&PP.on){PP.on=false;return;}
+  if(avg>.05){lowQ=true;if(renderer.shadowMap.enabled){renderer.shadowMap.enabled=false;sun.castShadow=false;scene.traverse(o=>{if(o.material){(Array.isArray(o.material)?o.material:[o.material]).forEach(m=>m.needsUpdate=true);}});}resize();}}}
 /* ---------- post-processing: HDR-ish bloom, a San Andreas style colour grade (warm highlights, cool shadows, smog haze),
    vignette, film grain and FXAA. Off on phones and switched off automatically if the frame rate drops. ---------- */
 const PP=(()=>{const gl2=renderer.capabilities.isWebGL2;const o={on:opt.gfx?opt.gfx!=='low':!MOBILE,w:1,h:1};
@@ -3193,7 +3350,7 @@ const PP=(()=>{const gl2=renderer.capabilities.isWebGL2;const o={on:opt.gfx?opt.
     const u=fin.u;u.tDiffuse.value=main.texture;u.tB1.value=b1.texture;u.tB2.value=b3.texture;u.px.value.set(1/o.w,1/o.h);u.time.value=time;u.night.value=nk;u.bloom.value=.42+nk*.45;
     renderer.setRenderTarget(null);renderer.render(fin.sc,cam);};
   return o;})();
-function frame(now){raf=requestAnimationFrame(frame);const raw=(now-last)/1000||0;let dt=Math.max(0,Math.min(.05,raw));last=now;if(hitStop>0){hitStop-=dt;dt*=.12;}if(raw>0&&raw<1)adapt(raw);if(!paused&&!mapOpen&&!shopOpen)step(dt);camUpdate(dt);hudUpdate(dt);audioUpdate(dt);PP.render();}
+function frame(now){raf=requestAnimationFrame(frame);const raw=(now-last)/1000||0;let dt=Math.max(0,Math.min(.05,raw));last=now;if(hitStop>0){hitStop-=dt;dt*=.12;}if(raw>0&&raw<1)adapt(raw);if(!paused&&!mapOpen&&!shopOpen)step(dt);camUpdate(dt);hudUpdate(dt);audioUpdate(dt);if(GRASS&&!P.inside)GRASS.update(P.car?P.car.x:P.x,P.car?P.car.z:P.z);PP.render();}
 function resize(){const w=view.clientWidth||innerWidth,h=view.clientHeight||innerHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();const pr=renderer.getPixelRatio();PP.setSize(Math.round(w*pr),Math.round(h*pr));}
 window.addEventListener('resize',()=>{if(!view.closest('[hidden]'))resize();});
 camera.position.set(P.x,4,P.z+7);

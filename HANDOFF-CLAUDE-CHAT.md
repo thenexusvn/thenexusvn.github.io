@@ -269,3 +269,11 @@ Python helper scripts used during development:
 - 8 tướng: kael, brakk, nyra, elara, vex, lumi, zoltar, thorn; 15 trang bị; 3 đường, trụ, nhà chính, quái rừng (bùa xanh/đỏ, rồng…).
 - Màn: sảnh chờ (showcase 3D), chế độ (Dễ/Thường/Khó), tướng, hướng dẫn, chọn tướng (24s), loading, trận, kết quả. Lưu `nexus-moba-save` (cấp, trận, thắng, MVP).
 - Điều khiển PC: WASD/chuột phải di chuyển, Space đánh, Q/E/R chiêu, F tốc biến, B về nhà, Tab bảng điểm. Mobile: joystick + nút, kéo nút chiêu để ngắm.
+
+## Nexus City — nâng cấp đồ hoạ (25/11/2026)
+- Xe: thân dựng bằng `carLoft` (mặt cắt superellipse theo profile hông xe, bo góc, kính vát vào), mui sơn tách từ khoang kính, mâm 5 chấu, lốp bo, đèn/xi nhan, viền chrome, tay nắm, khe cửa, hốc bánh tối.
+- Toà nhà: `wrapGB` ghi lại mọi khối nhà → `buildDetails()` thêm gờ tầng, phào mái, lan can mái, chân tường, cột góc, vây kính (toà kính), buồng kỹ thuật/thang trên mái.
+- Cây: thẻ lá alpha (`broadleafGeo`, `coniferGeo`, `LEAFM`, `NEEDLEM`, `instFol`) cho cây phố, cây thị trấn, rừng thông.
+- Cỏ: `GRASS` (instanced quanh người chơi trên đồi/rừng, chỉ máy tính).
+- Chất lượng tự hạ từng bước: độ phân giải → bloom → bóng. Texture anisotropy tối đa. Xe/người đi đường nhiều hơn (34 trên máy tính).
+- index.html nạp `city.js?v=20261125g`.
