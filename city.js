@@ -869,11 +869,11 @@ function makePlane(type,liv,tail,o){o=o||{};const g=new T.Group(),inner=new T.Gr
     const gr=new GB();gr.flat(A.x0+2,A.x1-2,Y,A.z0+2,A.z1-2,8);addMesh(gr.geo(),new T.MeshStandardMaterial({map:TX.grass,color:lin('#b8c79a'),roughness:1}),false);}
   // concrete: landside road + parking, apron, hangar apron; asphalt: runway, taxiway, links
   const CG=new GB(),AG=new GB();
-  CG.flat(-260,250,Y+.012,646,688,8);CG.flat(-340,620,Y+.012,750,870,8);CG.flat(280,620,Y+.012,700,760,8);CG.flat(-560,-370,Y+.012,690,760,8);
-  AG.flat(-565,605,Y+.03,RZ-RW2,RZ+RW2,10);AG.flat(-545,585,Y+.025,TZ-11.5,TZ+11.5,10);for(const x of[-545,-200,200,585])AG.flat(x-11.5,x+11.5,Y+.026,TZ+11.5,RZ-RW2,10);AG.flat(-20,20,Y+.026,868,TZ-11.5,10);
+  CG.flat(-260,250,Y+.05,646,688,8);CG.flat(-340,620,Y+.05,750,870,8);CG.flat(280,620,Y+.05,700,760,8);CG.flat(-560,-370,Y+.05,690,760,8);
+  AG.flat(-565,605,Y+.09,RZ-RW2,RZ+RW2,10);AG.flat(-545,585,Y+.085,TZ-11.5,TZ+11.5,10);for(const x of[-545,-200,200,585])AG.flat(x-11.5,x+11.5,Y+.08,TZ+11.5,RZ-RW2,10);AG.flat(-20,20,Y+.08,868,TZ-11.5,10);
   addMesh(CG.geo(),CONC,false);addMesh(AG.geo(),RWM,false);
   // markings
-  {const WM=new GB(),YM=new GB(),y1=Y+.045;
+  {const WM=new GB(),YM=new GB(),y1=Y+.12;
     for(let x=-470;x<500;x+=50)WM.flat(x,x+30,y1,RZ-.45,RZ+.45,2);
     WM.flat(-565,605,y1,RZ-RW2+1,RZ-RW2+1.9,2);WM.flat(-565,605,y1,RZ+RW2-1.9,RZ+RW2-1,2);
     for(const[xa,dir]of[[-560,1],[600,-1]]){for(let k=0;k<12;k++){const z0=RZ-RW2+3+k*3.5+(k>5?3:0);WM.flat(Math.min(xa,xa+dir*30),Math.max(xa,xa+dir*30),y1,z0,z0+1.8,2);}
@@ -881,7 +881,7 @@ function makePlane(type,liv,tail,o){o=o||{};const g=new T.Group(),inner=new T.Gr
     for(let x=-545;x<585;x+=6)YM.flat(x,x+4,y1-.01,TZ-.15,TZ+.15,2);
     for(const g of[-190,-100,-10])YM.flat(g-.15,g+.15,y1-.02,752,868,2);
     addMesh(WM.geo(),mat('#eeeeea',.6),false);addMesh(YM.geo(),mat('#f2c230',.6),false);
-    for(const[x,t,ry]of[[-520,'09',-Math.PI/2],[560,'27',Math.PI/2]]){const pl=new T.Mesh(new T.PlaneGeometry(24,14),new T.MeshStandardMaterial({map:textTex(t,{w:256,h:150,size:140,fg:'#f2f2ee'}),transparent:true,roughness:.6}));pl.rotation.order='YXZ';pl.rotation.set(-Math.PI/2,ry,0);pl.position.set(x,Y+.05,RZ);scene.add(pl);}}
+    for(const[x,t,ry]of[[-520,'09',-Math.PI/2],[560,'27',Math.PI/2]]){const pl=new T.Mesh(new T.PlaneGeometry(24,14),new T.MeshStandardMaterial({map:textTex(t,{w:256,h:150,size:140,fg:'#f2f2ee'}),transparent:true,roughness:.6}));pl.rotation.order='YXZ';pl.rotation.set(-Math.PI/2,ry,0);pl.position.set(x,Y+.125,RZ);scene.add(pl);}}
   // runway, threshold, taxiway and approach lights
   {const W=[],GN=[],RD=[],BL=[];for(let x=-560;x<=600;x+=60)for(const s of[-1,1])W.push([x,RZ+s*(RW2+.8)]);
     for(let z=RZ-RW2;z<=RZ+RW2;z+=4){GN.push([-566,z]);RD.push([606,z]);}
@@ -903,7 +903,7 @@ function makePlane(type,liv,tail,o){o=o||{};const g=new T.Group(),inner=new T.Gr
   const TX0=-230,TX1=30,TZ0=690,TZ1=745,TH=16;AIR.term={x0:TX0,x1:TX1,z0:TZ0,z1:TZ1,h:TH};
   {const glassM=new T.MeshStandardMaterial({color:lin('#9fc3d6'),roughness:.08,metalness:.6,transparent:true,opacity:.38,envMapIntensity:1.4,side:T.DoubleSide,depthWrite:false});
     const floorT=makeTex(512,512,(g,w,h)=>{speckle(g,w,h,'#d9d6cf',6000,.06);g.strokeStyle='rgba(120,115,105,.35)';g.lineWidth=2;for(let i=0;i<=w;i+=64){g.beginPath();g.moveTo(i,0);g.lineTo(i,h);g.stroke();g.beginPath();g.moveTo(0,i);g.lineTo(w,i);g.stroke();}});
-    const fl=new GB();fl.flat(TX0,TX1,Y+.06,TZ0,TZ1,6);const fm=addMesh(fl.geo(),new T.MeshStandardMaterial({map:floorT,roughness:.25,metalness:.1,emissive:lin('#4a4840'),emissiveIntensity:.35,envMapIntensity:.8}),false);
+    const fl=new GB();fl.flat(TX0,TX1,Y+.1,TZ0,TZ1,6);const fm=addMesh(fl.geo(),new T.MeshStandardMaterial({map:floorT,roughness:.25,metalness:.1,emissive:lin('#4a4840'),emissiveIntensity:.35,envMapIntensity:.8}),false);
     // roof slab with a wavy overhang on the landside
     const rf=new GB();rf.box(TX0-4,TX1+4,TH,TH+1.2,TZ0-22,TZ1+5,{uw:8,uh:8,ts:8});addMesh(rf.geo(),mat('#e4e6e9',.5,.3),true);
     const cl=new GB();for(let x=TX0+6;x<TX1-4;x+=12)cl.box(x,x+8,TH-.35,TH-.05,TZ0+4,TZ1-4,{uw:2,uh:2,ts:2});const clm=addMesh(cl.geo(),new T.MeshBasicMaterial({color:'#fff7e6',toneMapped:false}),false);
