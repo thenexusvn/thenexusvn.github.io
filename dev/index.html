@@ -2026,6 +2026,7 @@ $('#compose').addEventListener('submit',async e=>{e.preventDefault();const v=$('
    friends/{a_b}   {users:[a,b], by, status}   a friend request (status 'pending') or a friendship ('ok')
    rooms/{id}      {type:'dm'|'group', name, members:[uid], owner, last, lastBy, lastAt, createdAt}
    rooms/{id}/messages/{mid} {text, uid, name, createdAt} */
+const hubCloud=()=>ND.mode==='cloud'&&!!ND._db;
 const HUB={people:{},friends:{},rooms:{},online:new Set(),unsub:[],uid:null,roomCur:null,roomMsgs:[],roomUnsub:null,profSaved:''};
 const avOf=p=>{const m=/av=(a\d+)/.exec((p&&p.photo)||'');return m?m[1]:null;};
 const avHTML=(p,name)=>{const a=avOf(p);return a&&window.nexusAvatarHTML?window.nexusAvatarHTML(a,'av hub-av'):`<span class="av">${esc(initials(name||(p&&p.name)))}</span>`;};
@@ -2034,7 +2035,7 @@ const readKey=id=>'nexus-read-'+id;
 const lastRead=id=>{try{return +localStorage.getItem(readKey(id))||0;}catch(_){return 0;}};
 const markRead=id=>{try{localStorage.setItem(readKey(id),String(Date.now()));}catch(_){}};
 function hubStop(){HUB.unsub.forEach(f=>{try{f();}catch(_){}});HUB.unsub=[];HUB.people={};HUB.friends={};HUB.rooms={};HUB.uid=null;}
-function hubStart(){const u=me();if(!cloud()||!signedIn()){if(HUB.uid)hubStop();renderChans();return;}
+function hubStart(){const u=me();if(!hubCloud()||!signedIn()){if(HUB.uid)hubStop();renderChans();return;}
   const db=ND._db,FV=ND._FV;
   // keep my public profile row up to date (name and avatar)
   const sig=u.uid+'|'+u.name+'|'+(u.photo||'');if(HUB.profSaved!==sig){HUB.profSaved=sig;db.collection('profiles').doc(u.uid).set({name:String(u.name||'Bạn').slice(0,40),photo:String(u.photo||'').slice(0,120),at:FV.serverTimestamp()},{merge:true}).catch(e=>console.warn('profile',e));}
@@ -2054,7 +2055,7 @@ function roomRow(r){const unread=r.lastAt&&r.lastBy!==HUB.uid&&ND.tsMs(r.lastAt)
 
 /* the side list: create buttons, public channels, my chats */
 const _renderChansOld=renderChans;
-renderChans=function(){const on=cloud()&&signedIn();const reqs=on?Object.values(HUB.friends).filter(f=>f.status==='pending'&&f.by!==HUB.uid).length:0;const rooms=on?roomSorted():[];
+renderChans=function(){const on=hubCloud()&&signedIn();const reqs=on?Object.values(HUB.friends).filter(f=>f.status==='pending'&&f.by!==HUB.uid).length:0;const rooms=on?roomSorted():[];
   $('#chans').innerHTML=`<span class="eyebrow">${ic('chat')}CommsHub</span>`
    +`<div class="hub-new"><button type="button" class="btn btn-lime btn-sm" data-hubnew="group">${ic('plus')}Tạo nhóm chat</button><button type="button" class="btn btn-ghost btn-sm" data-hubnew="dm">${ic('send')}Nhắn riêng</button></div>`
    +`<button type="button" class="hub-ppl" data-hubnew="people">${ic('heart')}<span class="nm">Mọi người &amp; bạn bè</span>${reqs?`<span class="badge">${reqs}</span>`:''}</button>`
