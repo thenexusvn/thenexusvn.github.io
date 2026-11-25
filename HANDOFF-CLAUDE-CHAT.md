@@ -153,6 +153,23 @@ A school super-app, rebuilt from v0-thenexus.vercel.app. Single-page vanilla JS 
     - In the browser pane, a canvas/DOM recorder checks both games.
   - What stays Vietnamese on purpose: user content, real song titles and artists, the "Tiếng Việt" language button, and food names (bánh mì, phở).
 
+- **Graphics overhaul (Nov 2026):**
+  - **Post-processing `PP`** (in city.js, just before `frame`):
+    - The scene renders into an MSAA render target (FXAA when MSAA is not available).
+    - Bloom: a bright pass, then two blur levels at 1/4 and 1/8 size. The threshold drops at night so lamps glow.
+    - Colour grade in the San Andreas style: cool shadows, warm amber highlights, smog lift, gentle S-curve.
+    - Vignette and film grain.
+    - `adapt()` turns PP off first when frames get slow.
+  - **Graphics setting:** "Đồ hoạ: Đẹp nhất / Mượt" on the start and pause panels, saved as `nexus-city-gfx` and passed as `opt.gfx`. The game API has `setGfx`. Default is Best on desktop and Smooth on touch devices.
+  - **Look and textures:**
+    - Facades are weathered: rain streaks under windows and grime blotches.
+    - Building colours moved to a dusty Los Santos palette.
+    - Grass and sidewalk textures are 512 px with patches and cracks.
+    - Foliage texture on street trees and broadleaf trees, needle texture on pines.
+  - **Ground and cars:**
+    - A contact-shadow band runs round the foot of every building.
+    - Car paint uses MeshPhysical clear coat on desktop.
+
 ## Public link
 https://thenexusvn.github.io (GitHub Pages). Firebase project `nexus-4012e`: Google, Email/Password and Anonymous sign-in on; Firestore in asia-southeast1 with `firestore.rules` published; authorized domain `thenexusvn.github.io`.
 
