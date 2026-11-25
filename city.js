@@ -20,16 +20,19 @@ const EXT={x0:-HALF-26,x1:WATER-3,z0:-HALF-26,z1:HALF+26};
 /* west hills: terrain heights live in HGRID (built later); heightAt is 0 everywhere else */
 EXT.z1=HALF+70;EXT.x1=WATER+18;
 const HZ={x0:-800,x1:-456,z0:-110,z1:480};let HGRID=null;
+const WL={x0:-1385,x1:-790,z0:-112,z1:440};
+/* raised decks (harbour quay and piers) with their own floor height; hidden diamonds; the towns out in the country */
+const PADS=[],DIAS=[],TOWNS=[];
 /* the wilds north and west of the city: their own height grid; WA is the part the player may walk in */
 const WZ={x0:-1500,x1:545,z0:-1700,z1:-110},WA={x0:-1300,x1:EXT.x1,z0:-1500,z1:-110},WILD={};let WGRID=null;
 /* the airport sits on reclaimed land off the south beach; a causeway joins it to the city */
-const AP={x0:-620,x1:660,z0:640,z1:1010,y:.35},CW={x0:-10.4,x1:10.4,z0:EXT.z1-14,z1:AP.z0+2},AREAS=[EXT,HZ,WA,AP,CW];
+const AP={x0:-620,x1:660,z0:640,z1:1010,y:.35},CW={x0:-10.4,x1:10.4,z0:EXT.z1-14,z1:AP.z0+2},AREAS=[EXT,HZ,WA,AP,CW,WL];
 function inAirport(x,z){return(x>AP.x0&&x<AP.x1&&z>AP.z0&&z<AP.z1)||(x>CW.x0&&x<CW.x1&&z>CW.z0&&z<CW.z1);}
 function inHZ(x,z){return x<HZ.x1&&x>HZ.x0&&z>HZ.z0&&z<HZ.z1;}
 function inWild(x,z){return x>WZ.x0&&x<WZ.x1&&z>WZ.z0&&z<WZ.z1&&!(x>EXT.x0&&z>EXT.z0);}
 function inHills(x,z){return inHZ(x,z)||inWild(x,z);}
 function onDock(x,z){const d=WILD.dock;return d&&x>d.x0&&x<d.x1&&z>d.z0&&z<d.z1;}
-function heightAt(x,z){if(z>CW.z0&&inAirport(x,z))return AP.y;let G=null;if(inHZ(x,z))G=HGRID;else if(inWild(x,z)){G=WGRID;if(G&&onDock(x,z))return Math.max(WILD.dock.y,gridH(G,x,z));}return G?gridH(G,x,z):0;}
+function heightAt(x,z){for(let i=0;i<PADS.length;i++){const p=PADS[i];if(x>p.x0&&x<p.x1&&z>p.z0&&z<p.z1)return p.y;}if(z>CW.z0&&inAirport(x,z))return AP.y;let G=null;if(inHZ(x,z))G=HGRID;else if(inWild(x,z)){G=WGRID;if(G&&onDock(x,z))return Math.max(WILD.dock.y,gridH(G,x,z));}return G?gridH(G,x,z):0;}
 function gridH(G,x,z){const fx=(x-G.X0)/G.ST,fz=(z-G.Z0)/G.ST,ix=clamp(Math.floor(fx),0,G.NX-2),iz=clamp(Math.floor(fz),0,G.NZ-2),tx=fx-ix,tz=fz-iz,H=G.H,a=H[iz*G.NX+ix],b=H[iz*G.NX+ix+1],c=H[(iz+1)*G.NX+ix],d=H[(iz+1)*G.NX+ix+1];return(a*(1-tx)+b*tx)*(1-tz)+(c*(1-tx)+d*tx)*tz;}
 const FLOOR=3.6,BAY=3.2,FT_W=4*BAY,FT_H=4*FLOOR;
 // a river runs west to east through block row RIVER_J and out to the sea; every north-south road crosses it on a bridge
@@ -589,7 +592,7 @@ function wildBuild(ST,EXTX0,EXTZ0){
   const nz=(x,z)=>Math.sin(x*.013+z*.009)*.5+Math.sin(x*.031-z*.027+1.3)*.3+Math.sin(x*.071+z*.063+2.1)*.15+Math.sin(x*.17-z*.15)*.05;
   const bump=(x,z,cx,cz,r)=>{const t=hy(x-cx,z-cz)/r;return t>=1?0:(1-t*t)*(1-t*t);};
   const cityD=(x,z)=>hy(Math.max(0,EXTX0-x),Math.max(0,EXTZ0-z));
-  const PL={lake:{x:-230,z:-930,r:95},village:{x:-640,z:-720,r:80},camp:{x:150,z:-1080,r:22},summit:{x:-520,z:-1330,r:15},mine:{x:-985,z:-985,r:16},farm:{x:-900,z:-600},meadow:{x:-40,z:-570},forest:{x:190,z:-800}};
+  const PL={lake:{x:-230,z:-930,r:95},village:{x:-640,z:-720,r:80},camp:{x:150,z:-1080,r:22},summit:{x:-520,z:-1330,r:15},mine:{x:-985,z:-985,r:16},farm:{x:-900,z:-600},meadow:{x:-40,z:-570},forest:{x:190,z:-800},oldq:{x:-375,z:-612,r:95},harbor:{x:385,z:-655,r:105},highland:{x:-540,z:-1050,r:92},minetown:{x:-1030,z:-800,r:84}};
   const nat0=(x,z)=>{const dc=cityD(x,z),u=cl(dc/650,0,1);
     let v=3+24*u*u+(5+11*u)*nz(x,z);
     v+=30*ss(-1100,-1420,z)*(.75+.25*nz(x*1.7,z*1.3));
@@ -598,7 +601,7 @@ function wildBuild(ST,EXTX0,EXTZ0){
     v*=ss(0,80,dc)*ss(-110,-175,z)*ss(445,385,x);
     return Math.max(.04,v);};
   const L=PL.lake;{let m=1e9;for(let a=0;a<6.28;a+=.2)m=Math.min(m,nat0(L.x+Math.cos(a)*(L.r+25),L.z+Math.sin(a)*(L.r+25)));L.y=Math.round(Math.min(nat0(L.x,L.z),m)-2);}
-  PL.farm.r=75;const flats=[[PL.village,90,40],[PL.camp,22,25],[PL.mine,16,18],[PL.farm,75,40]];for(const[p]of flats)p.y=nat0(p.x,p.z);
+  PL.farm.r=75;const flats=[[PL.village,90,40],[PL.camp,22,25],[PL.mine,16,18],[PL.farm,75,40],[PL.oldq,95,50],[PL.harbor,105,40],[PL.highland,92,50],[PL.minetown,84,45]];for(const[p]of flats)p.y=nat0(p.x,p.z);PL.harbor.y=1.2;PL.oldq.y=5;
   /* ---- roads: Catmull-Rom through hand-placed points, resampled every 2 m ---- */
   const spline=CP=>{const raw=[];for(let k=0;k<CP.length-1;k++){const p0=CP[Math.max(0,k-1)],p1=CP[k],p2=CP[k+1],p3=CP[Math.min(CP.length-1,k+2)];
       for(let t=0;t<1;t+=1/60){const t2=t*t,t3=t2*t;raw.push([.5*(2*p1[0]+(-p0[0]+p2[0])*t+(2*p0[0]-5*p1[0]+4*p2[0]-p3[0])*t2+(-p0[0]+3*p1[0]-3*p2[0]+p3[0])*t3),.5*(2*p1[1]+(-p0[1]+p2[1])*t+(2*p0[1]-5*p1[1]+4*p2[1]-p3[1])*t2+(-p0[1]+3*p1[1]-3*p2[1]+p3[1])*t3)]);}}
@@ -617,7 +620,13 @@ function wildBuild(ST,EXTX0,EXTZ0){
   let jb=0,jd=1e9;R1.forEach((p,i)=>{const d=hy(p[0]-R2[0][0],p[1]-R2[0][1]);if(d<jd){jd=d;jb=i;}});
   const h2=profile(R2,null,null,.11);{const d=h1[jb]-h2[0];for(let i=0;i<R2.length;i++){const w=Math.max(0,1-i/40);h2[i]+=d*w;}}
   PL.summit.y=h1[h1.length-1];PL.camp.y=h2[h2.length-1]*.5+PL.camp.y*.5;
-  const roads=[{P:R1,h:h1},{P:R2,h:h2}];
+  /* more roads: to the harbour and the old quarter straight out of the city, and branches off the main road to the highland town and the mining town */
+  const R3=spline([[384,-452],[384,-492],[386,-540],[390,-580],[392,-620],[392,-680],[392,-740],[384,-770]]),h3=profile(R3,0,null,.12);
+  const R6=spline([[-256,-452],[-256,-492],[-258,-536],[-262,-572],[-282,-596],[-320,-600],[-380,-600],[-450,-600],[-500,-618],[-545,-655],[-582,-698],[-600,-722]]),h6=profile(R6,0,null,.12);
+  const branch=(P,g)=>{let pj=0,pd=1e9;R1.forEach((p,i)=>{const d=hy(p[0]-P[0][0],p[1]-P[0][1]);if(d<pd){pd=d;pj=i;}});const h=profile(P,null,null,g),d=h1[pj]-h[0];for(let i=0;i<P.length;i++){const w=Math.max(0,1-i/40);h[i]+=d*w;}return{P,h,par:0,pj};};
+  const B4=branch(spline([[-640,-1112],[-614,-1080],[-588,-1056],[-556,-1048],[-500,-1048],[-440,-1048],[-392,-1056]]),.12);
+  const B7=branch(spline([[-858,-846],[-905,-828],[-950,-808],[-990,-800],[-1050,-800],[-1110,-800],[-1150,-800]]),.12);
+  const roads=[{P:R1,h:h1,kind:'asph',gate:[0,-440]},{P:R2,h:h2,kind:'gravel',par:0,pj:jb},{P:R3,h:h3,kind:'asph',gate:[384,-440]},{P:R6,h:h6,kind:'asph',gate:[-256,-440]},Object.assign(B4,{kind:'asph'}),Object.assign(B7,{kind:'gravel'})];
   /* ---- nearest-road distance and road height per grid cell (rasterised, 2 m samples) ---- */
   const RD=new Float32Array(NX*NZ).fill(1e9),RH=new Float32Array(NX*NZ),RM=48;
   for(const r of roads)for(let i=0;i<r.P.length;i++){const[px,pz]=r.P[i],ix0=Math.max(0,Math.floor((px-RM-X0)/ST)),ix1=Math.min(NX-1,Math.ceil((px+RM-X0)/ST)),iz0=Math.max(0,Math.floor((pz-RM-Z0)/ST)),iz1=Math.min(NZ-1,Math.ceil((pz+RM-Z0)/ST));
@@ -643,6 +652,13 @@ function wildBuild(ST,EXTX0,EXTZ0){
 {const glowTex0=()=>makeTex(64,64,(g)=>{const r=g.createRadialGradient(32,32,0,32,32,32);r.addColorStop(0,'rgba(255,230,190,1)');r.addColorStop(.3,'rgba(255,170,80,.5)');r.addColorStop(1,'rgba(255,120,40,0)');g.fillStyle=r;g.fillRect(0,0,64,64);},{repeat:false});
   const W=wildBuild(MOBILE?8:6,EXT.x0,EXT.z0),G=W.G,PL=W.PL,ss=W.ss,nz=W.nz;WGRID=G;
   Object.assign(WILD,{PL,roads:W.roads,jb:W.jb,lake:PL.lake,gems:[],places:[],anim:{}});
+  /* West Nexus: a new town on the flat land south of the river, reached by an avenue out of the city's west side */
+  {const poly=CP=>{const o=[];for(let k=0;k<CP.length-1;k++){const a=CP[k],b=CP[k+1],l=hyp(b[0]-a[0],b[1]-a[1]),n=Math.max(1,Math.round(l/2));for(let t=0;t<n;t++)o.push([a[0]+(b[0]-a[0])*t/n,a[1]+(b[1]-a[1])*t/n]);}o.push(CP[CP.length-1]);return o;};
+    const hh=P=>P.map(p=>Math.max(.02,heightAt(p[0],p[1])));const R=W.roads,add=(CP,o)=>{const P=poly(CP);const r=Object.assign({P,h:hh(P),kind:'asph',urban:true,w:5.5},o);if(r.par!=null){let pj=0,pd=1e9;R[r.par].P.forEach((p,i)=>{const d=hyp(p[0]-P[0][0],p[1]-P[0][1]);if(d<pd){pd=d;pj=i;}});r.pj=pj;}R.push(r);return R.length-1;};
+    const r5=add([[-452,-102],[-560,-102],[-700,-102],[-790,-102],[-840,-92],[-872,-60],[-880,0],[-880,150]],{gate:[-440,-102],urban:false,w:4.6});
+    const av=add([[-880,150],[-980,150],[-1080,150],[-1200,150],[-1330,150]],{par:r5});
+    add([[-1080,150],[-1080,60],[-1080,-30],[-1080,-85]],{par:av});const so=add([[-1080,150],[-1080,240],[-1080,330],[-1080,420]],{par:av});
+    add([[-1080,330],[-980,330],[-900,330]],{par:so});add([[-1200,150],[-1200,60],[-1200,-30]],{par:av});add([[-1200,150],[-1200,250],[-1200,330]],{par:av});}
   const L=PL.lake,{X0,Z0,ST,NX,NZ,H,RD}=G;
   const rng=(()=>{let s=4242;return()=>{s=(s*16807)%2147483647;return s/2147483647;};})();
   const rdAt=(x,z)=>{const ix=clamp(Math.round((x-X0)/ST),0,NX-1),iz=clamp(Math.round((z-Z0)/ST),0,NZ-1);return RD[iz*NX+ix];};
@@ -664,17 +680,17 @@ function wildBuild(ST,EXTX0,EXTZ0){
     const tm=addMesh(tg,new T.MeshStandardMaterial({map:TX.grass,vertexColors:true,roughness:1}),false);tm.receiveShadow=Q.shadows;}
   /* ---- roads: asphalt main road with lines and reflector posts, gravel road to the lake and the campsite ---- */
   const posts=[];
-  W.roads.forEach((r,ri)=>{const RP=r.P,h=r.h,n=RP.length,DS=2,Wd=ri?3.6:4.4;
+  W.roads.forEach((r,ri)=>{const RP=r.P,h=r.h,n=RP.length,DS=2,AS=r.kind!=='gravel',Wd=r.w||(AS?4.4:3.6);
     const side=(i,off)=>{const a=RP[Math.max(0,i-1)],b=RP[Math.min(n-1,i+1)],tx=b[0]-a[0],tz=b[1]-a[1],l=hyp(tx,tz)||1;return[RP[i][0]+(-tz/l)*off,RP[i][1]+(tx/l)*off];};
     const strip=(gb,o0,o1,dy,ts,from,to,every)=>{for(let i=from;i<to;i++){if(every&&Math.floor(i/every)%2)continue;const y0=h[i]+dy,y1=h[i+1]+dy,a0=side(i,o0),a1=side(i,o1),b0=side(i+1,o0),b1=side(i+1,o1);
       const v=[[a0[0],y0,a0[1]],[a1[0],y0,a1[1]],[b1[0],y1,b1[1]],[b0[0],y1,b0[1]]];const cr=(v[1][0]-v[0][0])*(v[3][2]-v[0][2])-(v[1][2]-v[0][2])*(v[3][0]-v[0][0]);const q=cr<0?v:[v[0],v[3],v[2],v[1]];
       const s0=i*DS/ts,s1=(i+1)*DS/ts;gb.quad(q[0],q[1],q[2],q[3],[0,1,0],cr<0?[[0,s0],[1,s0],[1,s1],[0,s1]]:[[0,s0],[0,s1],[1,s1],[1,s0]]);}};
-    const RDg=new GB(),SH=new GB();strip(RDg,-Wd,Wd,.12,8,0,n-1);strip(SH,-Wd-1.3,-Wd,.1,6,0,n-1);strip(SH,Wd,Wd+1.3,.1,6,0,n-1);
-    if(ri===0){addMesh(RDg.geo(),ASPH,false);const YL=new GB(),WL=new GB();strip(YL,-.15,-.03,.135,4,16,n-1,4);strip(WL,-Wd+.15,-Wd+.3,.135,4,16,n-1);strip(WL,Wd-.3,Wd-.15,.135,4,16,n-1);
+    const RDg=new GB(),SH=new GB(),SB=r.urban?3.2:1.3,SY=r.urban?.24:.1;strip(RDg,-Wd,Wd,.12,8,0,n-1);strip(SH,-Wd-SB,-Wd,SY,6,0,n-1);strip(SH,Wd,Wd+SB,SY,6,0,n-1);
+    if(AS){addMesh(RDg.geo(),ASPH,false);const YL=new GB(),WL=new GB();strip(YL,-.15,-.03,.135,4,16,n-1,4);strip(WL,-Wd+.15,-Wd+.3,.135,4,16,n-1);strip(WL,Wd-.3,Wd-.15,.135,4,16,n-1);
       addMesh(YL.geo(),mat('#e8c24a',.7),false);addMesh(WL.geo(),mat('#e9e6df',.7),false);}
     else addMesh(RDg.geo(),new T.MeshStandardMaterial({map:TX.gravel,color:lin('#b49c76'),roughness:1}),false);
-    addMesh(SH.geo(),new T.MeshStandardMaterial({map:TX.gravel,color:lin('#a9987c'),roughness:1}),false);
-    for(let i=20;i<n;i+=12)for(const o of[-Wd-1.8,Wd+1.8]){const p=side(i,o);posts.push([p[0],h[i]+.05,p[1]]);}});
+    addMesh(SH.geo(),r.urban?new T.MeshStandardMaterial({map:TX.walk,roughness:.9}):new T.MeshStandardMaterial({map:TX.gravel,color:lin('#a9987c'),roughness:1}),false);
+    if(!r.urban)for(let i=20;i<n;i+=12)for(const o of[-Wd-1.8,Wd+1.8]){const p=side(i,o);posts.push([p[0],h[i]+.05,p[1]]);}});
   {const pg=new T.BoxGeometry(.14,1,.14);pg.translate(0,.5,0);const rf=new T.BoxGeometry(.16,.12,.16);rf.translate(0,.86,0);
     const g=buildVC([{geo:pg,color:'#efefe9'},{geo:rf,color:'#ff9f1c'}]);const im=inst(g,new T.MeshStandardMaterial({vertexColors:true,roughness:.6}),posts,(p,d)=>d.position.set(p[0],p[1],p[2]),false);if(im)im.frustumCulled=false;}
   /* ---- lake: water, dock with a rowboat, a little island, the waterfall on the cliff ---- */
@@ -796,7 +812,7 @@ function wildBuild(ST,EXTX0,EXTZ0){
   /* ---- forest: pines on the hills and mountains, broadleaf trees and boulders in the meadow ---- */
   {const pines=[],broad=[],rocks=[];const NP=MOBILE?1300:3600,NB=MOBILE?160:420,NR=MOBILE?120:300;
     const ok=(x,z,road)=>{if(inCity(x,z)||x>425||z<W.WZ0+200||x<W.WX0+190)return false;if(Math.hypot(Math.max(0,EXT.x0-x),Math.max(0,EXT.z0-z))<30)return false;if(rdAt(x,z)<road)return false;
-      if(Math.hypot(x-L.x,z-L.z)<L.r+8)return false;for(const p of[PL.village,PL.camp,PL.mine,PL.summit,PL.farm]){if(Math.hypot(x-p.x,z-p.z)<(p.r||20)+14)return false;}if(SP.lighthouse&&Math.hypot(x-SP.lighthouse.x,z-SP.lighthouse.z)<20)return false;return true;};
+      if(Math.hypot(x-L.x,z-L.z)<L.r+8)return false;for(const p of[PL.village,PL.camp,PL.mine,PL.summit,PL.farm,PL.oldq,PL.harbor,PL.highland,PL.minetown]){if(Math.hypot(x-p.x,z-p.z)<(p.r||20)+14)return false;}if(SP.lighthouse&&Math.hypot(x-SP.lighthouse.x,z-SP.lighthouse.z)<20)return false;return true;};
     for(let k=0;k<NP*4&&pines.length<NP;k++){const x=W.WX0+rng()*(W.WX1-W.WX0),z=W.WZ0+rng()*(W.WZ1-W.WZ0);if(!ok(x,z,10))continue;const y=heightAt(x,z);if(y>104)continue;
       const city=Math.hypot(Math.max(0,EXT.x0-x),Math.max(0,EXT.z0-z)),dens=clamp((city-120)/260,0,1)*clamp(.55+nz(x*.8,z*.8),0,1);if(rng()>dens)continue;
       if(Math.abs(heightAt(x+3,z)-y)>2.6||Math.abs(heightAt(x,z+3)-y)>2.6)continue;pines.push([x,y,z,.75+rng()*.8]);addCol({t:'c',x,z,r:.45});}
@@ -816,6 +832,248 @@ function wildBuild(ST,EXTX0,EXTZ0){
     const g=new T.OctahedronGeometry(.45,0);const m=new T.MeshStandardMaterial({color:lin('#7ef9ff'),emissive:lin('#38d8ff'),emissiveIntensity:1.6,roughness:.2,metalness:.3});
     const im=new T.InstancedMesh(g,m,WILD.gems.length);im.frustumCulled=false;im.instanceMatrix.setUsage(T.DynamicDrawUsage);scene.add(im);WILD.gemIM=im;}
 }
+/* ---------- TOWNS: five new places spread over the map, each with its own look, doors you can walk through and hidden diamonds ----------
+   Old Quarter (lanterns, canal, covered bridge, pagoda) · North Harbour (quay, piers, boats, cranes, containers)
+   Cloud Hill highland town (villas, church, night market, pines) · Silver Mine frontier town (false fronts, boardwalks, water tower, windmill)
+   West Nexus (glass towers, plaza fountain, cinema, villas with pools, football pitch) */
+{const PL=WILD.PL,RNG=(()=>{let s=777;return()=>{s=(s*16807)%2147483647;return s/2147483647;};})(),rr=(a,b)=>a+RNG()*(b-a),rp=a=>a[Math.floor(RNG()*a.length)];
+  const FACG={},flatRoof=new GB(),tileR=new GB(),tileG=new GB(),gw={},VC=[],BOX1=new T.BoxGeometry(1,1,1),CYL=new T.CylinderGeometry(1,1,1,10);
+  const LANT={'#ff3b30':[],'#ffcc33':[],'#ff8a1f':[],'#c86bff':[]},LAMPS=[],TREES=[],PINES=[],FLOW=[],STR=[],BOATS=[],MILLS=[];
+  const fb=k=>FACG[k]||(FACG[k]=new GB());
+  const rdW=(x,z)=>{const G=WGRID;if(!G)return 1e9;const ix=Math.round((x-G.X0)/G.ST),iz=Math.round((z-G.Z0)/G.ST);if(ix<0||iz<0||ix>=G.NX||iz>=G.NZ)return 1e9;return G.RD[iz*G.NX+ix];};
+  const vb=(x0,x1,y0,y1,z0,z1,c)=>VC.push({geo:BOX1,pos:[(x0+x1)/2,(y0+y1)/2,(z0+z1)/2],scale:[Math.max(.01,x1-x0),Math.max(.01,y1-y0),Math.max(.01,z1-z0)],color:c});
+  const vc=(x,y0,y1,z,r,c)=>VC.push({geo:CYL,pos:[x,(y0+y1)/2,z],scale:[r,y1-y0,r],color:c});
+  const gwb=c=>gw[c]||(gw[c]=new GB());
+  const nq=(gb,q,s)=>{const u=[q[1][0]-q[0][0],q[1][1]-q[0][1],q[1][2]-q[0][2]],v=[q[3][0]-q[0][0],q[3][1]-q[0][1],q[3][2]-q[0][2]];let n=[u[1]*v[2]-u[2]*v[1],u[2]*v[0]-u[0]*v[2],u[0]*v[1]-u[1]*v[0]];const l=Math.hypot(n[0],n[1],n[2])||1;n=n.map(a=>a/l);
+    if(n[1]<0){q=q.slice().reverse();n=n.map(a=>-a);}const L=Math.hypot(u[0],u[1],u[2]),W=Math.hypot(v[0],v[1],v[2]);gb.quad(q[0],q[1],q[2],q[3],n,[[0,0],[L/s,0],[L/s,W/s],[0,W/s]]);};
+  const tri2=(gb,a,b,c)=>{const u=[b[0]-a[0],b[1]-a[1],b[2]-a[2]],v=[c[0]-a[0],c[1]-a[1],c[2]-a[2]];let n=[u[1]*v[2]-u[2]*v[1],u[2]*v[0]-u[0]*v[2],u[0]*v[1]-u[1]*v[0]];const l=Math.hypot(n[0],n[1],n[2])||1;n=n.map(q=>q/l);
+    gb.tri(a,b,c,n,[[0,0],[1,0],[.5,1]]);gb.tri(a,c,b,n.map(q=>-q),[[0,0],[1,0],[.5,1]]);};
+  /* gable roof over a box; ax 'x' puts the ridge along x */
+  function gable(gb,x0,x1,z0,z1,y,rh,ax,o,wallC){o=o==null?.5:o;
+    if(ax==='x'){const zm=(z0+z1)/2;nq(gb,[[x0-o,y,z0-o],[x1+o,y,z0-o],[x1+o,y+rh,zm],[x0-o,y+rh,zm]],2.2);nq(gb,[[x1+o,y,z1+o],[x0-o,y,z1+o],[x0-o,y+rh,zm],[x1+o,y+rh,zm]],2.2);
+      if(wallC)for(const x of[x0,x1])tri2(gwb(wallC),[x,y,z0],[x,y,z1],[x,y+rh,zm]);}
+    else{const xm=(x0+x1)/2;nq(gb,[[x0-o,y,z1+o],[x0-o,y,z0-o],[xm,y+rh,z0-o],[xm,y+rh,z1+o]],2.2);nq(gb,[[x1+o,y,z0-o],[x1+o,y,z1+o],[xm,y+rh,z1+o],[xm,y+rh,z0-o]],2.2);
+      if(wallC)for(const z of[z0,z1])tri2(gwb(wallC),[x0,y,z],[x1,y,z],[xm,y+rh,z]);}}
+  /* hipped roof (four slopes), used for the pagoda tiers and the villas */
+  function hip(gb,x0,x1,z0,z1,y,rh,o){o=o==null?.6:o;const a=x0-o,b=x1+o,c=z0-o,d=z1+o,w=b-a,dd=d-c,k=Math.min(w,dd)/2,top=y+rh;
+    if(w>=dd){const r0=a+k,r1=b-k,zm=(c+d)/2;nq(gb,[[a,y,c],[b,y,c],[r1,top,zm],[r0,top,zm]],2.2);nq(gb,[[b,y,d],[a,y,d],[r0,top,zm],[r1,top,zm]],2.2);tri2(gb,[a,y,d],[a,y,c],[r0,top,zm]);tri2(gb,[b,y,c],[b,y,d],[r1,top,zm]);}
+    else{const r0=c+k,r1=d-k,xm=(a+b)/2;nq(gb,[[a,y,d],[a,y,c],[xm,top,r0],[xm,top,r1]],2.2);nq(gb,[[b,y,c],[b,y,d],[xm,top,r1],[xm,top,r0]],2.2);tri2(gb,[a,y,c],[b,y,c],[xm,top,r0]);tri2(gb,[b,y,d],[a,y,d],[xm,top,r1]);}}
+  /* a building: textured facade box + collider; returns the top height */
+  function bld(k,x0,x1,z0,z1,y,h,flat){fb(k).box(x0,x1,y-.8,y+h,z0,z1,{top:flat===false?null:flatRoof,uo:RNG()});colB(x0,x1,z0,z1,y+h);return y+h;}
+  /* a door on a facade facing h (0:+z, PI:-z, PI/2:+x, -PI/2:-x) that leads into one of the interiors */
+  function door(x,z,h,room,y,w,ht,col,txt){const fx=Math.round(Math.sin(h)),fz=Math.round(Math.cos(h));w=w||1.6;ht=ht||2.5;col=col||'#4b3526';
+    if(fz)vb(x-w/2,x+w/2,y,y+ht,z+fz*.0-.07,z+fz*.0+.07+fz*.02,col);else vb(x-.07,x+.07+fx*.02,y,y+ht,z-w/2,z+w/2,col);
+    if(fz)vb(x-w/2-.15,x+w/2+.15,y+ht,y+ht+.18,z-.1,z+.1,'#e8dfcc');else vb(x-.1,x+.1,y+ht,y+ht+.18,z-w/2-.15,z+w/2+.15,'#e8dfcc');
+    GDOORS.push({id:'t'+GDOORS.length,x:x+fx*1.4,z:z+fz*1.4,h,room,txt});}
+  const lamp=(x,z,y)=>{LAMPS.push([x,y,z]);props.flood.push([x,z,y+4.6]);addCol({t:'c',x,z,r:.18});};
+  const tree=(x,z,y,s)=>{TREES.push([x,y,z,s||1]);addCol({t:'c',x,z,r:.45});};
+  const pine=(x,z,y,s)=>{PINES.push([x,y,z,s||1]);addCol({t:'c',x,z,r:.45});};
+  const lanternString=(x0,z0,x1,z1,y,sag,step)=>{const n=Math.max(2,Math.round(hyp(x1-x0,z1-z0)/(step||1.6)));const keys=Object.keys(LANT);let px=x0,pz=z0,py=y;
+    for(let i=1;i<=n;i++){const t=i/n,x=x0+(x1-x0)*t,z=z0+(z1-z0)*t,yy=y-sag*4*t*(1-t);STR.push(px,py,pz,x,yy,z);px=x;pz=z;py=yy;if(i<n)LANT[keys[(i+Math.round(Math.abs(x0)))%4]].push([x,yy-.35,z]);}};
+  const town=(id,n,en,x,z,r,rw)=>{WILD.places.push({id,n,en,x,z,r:r*.6,rw});TOWNS.push({id,x,z,r});};
+  const dia=(x,z,y)=>DIAS.push({x,z,y:(y==null?heightAt(x,z):y)+1.1});
+  const archSign=(text,x,z,y,ry,span,col)=>{const c=Math.cos(ry),s=Math.sin(ry),ax=c,az=-s;for(const e of[-1,1]){const px=x+ax*e*span/2,pz=z+az*e*span/2;vb(px-.35,px+.35,y,y+6.2,pz-.35,pz+.35,col);addCol({t:'c',x:px,z:pz,r:.4});}
+    const bx=Math.abs(ax)>.5;if(bx)vb(x-span/2-.6,x+span/2+.6,y+6.2,y+6.8,z-.45,z+.45,col);else vb(x-.45,x+.45,y+6.2,y+6.8,z-span/2-.6,z+span/2+.6,col);
+    sign(text,x+Math.sin(ry)*.47,y+5.6,z+Math.cos(ry)*.47,ry,Math.min(span-1.4,9),1.1,{fg:'#fff',bg:col,size:64,w:1024,h:128});sign(text,x-Math.sin(ry)*.47,y+5.6,z-Math.cos(ry)*.47,ry+Math.PI,Math.min(span-1.4,9),1.1,{fg:'#fff',bg:col,size:64,w:1024,h:128});};
+
+  /* ======== 1. PHỐ CỔ ĐÈN LỒNG — Lantern Old Quarter ======== */
+  {const O=PL.oldq,y=O.y,Z=-600,SN=-611.5,SS=-588.5;
+    const pave=new GB();pave.flat(-462,-292,y+.14,SN,Z-5.7,3);pave.flat(-462,-292,y+.14,Z+5.7,SS-.01,3);
+    const COLS=['houseYellow','decoYellow','houseYellow','aptPeach','houseYellow','stone'],WALLC={houseYellow:'#d8c38a',decoYellow:'#dcc58e',aptPeach:'#d9b48e',stone:'#cdbf9f'};
+    const row=(xa,xb,side)=>{let x=xa;while(x<xb-5){const w=Math.min(xb-x,rr(6.2,8.2));if(w<5)break;const k=rp(COLS),h=rr(6.4,7.6),z0=side<0?SN-12:SS,z1=side<0?SN:SS+12;
+        const top=bld(k,x,x+w,z0,z1,y,h,false);gable(tileR,x,x+w,z0,z1,top,2.3,'x',.55,WALLC[k]);
+        const fz=side<0?z1:z0,o=side<0?1:-1;// street side
+        vb(x+.4,x+w-.4,y+3.5,y+3.65,fz+o*0,fz+o*1.1,'#6b3f24');for(let px=x+.6;px<x+w-.4;px+=.5)vb(px-.03,px+.03,y+3.65,y+4.5,fz+o*1.05-.03,fz+o*1.05+.03,'#6b3f24');vb(x+.4,x+w-.4,y+4.45,y+4.55,fz+o*1.02,fz+o*1.1,'#6b3f24');
+        for(const t of[.28,.72])vb(x+w*t-.55,x+w*t+.55,y+4.0,y+5.6,fz+o*.02-.01,fz+o*.06,'#355c4a');
+        vb(x+.3,x+w-.3,y+2.9,y+3.0,fz,fz+o*1.6,rp(['#b23a48','#2b6cb0','#2f855a','#c05621']));
+        LANT[rp(Object.keys(LANT))].push([x+w*.25,y+3.2,fz+o*1.3]);LANT[rp(Object.keys(LANT))].push([x+w*.75,y+3.2,fz+o*1.3]);
+        const rm=RNG();door(x+w/2,fz,side<0?0:Math.PI,rm<.12?'mart':rm<.2?'clothes':'flat',y,1.5,2.5,'#5a3a22');
+        x+=w;}};
+    row(-458,-386,-1);row(-379,-296,-1);row(-458,-403,1);row(-338,-296,1);
+    // the teahouse: a wider building with a sign
+    {const x0=-386,x1=-379;vb(x0,x1,y,y+.15,SN-12,SN,'#8c8174');}
+    for(let x=-452;x<=-300;x+=8)lanternString(x,SN+.5,x+3,SS-.5,y+6.2,1.2,1.5);
+    // pagoda in a stone yard on the south side
+    {const cx=-380,cz=-566,pv=new GB();pv.flat(-402,-358,y+.15,-588.4,-544,3);addMesh(pv.geo(),new T.MeshStandardMaterial({map:TX.walk,color:lin('#b9ad98'),roughness:.95}),false);
+      let s=8,yy=y;for(let t=0;t<3;t++){const h=t?2.6:3.4;vb(cx-s/2,cx+s/2,yy,yy+h,cz-s/2,cz+s/2,t?'#9b3328':'#a33b2b');for(const[a,b]of[[-1,-1],[1,-1],[-1,1],[1,1]])vc(cx+a*s/2,yy,yy+h,cz+b*s/2,.22,'#5a2418');yy+=h;hip(tileR,cx-s/2,cx+s/2,cz-s/2,cz+s/2,yy,1.4,1.3);yy+=.9;s-=2.2;}
+      vc(cx,yy+.4,yy+3,cz,.12,'#c9a227');VC.push({geo:new T.SphereGeometry(.35,10,8),pos:[cx,yy+3.1,cz],color:'#f2c84b'});colB(cx-4,cx+4,cz-4,cz+4,yy);
+      vb(cx-1,cx+1,y,y+.9,cz+6,cz+7,'#7a7a72');LANT['#ff3b30'].push([cx-4.4,y+3,cz+4.4],[cx+4.4,y+3,cz+4.4],[cx-4.4,y+3,cz-4.4],[cx+4.4,y+3,cz-4.4]);
+      for(const[a,b]of[[-16,-14],[16,-14],[-16,14],[16,14]])tree(cx+a,cz+b,y,1.1);dia(cx+5.5,cz-6);}
+    // canal behind the north row with a covered bridge
+    {const z0=-656,z1=-646,cx=-377;const wg=new GB();wg.flat(-462,-292,y-.7,z0,z1,6);const wm=addMesh(wg.geo(),new T.MeshStandardMaterial({color:lin('#2f6f6a'),roughness:.1,metalness:.2}),false);
+      vb(-462,-292,y-1.6,y+.25,z0-.6,z0,'#8a8578');vb(-462,-292,y-1.6,y+.25,z1,z1+.6,'#8a8578');
+      colX(-462,cx-3.2,z0,z1,3);colX(cx+3.2,-292,z0,z1,3);
+      vb(cx-3,cx+3,y+.05,y+.3,z0-1.5,z1+1.5,'#7a4a2a');for(const a of[-1,1])for(const b of[z0-1.2,(z0+z1)/2,z1+1.2])vc(cx+a*2.7,y+.3,y+3,b,.14,'#9b2f22');
+      gable(tileR,cx-3,cx+3,z0-1.5,z1+1.5,y+3,1.6,'z',.5,'#9b2f22');colX(cx-3.3,cx-2.6,z0-1.5,z1+1.5,3);colX(cx+2.6,cx+3.3,z0-1.5,z1+1.5,3);
+      sign('CẦU MÁI ĐỎ',cx,y+3.4,z1+1.95,0,3.2,.5,{fg:'#ffe08a',bg:'#5a1a12',size:56,w:512,h:96});dia(-300,z1+2.2);dia(-456,z0-2.5);
+      for(let x=-455;x<-300;x+=14){tree(x,z1+5,y,.9);tree(x+7,z0-5,y,.9);}}
+    // tea house on the south side of the main street
+    {const x0=-356,x1=-340,z0=SS,z1=SS+13;const top=bld('decoYellow',x0,x1,z0,z1,y,7.2,false);gable(tileR,x0,x1,z0,z1,top,2.6,'x',.6,'#dcc58e');door((x0+x1)/2,z0,Math.PI,'tea',y,2,2.6,'#5a1a12',()=>L('Vào Trà quán Phố Cổ','Enter the Old Quarter Teahouse'));
+      sign('TRÀ QUÁN PHỐ CỔ',(x0+x1)/2,y+5.4,z0-.08,Math.PI,5.5,.8,{fg:'#ffe08a',bg:'#5a1a12',size:60,w:1024,h:140});}
+    archSign('PHỐ CỔ ĐÈN LỒNG',-290,Z,y,Math.PI/2,13,'#8f1d16');
+    for(let x=-450;x<-300;x+=24){lamp(x,SN+6.3,y);lamp(x+12,SS-6.3,y);}
+    dia(-383,SN-14);dia(-460,SS+6);
+    town('oldq','Phố Cổ Đèn Lồng','Lantern Old Quarter',O.x,-600,110,600);
+    addMesh(pave.geo(),new T.MeshStandardMaterial({map:TX.walk,color:lin('#c9b79a'),roughness:.95}),false);}
+
+  /* ======== 2. CẢNG BẮC — North Harbour ======== */
+  {const H=PL.harbor,y=H.y,QX0=446,QX1=538,QZ0=-736,QZ1=-574;
+    PADS.push({x0:QX0,x1:QX1+.5,z0:QZ0,z1:QZ1,y:y+.05});
+    const deck=new GB();deck.box(QX0,QX1,y-3,y+.05,QZ0,QZ1,{uw:4,uh:4,top:undefined});addMesh(deck.geo(),new T.MeshStandardMaterial({map:TX.walk,color:lin('#a7a39b'),roughness:.95}),true);
+    vb(QX1-.4,QX1,y+.05,y+.25,QZ0,QZ1,'#e8c24a');for(let z=QZ0+4;z<QZ1;z+=8)vc(QX1-.6,y+.05,y+.6,z,.2,'#2a2e33');
+    // three finger piers out into the sea, walkable
+    for(const pz of[-716,-655,-594]){const p={x0:QX1-.5,x1:612,z0:pz-3,z1:pz+3,y:y-.15};PADS.push(p);AREAS.push({x0:QX0,x1:612,z0:pz-3.2,z1:pz+3.2});
+      const g=new GB();for(let x=p.x0;x<p.x1;x+=.6)g.box(x,x+.52,p.y-.18,p.y,p.z0,p.z1,{uw:1,uh:1,top:undefined});addMesh(g.geo(),mat('#8a6a48',.85),true);
+      for(let x=p.x0+2;x<p.x1;x+=4)for(const s of[p.z0+.2,p.z1-.2])vc(x,-2,p.y+.6,s,.16,'#5a4030');
+      // boats moored on both sides
+      for(const s of[-1,1]){if(RNG()<.25)continue;const bx=rr(560,595),bz=pz+s*7.5;BOATS.push({x:bx,z:bz,c:rp(['#e63946','#2a9d8f','#f4f1ea','#3a86ff','#ffb703']),len:rr(8,12),ph:RNG()*6});}}
+    AREAS.push({x0:QX0,x1:QX1+.5,z0:QZ0,z1:QZ1});
+    // containers and a gantry crane on the quay
+    const CC=['#c0392b','#2e86de','#27ae60','#f39c12','#8e44ad','#16a085','#d35400'];
+    for(let i=0;i<4;i++)for(let j=0;j<2;j++){const x0=462+j*7,z0=-650+i*3,n=1+Math.floor(RNG()*3);for(let k=0;k<n;k++){vb(x0,x0+6,y+k*2.6,y+k*2.6+2.55,z0,z0+2.5,rp(CC));}colX(x0,x0+6,z0,z0+2.5,n*2.6);}
+    dia(476,-653.5);
+    {const cz0=-700,cz1=-676,cx0=500,cx1=530,H2=y+26;for(const x of[cx0,cx1])for(const z of[cz0,cz1]){vb(x-.6,x+.6,y,H2,z-.6,z+.6,'#e8b400');addCol({t:'c',x,z,r:.8});}
+      vb(cx0-.8,cx1+.8,H2,H2+1.6,cz0-.8,cz0+.8,'#e8b400');vb(cx0-.8,cx1+.8,H2,H2+1.6,cz1-.8,cz1+.8,'#e8b400');vb(cx0-12,cx1+26,H2+1.6,H2+3,(cz0+cz1)/2-1,(cz0+cz1)/2+1,'#e8b400');vb(cx0+6,cx0+12,H2+3,H2+6,(cz0+cz1)/2-2,(cz0+cz1)/2+2,'#33383f');
+      for(let k=0;k<8;k++){const x=cx0+2+k*3.5;vb(x-.08,x+.08,y+1,H2,cz0-.1,cz0+.1,'#c99c00');}props.flood.push([cx0,cz0,H2+1],[cx1,cz1,H2+1]);}
+    // warehouses and the fish market between the road and the quay
+    const W2=['brick','brick','stone'];
+    {const x0=404,x1=444;let z=-744;const plan=[[22,'ware','CHỢ CÁ CẢNG BẮC'],[18,'sea','NHÀ HÀNG HẢI SẢN BIỂN XANH'],[14,'mart','TẠP HOÁ BẾN CẢNG'],[30,'ware','KHO HÀNG 07'],[22,'ware','KHO HÀNG 08'],[20,'hotel','NHÀ NGHỈ THUYỀN TRƯỞNG']];
+      for(const[d,room,nm]of plan){const z0=z,z1=z+d-2,h=room==='hotel'?13:room==='sea'?6:rr(8,10),k=room==='sea'?'decoWhite':room==='hotel'?'aptMint':rp(W2);const top=bld(k,x0,x1,z0,z1,y,h,true);
+        const sea=room==='sea',dx=sea?x1:x0,hh=sea?Math.PI/2:-Math.PI/2;door(dx,(z0+z1)/2,hh,room,y,room==='ware'?3.6:1.8,room==='ware'?3.6:2.6,room==='ware'?'#5a5f66':'#2a3a48',room==='sea'?()=>L('Vào Nhà hàng Hải sản Biển Xanh','Enter the Blue Sea seafood restaurant'):null);
+        sign(nm,dx+(sea?.08:-.08),y+Math.min(h-1,5),(z0+z1)/2,hh,Math.min(d-3,9),.9,{fg:'#fff',bg:sea?'#1d5f8a':room==='hotel'?'#2f6b4f':'#33383f',size:52,w:1024,h:110});
+        if(sea){vb(x1,x1+6,y,y+.15,z0,z1,'#9a7a58');for(let k=0;k<3;k++){const tz=z0+3+k*5;vc(x1+3,y,y+.75,tz,.6,'#f4f1ea');vc(x1+3,y,y+2.6,tz,.04,'#ddd');VC.push({geo:new T.ConeGeometry(1.4,.7,10),pos:[x1+3,y+2.8,tz],color:rp(['#e63946','#2a9d8f','#ffb703'])});}}
+        z+=d;}
+      dia(x0-1.5,-695);}
+    // fishermen's houses on the hillside west of the road
+    {let z=-744;const KK=['aptMint','aptPeach','houseBlue','aptCream','houseWhite','aptLav'];while(z<-570){const d=rr(12,16),x1=380,x0=x1-rr(12,16),h=rr(7,14),k=rp(KK);bld(k,x0,x1,z,z+d,y,h,true);door(x1,z+d/2,Math.PI/2,'flat',y,1.4,2.4,'#5a3d28');z+=d+rr(3,6);}
+      dia(358,-600);}
+    for(let z=-740;z<-560;z+=20){lamp(399.5,z,y);lamp(384.5,z+10,y);}
+    for(const p of[[392,-760],[300,-740],[310,-600]])tree(p[0],p[1],y,1);
+    archSign('CẢNG BẮC NEXUS',392,-548,heightAt(392,-548),0,13,'#1d5f8a');dia(610,-594);dia(608,-716);
+    town('harbor','Cảng Bắc','North Harbour',430,-655,110,600);}
+
+  /* ======== 3. ĐỒI MÂY — Cloud Hill highland town ======== */
+  {const Hh=PL.highland,y=Hh.y,Z=-1048,SN=Z-7.5,SS=Z+7.5;
+    const pave=new GB();
+    // villas with steep roofs, gardens and white fences
+    const VK=['houseWhite','houseBlue','houseSage','houseYellow','houseWhite'];const villa=(x,side,room)=>{const w=11,d=9,z0=side<0?SN-6-d:SS+6,z1=z0+d,k=rp(VK),top=bld(k,x-w/2,x+w/2,z0,z1,y,6.6,false);
+        hip(tileG,x-w/2,x+w/2,z0,z1,top,3.2,.7);vb(x+2,x+3,top,top+3.6,z0+2,z0+3,'#7a6a5a');
+        const fz=side<0?z1:z0,o=side<0?1:-1;door(x,fz,side<0?0:Math.PI,room||'flat',y,1.5,2.5,'#2f4a5f');
+        for(let t=-5;t<=5;t+=.6)vb(x+t-.04,x+t+.04,y,y+.9,fz+o*5.6-.04,fz+o*5.6+.04,'#f4f1ea');vb(x-5.5,x-.9,y+.75,y+.85,fz+o*5.6-.05,fz+o*5.6+.05,'#f4f1ea');vb(x+.9,x+5.5,y+.75,y+.85,fz+o*5.6-.05,fz+o*5.6+.05,'#f4f1ea');
+        for(let t=0;t<16;t++)FLOW.push([x+rr(-5,5),y,fz+o*rr(1,4.8),rp(['#ff6b9a','#ffd166','#c77dff','#ff8fab','#f94144','#ffffff'])]);
+        pave.flat(x-.8,x+.8,y+.04,Math.min(fz,fz+o*5.6),Math.max(fz,fz+o*5.6),2);};
+    for(let x=-605;x<=-470;x+=27){if(x>-600)villa(x,-1);if(x<-480)villa(x,1);}
+    // hotel
+    {const x0=-640,x1=-616,z0=SN-16,z1=SN-2,top=bld('houseWhite',x0,x1,z0,z1,y,10,false);hip(tileG,x0,x1,z0,z1,top,4,.8);door((x0+x1)/2,z1,0,'hotel',y,2.4,2.8,'#2f4a5f',()=>L('Vào Khách sạn Đồi Mây','Enter the Cloud Hill Hotel'));
+      sign('KHÁCH SẠN ĐỒI MÂY',(x0+x1)/2,y+7.6,z1+.08,0,8,1,{fg:'#ffffff',bg:'#3d5677',size:60,w:1024,h:128});}
+    // stone church with a steeple
+    {const x0=-458,x1=-442,z0=SS+4,z1=SS+34,cx=(x0+x1)/2;bld('stone',x0,x1,z0,z1,y,9,false);gable(tileG,x0,x1,z0,z1,y+9,4.5,'z',.4,'#cdbf9f');
+      const tz0=z0-4,tz1=z0+1.5;bld('stone',cx-3,cx+3,tz0,tz1,y,20,false);hip(tileG,cx-3,cx+3,tz0,tz1,y+20,7,.3);vb(cx-.08,cx+.08,y+27,y+29.4,(tz0+tz1)/2-.08,(tz0+tz1)/2+.08,'#e8e1cf');vb(cx-.7,cx+.7,y+28.4,y+28.6,(tz0+tz1)/2-.08,(tz0+tz1)/2+.08,'#e8e1cf');
+      VC.push({geo:new T.CircleGeometry(1.1,20).rotateY(Math.PI),pos:[cx,y+15,tz0-.02],color:'#f4f1ea'});
+      door(cx,tz0,Math.PI,'church',y,2.2,3.4,'#5a3a22',()=>L('Vào Nhà thờ Đồi Mây','Enter Cloud Hill Church'));
+      for(const t of[.3,.5,.7])vb(x1+.02,x1+.06,y+3,y+6.5,z0+(z1-z0)*t-.6,z0+(z1-z0)*t+.6,'#5a8fc9');dia(x0-1.8,z1-2);}
+    // night market: striped stalls with string lights along the east end
+    for(let x=-436;x<=-400;x+=6)for(const s of[-1,1]){const z=s<0?SN-2.4:SS+2.4;vb(x-2.2,x+2.2,y,y+.95,z-1,z+1,'#7a5a3a');for(const a of[-1,1])for(const b of[-1,1])vb(x+a*2.1-.05,x+a*2.1+.05,y,y+2.6,z+b*.95-.05,z+b*.95+.05,'#ddd');
+      vb(x-2.4,x+2.4,y+2.6,y+2.75,z-1.3,z+1.3,rp(['#e63946','#2a9d8f','#ffb703','#7b2cbf']));for(let k=0;k<5;k++)VC.push({geo:BOX1,pos:[x-1.6+k*.8,y+1.05,z],scale:[.5,.2,.5],color:rp(['#f4a261','#e9c46a','#a33b20','#6a994e','#ff8fab'])});colX(x-2.2,x+2.2,z-1,z+1,2.7);}
+    lanternString(-438,SN-1,-398,SN-1,y+3.4,.6,1.3);lanternString(-438,SS+1,-398,SS+1,y+3.4,.6,1.3);
+    sign('CHỢ ĐÊM ĐỒI MÂY',-418,y+4.8,SN-1.2,0,7,1,{fg:'#ffd166',bg:'#3a1f4a',size:60,w:1024,h:128});
+    for(let x=-620;x<-400;x+=22){lamp(x,SN-.6,y);lamp(x+11,SS+.6,y);}
+    // ring of pines around the town
+    for(let k=0;k<70;k++){const a=RNG()*6.28,r=rr(70,110),x=Hh.x+Math.cos(a)*r*1.3,z=Hh.z+Math.sin(a)*r*.75;if(Math.abs(z-Z)<12||rdW(x,z)<10)continue;pine(x,z,heightAt(x,z),rr(.8,1.4));}
+    archSign('ĐỒI MÂY',-566,-1050,y,Math.PI/2,12,'#3d5677');
+    dia(-610,SS+18);dia(-392,SN-6);dia(-520,SN-26);
+    addMesh(pave.geo(),new T.MeshStandardMaterial({map:TX.walk,color:lin('#cfc6b4'),roughness:.95}),false);
+    town('highland','Đồi Mây','Cloud Hill',-520,-1050,100,700);}
+
+  /* ======== 4. MỎ BẠC — Silver Mine frontier town ======== */
+  {const M=PL.minetown,y=M.y,Z=-800,SN=Z-7.6,SS=Z+7.6;const WOOD=['#8b5a3c','#a0703f','#6f4a2f','#b88b5a','#7d5236','#9c6b45'];
+    for(const s of[-1,1]){const z0=s<0?Z-7.6:Z+4.9,z1=s<0?Z-4.9:Z+7.6;const g=new GB();for(let x=-1112;x<-992;x+=.55)g.box(x,x+.5,y+.05,y+.35,z0,z1,{uw:1,uh:1,top:undefined});addMesh(g.geo(),mat('#7a5a3e',.9),false);}
+    const plan=[['saloon','SALOON CHIM ƯNG',16,9.5],['police','VĂN PHÒNG CẢNH SÁT TRƯỞNG',11,7],['mart','CỬA HÀNG TỔNG HỢP',12,7.5],['guns','THỢ SÚNG',9,7],['flat','TIỆM CẮT TÓC',8,6],['hotel','KHÁCH SẠN MỎ BẠC',14,10],['flat','',9,6.5],['diner','QUÁN ĂN THỢ MỎ',11,7],['ware','KHO QUẶNG',14,8],['flat','',9,6]];
+    let xs={'-1':-1110,'1':-1110},i=0;
+    for(const[room,nm,w,h]of plan){const s=i%2?1:-1;i++;const x0=xs[s],x1=x0+w;xs[s]=x1+rr(2,4);const z0=s<0?SN-12:SS,z1=s<0?SN:SS+12,col=rp(WOOD);
+      vb(x0,x1,y-.5,y+h,z0,z1,col);colB(x0,x1,z0,z1,y+h);vb(x0-.1,x1+.1,y+h,y+h+.15,z0-.1,z1+.1,'#4a3424');
+      const fz=s<0?z1:z0,o=s<0?1:-1;vb(x0,x1,y+h,y+h+2.4,fz-o*.15,fz+o*.05,col);vb(x0+.2,x1-.2,y+h+1.9,y+h+2.2,fz+o*.06,fz+o*.12,'#3a2a1c');
+      for(let px=x0+.25;px<x1;px+=.32)vb(px-.015,px+.015,y,y+h,fz+o*.02,fz+o*.04,'#4a3424');
+      vb(x0,x1,y+3.2,y+3.35,fz,fz+o*2.6,'#5a4030');for(const t of[x0+.3,x1-.3])vb(t-.1,t+.1,y,y+3.2,fz+o*2.5-.1,fz+o*2.5+.1,'#5a4030');
+      for(const t of[.25,.75])vb(x0+w*t-.6,x0+w*t+.6,y+1.2,y+2.6,fz+o*.02,fz+o*.07,'#a9cfe0');
+      if(nm)sign(nm,(x0+x1)/2,y+h+1.1,fz+o*.2,s<0?0:Math.PI,Math.min(w-1,9),1,{fg:'#f4e2c0',bg:'#3a2a1c',size:54,w:1024,h:120,font:'Georgia,serif'});
+      const nmF=room==='saloon'?()=>L('Vào Saloon Chim Ưng','Enter the Eagle Saloon'):room==='police'?()=>L('Vào văn phòng cảnh sát trưởng','Enter the sheriff\'s office'):null;
+      door((x0+x1)/2,fz,s<0?0:Math.PI,room,y,room==='saloon'?2.2:1.5,2.6,'#3a2414',nmF);
+      if(room==='saloon'){vb(x0+2,x0+2.2,y,y+1.1,fz+o*3.2,fz+o*3.4,'#5a4030');vb(x0+1,x0+5,y+1,y+1.1,fz+o*3.2,fz+o*3.4,'#5a4030');}}
+    // water tower, windmill, wagon, barrels
+    {const x=-1080,z=-770;for(const a of[-1,1])for(const b of[-1,1])vb(x+a*2.4-.15,x+a*2.4+.15,y,y+9,z+b*2.4-.15,z+b*2.4+.15,'#5a4030');vc(x,y+9,y+13,z,3.2,'#7d5236');VC.push({geo:new T.ConeGeometry(3.5,1.6,12),pos:[x,y+13.8,z],color:'#4a3424'});addCol({t:'c',x,z,r:3});dia(x+4.5,z+3);}
+    {const x=-985,z=-772,hb=y+11;vb(x-1.2,x+1.2,y,hb,z-1.2,z+1.2,'#a0703f');colB(x-1.2,x+1.2,z-1.2,z+1.2,hb);const g=new T.Group();g.position.set(x,hb-1,z+1.3);
+      for(let k=0;k<4;k++){const b=new T.Mesh(new T.BoxGeometry(.5,5.5,.06),mat('#e9dfc9',.8));b.position.y=2.75;const p=new T.Group();p.rotation.z=k*Math.PI/2;p.add(b);g.add(p);}scene.add(g);MILLS.push(g);}
+    for(const[bx,bz]of[[-1075,-764],[-1073.8,-764.6],[-1074.5,-763.3],[-990,-766],[-991,-767.2]]){vc(bx,y,y+1,bz,.4,'#6f4a2f');addCol({t:'c',x:bx,z:bz,r:.42});}
+    {const x=-960,z=Z+14;vb(x-1.1,x+1.1,y+.7,y+1.5,z-2,z+2,'#8b5a3c');for(const a of[-1,1])for(const b of[-1.5,1.5])VC.push({geo:new T.CylinderGeometry(.6,.6,.12,12).rotateZ(Math.PI/2),pos:[x+a*1.15,y+.6,z+b],color:'#3a2a1c'});colX(x-1.2,x+1.2,z-2,z+2,1.6);}
+    for(let x=-1100;x<-990;x+=20)lamp(x,SN+.8,y);
+    archSign('MỎ BẠC',-990,Z,y,Math.PI/2,11,'#5a3a22');
+    for(let k=0;k<40;k++){const a=RNG()*6.28,r=rr(55,95),x=M.x+Math.cos(a)*r,z=M.z+Math.sin(a)*r;if(Math.abs(z-Z)<26||rdW(x,z)<9||hyp(x+1080,z+770)<8||hyp(x+985,z+772)<6)continue;pine(x,z,heightAt(x,z),rr(.8,1.3));}
+    dia(-1113,SN-13);dia(-998,SS+13);dia(-1045,SS+14);
+    town('minetown','Thị trấn Mỏ Bạc','Silver Mine Town',M.x,Z,95,700);}
+
+  /* ======== 5. NEXUS TÂY — West Nexus, a modern new town ======== */
+  {const y=0,E=8.7;
+    // downtown towers
+    const tower=(k,x0,x1,z0,z1,h,dx,dz,dh)=>{let a0=x0,a1=x1,c0=z0,c1=z1,yy=y;const tiers=h>60?3:h>35?2:1;for(let t=0;t<tiers;t++){const th=t===tiers-1?h-yy:Math.round(h*(t===0?.55:.27));fb(k).box(a0,a1,yy,yy+th,c0,c1,{top:flatRoof,uo:RNG()});if(t===0)colB(a0,a1,c0,c1,h);yy+=th;const ins=Math.min(a1-a0,c1-c0)*.11;a0+=ins;a1-=ins;c0+=ins;c1-=ins;}
+      vb(a0+1,a0+3,yy,yy+3,c0+1,c0+3,'#5a5f66');door(dx,dz,dh,'office',y,3,3.2,'#22323f',null);};
+    tower('glassBlue',-1188,-1158,-26,6,86,-1173,6,0);tower('glassTeal',-1150,-1112,-24,16,64,-1112,-4,Math.PI/2);tower('glassSilver',-1188,-1140,36,80,52,-1164,80,0);tower('glassBronze',-1128,-1092,46,138,34,-1110,138,0);
+    tower('glassSilver',-1300,-1262,-26,18,58,-1281,18,0);tower('glassBlue',-1250,-1212,-20,30,74,-1212,5,Math.PI/2);tower('decoWhite',-1300,-1260,44,90,22,-1280,90,0);
+    {const x0=-1252,x1=-1212,z0=60,z1=138;bld('glassTeal',x0,x1,z0,z1,y,14,true);door(x1,90,Math.PI/2,'gym',y,2.4,2.8,'#22323f',null);door(x1,122,Math.PI/2,'clothes',y,2.4,2.8,'#22323f',null);
+      sign('NEXUS FIT · THỜI TRANG TÂY',x1+.08,y+10,105,Math.PI/2,12,1.3,{fg:'#fff',bg:'#7b2cbf',size:56,w:1024,h:120});}
+    // plaza with a fountain, cinema, mall, car showroom and café
+    {const pz=new GB();pz.flat(-1071,-888,y+.06,-60,141,4);addMesh(pz.geo(),new T.MeshStandardMaterial({map:TX.walk,color:lin('#d9d2c4'),roughness:.9}),false);
+      const fx=-980,fzz=50;vc(fx,y,y+.7,fzz,9,'#c9c2b3');vc(fx,y+.7,y+.72,fzz,8.4,'#3a8fb7');vc(fx,y,y+3,fzz,1,'#c9c2b3');vc(fx,y+3,y+3.3,fzz,2.6,'#c9c2b3');vc(fx,y+3.3,y+4.6,fzz,.4,'#c9c2b3');addCol({t:'c',x:fx,z:fzz,r:9.1});
+      const jet=new T.Mesh(new T.CylinderGeometry(.15,.6,3,10,1,true),new T.MeshBasicMaterial({color:0xcfefff,transparent:true,opacity:.55}));jet.position.set(fx,y+6,fzz);scene.add(jet);WILD.anim.jet=jet;
+      for(let a=0;a<6.28;a+=.785)tree(fx+Math.cos(a)*22,fzz+Math.sin(a)*22,y,1);
+      {const x0=-1066,x1=-1026,z0=-55,z1=-12;bld('decoTeal',x0,x1,z0,z1,y,13,true);door(-1046,z1,0,'cinema',y,3.2,3,'#1d1f22',()=>L('Vào Rạp chiếu phim Nexus','Enter Nexus Cinema'));
+        sign('RẠP PHIM NEXUS',-1046,y+9.6,z1+.08,0,14,2,{fg:'#ffd166',bg:'#1d1f22',size:80,w:1024,h:150});for(let k=0;k<12;k++)LANT['#ffcc33'].push([x0+2+k*3.3,y+12.2,z1+.3]);}
+      {const x0=-950,x1=-893,z0=-55,z1=0;bld('glassSilver',x0,x1,z0,z1,y,16,true);door(-921,z1,0,'clothes',y,4,3.2,'#22323f',null);door(x0,-28,-Math.PI/2,'mart',y,2.4,2.8,'#22323f',null);
+        sign('NEXUS TÂY MALL',-921,y+13,z1+.08,0,16,2,{fg:'#fff',bg:'#e63946',size:84,w:1024,h:150});}
+      {const x0=-950,x1=-893,z0=88,z1=136;bld('glassBlue',x0,x1,z0,z1,y,9,true);door(-921,z0,Math.PI,'cars',y,4,3.2,'#22323f',null);sign('NEXUS MOTORS TÂY',-921,y+7,z0-.08,Math.PI,12,1.4,{fg:'#111',bg:'#c1f354',size:72,w:1024,h:130});}
+      {const x0=-1066,x1=-1036,z0=100,z1=136;bld('decoPink',x0,x1,z0,z1,y,8,true);door(-1051,z0,Math.PI,'diner',y,2.2,2.8,'#22323f',null);sign('QUÁN CƠM TÂY THÀNH',-1051,y+6.2,z0-.08,Math.PI,10,1.2,{fg:'#3a2000',bg:'#ffb703',size:62,w:1024,h:128});
+        for(let k=0;k<4;k++){const tz=z0-5,tx=x0+4+k*6.5;vc(tx,y,y+.75,tz,.6,'#f4f1ea');vc(tx,y,y+2.6,tz,.04,'#ddd');VC.push({geo:new T.ConeGeometry(1.5,.7,10),pos:[tx,y+2.8,tz],color:'#ffb703'});}}
+      dia(-1069,-58);dia(-890,139);}
+    // apartments
+    {let x=-1190;while(x<-1110){const w=Math.min(rr(22,30),-1092-x);if(w<14)break;const k=rp(['aptPink','aptLav','aptCream','decoTeal','aptMint']);bld(k,x,x+w,165,205,y,rr(18,34),true);door(x+w/2,165,Math.PI,'flat',y,2,2.8,'#2a3038',null);bld(rp(['aptPink','aptLav','aptCream']),x,x+w,250,312,y,rr(14,26),true);door(x+w/2,312,0,'flat',y,2,2.8,'#2a3038',null);x+=w+6;}dia(-1150,228);}
+    // villas with pools
+    const villa=(cx,cz,face)=>{const w=14,d=11,x0=cx-w/2,z0=cz-d/2,k=rp(['houseWhite','houseBlue','white','houseSage']);bld(k,x0,x0+w,z0,z0+d,y,7,true);vb(x0+2,x0+8,y+7,y+7.4,z0+1,z0+d-1,'#f4f1ea');
+      const pz=face>0?z0+d+3:z0-9;vb(x0+1,x0+10,y,y+.18,pz,pz+6,'#e8e4da');vb(x0+1.6,x0+9.4,y+.16,y+.19,pz+.6,pz+5.4,'#38b6d8');colX(x0+1,x0+10,pz,pz+6,.4);
+      door(cx+4,face>0?z0+d:z0,face>0?0:Math.PI,'flat',y,1.6,2.6,'#3a2a1c',null);for(let t=0;t<3;t++)tree(x0+w+3,z0+t*5,y,.8);};
+    for(const cx of[-1310,-1270,-1230])for(const cz of[180,225,270,315])villa(cx,cz,cz<250?-1:1);
+    for(const cx of[-1050,-1010,-970,-930])villa(cx,400,-1);
+    dia(-1330,330);dia(-912,425);
+    // football pitch and park
+    {const x0=-1060,x1=-960,z0=175,z1=305,g=new GB();g.flat(x0,x1,y+.05,z0,z1,6);addMesh(g.geo(),new T.MeshStandardMaterial({map:TX.grass,color:lin('#6fbf5a'),roughness:1}),false);
+      const ln='#f4f4f2';vb(x0+2,x1-2,y+.06,y+.08,z0+2,z0+2.15,ln);vb(x0+2,x1-2,y+.06,y+.08,z1-2.15,z1-2,ln);vb(x0+2,x0+2.15,y+.06,y+.08,z0+2,z1-2,ln);vb(x1-2.15,x1-2,y+.06,y+.08,z0+2,z1-2,ln);vb(x0+2,x1-2,y+.06,y+.08,(z0+z1)/2-.07,(z0+z1)/2+.07,ln);
+      for(const zz of[z0+2,z1-2]){const cx=(x0+x1)/2;vb(cx-3.7,cx-3.5,y,y+2.4,zz-.1,zz+.1,ln);vb(cx+3.5,cx+3.7,y,y+2.4,zz-.1,zz+.1,ln);vb(cx-3.7,cx+3.7,y+2.3,y+2.45,zz-.1,zz+.1,ln);}
+      for(let z=z0;z<z1;z+=12){tree(-950,z+6,y,1.1);tree(-915,z,y,1);}dia(-905,240);}
+    for(let x=-1320;x<-890;x+=24){lamp(x,150-E+.6,y);lamp(x+12,150+E-.6,y);}for(let z=-70;z<420;z+=24){lamp(-1080-E+.6,z,y);lamp(-1080+E-.6,z+12,y);}for(let z=-60;z<140;z+=24)lamp(-880-6.2,z,y);
+    archSign('NEXUS TÂY',-800,-102,heightAt(-800,-102),Math.PI/2,12,'#2b6cb0');
+    town('westside','Nexus Tây','West Nexus',-1100,150,190,800);}
+
+  /* ======== build the shared meshes ======== */
+  for(const k in FACG)if(FACG[k].p.length)addMesh(FACG[k].geo(),FAC[k],true);
+  if(flatRoof.p.length)addMesh(flatRoof.geo(),ROOF,false);
+  if(tileR.p.length)addMesh(tileR.geo(),SHINGLE.red,true);if(tileG.p.length)addMesh(tileG.geo(),SHINGLE.grey,true);
+  for(const c in gw)addMesh(gw[c].geo(),mat(c,.9),false);
+  for(let s=0;s<VC.length;s+=4000){const m=new T.Mesh(buildVC(VC.slice(s,s+4000)),new T.MeshStandardMaterial({vertexColors:true,roughness:.8}));m.castShadow=Q.shadows;m.receiveShadow=Q.shadows;scene.add(m);}
+  if(STR.length){const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(STR,3));scene.add(new T.LineSegments(g,new T.LineBasicMaterial({color:0x2a2420})));}
+  {const lg=new T.SphereGeometry(.26,10,8);lg.scale(1,1.3,1);for(const c in LANT){const im=inst(lg,new T.MeshBasicMaterial({color:new T.Color(c),toneMapped:false}),LANT[c],(p,d)=>d.position.set(p[0],p[1],p[2]),false);if(im){im.frustumCulled=false;}}}
+  {const pole=new T.CylinderGeometry(.08,.12,4.8,8);pole.translate(0,2.4,0);const head=new T.SphereGeometry(.32,10,8);head.translate(0,4.95,0);
+    const im1=inst(pole,mat('#2b2f36',.5,.5),LAMPS,(p,d)=>d.position.set(p[0],p[1],p[2]),true),im2=inst(head,new T.MeshBasicMaterial({color:0xfff1c8,toneMapped:false}),LAMPS,(p,d)=>d.position.set(p[0],p[1],p[2]),false);for(const im of[im1,im2])if(im)im.frustumCulled=false;}
+  {const pl=(p,d,i)=>{d.position.set(p[0],p[1]-.15,p[2]);d.scale.setScalar(p[3]);d.rotation.y=i*1.7;};
+    const bt=new T.CylinderGeometry(.22,.32,3.2,6);bt.translate(0,1.6,0);const cn=new T.IcosahedronGeometry(2.4,0);cn.translate(0,4.4,0);
+    for(const im of[inst(bt,mat('#6a4a34',.95),TREES,pl,true),inst(cn,new T.MeshStandardMaterial({color:lin('#6f9e48'),map:TX.foliage,roughness:.9}),TREES,pl,true)])if(im)im.frustumCulled=false;
+    const tr=new T.CylinderGeometry(.18,.3,3,6,1,true);tr.translate(0,1.5,0);const c1=new T.ConeGeometry(2.3,4.4,8,1,true);c1.translate(0,4.3,0);const c2=new T.ConeGeometry(1.7,3.6,8,1,true);c2.translate(0,6.6,0);const c3=new T.ConeGeometry(1.1,2.6,8,1,true);c3.translate(0,8.4,0);const cones=mergeGeos([c1,c2,c3]);cones.computeVertexNormals();
+    for(const im of[inst(tr,mat('#5a4030',.95),PINES,pl,true),inst(cones,new T.MeshStandardMaterial({color:lin('#3a6a3e'),map:TX.needles,roughness:.95}),PINES,pl,true)])if(im)im.frustumCulled=false;
+    const fg=new T.SphereGeometry(.16,6,5);const groups={};for(const f of FLOW)(groups[f[3]]||(groups[f[3]]=[])).push(f);for(const c in groups){const im=inst(fg,mat(c,.7),groups[c],(p,d)=>{d.position.set(p[0],p[1]+.28,p[2]);},false);if(im)im.frustumCulled=false;}}
+  // fishing boats that bob on the swell
+  for(const b of BOATS){const g=new T.Group();const L2=b.len;g.add(new T.Mesh(buildVC([{geo:new T.BoxGeometry(2.6,1.1,L2),pos:[0,.35,0],color:b.c},{geo:new T.BoxGeometry(2.7,.18,L2+.1),pos:[0,.95,0],color:'#f4f1ea'},{geo:new T.CylinderGeometry(0,1.3,2.2,4).rotateX(Math.PI/2).rotateZ(Math.PI/4),pos:[0,.45,L2/2+1],color:b.c},
+      {geo:new T.BoxGeometry(1.9,1.6,2.6),pos:[0,1.8,-L2*.15],color:'#f4f1ea'},{geo:new T.BoxGeometry(1.95,.5,2.65),pos:[0,2.2,-L2*.15],color:'#20303a'},{geo:new T.BoxGeometry(.12,4.5,.12),pos:[0,3,L2*.2],color:'#5a4030'},{geo:new T.BoxGeometry(.06,.06,L2*.6),pos:[0,4.8,0],color:'#5a4030'}]),new T.MeshStandardMaterial({vertexColors:true,roughness:.7})));
+    g.position.set(b.x,.05,b.z);g.rotation.y=RNG()<.5?Math.PI/2:-Math.PI/2;g.children[0].castShadow=Q.shadows;scene.add(g);b.g=g;addCol({t:'b',x0:b.x-L2/2,x1:b.x+L2/2,z0:b.z-1.4,z1:b.z+1.4,h:3});}
+  WILD.anim.boats=BOATS;WILD.anim.mills=MILLS;}
+
 /* ---------- Nexus International Airport: built on reclaimed land off the south beach, joined to the city by a causeway.
    Runway 09/27, taxiway, apron with jet bridges, a walk-in glass terminal, control tower, hangars with planes you can fly ---------- */
 const AIR={planes:[],gates:[],lights:[]};
@@ -1833,6 +2091,9 @@ function rebuildPlayer(){const old=P.H;const H=makeHuman(playerLook());H.root.po
 const VEH={bike:{n:'Xe máy',p:1500},hatch:{n:'Xe hatchback nhỏ',p:4500},sedan:{n:'Sedan gia đình',p:6000},minivan:{n:'Xe gia đình 7 chỗ',p:8500},van:{n:'Xe tải van',p:9000},suv:{n:'SUV 7 chỗ',p:11000},pickup:{n:'Bán tải',p:13000},jeep:{n:'Xe địa hình gầm cao',p:16000},coupe:{n:'Coupe 2 cửa',p:18000},muscle:{n:'Xe cơ bắp Mỹ',p:22000},sports:{n:'Xe thể thao',p:24000},limo:{n:'Limousine',p:35000},bus:{n:'Xe buýt thành phố',p:40000},super:{n:'Siêu xe Nexus GT',p:60000},hyper:{n:'Siêu xe Hyper X',p:95000}};
 const SHOPS={
   food:{n:'Cơm Tấm Cô Ba',items:[{n:'Bánh mì thịt',d:'+25 máu',p:8,ok:()=>!P.tray,fn:()=>takeFood({n:TT('Bánh mì thịt'),hp:25,col:'#c98b4a'})},{n:'Cơm tấm sườn bì chả',d:'+60 máu',p:18,ok:()=>!P.tray,fn:()=>takeFood({n:TT('Cơm tấm sườn bì chả'),hp:60,col:'#a33b20'})},{n:'Phở bò tái',d:'Hồi đầy máu',p:25,ok:()=>!P.tray,fn:()=>takeFood({n:TT('Phở bò tái'),hp:200,col:'#e9c46a'})},{n:'Trà sữa trân châu',d:'+15 máu, chạy nhanh hơn 60 giây',p:12,ok:()=>!P.tray,fn:()=>takeFood({n:TT('Trà sữa trân châu'),hp:15,boost:1,col:'#d4a373'})}]},
+  tea:{n:'Trà quán Phố Cổ',items:[{n:'Trà sen nóng',d:'+20 máu',p:6,ok:()=>!P.tray,fn:()=>takeFood({n:TT('Trà sen nóng'),hp:20,col:'#c9a227'})},{n:'Bánh đậu xanh',d:'+30 máu',p:8,ok:()=>!P.tray,fn:()=>takeFood({n:TT('Bánh đậu xanh'),hp:30,col:'#e9c46a'})},{n:'Cao lầu',d:'+70 máu',p:20,ok:()=>!P.tray,fn:()=>takeFood({n:TT('Cao lầu'),hp:70,col:'#c98b4a'})},{n:'Cà phê trứng',d:'+15 máu, chạy nhanh hơn 60 giây',p:10,ok:()=>!P.tray,fn:()=>takeFood({n:TT('Cà phê trứng'),hp:15,boost:1,col:'#d4a373'})}]},
+  sea:{n:'Nhà hàng Hải sản Biển Xanh',items:[{n:'Mực nướng',d:'+40 máu',p:14,ok:()=>!P.tray,fn:()=>takeFood({n:TT('Mực nướng'),hp:40,col:'#f4a261'})},{n:'Tôm hùm bơ tỏi',d:'Hồi đầy máu',p:60,ok:()=>!P.tray,fn:()=>takeFood({n:TT('Tôm hùm bơ tỏi'),hp:200,col:'#e63946'})},{n:'Cá kho tộ',d:'+60 máu',p:22,ok:()=>!P.tray,fn:()=>takeFood({n:TT('Cá kho tộ'),hp:60,col:'#8a4b2a'})},{n:'Nước dừa',d:'+15 máu',p:5,ok:()=>!P.tray,fn:()=>takeFood({n:TT('Nước dừa'),hp:15,col:'#f1faee'})}]},
+  saloon:{n:'Saloon Chim Ưng',items:[{n:'Đậu hầm thịt xông khói',d:'+45 máu',p:12,ok:()=>!P.tray,fn:()=>takeFood({n:TT('Đậu hầm thịt xông khói'),hp:45,col:'#8a4b2a'})},{n:'Bò nướng than',d:'Hồi đầy máu',p:40,ok:()=>!P.tray,fn:()=>takeFood({n:TT('Bò nướng than'),hp:200,col:'#6b2e1a'})},{n:'Bia gừng',d:'+15 máu, chạy nhanh hơn 60 giây',p:7,ok:()=>!P.tray,fn:()=>takeFood({n:TT('Bia gừng'),hp:15,boost:1,col:'#e9c46a'})}]},
   bar:{n:'Quầy bar Nexus Grand',items:[{n:'Nước cam ép',d:'+15 máu',p:6,fn:()=>heal(15)},{n:'Cà phê sữa đá',d:'+10 máu, chạy nhanh hơn 60 giây',p:9,fn:()=>{heal(10);P.boostT=60;}},{n:'Mocktail nhiệt đới',d:'+35 máu',p:15,fn:()=>heal(35)},{n:'Bít tết bò',d:'Hồi đầy máu',p:45,fn:()=>heal(999)}]},
   mart:{n:'Xăng Nexus Mart',items:[{n:'Snack khoai tây',d:'+10 máu',p:4,fn:()=>heal(10)},{n:'Nước tăng lực',d:'Chạy nhanh hơn 60 giây',p:7,fn:()=>{P.boostT=60;}},{n:'Bộ sơ cứu',d:'Hồi đầy máu',p:120,fn:()=>heal(999)},{n:'Sửa xe nhanh',d:'Hồi 50% độ bền cho xe bạn đang lái',p:60,need:'car',fn:()=>{P.car.hp=Math.min(100,P.car.hp+50);}}]},
   clothes:{n:'Nexus Plaza · Thời trang',kind:'clothes'},
@@ -2255,6 +2516,60 @@ let gymHits=0;
   itb('walnut',x1-2.4,x1-1.2,0,.9,z1-3.2,z1-2.2,{col:1});ibox(x1-2.42,x1-1.18,.6,.7,z1-3.22,z1-2.18,'#c1f354');
   act(R,x1-1.8,z1-1.7,1.6,L('Lục thùng hàng','Search the crate'),()=>{const k=curDoor&&curDoor.id||'w';if(time-(LOOT[k]||-1e9)<300){showPrompt(L('Thùng trống rỗng · quay lại sau','The crate is empty · come back later'),1.6);return;}LOOT[k]=time;const m=Math.round(rnd(40,160));save.money+=m;sfx('cash');showPrompt(L('Tìm được ','Found ')+fmt$(m),1.6);});
   for(let x=x0+3;x<x1-1;x+=6)for(let z=z0+3;z<z1-1;z+=6)IE.push([x,R.h-.04,z]);R.lights=[[cx,6.6,z0+5,1.2,'#e8f0ff',16],[cx,6.6,z1-5,1.1,'#e8f0ff',15]];}
+/* ---- town interiors: teahouse, seafood restaurant, church, saloon, cinema ---- */
+{const R=room('tea',4180,0,18,14,3.4,{wall:'plasterW',floor:'oak',fts:1.4,wts:1.6,ceil:'oak',cts:1.6,wain:'walnut',wainH:1.0,rail:'red',skirt:'dark'}),x0=R.x0,x1=R.x1,z0=R.z0,z1=R.z1,cx=4180;R.seats=[];
+  itb('walnut',cx-4,cx+4,0,1.0,z0+2.6,z0+3.3,{col:1});itb('oak',cx-4.1,cx+4.1,1.0,1.05,z0+2.5,z0+3.4,{bot:1});for(let k=0;k<5;k++){cyl('brass',cx-3+k*1.5,1.05,1.3,z0+2.95,.13,.1,12);cyl('brass',cx-3+k*1.5,1.3,1.38,z0+2.95,.04,.04,8);}
+  for(const y of[1.4,1.9,2.4])itb('walnut',x0+.5,x1-.5,y,y+.04,z0+.05,z0+.35);for(let k=0;k<14;k++)cyl(['green','red','brass','white'][k%4],x0+1+k*1.1,1.44+(k%3)*.5,1.44+(k%3)*.5+.25,z0+.2,.09,.09,10);
+  extra(Object.assign(randomLook('ped'),{female:true,shirt:'#b23a48',jacket:null}),cx,z0+1.9,0);
+  act(R,cx,z0+4.2,2.3,()=>P.tray?L('Bạn đang cầm khay · tới bàn ngồi','You are holding a tray · sit at a table'):L('Gọi trà và bánh','Order tea and snacks'),()=>{if(!P.tray)openShop('tea');});
+  for(const tx of[x0+3,x0+7,x1-7,x1-3])for(const tz of[z0+7,z0+10.5]){if(Math.abs(tx-cx)<1.5)continue;itb('walnut',tx-.55,tx+.55,.55,.6,tz-.55,tz+.55,{col:1});itb('dark',tx-.05,tx+.05,0,.55,tz-.05,tz+.05);
+    chair(R,tx,tz-.85,0,'red');chair(R,tx,tz+.85,Math.PI,'red');cyl('white',tx,.6,.68,tz,.06,.05,10);}
+  for(let k=0;k<6;k++)sph('red',x0+2+k*2.8,2.7,z0+6+(k%2)*3,.24,1.3);
+  pframe(paintingTex(2),x0+.03,2.0,z0+8,1.8,1.1,Math.PI/2);pframe(paintingTex(1),x1-.03,2.0,z0+8,1.8,1.1,-Math.PI/2);plant(x0+.7,z1-.8,1.2);plant(x1-.7,z1-.8,1.2);
+  for(let x=x0+2.5;x<x1-1;x+=4)for(let z=z0+2.5;z<z1-1;z+=4)IE.push([x,R.h-.04,z]);R.lights=[[cx,3.1,z0+4,1,'#ffcf9a',13],[cx,3.1,z1-4,1,'#ffcf9a',12]];
+  DIAS.push({x:x1-.8,z:z0+1.2,y:1.1});}
+{const R=room('sea',4260,0,20,14,3.5,{wall:'plasterW',floor:'tileW',fts:1,wts:1.6,ceil:'plaster',wain:'blue',wainH:1.1,rail:'white',skirt:'dark'}),x0=R.x0,x1=R.x1,z0=R.z0,z1=R.z1,cx=4260;R.seats=[];
+  // aquariums along the back wall with fish
+  for(let k=0;k<3;k++){const x=cx-6+k*6;itb('dark',x-2.2,x+2.2,0,.9,z0+.1,z0+1.1,{col:1});glow('#47b6e8',x,1.55,z0+1.12,4.3,1.3,0,.9);for(let f=0;f<5;f++)sph(['red','brass','white','teal','gold'][f],x-1.6+f*.8,1.2+(f%3)*.3,z0+.9,.09,.7);}
+  itb('white',x1-6,x1-.3,0,1.05,z1-4.4,z1-3.7,{col:1});itb('marbleTop',x1-6.1,x1-.25,1.05,1.1,z1-4.5,z1-3.6,{bot:1});extra(Object.assign(randomLook('ped'),{shirt:'#f4f1ea',jacket:null,cap:'#f4f1ea'}),x1-3,z1-5.2,0);
+  act(R,x1-3,z1-2.9,2.2,()=>P.tray?L('Bạn đang cầm khay · tới bàn ngồi','You are holding a tray · sit at a table'):L('Gọi món hải sản','Order seafood'),()=>{if(!P.tray)openShop('sea');});
+  for(const tx of[x0+3,x0+7.5,cx+2])for(const tz of[z0+4.5,z0+8.5]){rtable(tx,tz,.55,'oak');chair(R,tx-.85,tz,Math.PI/2,'blue');chair(R,tx+.85,tz,-Math.PI/2,'blue');}
+  glow('#bfe6ff',x0+.05,1.9,z0+7,6,1.6,Math.PI/2,.75);for(let k=0;k<4;k++)itb('walnut',x0+.04,x0+.08,1.1,2.7,z0+4+k*2,z0+4.06+k*2);
+  sign('BIỂN XANH',cx,2.9,z0+.04,0,3.6,.5,{fg:'#fff',bg:'#1d5f8a',size:60,w:512,h:96});plant(x0+.7,z1-.8,1.1);
+  for(let x=x0+2.5;x<x1-1;x+=4)for(let z=z0+2.5;z<z1-1;z+=4)IE.push([x,R.h-.04,z]);R.lights=[[cx,3.2,z0+4,1.1,'#eaf6ff',14],[cx,3.2,z1-4,1,'#fff1dc',12]];
+  DIAS.push({x:x0+.8,z:z0+1.6,y:1.1});}
+{const R=room('church',4340,0,16,28,8,{wall:'stone',floor:'marble',fts:2,wts:2.4,ceil:'plaster',crown:'stone',skirt:'dark'}),x0=R.x0,x1=R.x1,z0=R.z0,z1=R.z1,cx=4340;R.seats=[];
+  itb('stone',cx-3,cx+3,0,.35,z0+.2,z0+4,{col:1});itb('white',cx-1.4,cx+1.4,.35,1.3,z0+1.4,z0+2.4,{col:1});ibox(cx-1.45,cx+1.45,1.3,1.36,z0+1.35,z0+2.45,'#c9a227');
+  ibox(cx-.06,cx+.06,1.36,2.4,z0+1.85,z0+1.95,'#c9a227');ibox(cx-.4,cx+.4,2.0,2.1,z0+1.85,z0+1.95,'#c9a227');
+  for(const s of[-1,1])for(let k=0;k<3;k++){const x=cx+s*(1.8+k*.3);cyl('white',x,1.3,1.6+k*.1,z0+2.6,.04,.04,8);sph('gold',x,1.66+k*.1,z0+2.6,.04,1.6);}
+  act(R,cx,z0+5,2.4,L('Thắp nến cầu nguyện (+15 máu)','Light a candle and pray (+15 HP)'),()=>{heal(15);sfx('door');showPrompt(L('Lòng bình yên hơn','You feel at peace'),1.6);});
+  for(let r=0;r<6;r++){const z=z0+7.5+r*2.6;for(const s of[-1,1]){const xa=s<0?x0+1.2:cx+1.2,xb=s<0?cx-1.2:x1-1.2;itb('walnut',xa,xb,.42,.48,z-.25,z+.25,{col:1});itb('walnut',xa,xb,.48,1.0,z+.25,z+.33);
+    for(let x=xa+.5;x<xb-.2;x+=.75)R.seats.push({x,z,h:Math.PI});}}
+  const SG=['#e63946','#3a86ff','#ffb703','#2a9d8f','#8338ec'];for(let k=0;k<5;k++){const z=z0+5+k*4.5;glow(SG[k],x0+.05,4.5,z,1.2,3.2,Math.PI/2,1.1);glow(SG[(k+2)%5],x1-.05,4.5,z,1.2,3.2,-Math.PI/2,1.1);}
+  glow('#ffd9a6',cx,5.8,z0+.04,2.4,2.4,0,1);
+  for(let z=z0+4;z<z1-1;z+=5)IE.push([cx,R.h-.04,z]);R.lights=[[cx,7,z0+4,1.2,'#ffe2b8',16],[cx,7,z0+16,1,'#ffe2b8',14]];
+  DIAS.push({x:x1-.8,z:z0+.8,y:1.1});}
+{const R=room('saloon',4420,0,20,16,4,{wall:'oak',floor:'oak',fts:1.2,wts:1.4,ceil:'oak',cts:1.6,wain:'walnut',wainH:1.1,rail:'brass',skirt:'dark'}),x0=R.x0,x1=R.x1,z0=R.z0,z1=R.z1,cx=4420;R.seats=[];
+  itb('walnut',x0+1,x1-6,0,1.15,z0+3,z0+3.8,{col:1});itb('walnut',x0+.9,x1-5.9,1.15,1.22,z0+2.9,z0+3.9,{bot:1});itb('brass',x0+1,x1-6,.15,.2,z0+3.85,z0+3.95);
+  for(const y of[1.5,2.1])itb('walnut',x0+1,x1-6,y,y+.05,z0+.05,z0+.4);for(let k=0;k<18;k++)cyl(['green','brass','red','teal'][k%4],x0+1.3+k*.7,1.55+(k%2)*.6,1.55+(k%2)*.6+.32,z0+.22,.06,.06,8);
+  extra(Object.assign(randomLook('ped'),{shirt:'#f4f1ea',beard:true,female:false,jacket:'#3a2414',cap:'#3a2a1c'}),cx-2,z0+2.3,0);
+  act(R,cx-2,z0+4.6,2.4,()=>P.tray?L('Bạn đang cầm khay · tới bàn ngồi','You are holding a tray · sit at a table'):L('Gọi đồ ở quầy','Order at the bar'),()=>{if(!P.tray)openShop('saloon');});
+  for(const[tx,tz]of[[x0+3,z0+8],[x0+7,z0+11],[cx+2,z0+8],[cx+6,z0+11],[cx-2,z1-3]]){rtable(tx,tz,.6,'walnut');chair(R,tx-.9,tz,Math.PI/2,'walnut');chair(R,tx+.9,tz,-Math.PI/2,'walnut');}
+  itb('black',x1-4,x1-1.6,0,1.25,z0+1,z0+2.2,{col:1});itb('white',x1-3.95,x1-1.65,.82,.86,z0+2.2,z0+2.4);act(R,x1-2.8,z0+3,1.4,L('Đánh piano','Play the piano'),()=>{sfx('horn');showPrompt(L('♪ Một điệu nhạc miền Tây','♪ A honky-tonk tune'),1.6);});
+  ibox(cx-1.2,cx+1.2,2.6,3.2,z0+.05,z0+.15,'#e9dfc9');ibox(cx-.1,cx+.1,2.4,3.4,z0+.05,z0+.1,'#4a3424');
+  for(let x=x0+2.5;x<x1-1;x+=4)for(let z=z0+2.5;z<z1-1;z+=4)IE.push([x,R.h-.04,z]);R.lights=[[cx,3.7,z0+4,1,'#ffc98a',13],[cx,3.7,z1-4,1,'#ffc98a',12]];
+  DIAS.push({x:x1-.8,z:z1-2.2,y:1.1});}
+let CINE=null;
+{const R=room('cinema',4500,0,22,20,7,{wall:'dark',floor:'rugB',fts:2,wts:2,ceil:'plaster',skirt:'dark'}),x0=R.x0,x1=R.x1,z0=R.z0,z1=R.z1,cx=4500;R.seats=[];
+  const cv=document.createElement('canvas');cv.width=512;cv.height=256;const tex=new T.CanvasTexture(cv);const sc=new T.Mesh(new T.PlaneGeometry(14,7),new T.MeshBasicMaterial({map:tex,toneMapped:false}));sc.position.set(cx,3.9,z0+.06);scene.add(sc);CINE={cv,tex,t:0};
+  ibox(cx-7.3,cx+7.3,.2,.3,z0+.02,z0+.1,'#111');
+  for(let r=0;r<5;r++){const z=z0+6+r*2.2;for(let x=cx-7;x<=cx+7;x+=1){if(Math.abs(x-cx)<.6)continue;chair(R,x,z,Math.PI,'red');}}
+  itb('red',x1-5,x1-.3,0,1.05,z1-4.4,z1-3.7,{col:1});itb('marbleTop',x1-5.1,x1-.25,1.05,1.1,z1-4.5,z1-3.6,{bot:1});extra(Object.assign(randomLook('ped'),{shirt:'#d62828',cap:'#d62828',jacket:null}),x1-2.6,z1-5.2,0);
+  act(R,x1-2.6,z1-2.9,2.2,()=>P.tray?L('Bạn đang cầm bắp rang · tìm ghế ngồi xem phim','You have popcorn · find a seat and watch'):L('Mua bắp rang và nước · $10','Buy popcorn and a drink · $10'),()=>{if(P.tray)return;if(save.money<10){showPrompt(L('Không đủ tiền','Not enough money'),1.2);return;}save.money-=10;sfx('cash');P.tray={n:TT('Bắp rang bơ'),hp:30,col:'#f2d16b'};trayMesh('#f2d16b');banner(L('BẮP RANG BƠ','POPCORN'),L('Tìm một ghế và bấm E để ngồi xem phim','Find a seat and press E to watch the film'));});
+  R.lights=[[cx,6.5,z1-4,1.1,'#ffd9a6',18],[cx,6.5,z0+6,.8,'#cfe0ff',16]];IE.push([cx,R.h-.04,z1-3],[cx-6,R.h-.04,z1-3],[cx+6,R.h-.04,z1-3]);
+  DIAS.push({x:x0+.8,z:z0+3,y:1.1});}
+/* diamonds hidden inside the city's shared interiors */
+for(const[id,fx,fz]of[['diner',.06,.1],['police',.6,.45],['mart',.94,.1],['gym',.05,.08],['ware',.96,.3],['hotel',.97,.75],['office',.5,.22],['flat',.13,.88],['clothes',.95,.4],['cars',.04,.08],['guns',.96,.9]]){const R=ROOMS[id];DIAS.push({x:R.x0+(R.x1-R.x0)*fx,z:R.z0+(R.z1-R.z0)*fz,y:1.1});}
 function z1_(R){return R.z1;}
 /* build the meshes: one per textured material, cylinders per material, coloured props, glowing planes */
 {for(const k in IB){const m=new T.Mesh(IB[k].geo(),imat(k));m.receiveShadow=Q.shadows;scene.add(m);}
@@ -2468,7 +2783,7 @@ const mapBg=document.createElement('canvas');mapBg.width=Math.ceil((MAPX1-MAPX0)
   if(WGRID){const G=WGRID;for(let iz=0;iz<G.NZ-1;iz++)for(let ix=0;ix<G.NX-1;ix++){const x=G.X0+ix*G.ST,z=G.Z0+iz*G.ST;if(x>440||(x>EXT.x0&&z>EXT.z0)||x<MAPX0-8||z<MAPZ0-8)continue;const v=G.H[iz*G.NX+ix];const k=clamp(v/110,0,1);
       g.fillStyle=v>95?'#e8eaec':`rgb(${85+k*80|0},${104+k*40|0},${63+k*55|0})`;g.fillRect(X(x),Z(z),G.ST*MK1+1,G.ST*MK1+1);}
     const LK=WILD.lake;g.fillStyle='#2b86a3';g.beginPath();g.arc(X(LK.x),Z(LK.z),LK.r*MK1,0,7);g.fill();
-    g.lineJoin='round';g.lineCap='round';WILD.roads.forEach((r,ri)=>{g.beginPath();r.P.forEach((p,k)=>{k?g.lineTo(X(p[0]),Z(p[1])):g.moveTo(X(p[0]),Z(p[1]));});g.strokeStyle=ri?'#8a7556':'#3b3a40';g.lineWidth=(ri?7:9)*MK1;g.stroke();});
+    g.lineJoin='round';g.lineCap='round';WILD.roads.forEach((r,ri)=>{g.beginPath();r.P.forEach((p,k)=>{k?g.lineTo(X(p[0]),Z(p[1])):g.moveTo(X(p[0]),Z(p[1]));});g.strokeStyle=r.kind==='gravel'?'#8a7556':'#3b3a40';g.lineWidth=(r.kind==='gravel'?7:9)*MK1;g.stroke();});
     g.fillStyle='#2b86a3';g.fillRect(X(WA.x0-10),Z(RZ0),X(EXT.x0)-X(WA.x0-10),(RZ1-RZ0)*MK1);
     for(const c of blds)if(c.x0<EXT.x0||c.z0<EXT.z0){g.fillStyle='#8a5a44';g.fillRect(X(c.x0),Z(c.z0),(c.x1-c.x0)*MK1,(c.z1-c.z0)*MK1);}}
   {const rr=(x0,x1,z0,z1,c)=>{g.fillStyle=c;g.fillRect(X(x0),Z(z0),(x1-x0)*MK1,(z1-z0)*MK1);};rr(CW.x0,CW.x1,CW.z0,CW.z1,'#4a4a50');rr(AP.x0,AP.x1,AP.z0,AP.z1,'#8b9a74');
@@ -2506,7 +2821,7 @@ function drawBigMap(){const c=hud.mapC,g=c.getContext('2d'),s=mapS();g.fillStyle
   if(gps.wp){const q=tr(gps.wp.x,gps.wp.z);pin(g,q[0],q[1],1.6);}
   const t=P.car||P,p=tr(t.x,t.z),h=P.car?P.car.h:P.h;g.save();g.translate(p[0],p[1]);g.rotate(Math.PI-h);g.fillStyle='#fff';g.strokeStyle='#000';g.lineWidth=2;g.beginPath();g.moveTo(0,-13);g.lineTo(9,10);g.lineTo(0,5);g.lineTo(-9,10);g.closePath();g.fill();g.stroke();g.restore();
   g.fillStyle='#fff';g.font='700 26px "Space Grotesk",Inter';g.textAlign='left';g.fillText('NEXUS CITY',16,mapOY()+34);
-  if(WILD.places){g.font='600 19px Inter';g.fillStyle='#d6f5ff';g.fillText(L('Khám phá ','Explored ')+WILD.places.filter(p=>save.disc[p.id]).length+'/'+WILD.places.length+'   ·   '+L('Ngọc Nexus ','Nexus gems ')+save.gems.length+'/'+WILD.gems.length,16,mapOY()+62);}}
+  if(WILD.places){g.font='600 19px Inter';g.fillStyle='#d6f5ff';g.fillText(L('Khám phá ','Explored ')+WILD.places.filter(p=>save.disc[p.id]).length+'/'+WILD.places.length+'   ·   '+L('Kim cương ','Diamonds ')+(save.dia||[]).length+'/'+DIAS.length+'   ·   '+L('Ngọc Nexus ','Nexus gems ')+save.gems.length+'/'+WILD.gems.length,16,mapOY()+62);}}
 function renderPOI(){hud.poi.innerHTML='';for(const p of poiList()){const b=document.createElement('button');b.type='button';const col=p.i==='bank'?'#4ade80':p.i==='house'?'#ffffff':p.i==='hosp'?'#d62828':p.i==='police'?'#3d6fd6':p.i;b.innerHTML='<i style="background:'+col+'"></i>';b.appendChild(document.createTextNode(p.n));b.addEventListener('click',()=>{setWaypoint(p.x,p.z,p.n);gpsUpdate(0);drawBigMap();});hud.poi.appendChild(b);}}
 let mapOpen=false;function toggleMap(){mapOpen=!mapOpen;hud.map.hidden=!mapOpen;if(mapOpen){gps.t=0;gpsUpdate(0);drawBigMap();renderPOI();tutEvent('map');}}
 hud.mapC.addEventListener('click',e=>{const c=hud.mapC,r=c.getBoundingClientRect(),px=(e.clientX-r.left)*c.width/r.width,py=(e.clientY-r.top)*c.height/r.height,s=mapS();
@@ -2542,13 +2857,13 @@ if(MOBILE){hud.touch.hidden=false;const jEl=$h('.nc-joy'),kn=$h('.nc-joy i');
     const up=()=>{if(k==='punch')P.trigger=false;if(k==='jump')tb.jump=false;if(k==='block')tb.block=false;};b.addEventListener('pointerup',up);b.addEventListener('pointercancel',up);b.addEventListener('pointerleave',up);});}
 
 /* ---------- interaction ---------- */
-const DOORTXT={flat:()=>L('Vào nhà','Go inside'),office:()=>L('Vào toà nhà văn phòng','Enter the office tower'),hotel:()=>L('Vào khách sạn','Enter the hotel'),ware:()=>L('Vào nhà kho','Enter the warehouse')};
+const DOORTXT={tea:()=>L('Vào trà quán','Enter the teahouse'),sea:()=>L('Vào nhà hàng hải sản','Enter the seafood restaurant'),church:()=>L('Vào nhà thờ','Enter the church'),saloon:()=>L('Vào saloon','Enter the saloon'),cinema:()=>L('Vào rạp phim','Enter the cinema'),hotel:()=>L('Vào khách sạn','Enter the hotel'),ware:()=>L('Vào nhà kho','Enter the warehouse'),office:()=>L('Vào toà nhà','Enter the building'),mart:()=>L('Vào cửa hàng tạp hoá','Enter the store'),guns:()=>L('Vào tiệm súng','Enter the gun shop'),gym:()=>L('Vào phòng tập','Enter the gym'),clothes:()=>L('Vào shop quần áo','Enter the clothes shop'),cars:()=>L('Vào showroom xe','Enter the car showroom'),diner:()=>L('Vào quán ăn','Enter the restaurant'),police:()=>L('Vào đồn cảnh sát','Enter the police station'),flat:()=>L('Vào nhà','Go inside'),office:()=>L('Vào toà nhà văn phòng','Enter the office tower'),hotel:()=>L('Vào khách sạn','Enter the hotel'),ware:()=>L('Vào nhà kho','Enter the warehouse')};
 /* sitting, carrying a tray, eating at a table */
 let TRAYM=null;
 function trayMesh(col){if(!TRAYM){TRAYM=new T.Group();TRAYM.add(new T.Mesh(buildVC([{geo:new T.BoxGeometry(.5,.03,.36),color:'#7a4a24'},{geo:new T.CylinderGeometry(.15,.12,.03,16),pos:[-.06,.03,0],color:'#f4f1ea'},{geo:new T.CylinderGeometry(.045,.04,.14,10),pos:[.17,.085,.08],color:'#e9e2d0'},{geo:new T.CylinderGeometry(.01,.01,.12,5),pos:[.17,.18,.08],color:'#d62828'}]),HUMAT));
     TRAYM.food=new T.Mesh(new T.SphereGeometry(.1,12,8).scale(1.2,.45,1),new T.MeshStandardMaterial({roughness:.7}));TRAYM.food.position.set(-.06,.07,0);TRAYM.add(TRAYM.food);}
   TRAYM.food.material.color.copy(lin(col||'#c98b4a'));return TRAYM;}
-function takeFood(f){if(P.inside!=='diner'){heal(f.hp);if(f.boost)P.boostT=60;return;}P.tray=f;trayMesh(f.col);closeShop();setTimeout(()=>banner(L('MANG KHAY RA BÀN','CARRY IT TO A TABLE'),L('Tới một chiếc ghế trống và bấm E để ngồi ăn','Walk to a free chair and press E to sit and eat')),900);}
+function takeFood(f){const RM=P.inside&&ROOMS[P.inside];if(!RM||!RM.seats||!RM.seats.length){heal(f.hp);if(f.boost)P.boostT=60;return;}P.tray=f;trayMesh(f.col);closeShop();setTimeout(()=>banner(L('MANG KHAY RA BÀN','CARRY IT TO A TABLE'),L('Tới một chiếc ghế trống và bấm E để ngồi ăn','Walk to a free chair and press E to sit and eat')),900);}
 function sitDown(st){P.sit={s:st,left:P.tray?6:0,t:0};P.x=st.x;P.z=st.z;P.h=st.h;P.y=0;P.vy=0;P.aiming=false;keys.clear();if(P.tray)showPrompt(L('Chúc ngon miệng!','Enjoy your meal!'),1.4);}
 function standUp(){const S=P.sit;if(!S)return;const st=S.s;P.sit=null;const rx=Math.cos(st.h),rz=-Math.sin(st.h);for(const d of[.75,-.75,0]){const x=st.x+rx*d-Math.sin(st.h)*(d?0:.7),z=st.z+rz*d-Math.cos(st.h)*(d?0:.7);if(!resolve(x,z,.38)||d===0){P.x=x;P.z=z;break;}}
   const H=P.H;H.legL.rotation.z=H.legR.rotation.z=0;H.root.rotation.x=0;}
@@ -2581,7 +2896,7 @@ function interactOption(){const t=P.car||P,near=(p,r)=>p&&hyp(P.x-p.x,P.z-p.z)<r
   if(!P.car&&WILD.shops)for(const sh of WILD.shops)if(near(sh,2.8))return{k:'E',txt:L('Vào ','Enter ')+sh.n,fn:()=>openShop(sh.id)};
   if(!P.car&&near(SP.apt,2.6))return save.apt?{k:'E',txt:L('Căn hộ: lưu game, hồi máu','Apartment: save and heal'),fn:stashAtHome}:{k:'E',txt:L('Mua căn hộ ven biển · ','Buy beach apartment · ')+fmt$(APT_PRICE),fn:()=>{if(save.money<APT_PRICE){showPrompt(L('Không đủ tiền','Not enough money'),1.4);return;}save.money-=APT_PRICE;save.apt=true;sfx('cash');writeSave();banner(L('Căn hộ ven biển','Beach apartment'),L('Nhà an toàn thứ hai: lưu game, hồi máu, cất tiền','Second safehouse: save, heal, stash cash'));}};
   for(const s of SP.shops){const r=s.id==='garage'?5.5:2.6;if((s.id==='garage'||!P.car)&&hyp(t.x-s.x,t.z-s.z)<r)return{k:'E',txt:L('Vào ','Enter ')+TT(SHOPS[s.id].n),fn:XROOM[s.id]?()=>enterInterior(XROOM[s.id],{x:s.x,z:s.z,h:0}):()=>openShop(s.id)};}
-  if(!P.car){let gd=null,bd=1.8;for(const d of GDOORS){const dd=Math.abs(P.x-d.x)+Math.abs(P.z-d.z);if(dd<bd){bd=dd;gd=d;}}if(gd)return{k:'E',txt:DOORTXT[gd.room](),fn:()=>enterInterior(gd.room,gd)};}
+  if(!P.car){let gd=null,bd=1.8;for(const d of GDOORS){const dd=Math.abs(P.x-d.x)+Math.abs(P.z-d.z);if(dd<bd){bd=dd;gd=d;}}if(gd)return{k:'E',txt:gd.txt?gd.txt():DOORTXT[gd.room]?DOORTXT[gd.room]():L('Vào trong','Go inside'),fn:()=>enterInterior(gd.room,gd)};}
   if(!mis&&!(heist&&heist.stage==='vault'))for(const k in GIVERS){const p=giverPos[k];if(p&&hyp(t.x-p.x,t.z-p.z)<3.2)return{k:'E',txt:'Nhận việc: '+GIVERS[k].name,fn:()=>startMission(k)};}
   if(P.seq)return null;
   if(!P.car){let best=null,bd=4.5;for(const c of cars){const d=hyp(c.x-P.x,c.z-P.z);if(d<bd){bd=d;best=c;}}if(best)return{k:'F',txt:best.driver?(best.kind==='police'?'Cướp xe cảnh sát':'Kéo tài xế ra, lấy xe'):'Lên xe',fn:toggleCar,noE:true};}
@@ -2630,8 +2945,20 @@ function playerUpdate(dt){
 save.disc=save.disc||{};save.gems=save.gems||[];
 function wildPark(){for(const p of(WILD.parks||[]).concat(WILD.parkSummit?[WILD.parkSummit]:[]))newCar(p[0],p[1],p[2],p[3],'parked',p[4]);}
 let wildT=0,wildFog=1;const VIL=[];
-function inWildArea(x,z){return z<EXT.z0||(x<EXT.x0&&z<HZ.z0);}
-function wildUpdate(dt){const A=WILD.anim,nk=1-tod.day,me=P.car||P;
+function inWildArea(x,z){return z<EXT.z0||(x<EXT.x0&&z<HZ.z0)||(x<HZ.x0&&z<WL.z1);}
+/* Nexus diamonds: hidden in the towns, the countryside and inside buildings */
+let DIAIM=null;save.dia=save.dia||[];const TPED=[];
+function diaUpdate(dt){if(!DIAS.length)return;if(!DIAIM){const g=new T.OctahedronGeometry(.42,0);g.scale(1,1.5,1);DIAIM=new T.InstancedMesh(g,new T.MeshStandardMaterial({color:lin('#bff3ff'),emissive:new T.Color('#4fd2ff'),emissiveIntensity:.9,roughness:.08,metalness:.35}),DIAS.length);DIAIM.frustumCulled=false;DIAIM.instanceMatrix.setUsage(T.DynamicDrawUsage);scene.add(DIAIM);}
+  const me=P.car||P,got=save.dia,N=DIAS.length;for(let i=0;i<N;i++){const g=DIAS[i],have=got.includes(i);dummy.position.set(g.x,g.y+Math.sin(time*2.4+i)*.15,g.z);dummy.rotation.set(0,time*2+i,0);dummy.scale.setScalar(have?.0001:1+.08*Math.sin(time*6+i));dummy.updateMatrix();DIAIM.setMatrixAt(i,dummy.matrix);
+    if(!have&&Math.abs(me.x-g.x)<3&&Math.abs(me.z-g.z)<3&&hyp(me.x-g.x,me.z-g.z)<(P.car?2.6:1.6)&&Math.abs((P.car?heightAt(me.x,me.z):P.y)-(g.y-1.1))<2.6){got.push(i);save.money+=500;sfx('cash');const n=got.length;
+      if(n>=N){save.money+=50000;banner(L('ĐÃ TÌM ĐỦ KIM CƯƠNG NEXUS','ALL NEXUS DIAMONDS FOUND'),L('Thưởng thêm $50.000','Bonus $50,000'),4);}else banner(L('KIM CƯƠNG NEXUS ','NEXUS DIAMOND ')+n+'/'+N,'+$500 · '+L('còn '+(N-n)+' viên đang trốn đâu đó',(N-n)+' more hidden out there'),2.6);writeSave();}}
+  dummy.rotation.set(0,0,0);dummy.scale.set(1,1,1);DIAIM.instanceMatrix.needsUpdate=true;
+  if(CINE&&P.inside==='cinema'){CINE.t+=dt;if(CINE.t>.08){CINE.t=0;const g=CINE.cv.getContext('2d'),w=512,h=256,k=time*.6;const gr=g.createLinearGradient(0,0,w,h);gr.addColorStop(0,`hsl(${(k*40)%360},60%,45%)`);gr.addColorStop(1,`hsl(${(k*40+120)%360},60%,25%)`);g.fillStyle=gr;g.fillRect(0,0,w,h);
+      g.fillStyle='rgba(255,255,255,.85)';for(let i=0;i<6;i++){const x=(i*97+k*60)%(w+80)-40,y=150+Math.sin(k*2+i)*40;g.beginPath();g.arc(x,y,18+i*3,0,7);g.fill();}g.fillStyle='#111';g.fillRect(0,h-40,w,40);g.fillStyle='#ffd166';g.font='700 26px Inter,sans-serif';g.textAlign='center';g.fillText(TT('NEXUS CITY: CUỘC PHIÊU LƯU MỚI'),w/2,h-12);CINE.tex.needsUpdate=true;}}}
+function wildUpdate(dt){const A=WILD.anim,nk=1-tod.day,me=P.car||P;diaUpdate(dt);
+  if(A.jet){const k=1+Math.sin(time*6)*.08;A.jet.scale.set(k,1+Math.sin(time*3)*.1,k);}
+  if(A.mills)for(const m of A.mills)m.rotation.z+=dt*.9;
+  if(A.boats)for(const b of A.boats)if(b.g){b.g.position.y=.05+Math.sin(time*1.3+b.ph)*.12;b.g.rotation.z=Math.sin(time*1.1+b.ph)*.04;}
   const wf=inWildArea(me.x,me.z)?(MOBILE?1.5:2.2):1;wildFog+=(wf-wildFog)*Math.min(1,dt*.6);scene.fog.far*=wildFog;
   if(A.fall)A.fall.offset.y+=dt*1.4;
   if(A.foam){const k=1+Math.sin(time*3)*.06;A.foam.scale.set(k,1,k);A.foam.material.opacity=.42+Math.sin(time*5)*.08;}
@@ -2649,18 +2976,26 @@ function wildUpdate(dt){const A=WILD.anim,nk=1-tod.day,me=P.car||P;
   for(const p of WILD.places){if(save.disc[p.id])continue;if(hyp(me.x-p.x,me.z-p.z)<p.r){save.disc[p.id]=1;save.money+=p.rw;sfx('cash');const k=WILD.places.filter(q=>save.disc[q.id]).length;
       banner(L('KHÁM PHÁ: ','DISCOVERED: ')+L(p.n,p.en),'+'+fmt$(p.rw)+' · '+L('Đã khám phá ','Explored ')+k+'/'+WILD.places.length,3.4);writeSave();break;}}
   const V=SP.village;if(V){for(let i=VIL.length-1;i>=0;i--)if(!npcs.includes(VIL[i]))VIL.splice(i,1);
-    if(hyp(me.x-V.x,me.z-V.z)<150&&VIL.length<6){const a=Math.random()*6.28,r=8+Math.random()*30,x=V.x+Math.cos(a)*r,z=V.z+Math.sin(a)*r;if(!resolve(x,z,.4)&&hyp(x-P.x,z-P.z)>25){const n=newNPC('ped',x,z,{b:null,state:'walk'});n.h=Math.random()*6.28;VIL.push(n);}}}}
+    if(hyp(me.x-V.x,me.z-V.z)<150&&VIL.length<6){const a=Math.random()*6.28,r=8+Math.random()*30,x=V.x+Math.cos(a)*r,z=V.z+Math.sin(a)*r;if(!resolve(x,z,.4)&&hyp(x-P.x,z-P.z)>25){const n=newNPC('ped',x,z,{b:null,state:'walk'});n.h=Math.random()*6.28;VIL.push(n);}}}
+  // townsfolk walking about in the new towns
+  for(let i=TPED.length-1;i>=0;i--)if(!npcs.includes(TPED[i]))TPED.splice(i,1);
+  if(!P.inside)for(const t of TOWNS){if(hyp(me.x-t.x,me.z-t.z)>t.r+60)continue;const lim=t.id==='westside'?14:9;for(let tries=0;tries<3&&TPED.length<lim;tries++){const a=Math.random()*6.28,r=Math.random()*t.r*.8,x=t.x+Math.cos(a)*r,z=t.z+Math.sin(a)*r;
+      if(resolve(x,z,.5)||hyp(x-P.x,z-P.z)<22)continue;const n=newNPC('ped',x,z,{b:null,state:'walk'});n.h=Math.random()*6.28;TPED.push(n);}break;}}
 function campRest(){if(stars>0){showPrompt(L('Cắt đuôi cảnh sát trước đã','Lose the police first'),1.6);return;}P.hp=maxHp();const h=tod.hour,night=h>=18||h<6;if(night)tod.hour=7;writeSave();sfx('door');
   banner(L('NGHỈ BÊN LỬA TRẠI','RESTED BY THE FIRE'),L('Hồi đầy máu','Full health')+(night?L(' · trời đã sáng',' · it is morning'):'')+L(' · đã lưu game',' · game saved'),3);}
 function wildNearest(x,z){let best=null,bd=1e9;WILD.roads.forEach((r,ri)=>{for(let i=0;i<r.P.length;i+=3){const d=hyp(r.P[i][0]-x,r.P[i][1]-z);if(d<bd){bd=d;best={ri,i};}}});return best;}
 function wildPath(a,b){const R=WILD.roads,seg=(ri,i0,i1)=>{const P=R[ri].P,o=[],st=i1>=i0?5:-5;for(let i=i0;st>0?i<i1:i>i1;i+=st)o.push(P[i]);o.push(P[i1]);return o;};
-  if(a.ri===b.ri)return seg(a.ri,a.i,b.i);const J=WILD.jb;return a.ri===0?seg(0,a.i,J).concat(seg(1,0,b.i)):seg(1,a.i,0).concat(seg(0,J,b.i));}
+  // climb from a node to the root of its road tree: list of [road, index where we join it]
+  const chain=n=>{const c=[[n.ri,n.i]];let r=n.ri;while(R[r].par!=null){c.push([R[r].par,R[r].pj]);r=R[r].par;}return c;};
+  const ca=chain(a),cb=chain(b);let ia=-1,ib=-1;for(let x=0;x<ca.length&&ia<0;x++)for(let y=0;y<cb.length;y++)if(ca[x][0]===cb[y][0]){ia=x;ib=y;break;}
+  if(ia<0){const ra=ca[ca.length-1][0],rb=cb[cb.length-1][0],ga=R[ra].gate,gb=R[rb].gate;let o=[];for(let x=0;x<ca.length;x++)o=o.concat(seg(ca[x][0],ca[x][1],0));o=o.concat(planRouteCity(ga[0],ga[1],gb[0],gb[1]));let t=[];for(let y=0;y<cb.length;y++)t=seg(cb[y][0],0,cb[y][1]).concat(t);return o.concat(t);}
+  let o=[];for(let x=0;x<ia;x++)o=o.concat(seg(ca[x][0],ca[x][1],0));o=o.concat(seg(ca[ia][0],ca[ia][1],cb[ib][1]));let t=[];for(let y=0;y<ib;y++)t=seg(cb[y][0],0,cb[y][1]).concat(t);return o.concat(t);}
 function planRoute(fx,fz,tx,tz){const fa=inAirport(fx,fz)&&fz>CW.z0+20,ta=inAirport(tx,tz)&&tz>CW.z0+20;if(fa&&ta)return[[fx,fz],[tx,tz]];if(ta)return planRoute(fx,fz,0,HALF-3).concat([[0,CW.z0+4],[0,AP.z0+8],[tx,tz]]);if(fa)return[[fx,fz],[0,AP.z0+8],[0,CW.z0+4]].concat(planRoute(0,HALF-3,tx,tz));
   const fw=inWildArea(fx,fz),tw=inWildArea(tx,tz);if(!WILD.roads||(!fw&&!tw))return planRouteCity(fx,fz,tx,tz);
-  const gate=WILD.roads[0].P[0],G0={ri:0,i:0};let pts;
+  const rootOf=n=>{let r=n.ri;while(WILD.roads[r].par!=null)r=WILD.roads[r].par;return r;};let pts;
   if(fw&&tw)pts=[[fx,fz]].concat(wildPath(wildNearest(fx,fz),wildNearest(tx,tz)),[[tx,tz]]);
-  else if(tw)pts=planRouteCity(fx,fz,gate[0],gate[1]+10).concat(wildPath(G0,wildNearest(tx,tz)),[[tx,tz]]);
-  else pts=[[fx,fz]].concat(wildPath(wildNearest(fx,fz),G0),planRouteCity(gate[0],gate[1]+10,tx,tz));
+  else if(tw){const nb=wildNearest(tx,tz),rr=rootOf(nb),gt=WILD.roads[rr].gate;pts=planRouteCity(fx,fz,gt[0],gt[1]).concat(wildPath({ri:rr,i:0},nb),[[tx,tz]]);}
+  else{const na=wildNearest(fx,fz),rr=rootOf(na),gt=WILD.roads[rr].gate;pts=[[fx,fz]].concat(wildPath(na,{ri:rr,i:0}),planRouteCity(gt[0],gt[1],tx,tz));}
   const out=[pts[0]];for(let k=1;k<pts.length;k++){const q=out[out.length-1];if(hyp(pts[k][0]-q[0],pts[k][1]-q[1])>.5)out.push(pts[k]);}return out;}
 /* ---------- planes at run time: flying your own plane, airliners crossing the sky, airport traffic, the sightseeing flight ---------- */
 const PT={cessna:{max:62,acc:.55,vr:24,stall:18,turn:.95,bank:.75,pitch:.9,taxi:1.1,rad:5,side:2.8,cam:15},jet:{max:135,acc:.32,vr:50,stall:40,turn:.62,bank:.8,pitch:.7,taxi:.6,rad:8,side:4.4,cam:26}};
@@ -2872,7 +3207,7 @@ const api={
   resume(){active=true;paused=false;keys.clear();cam.rmb=false;last=performance.now();cancelAnimationFrame(raf);raf=requestAnimationFrame(frame);resize();if(P.car&&radio.idx>=0)radioPlay();},
   resize,
   get save(){return save;},
-  _dbg:{AIR,PP,P,cars,newCar,buyVehicle,interactOption,sitDown,standUp,takeFood,GDOORS,SHOPS,save,bookTour,npcs,get stars(){return stars;},set stars(v){stars=v;},startHeist,startMission,interact,toggleCar,playerPunch,get heist(){return heist;},set heistProg(v){if(heist)heist.prog=v;},SP,tut,toggleMap,bag,time:()=>time,scene,renderer,sun,step,info:()=>renderer.info.render,keys,camUpdate,camera,weather,ROOMS,openShop,closeShop,enterInterior,exitInterior,selectWeapon,fireWeapon,get shopOpen(){return shopOpen;},tod,todApply,gps,setWaypoint,clearWaypoint,planRoute,poiList,radio,radioNext,playerHitBy,get lastFoe(){return lastFoe;},cam,tb,render:()=>renderer.render(scene,camera)}
+  _dbg:{heightAt,resolve,TOWNS,DIAS,PADS,inBld,AIR,PP,P,cars,newCar,buyVehicle,interactOption,sitDown,standUp,takeFood,GDOORS,SHOPS,save,bookTour,npcs,get stars(){return stars;},set stars(v){stars=v;},startHeist,startMission,interact,toggleCar,playerPunch,get heist(){return heist;},set heistProg(v){if(heist)heist.prog=v;},SP,tut,toggleMap,bag,time:()=>time,scene,renderer,sun,step,info:()=>renderer.info.render,keys,camUpdate,camera,weather,ROOMS,openShop,closeShop,enterInterior,exitInterior,selectWeapon,fireWeapon,get shopOpen(){return shopOpen;},tod,todApply,gps,setWaypoint,clearWaypoint,planRoute,poiList,radio,radioNext,playerHitBy,get lastFoe(){return lastFoe;},cam,tb,render:()=>renderer.render(scene,camera)}
 };
 return api;
 }

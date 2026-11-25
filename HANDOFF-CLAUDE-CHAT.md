@@ -225,3 +225,16 @@ Python helper scripts used during development:
 - `GDOORS`: cửa của nhà ống, nhà ở, chung cư, toà văn phòng, khách sạn biển, nhà kho → vào phòng dùng chung tương ứng, ra lại đúng cửa đó (`enterInterior(id,out)`). Mesh cửa gộp lại thành 1 mesh.
 - Tiệm ăn: mua món → `P.tray` (cầm khay), E ở ghế trống → `sitDown` ngồi ăn 6 giây hồi máu dần (`sitUpdate`, `sitPose`), E/đi để đứng dậy. Ra ngoài khi đang cầm khay thì ăn mang đi.
 - Máy bay: dưới 32 m có hỗ trợ hạ cánh (tự cân cánh, tự nâng mũi, giới hạn tốc độ rơi); chạm đất mạnh thì nảy lên và mất ít máu, chỉ rơi thẳng xuống rất mạnh (>30 m/s) hoặc xuống nước mới nổ.
+
+## Bản đồ mở rộng: 5 thị trấn mới, kim cương Nexus (11/2026)
+- Code ngoài trời nằm trong khối `TOWNS` (trước phần sân bay); nội thất mới nằm sau `rooms2` (tea, sea, church, saloon, cinema ở x 4180–4500).
+- Thị trấn (tâm và mặt bằng ở `PL` của `wildBuild`, được san phẳng qua `flats`):
+  - Phố Cổ Đèn Lồng (-375,-612): phố đèn lồng, kênh, cầu mái đỏ, chùa ba tầng, trà quán.
+  - Cảng Bắc (385,-655): bến cảng (`PADS` = sàn nâng có độ cao riêng, `AREAS` thêm cầu tàu), thuyền nhấp nhô, cẩu, container, chợ cá, nhà hàng hải sản.
+  - Đồi Mây (-540,-1050): biệt thự, nhà thờ có tháp chuông, chợ đêm, khách sạn.
+  - Thị trấn Mỏ Bạc (-1030,-800): nhà gỗ kiểu miền Tây, saloon, văn phòng cảnh sát trưởng, tháp nước, cối xay gió.
+  - Nexus Tây (vùng `WL`, x -1385..-790, z -112..440): toà kính, quảng trường đài phun nước, rạp phim (màn hình chạy hình), mall, biệt thự có hồ bơi, sân bóng.
+- Đường mới: R3 (cảng), R6 (phố cổ) đi thẳng từ thành phố; B4 (Đồi Mây), B7 (Mỏ Bạc) rẽ từ đường chính; đường đô thị ở Nexus Tây (thêm sau `wildBuild`). Mỗi đường có `kind`, `gate` (đường gốc) hoặc `par`/`pj` (rẽ nhánh); GPS `wildPath` đi theo cây đường này.
+- `door()` trong thị trấn đẩy vào `GDOORS` với `room` bất kỳ (flat, office, hotel, ware, mart, guns, gym, clothes, cars, diner, police, tea, sea, church, saloon, cinema) và `txt` riêng.
+- Kim cương Nexus: `DIAS` (40 viên: 24 ngoài trời, 16 trong nhà), lưu ở `save.dia`, $500/viên, đủ bộ +$50.000; xử lý trong `diaUpdate`. Bản đồ hiện bộ đếm.
+- Dân cư đi bộ trong thị trấn: `TPED` trong `wildUpdate`. Ăn uống ngồi bàn chạy ở mọi phòng có `R.seats` (`takeFood`).

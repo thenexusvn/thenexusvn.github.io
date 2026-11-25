@@ -878,7 +878,7 @@ function wildBuild(ST,EXTX0,EXTZ0){
 
   /* ======== 1. PHỐ CỔ ĐÈN LỒNG — Lantern Old Quarter ======== */
   {const O=PL.oldq,y=O.y,Z=-600,SN=-611.5,SS=-588.5;
-    const pave=new GB();pave.flat(-462,-292,y+.14,SN+5.8,Z-5.7,3);pave.flat(-462,-292,y+.14,Z+5.7,SS-.01,3);
+    const pave=new GB();pave.flat(-462,-292,y+.14,SN,Z-5.7,3);pave.flat(-462,-292,y+.14,Z+5.7,SS-.01,3);
     const COLS=['houseYellow','decoYellow','houseYellow','aptPeach','houseYellow','stone'],WALLC={houseYellow:'#d8c38a',decoYellow:'#dcc58e',aptPeach:'#d9b48e',stone:'#cdbf9f'};
     const row=(xa,xb,side)=>{let x=xa;while(x<xb-5){const w=Math.min(xb-x,rr(6.2,8.2));if(w<5)break;const k=rp(COLS),h=rr(6.4,7.6),z0=side<0?SN-12:SS,z1=side<0?SN:SS+12;
         const top=bld(k,x,x+w,z0,z1,y,h,false);gable(tileR,x,x+w,z0,z1,top,2.3,'x',.55,WALLC[k]);
@@ -2566,7 +2566,7 @@ let CINE=null;
   for(let r=0;r<5;r++){const z=z0+6+r*2.2;for(let x=cx-7;x<=cx+7;x+=1){if(Math.abs(x-cx)<.6)continue;chair(R,x,z,Math.PI,'red');}}
   itb('red',x1-5,x1-.3,0,1.05,z1-4.4,z1-3.7,{col:1});itb('marbleTop',x1-5.1,x1-.25,1.05,1.1,z1-4.5,z1-3.6,{bot:1});extra(Object.assign(randomLook('ped'),{shirt:'#d62828',cap:'#d62828',jacket:null}),x1-2.6,z1-5.2,0);
   act(R,x1-2.6,z1-2.9,2.2,()=>P.tray?L('Bạn đang cầm bắp rang · tìm ghế ngồi xem phim','You have popcorn · find a seat and watch'):L('Mua bắp rang và nước · $10','Buy popcorn and a drink · $10'),()=>{if(P.tray)return;if(save.money<10){showPrompt(L('Không đủ tiền','Not enough money'),1.2);return;}save.money-=10;sfx('cash');P.tray={n:TT('Bắp rang bơ'),hp:30,col:'#f2d16b'};trayMesh('#f2d16b');banner(L('BẮP RANG BƠ','POPCORN'),L('Tìm một ghế và bấm E để ngồi xem phim','Find a seat and press E to watch the film'));});
-  R.lights=[[cx,6.5,z1-4,.5,'#ffd9a6',14]];IE.push([cx,R.h-.04,z1-3]);
+  R.lights=[[cx,6.5,z1-4,1.1,'#ffd9a6',18],[cx,6.5,z0+6,.8,'#cfe0ff',16]];IE.push([cx,R.h-.04,z1-3],[cx-6,R.h-.04,z1-3],[cx+6,R.h-.04,z1-3]);
   DIAS.push({x:x0+.8,z:z0+3,y:1.1});}
 /* diamonds hidden inside the city's shared interiors */
 for(const[id,fx,fz]of[['diner',.06,.1],['police',.6,.45],['mart',.94,.1],['gym',.05,.08],['ware',.96,.3],['hotel',.97,.75],['office',.5,.22],['flat',.13,.88],['clothes',.95,.4],['cars',.04,.08],['guns',.96,.9]]){const R=ROOMS[id];DIAS.push({x:R.x0+(R.x1-R.x0)*fx,z:R.z0+(R.z1-R.z0)*fz,y:1.1});}
