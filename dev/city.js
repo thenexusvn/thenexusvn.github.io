@@ -1225,7 +1225,7 @@ function makeHuman(o){
   const hp=[{geo:F?G.pelvisF:G.pelvisM,color:o.pants,scale:[1,1,.72]},{geo:G.belt,color:'#2a2522',pos:[0,.06,0],scale:[F?1.08:1,1,.72]}];if(o.skirt)hp.push({geo:G.skirt,color:o.pants,pos:[0,-.1,0]});mk(hp,hips);
   const spine=new T.Group();spine.position.y=.06;hips.add(spine);
   const sp=[{geo:F?G.torsoF:G.torsoM,color:top,scale:[1,1,.64]},{geo:G.neck,color:o.skin,pos:[0,.62,0],scale:[1.15,1,1.1]}];
-  if(F)for(const s of[-1,1])sp.push({geo:G.bust,color:top,pos:[s*.068,.34,.075],scale:[1,.95,.85]});
+  if(F)for(const s of[-1,1])sp.push({geo:G.bust,color:top,pos:[s*.06,.335,.05],scale:[.9,.8,.62]});
   if(o.jacket){sp.push({geo:G.panel,color:o.shirt,pos:[0,.27,F?.118:.124]});sp.push({geo:G.collar,color:o.jacket,pos:[0,.55,.02],scale:[1.2,1,1]});}
   mk(sp,spine);
   const head=new T.Group();head.position.y=.775;spine.add(head);

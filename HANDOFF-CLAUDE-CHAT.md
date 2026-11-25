@@ -186,6 +186,16 @@ A school super-app, rebuilt from v0-thenexus.vercel.app. Single-page vanilla JS 
   - **Camera, HUD and GPS:** the camera follows the plane. The HUD shows speed, height above ground and throttle. GPS routes to and from the airport through the causeway, and the map draws the airport.
   - **Testing without a browser:** /home/claude/smoke/smoke.js runs city.js with a stand-in THREE/DOM to catch code errors. fly.js and land.js check take-off, landing, crashes, the tour and traffic.
 
+- **New people and characters (Nov 2026):**
+  - **Models:** `makeHuman` builds smooth lathe-turned bodies from `HG2`: torso and pelvis profiles per sex, tapered limbs.
+    - The head has a jaw, ears, nose, eye whites and irises, brows and a mouth.
+    - Hair styles: short, buzz, bald, pony, long, bun. Optional beard, glasses, and a jacket over a tee panel.
+    - Hands have thumbs; sneakers have white soles.
+    - The group and joint layout is unchanged, so every animation still works.
+  - **Player characters:** **Joseph** (male: denim jacket, white tee, stubble) and **Oscar** (female: ponytail, red top, black pants). Old saves `minh`/`vy` map to joseph/oscar (aliases stay in `CHARS`).
+  - **NPCs:** `randomLook` gives them random hair styles, beards, glasses and jackets.
+  - **HUD in GTA style:** money in green Impact with a black outline, an Impact clock, gold stars, a red health bar.
+
 ## Public link
 https://thenexusvn.github.io (GitHub Pages). Firebase project `nexus-4012e`: Google, Email/Password and Anonymous sign-in on; Firestore in asia-southeast1 with `firestore.rules` published; authorized domain `thenexusvn.github.io`.
 
