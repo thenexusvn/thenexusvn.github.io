@@ -262,3 +262,10 @@ Python helper scripts used during development:
 ## Cloudinary cho Loopy (11/2026)
 - Tài khoản Cloudinary của chủ web, cloud name `znot6i1w`, upload preset `loopy_unsigned` (Unsigned, thư mục `loopy`, bật Disallow public ID). Đã ghi vào `firebase-config.js` (`NEXUS_VIDEO_UPLOAD`).
 - Đã thử tải một video thử 1 giây lên thành công (nằm trong thư mục loopy trên Cloudinary, có thể xoá).
+
+## Nexus Legends (MOBA 5v5) — moba.js
+- Game MOBA gốc (lấy cảm hứng thể loại, KHÔNG dùng tướng/tên/UI của Liên Quân). Thẻ "Nexus Legends" trong #arena, launcher `window.NexusMobaUI` trong index.html, nạp `moba.js?v=3`.
+- Nguồn tách phần ở /home/claude/moba/p1_core.js … p9_match.js; build: `cat p1..p9 > moba.js`.
+- 8 tướng: kael, brakk, nyra, elara, vex, lumi, zoltar, thorn; 15 trang bị; 3 đường, trụ, nhà chính, quái rừng (bùa xanh/đỏ, rồng…).
+- Màn: sảnh chờ (showcase 3D), chế độ (Dễ/Thường/Khó), tướng, hướng dẫn, chọn tướng (24s), loading, trận, kết quả. Lưu `nexus-moba-save` (cấp, trận, thắng, MVP).
+- Điều khiển PC: WASD/chuột phải di chuyển, Space đánh, Q/E/R chiêu, F tốc biến, B về nhà, Tab bảng điểm. Mobile: joystick + nút, kéo nút chiêu để ngắm.
