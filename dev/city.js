@@ -1624,7 +1624,7 @@ function carLoft(poly,hw0,opt){// poly: side-view points [z,y]; returns indexed 
   const caps=[];for(const[R,dir]of[[ring[0],-1],[ring[ring.length-1],1]]){const ci=pos.length/3;pos.push(0,(R.lo+R.hi)/2,R.z);uv.push(0,0);for(let k=0;k<M;k++)caps.push(dir>0?[ci,R.r[k],R.r[k+1]]:[ci,R.r[k+1],R.r[k]]);}
   return{pos,uv,quads,caps,ring,M,span,hwAt,xAt,zmin,zmax,RY};}
 function loftGeo(L,filter){const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(L.pos,3));g.setAttribute('uv',new T.Float32BufferAttribute(L.uv,2));
-  const id=[];L.quads.forEach((q,i)=>{if(filter&&!filter(q,i))return;id.push(q[0],q[1],q[2],q[0],q[2],q[3]);});if(!filter||filter('cap'))for(const c of L.caps)id.push(c[0],c[1],c[2]);
+  const id=[];L.quads.forEach((q,i)=>{if(filter&&!filter(q,i))return;id.push(q[0],q[3],q[2],q[0],q[2],q[1]);});if(!filter||filter('cap'))for(const c of L.caps)id.push(c[0],c[1],c[2]);
   g.setIndex(id);g.computeVertexNormals();return g;}
 function carGeos(b){if(CG[b])return CG[b];const s=CAR_T[b];
   const sh=new T.Shape();const L=s.lower;sh.moveTo(L[0][0],L[0][1]);for(let k=1;k<L.length;k++)sh.lineTo(L[k][0],L[k][1]);
