@@ -170,6 +170,22 @@ A school super-app, rebuilt from v0-thenexus.vercel.app. Single-page vanilla JS 
     - A contact-shadow band runs round the foot of every building.
     - Car paint uses MeshPhysical clear coat on desktop.
 
+- **Airport (Nov 2026):** Nexus International Airport sits on reclaimed land `AP` (x -620..660, z 640..1010, ground y .35), joined to the city's south road by a causeway `CW` at x 0. `inAirport()` and `heightAt` return `AP.y` there, and both rects are in `AREAS`.
+  - **Runway and taxiways:** runway 09/27 runs along z 950 with edge, threshold, approach and blue taxi lights (`AIR.RZ`). A parallel taxiway at z 880 has link taxiways to the runway.
+  - **Terminal you can walk through** (`AIR.term`, x -230..30, z 690..745):
+    - glass walls with door gaps, check-in islands, departures board, seats, café and duty free;
+    - three gates with jet bridges and parked airliners;
+    - gate 3's desk sells the sightseeing flight (`bookTour`, $250).
+  - **Other buildings:** control tower with a beacon, three arched hangars, fuel farm, windsock, ground vehicles and a car park.
+  - **Flyable planes** (`AIR.planes`): two Cessnas and a private jet in the hangars, plus a Cessna on the apron.
+    - Arcade flight model in `planeStep`: W/S throttle, ↑/↓ pitch, A/D bank and turn. On mobile the stick pitches and turns, Run raises throttle, Brake lowers it.
+    - Crashes (`crashPlane`) are buildings, trees, a hard landing or water; water sends you back to the airport. Wrecked planes respawn at home after 30 s once you are 60 m away.
+    - The airspace is limited to a 2.7 km radius.
+  - **Traffic:** `AIR.sky` holds three airliners circling high with fog off and glowing strobes at night. `AIR.traffic` is a widebody that lands from the east, rolls out, pivots and takes off again.
+  - **Sightseeing flight:** `TOUR` is a Catmull-Rom path covering take-off, the coast, the lighthouse, camp, lake, peak, village, pass and downtown, then landing. It shows "Below: …" captions and takes about 2 minutes; F ends it. `endTour` brings the player back to the terminal.
+  - **Camera, HUD and GPS:** the camera follows the plane. The HUD shows speed, height above ground and throttle. GPS routes to and from the airport through the causeway, and the map draws the airport.
+  - **Testing without a browser:** /home/claude/smoke/smoke.js runs city.js with a stand-in THREE/DOM to catch code errors. fly.js and land.js check take-off, landing, crashes, the tour and traffic.
+
 ## Public link
 https://thenexusvn.github.io (GitHub Pages). Firebase project `nexus-4012e`: Google, Email/Password and Anonymous sign-in on; Firestore in asia-southeast1 with `firestore.rules` published; authorized domain `thenexusvn.github.io`.
 
