@@ -113,6 +113,12 @@ A school super-app, rebuilt from v0-thenexus.vercel.app. Single-page vanilla JS 
   - **Plans:** admins get every plan (`planUntil` returns about 10 years from now).
   - **Test:** `tools/test_admin.py`.
 
+- **Getting in and out of cars (Nov 2026):** every car (not bikes) has a driver-side front door on local +x. It is built by `doorGeo(b)`: a panel, window and handle, plus a dark opening `hole`. The door is shown only while open and animated by `c.doorA`/`c.doorT` in `doorsUpdate`.
+  - Cars with a driver show a seated driver mesh `m.drv`, built by `bustGeo(body, look)`. `c.look` is reused when that driver is pulled out. The player's look is shown while the player drives.
+  - **F to get in:** `startEnter` runs `P.seq`: walk to the door → open → pull the driver out if there is one (`pullDriver`: the NPC falls, gets up, flees or fights; police drivers fight and add 2 stars) → climb in → close.
+  - **F to get out** (below about 16 km/h): `startExit` runs open → step out. The door closes on its own with a slam sound.
+  - If the door spot is blocked, the old instant enter/exit is used. `seqUpdate` replaces player input during a sequence. A knock-down cancels the sequence (`seqCancel`).
+
 ## Public link
 https://thenexusvn.github.io (GitHub Pages). Firebase project `nexus-4012e`: Google, Email/Password and Anonymous sign-in on; Firestore in asia-southeast1 with `firestore.rules` published; authorized domain `thenexusvn.github.io`.
 

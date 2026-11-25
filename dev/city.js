@@ -1267,7 +1267,7 @@ function seqUpdate(dt){const q=P.seq,c=q.c,H=P.H,D=c.m.D,S=D.seat;q.t+=dt;let sp
 function toggleCar(){
   if(P.koT>0||P.seq)return;
   if(P.car){const c=P.car;if(Math.abs(c.vf)>6){showPrompt('Giảm tốc để xuống xe',1.2);return;}
-    if(c.m.door&&Math.abs(c.vf)<2.5&&!P.inside&&startExit(c))return;
+    if(c.m.door&&Math.abs(c.vf)<4.5&&!P.inside&&startExit(c))return;
     const lx=Math.cos(c.h),lz=-Math.sin(c.h);let ok=false;for(const s of[1.9,-1.9]){const x=c.x+lx*s,z=c.z+lz*s;if(!resolve(x,z,.4)){P.x=x;P.z=z;ok=true;break;}}if(!ok){P.x=c.x+Math.sin(c.h)*3.2;P.z=c.z+Math.cos(c.h)*3.2;}
     dismount();engineOff();c.kind='parked';c.driver=false;c.pseat=false;P.car=null;P.H.root.visible=true;P.h=c.h;radioStop();tutEvent('exit');return;}
   let best=null,bd=4.5;for(const c of cars){const d=hyp(c.x-P.x,c.z-P.z);if(d<bd){bd=d;best=c;}}
