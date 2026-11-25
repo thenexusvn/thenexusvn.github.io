@@ -2278,7 +2278,7 @@ let perfT=0,perfN=0,lowQ=false;
 function adapt(raw){if(lowQ||paused)return;perfT+=raw;perfN++;if(perfT>4){const avg=perfT/perfN;perfT=0;perfN=0;if(avg>.036&&PP.on){PP.on=false;return;}if(avg>.045){lowQ=true;renderer.setPixelRatio(1);if(renderer.shadowMap.enabled){renderer.shadowMap.enabled=false;sun.castShadow=false;scene.traverse(o=>{if(o.material){(Array.isArray(o.material)?o.material:[o.material]).forEach(m=>m.needsUpdate=true);}});}resize();}}}
 /* ---------- post-processing: HDR-ish bloom, a San Andreas style colour grade (warm highlights, cool shadows, smog haze),
    vignette, film grain and FXAA. Off on phones and switched off automatically if the frame rate drops. ---------- */
-const PP=(()=>{const gl2=renderer.capabilities.isWebGL2;const o={on:!MOBILE,w:1,h:1};
+const PP=(()=>{const gl2=renderer.capabilities.isWebGL2;const o={on:opt.gfx?opt.gfx!=='low':!MOBILE,w:1,h:1};
   const mkRT=(w,h,ms)=>{const opt={minFilter:T.LinearFilter,magFilter:T.LinearFilter,format:T.RGBAFormat,type:T.UnsignedByteType};const rt=ms&&gl2&&T.WebGLMultisampleRenderTarget?new T.WebGLMultisampleRenderTarget(w,h,opt):new T.WebGLRenderTarget(w,h,opt);if(rt.samples!==undefined&&ms)rt.samples=4;return rt;};
   const main=mkRT(4,4,true),b1=mkRT(4,4),b2=mkRT(4,4),b3=mkRT(4,4),b4=mkRT(4,4);
   const cam=new T.OrthographicCamera(-1,1,1,-1,0,1),tri=new T.BufferGeometry();tri.setAttribute('position',new T.Float32BufferAttribute([-1,-1,0,3,-1,0,-1,3,0],3));tri.setAttribute('uv',new T.Float32BufferAttribute([0,0,2,0,0,2],2));
@@ -2327,6 +2327,7 @@ camera.position.set(P.x,4,P.z+7);
 if(tut.on)banner('Chào mừng tới Nexus City','Làm theo hướng dẫn ở góc trên bên trái, hoặc bấm Bỏ qua');
 else banner('Nexus City','Bấm M để mở bản đồ và chọn nơi muốn tới. Cột xanh lá giữa trung tâm là ngân hàng.');
 const api={
+  setGfx(v){PP.on=v!=='low';resize();},
   start(){paused=false;active=true;keys.clear();last=performance.now();cancelAnimationFrame(raf);raf=requestAnimationFrame(frame);resize();},
   setPaused(p){paused=p;active=!p;keys.clear();cam.rmb=false;tb.block=false;if(p)radioStop();else{last=performance.now();if(P.car&&radio.idx>=0)radioPlay();}},
   stop(){cancelAnimationFrame(raf);active=false;paused=true;keys.clear();radioStop();writeSave();},
