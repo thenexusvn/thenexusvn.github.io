@@ -144,6 +144,15 @@ A school super-app, rebuilt from v0-thenexus.vercel.app. Single-page vanilla JS 
   - On touch phones that support it, the phone's own share sheet opens instead.
   - The card also has a Facebook share link.
 
+- **English mode (Nov 2026):** `NexusI18n` translates DOM text, attributes and canvas `fillText`/`strokeText` through the dictionary `D` and the regex list `R`.
+  - Strings with no Vietnamese accent marks are translated only when they are in `NODIA` (for example the channel `chung`, `Xe`, `Mang`), so English words are never touched.
+  - Added the wild place names, signs, interior signs, Nexus Originals titles, Last Zone bot names, prices in đ (shown as VND), and fixed the fine and kill-feed regexes.
+  - Audit tools are in /home/claude/i18n:
+    - `extract.js` lists literals the dictionary does not translate.
+    - `audit.py` walks every page in English with the fake Firebase.
+    - In the browser pane, a canvas/DOM recorder checks both games.
+  - What stays Vietnamese on purpose: user content, real song titles and artists, the "Tiếng Việt" language button, and food names (bánh mì, phở).
+
 ## Public link
 https://thenexusvn.github.io (GitHub Pages). Firebase project `nexus-4012e`: Google, Email/Password and Anonymous sign-in on; Firestore in asia-southeast1 with `firestore.rules` published; authorized domain `thenexusvn.github.io`.
 
