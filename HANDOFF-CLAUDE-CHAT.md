@@ -140,6 +140,10 @@ A school super-app, rebuilt from v0-thenexus.vercel.app. Single-page vanilla JS 
   - **Map and GPS:** the map covers everything and shows explored and gem counts. `planRoute` routes along the wild roads (`wildPath`) and falls back to `planRouteCity` in town.
   - **Fog:** draws further out while you are in the wilds. The distant mountain ring moved out to 1.75–2.3 km.
 
+- **Share (Nov 2026):** a "Chia sẻ" button sits in the sidebar footer and a "Rủ bạn bè vào Nexus" card on the home page. Any `[data-share]` element copies `SHARE_URL` (https://thenexusvn.github.io/) through `copyText`, with an execCommand fallback.
+  - On touch phones that support it, the phone's own share sheet opens instead.
+  - The card also has a Facebook share link.
+
 ## Public link
 https://thenexusvn.github.io (GitHub Pages). Firebase project `nexus-4012e`: Google, Email/Password and Anonymous sign-in on; Firestore in asia-southeast1 with `firestore.rules` published; authorized domain `thenexusvn.github.io`.
 
