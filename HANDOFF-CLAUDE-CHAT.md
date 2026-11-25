@@ -238,3 +238,9 @@ Python helper scripts used during development:
 - `door()` trong thị trấn đẩy vào `GDOORS` với `room` bất kỳ (flat, office, hotel, ware, mart, guns, gym, clothes, cars, diner, police, tea, sea, church, saloon, cinema) và `txt` riêng.
 - Kim cương Nexus: `DIAS` (40 viên: 24 ngoài trời, 16 trong nhà), lưu ở `save.dia`, $500/viên, đủ bộ +$50.000; xử lý trong `diaUpdate`. Bản đồ hiện bộ đếm.
 - Dân cư đi bộ trong thị trấn: `TPED` trong `wildUpdate`. Ăn uống ngồi bàn chạy ở mọi phòng có `R.seats` (`takeFood`).
+
+## Màn hình chào mừng lần đầu (11/2026)
+- Cuối `index.html` (CSS `.onb*` + script): hiện khi trình duyệt chưa có `localStorage['nexus-onb-v1']`, hoặc khi mở link có `?welcome=1` (để thử lại). Link chia sẻ giờ là `?ref=share` → màn hình ghi "Bạn của bạn đã mời bạn".
+- Các bước: logo + Loading → Bắt đầu → Điều khoản (tick đồng ý, link đọc đầy đủ; lưu `nexus-terms`) → Đăng nhập/Tạo tài khoản (Google hoặc email, kèm khuyến nghị dùng tài khoản Google cá nhân; bỏ qua nếu đã đăng nhập) → Tên + ảnh đại diện (`ND.setProfile`, avatar lưu ở `photoURL` dạng `https://thenexusvn.github.io/#av=aN`) → chữ "giữ bí mật… / Enjoy!" rồi vào web. Có nút VI/EN.
+- Nội dung Điều khoản & Chính sách: `window.NEXUS_TERMS` (vi/en), có trang riêng `#terms` (nút "Điều khoản" ở cột trái). Đây là bản mẫu, chưa qua luật sư xem.
+- Ảnh đại diện hiện cạnh tên ở cột trái (`nexusAvatarHTML`).
