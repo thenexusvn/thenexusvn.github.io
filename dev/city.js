@@ -1565,27 +1565,84 @@ Object.assign(CAR_T,{
 const CAR_BODY={sedan:'sedan',sports:'sports',suv:'suv',taxi:'sedan',police:'sedan',super:'super',bike:'bike',hatch:'hatch',coupe:'coupe',muscle:'muscle',pickup:'pickup',van:'van',minivan:'minivan',jeep:'jeep',limo:'limo',hyper:'hyper',bus:'bus'};
 const CARC=['#c0392b','#f4f4f2','#1d3557','#2a9d8f','#e9c46a','#111418','#8d99ae','#6c757d','#3a86ff','#ff8fab','#7b2cbf','#e76f51','#264653','#d4d8dd','#ffb703'];
 const CG={};
+/* ---------- car bodies: lofted from the side profile, with rounded plan view, tumblehome and real cross-sections ---------- */
+function carLoft(poly,hw0,opt){// poly: side-view points [z,y]; returns indexed geometry + sampler
+  const P=poly;const zs=P.map(p=>p[0]),zmin=Math.min(...zs),zmax=Math.max(...zs),zc=(zmin+zmax)/2,hl=(zmax-zmin)/2;
+  const span=z=>{let lo=1e9,hi=-1e9;for(let k=0;k<P.length;k++){const a=P[k],b=P[(k+1)%P.length];const z0=Math.min(a[0],b[0]),z1=Math.max(a[0],b[0]);if(z<z0-1e-6||z>z1+1e-6)continue;
+      if(Math.abs(b[0]-a[0])<1e-6){lo=Math.min(lo,a[1],b[1]);hi=Math.max(hi,a[1],b[1]);continue;}const t=(z-a[0])/(b[0]-a[0]),y=a[1]+(b[1]-a[1])*t;lo=Math.min(lo,y);hi=Math.max(hi,y);}return[lo,hi];};
+  const hwAt=z=>{const e=clamp((Math.abs((z-zc)/hl)-(opt.endStart||.68))/(1-(opt.endStart||.68)),0,1);return hw0*(1-(opt.endPinch||.13)*e*e);};
+  const n=opt.n||5,tum=opt.tum||.06,M=opt.ring||22;
+  const xAt=(yRel,hw)=>{const v=Math.abs(2*yRel-1);const sx=Math.pow(Math.max(0,1-Math.pow(v,n)),1/n);return hw*sx*(1-tum*clamp((yRel-.5)/.5,0,1))*(1+(opt.bulge||0)*Math.sin(Math.PI*clamp(yRel,0,1)));};
+  // slice positions: dense, plus both sides of every profile vertex
+  let sl=[];const NS=opt.slices||44;for(let i=0;i<=NS;i++){const u=i/NS;sl.push(zmin+(zmax-zmin)*(.5-.5*Math.cos(Math.PI*u)));}
+  for(const z of zs){sl.push(z-.004,z+.004);}sl=sl.map(z=>clamp(z,zmin+.002,zmax-.002)).sort((a,b)=>a-b).filter((z,i,a)=>!i||z-a[i-1]>.0015);
+  const pos=[],uv=[],ring=[],idx=[];
+  for(const z of sl){const[lo,hi]=span(z);const h=Math.max(.002,hi-lo),hw=hwAt(z);const r=[];
+    for(let k=0;k<=M;k++){const th=k/M*Math.PI*2,c=Math.cos(th),s=Math.sin(th);const sy=Math.sign(s)*Math.pow(Math.abs(s),2/n);const yRel=(sy+1)/2;const sx=Math.sign(c)*Math.pow(Math.abs(c),2/n);
+      const x=hw*sx*(1-tum*clamp((yRel-.5)/.5,0,1))*(1+(opt.bulge||0)*Math.sin(Math.PI*yRel));r.push(pos.length/3);pos.push(x,lo+h*yRel,z);uv.push(0,0);}
+    ring.push({z,lo,hi,r});}
+  const quads=[];// [a,b,c,d,meta]
+  for(let i=0;i<ring.length-1;i++){const A=ring[i],B=ring[i+1];for(let k=0;k<M;k++){const q=[A.r[k],B.r[k],B.r[k+1],A.r[k+1]];quads.push(q);}}
+  // caps
+  const caps=[];for(const[R,dir]of[[ring[0],-1],[ring[ring.length-1],1]]){const ci=pos.length/3;pos.push(0,(R.lo+R.hi)/2,R.z);uv.push(0,0);for(let k=0;k<M;k++)caps.push(dir>0?[ci,R.r[k],R.r[k+1]]:[ci,R.r[k+1],R.r[k]]);}
+  return{pos,uv,quads,caps,ring,M,span,hwAt,xAt,zmin,zmax};}
+function loftGeo(L,filter){const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(L.pos,3));g.setAttribute('uv',new T.Float32BufferAttribute(L.uv,2));
+  const id=[];L.quads.forEach((q,i)=>{if(filter&&!filter(q,i))return;id.push(q[0],q[1],q[2],q[0],q[2],q[3]);});if(!filter||filter('cap'))for(const c of L.caps)id.push(c[0],c[1],c[2]);
+  g.setIndex(id);g.computeVertexNormals();return g;}
 function carGeos(b){if(CG[b])return CG[b];const s=CAR_T[b];
   const sh=new T.Shape();const L=s.lower;sh.moveTo(L[0][0],L[0][1]);for(let k=1;k<L.length;k++)sh.lineTo(L[k][0],L[k][1]);
   const R=s.wr+.07,ph=Math.asin(clamp((s.yb-s.wr)/R,-1,1));
   sh.lineTo(s.wz+R*Math.cos(ph),s.yb);sh.absarc(s.wz,s.wr,R,ph,Math.PI-ph,false);sh.lineTo(-s.wz+R*Math.cos(ph),s.yb);sh.absarc(-s.wz,s.wr,R,ph,Math.PI-ph,false);sh.lineTo(L[0][0],L[0][1]);
-  const ex=(shape,w)=>{const bv=.06,g=new T.ExtrudeGeometry(shape,{depth:w-2*bv,bevelEnabled:true,bevelThickness:bv,bevelSize:bv,bevelSegments:2,curveSegments:10});g.rotateY(-Math.PI/2);g.translate((w-2*bv)/2,0,0);g.computeVertexNormals();return g;};
-  const cs=new T.Shape();s.cabin.forEach((p,k)=>k?cs.lineTo(p[0],p[1]):cs.moveTo(p[0],p[1]));
-  const roof=new T.BoxGeometry(s.w-.2,.07,s.roof[1]-s.roof[0]);roof.translate(0,s.roof[2],(s.roof[0]+s.roof[1])/2);
-  const pil=new T.BoxGeometry(s.w-.16,(s.roof[2]-s.cabin[0][1])*.98,.09);pil.translate(0,(s.roof[2]+s.cabin[0][1])/2,(s.roof[0]+s.roof[1])/2-.15);
-  return CG[b]={lower:ex(sh,s.w),cabin:ex(cs,s.w-.22),roof,pil,tire:new T.CylinderGeometry(s.wr,s.wr,.26,18).rotateZ(Math.PI/2),rim:new T.CylinderGeometry(s.wr*.62,s.wr*.62,.27,12).rotateZ(Math.PI/2)};}
+  const poly=sh.getPoints(14).map(p=>[p.x,p.y]);
+  const tall=b==='van'||b==='bus';
+  const BL=carLoft(poly,s.w/2,{n:tall?7:5,tum:tall?.03:.07,bulge:.02,endPinch:tall?.05:.15,endStart:tall?.85:.62,slices:tall?40:52});
+  const cabPoly=s.cabin.map(p=>[p[0],p[1]]);
+  const CL=carLoft(cabPoly,(s.w-.18)/2,{n:tall?8:3.6,tum:tall?.04:.24,endPinch:tall?.03:.12,endStart:.5,slices:tall?30:36});
+  // split the greenhouse: roof skin and B-pillars are paint, the rest is glass
+  const r0=s.roof[0],r1=s.roof[1],bp=(r0+r1)/2-.15,M=CL.M;
+  const isPaint=(q,i)=>{const ri=Math.floor(i/M),k=i%M,A=CL.ring[ri],B=CL.ring[ri+1];const zA=A.z,zB=B.z;const th=(k+.5)/M*Math.PI*2,yRel=(Math.sign(Math.sin(th))*Math.pow(Math.abs(Math.sin(th)),2/3.6)+1)/2;
+    const inRoof=zA>=r0-.05&&zB<=r1+.05;if(inRoof&&yRel>(tall?.97:.86))return true;if(!tall&&zA>=bp-.06&&zB<=bp+.06&&yRel<.9)return true;return false;};
+  const glass=loftGeo(CL,(q,i)=>q==='cap'?true:!isPaint(q,i)),roof=loftGeo(CL,(q,i)=>q==='cap'?false:isPaint(q,i));
+  roof.scale(1.004,1.004,1);
+  // tyre: rounded sidewalls; rim: dark barrel, 5 silver spokes, lip ring and hub, brake disc
+  const wr=s.wr,tp=[[wr*.64,-.13],[wr*.9,-.134],[wr*.97,-.118],[wr,-.08],[wr*1.005,0],[wr,.08],[wr*.97,.118],[wr*.9,.134],[wr*.64,.13]].map(p=>new T.Vector2(p[0],p[1]));
+  const tire=new T.LatheGeometry(tp,26).rotateZ(Math.PI/2);
+  const rimParts=[{geo:new T.CylinderGeometry(wr*.64,wr*.64,.22,22).rotateZ(Math.PI/2),color:'#24272b'},{geo:new T.CylinderGeometry(wr*.46,wr*.46,.235,20).rotateZ(Math.PI/2),color:'#3a3d42'}];
+  for(const sx of[-1,1]){rimParts.push({geo:new T.TorusGeometry(wr*.62,.016,6,26).rotateY(Math.PI/2),pos:[sx*.112,0,0],color:'#d8dde2'},{geo:new T.CylinderGeometry(wr*.13,wr*.13,.02,10).rotateZ(Math.PI/2),pos:[sx*.118,0,0],color:'#c4c9cf'});
+    for(let k=0;k<5;k++){const a=k/5*Math.PI*2,sp=new T.BoxGeometry(.02,wr*.5,.055).translate(0,wr*.33,0).rotateX(a);rimParts.push({geo:sp,pos:[sx*.112,0,0],color:'#cfd4da'});}}
+  return CG[b]={BL,CL,lower:loftGeo(BL),cabin:glass,roof,tire,rimParts};}
 const lightBox=new T.BoxGeometry(.36,.12,.06),grille=new T.BoxGeometry(1,.16,.08),plate=new T.BoxGeometry(.42,.13,.03),mirror=new T.BoxGeometry(.18,.1,.12),barG=new T.BoxGeometry(.5,.12,.28);
 const BAR={r:new T.MeshStandardMaterial({color:0x220000,emissive:lin('#ff1a2a'),emissiveIntensity:3}),b:new T.MeshStandardMaterial({color:0x000022,emissive:lin('#1a5bff'),emissiveIntensity:3})};
 const copText=textTex('CẢNH SÁT',{fg:'#1b2a55',size:70,bg:'rgba(0,0,0,0)'}),taxiText=textTex('TAXI',{fg:'#111',size:90,bg:'#f5c518',w:256,h:128});
 const DETAILM=new T.MeshBasicMaterial({vertexColors:true,toneMapped:false}),WHEELM=new T.MeshStandardMaterial({vertexColors:true,roughness:.55,metalness:.4});
+const TRIMM=new T.MeshStandardMaterial({vertexColors:true,roughness:.35,metalness:.6});
 const CM={};
-function carMeshes(b){if(CM[b])return CM[b];const s=CAR_T[b],cg=carGeos(b);
-  const fz=s.lower.reduce((a,p)=>Math.max(a,p[0]),0)+.03,rz=s.lower.reduce((a,p)=>Math.min(a,p[0]),0)-.03;
-  const paint=buildVC([{geo:cg.lower},{geo:cg.roof},{geo:cg.pil},{geo:mirror,pos:[-(s.w/2+.04),s.cabin[0][1]+.1,s.cabin[3][0]-.15]},{geo:mirror,pos:[s.w/2+.04,s.cabin[0][1]+.1,s.cabin[3][0]-.15]}]);
-  const det=[];for(const x of[-1,1]){det.push({geo:lightBox,color:'#fff4dc',pos:[x*(s.w/2-.36),s.hl,fz]},{geo:lightBox,color:'#ff2020',pos:[x*(s.w/2-.34),s.tl,rz]});}
-  det.push({geo:grille,color:'#0c0c0c',pos:[0,s.hl-.2,fz]},{geo:plate,color:'#e8e8e8',pos:[0,s.tl-.3,rz]});
-  const wheel=buildVC([{geo:cg.tire,color:'#151515'},{geo:cg.rim,color:'#b9bec5'}]);
-  return CM[b]={paint,glass:cg.cabin,detail:buildVC(det),wheel,fz,rz};}
+function carMeshes(b){if(CM[b])return CM[b];const s=CAR_T[b],cg=carGeos(b),BL=cg.BL,tall=b==='van'||b==='bus';
+  const fz=BL.zmax+.012,rz=BL.zmin-.012,belt=s.cabin[0][1];
+  // side x of the body surface at height y, slice z
+  const sideX=(z,y)=>{const[lo,hi]=BL.span(z);const yRel=clamp((y-lo)/Math.max(.01,hi-lo),0,1);return BL.xAt(yRel,BL.hwAt(z));};
+  const mz=s.cabin[3][0]-.15,mx=sideX(mz,belt)+.06;
+  const paint=buildVC([{geo:cg.lower},{geo:cg.roof},{geo:mirror,pos:[-mx,belt+.08,mz]},{geo:mirror,pos:[mx,belt+.08,mz]}]);
+  const det=[],trim=[],add=(g,p,c,a)=>(a||det).push({geo:g,pos:p,color:c});
+  const fy=(z)=>BL.span(z),fw=BL.hwAt(BL.zmax-.01),rw=BL.hwAt(BL.zmin+.01);
+  for(const x of[-1,1]){// lamps: lens + bright core, indicators
+    add(new T.BoxGeometry(.42,.13,.05),[x*(fw-.3),s.hl,fz],'#c9d2dc',trim);add(new T.BoxGeometry(.26,.07,.03),[x*(fw-.3),s.hl,fz+.02],'#fffaf0');add(new T.BoxGeometry(.1,.05,.03),[x*(fw-.08),s.hl-.02,fz+.015],'#ffa526');
+    add(new T.BoxGeometry(.44,.14,.05),[x*(rw-.3),s.tl,rz],'#6a0a0a',trim);add(new T.BoxGeometry(.32,.07,.03),[x*(rw-.3),s.tl,rz-.02],'#ff1e1e');add(new T.BoxGeometry(.1,.06,.03),[x*(rw-.06),s.tl,rz-.02],'#ffb020');
+    // side: chrome belt strip, dark skirt, door handles, door seams, mirrors' glass
+    if(!tall){const z0=s.cabin[0][0]+.1,z1=s.cabin[3][0]-.1,zm=(z0+z1)/2;add(new T.BoxGeometry(.012,.025,z1-z0),[x*(sideX(zm,belt-.03)+.004),belt-.03,zm],'#cfd5dc',trim);
+      for(const hz of[zm+.35,zm-.75])add(new T.BoxGeometry(.02,.035,.17),[x*(sideX(hz,belt-.16)+.01),belt-.16,hz],'#c0c6cc',trim);
+      for(const dz of[zm+.95,zm-.15,zm-1.15])if(dz>s.lower[0][0]+.6&&dz<BL.zmax-.6)add(new T.BoxGeometry(.008,(belt-s.yb)*.82,.012),[x*(sideX(dz,(belt+s.yb)/2)+.003),(belt+s.yb)/2+.02,dz],'#1a1b1e');}
+    add(new T.BoxGeometry(.03,.12,s.wz*2-(s.wr+.07)*2-.1),[x*(sideX(0,s.yb+.07)-.01),s.yb+.06,0],'#141518');
+  }
+  // front: grille with chrome surround, lower intake, plate; rear: plate, diffuser, exhaust
+  add(new T.BoxGeometry(Math.min(1.1,fw*1.1),.2,.04),[0,s.hl-.04,fz],'#c4cad1',trim);add(new T.BoxGeometry(Math.min(1.0,fw),.15,.05),[0,s.hl-.04,fz+.01],'#0b0c0e');
+  add(new T.BoxGeometry(fw*1.3,.12,.04),[0,s.yb+.14,fz-.01],'#0f1012');add(new T.BoxGeometry(.5,.13,.02),[0,s.yb+.32,fz+.012],'#f0f0ec');
+  add(new T.BoxGeometry(.5,.13,.02),[0,s.tl-.27,rz-.012],'#f0f0ec');add(new T.BoxGeometry(rw*1.4,.1,.04),[0,s.yb+.1,rz+.01],'#121315');
+  add(new T.CylinderGeometry(.045,.045,.16,10).rotateX(Math.PI/2),[-rw*.55,s.yb+.08,rz-.05],'#9aa0a6',trim);
+  // dark wheel housings so you cannot see through the arches
+  for(const z of[s.wz,-s.wz])add(new T.BoxGeometry(s.w-.62,s.wr*1.5,(s.wr+.07)*2-.05),[0,s.wr+.05,z],'#0a0a0b');
+  const wheel=buildVC([{geo:cg.tire,color:'#121314'}].concat(cg.rimParts));
+  return CM[b]={paint,glass:cg.cabin,detail:buildVC(det),trim:trim.length?buildVC(trim):null,wheel,fz,rz};}
 /* driver-side front door (local +x) that can swing open, the dark opening behind it, and a seated driver */
 const DG={},ARMG=new T.BoxGeometry(.1,.1,.46).translate(0,0,.21).rotateX(.42),WHEELG=new T.TorusGeometry(.17,.025,6,18),HOLEM=new T.MeshBasicMaterial({color:'#121418'});
 function doorGeo(b){if(DG[b])return DG[b];const s=CAR_T[b],R=s.wr+.07,belt=s.cabin[0][1];
@@ -1610,7 +1667,7 @@ function makeCar(type,color){
   const b=CAR_BODY[type],s=CAR_T[b],M=carMeshes(b),g=new T.Group(),bg=new T.Group();g.add(bg);
   const pc={color:lin(type==='police'?'#14171d':type==='taxi'?'#f5c518':color),roughness:ENV_OK?.3:.35,metalness:ENV_OK?.5:.15};const paint=!MOBILE&&ENV_OK?new T.MeshPhysicalMaterial(Object.assign(pc,{clearcoat:1,clearcoatRoughness:.06,envMapIntensity:1.1})):new T.MeshStandardMaterial(pc);
   const body=new T.Mesh(M.paint,paint);body.castShadow=Q.shadows;bg.add(body);
-  const gl=new T.Mesh(M.glass,GLASS);gl.castShadow=Q.shadows;bg.add(gl);bg.add(new T.Mesh(M.detail,DETAILM));
+  const gl=new T.Mesh(M.glass,GLASS);gl.castShadow=Q.shadows;bg.add(gl);bg.add(new T.Mesh(M.detail,DETAILM));if(M.trim)bg.add(new T.Mesh(M.trim,TRIMM));
   if(type==='police'){const door=new T.Mesh(new T.BoxGeometry(s.w+.03,.4,2.1),mat('#f4f5f7',.35,.2));door.position.set(0,.66,-.1);bg.add(door);
     const tg=buildVC([{geo:new T.PlaneGeometry(1.5,.32).rotateY(Math.PI/2),pos:[s.w/2+.03,.66,-.1]},{geo:new T.PlaneGeometry(1.5,.32).rotateY(-Math.PI/2),pos:[-(s.w/2+.03),.66,-.1]}]);
     bg.add(new T.Mesh(tg,new T.MeshBasicMaterial({map:copText,transparent:true})));
