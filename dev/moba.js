@@ -98,7 +98,7 @@ const renderer=new T.WebGLRenderer({antialias:SET.gfx!=='low',powerPreference:'h
 renderer.setPixelRatio(Q.dpr);renderer.outputEncoding=T.sRGBEncoding;renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.08;
 renderer.shadowMap.enabled=Q.shadows;renderer.shadowMap.type=T.PCFSoftShadowMap;
 view.appendChild(renderer.domElement);renderer.domElement.style.cssText='position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none';
-const scene=new T.Scene();scene.background=new T.Color('#9ec3d6');scene.fog=new T.Fog('#9ec3d6',90,210);
+const scene=new T.Scene();scene.background=new T.Color('#9ec3d6');scene.fog=new T.Fog('#9ec3d6',110,320);
 const camera=new T.PerspectiveCamera(42,1,.5,400);
 const lin=c=>new T.Color(c).convertSRGBToLinear();
 const hemi=new T.HemisphereLight(0xcfe6ff,0x3a4a2a,.75);scene.add(hemi);
@@ -112,14 +112,14 @@ const PP={on:false};
 const ppCam=new T.OrthographicCamera(-1,1,1,-1,0,1),ppScene=new T.Scene(),ppQuad=new T.Mesh(new T.PlaneGeometry(2,2));ppQuad.frustumCulled=false;ppScene.add(ppQuad);
 const ppVS='varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.,1.);}';
 const ppMat=(fs,u)=>new T.ShaderMaterial({uniforms:u,vertexShader:ppVS,fragmentShader:fs,depthTest:false,depthWrite:false,toneMapped:false});
-const ppBright=ppMat('uniform sampler2D t;uniform float th;varying vec2 vUv;void main(){vec3 c=texture2D(t,vUv).rgb;float l=max(c.r,max(c.g,c.b));gl_FragColor=vec4(c*smoothstep(th,th*1.5+.15,l),1.);}',{t:{value:null},th:{value:.82}});
+const ppBright=ppMat('uniform sampler2D t;uniform float th;varying vec2 vUv;void main(){vec3 c=texture2D(t,vUv).rgb;float l=max(c.r,max(c.g,c.b));gl_FragColor=vec4(c*smoothstep(th,th*1.5+.15,l),1.);}',{t:{value:null},th:{value:1.0}});
 const ppBlur=ppMat('uniform sampler2D t;uniform vec2 d;varying vec2 vUv;void main(){vec3 c=texture2D(t,vUv).rgb*.227027;c+=(texture2D(t,vUv+d*1.3846).rgb+texture2D(t,vUv-d*1.3846).rgb)*.3162162;c+=(texture2D(t,vUv+d*3.2307).rgb+texture2D(t,vUv-d*3.2307).rgb)*.0702703;gl_FragColor=vec4(c,1.);}',{t:{value:null},d:{value:new T.Vector2()}});
 const ppFinal=ppMat(`uniform sampler2D tS,b1,b2,b3;uniform float str,ex,sat,vig;varying vec2 vUv;
 vec3 RRT(vec3 v){vec3 a=v*(v+.0245786)-.000090537;vec3 b=v*(.983729*v+.4329510)+.238081;return a/b;}
 void main(){vec3 c=texture2D(tS,vUv).rgb;vec3 b=texture2D(b1,vUv).rgb*.55+texture2D(b2,vUv).rgb*.8+texture2D(b3,vUv).rgb*1.1;c+=b*str;c*=ex/.6;
  const mat3 I=mat3(vec3(.59719,.07600,.02840),vec3(.35458,.90834,.13383),vec3(.04823,.01566,.83777));const mat3 O=mat3(vec3(1.60475,-.10208,-.00327),vec3(-.53108,1.10813,-.07276),vec3(-.07367,-.00605,1.07602));
  c=clamp(O*RRT(I*c),0.,1.);float l=dot(c,vec3(.2126,.7152,.0722));c=mix(vec3(l),c,sat);c*=mix(1.-vig,1.,smoothstep(.95,.3,length((vUv-.5)*vec2(1.15,1.))));
- c=mix(c*12.92,1.055*pow(c,vec3(1./2.4))-.055,step(vec3(.0031308),c));gl_FragColor=vec4(c,1.);}`,{tS:{value:null},b1:{value:null},b2:{value:null},b3:{value:null},str:{value:.6},ex:{value:1.08},sat:{value:1.12},vig:{value:.22}});
+ c=mix(c*12.92,1.055*pow(c,vec3(1./2.4))-.055,step(vec3(.0031308),c));gl_FragColor=vec4(c,1.);}`,{tS:{value:null},b1:{value:null},b2:{value:null},b3:{value:null},str:{value:.45},ex:{value:1.08},sat:{value:1.12},vig:{value:.22}});
 function ppPass(m,target){ppQuad.material=m;renderer.setRenderTarget(target);renderer.render(ppScene,ppCam);}
 function ppDispose(){if(PP.main){PP.main.dispose();for(const l of PP.lv){l[0].dispose();l[1].dispose();}}PP.main=null;PP.on=false;}
 function ppSetup(){ppDispose();const want=!!Q.pp;if(want){try{const gl2=renderer.capabilities.isWebGL2;const ty=gl2||renderer.extensions.get('OES_texture_half_float')?T.HalfFloatType:T.UnsignedByteType;
@@ -186,7 +186,7 @@ const OB=[];// round obstacles {x,z,r}
   const outer=new T.Mesh(new T.PlaneGeometry(700,700),new T.MeshStandardMaterial({color:lin('#14301a'),roughness:1}));outer.rotation.x=-Math.PI/2;outer.position.y=-.05;world.add(outer);
   const skyT=makeTex(8,512,(g,w,h)=>{const r=g.createLinearGradient(0,0,0,h);r.addColorStop(0,'#2f6fb4');r.addColorStop(.35,'#6fa6d6');r.addColorStop(.5,'#9ec3d6');r.addColorStop(1,'#9ec3d6');g.fillStyle=r;g.fillRect(0,0,w,h);});
   const sky=new T.Mesh(new T.SphereGeometry(330,32,16),new T.MeshBasicMaterial({map:skyT,side:T.BackSide,fog:false,depthWrite:false}));sky.renderOrder=-1;world.add(sky);
-  const hills=[];for(let i=0;i<70;i++){const a=i/70*TAU+Math.random()*.06,d=150+Math.random()*60,h=18+Math.random()*34,r=22+Math.random()*26;hills.push({g:new T.ConeGeometry(1,1,7),p:[Math.cos(a)*d,h/2-2,Math.sin(a)*d],s:[r,h,r],r:[0,Math.random()*3,0],c:Math.random()<.5?'#2e5a3a':'#3d6b45'});}
+  const hills=[];for(let i=0;i<70;i++){const a=i/70*TAU+Math.random()*.06,d=225+Math.random()*45,h=30+Math.random()*50,r=30+Math.random()*30;hills.push({g:new T.ConeGeometry(1,1,7),p:[Math.cos(a)*d,h/2-2,Math.sin(a)*d],s:[r,h,r],r:[0,Math.random()*3,0],c:Math.random()<.5?'#2e5a3a':'#3d6b45'});}
   world.add(new T.Mesh(mergeVC(hills),VCMF));}
 /* river water with moving ripples */
 const waterTex=makeTex(256,256,(g)=>{g.fillStyle='#2d7f93';g.fillRect(0,0,256,256);for(let i=0;i<260;i++){g.strokeStyle=`rgba(200,245,255,${.06+Math.random()*.12})`;g.lineWidth=1+Math.random()*2;const x=Math.random()*256,y=Math.random()*256;g.beginPath();g.ellipse(x,y,6+Math.random()*16,2+Math.random()*3,0,0,TAU);g.stroke();}},true);
@@ -1122,7 +1122,7 @@ function frame(ts){if(!running)return;raf=requestAnimationFrame(frame);let dt=(t
   else{if(state==='select')selectTick(dt);if(state==='loading')loadingTick(dt);lobbyFrame(dt);LS.cam.aspect=camera.aspect;LS.cam.updateProjectionMatrix();renderer.domElement.style.filter='';present(LS.scene,LS.cam);}}
 ppSetup();screenLobby();
 return{start(){if(running)return;running=true;resize();last=performance.now();raf=requestAnimationFrame(frame);},stop(){running=false;cancelAnimationFrame(raf);keys.clear();attackHeld=false;},
-  _dbg:{SET,Q,PP,applyGfx,openSettings,get AIM(){return AIM;},skillDown,skillUp,step,startMatch,screenLobby,screenSelect,HEROES,castSkill,tryAttack,get state(){return state;},syncModels,hudUpdate,camUpdate,get save(){return save;},quickBuy,endMatch}};
+  _dbg:{get M(){return M;},SET,Q,PP,applyGfx,openSettings,get AIM(){return AIM;},skillDown,skillUp,step,startMatch,screenLobby,screenSelect,HEROES,castSkill,tryAttack,get state(){return state;},syncModels,hudUpdate,camUpdate,get save(){return save;},quickBuy,endMatch}};
 }
 window.NexusMoba={create};
 })();
