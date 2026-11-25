@@ -197,22 +197,22 @@ const FAC={
   glassTeal:facade('glass',{frame:'#22333a',span:'#16262b',g1:'#a6e0dc',g2:'#1f5a62'}),
   glassBronze:facade('glass',{frame:'#3a3028',span:'#2a221c',g1:'#e8c9a0',g2:'#5a4430'}),
   glassSilver:facade('glass',{frame:'#6a7078',span:'#4a5058',g1:'#dfe8ef',g2:'#62707e'}),
-  aptPink:facade('apt',{wall:'#f2c4c4',trim:'#fbf3ee',balcony:1}),
-  aptMint:facade('apt',{wall:'#a7d8c8',trim:'#f4fbf8',balcony:1}),
-  aptPeach:facade('apt',{wall:'#f7d2ad',trim:'#fff8ef'}),
-  aptCream:facade('apt',{wall:'#ece4d2',trim:'#ffffff',balcony:1}),
-  aptLav:facade('apt',{wall:'#cdbde6',trim:'#f7f2ff'}),
-  decoPink:facade('deco',{wall:'#f6c6d4',accent:'#2fb6b0'}),
-  decoTeal:facade('deco',{wall:'#a9e2dc',accent:'#f27c9b'}),
-  decoYellow:facade('deco',{wall:'#f8e2a6',accent:'#3d8fd6'}),
-  decoWhite:facade('deco',{wall:'#f4f1ea',accent:'#ff8f6b'}),
+  aptPink:facade('apt',{wall:'#d8a596',trim:'#ece4d8',balcony:1}),
+  aptMint:facade('apt',{wall:'#9fb5a4',trim:'#e6e8e0',balcony:1}),
+  aptPeach:facade('apt',{wall:'#d9b48e',trim:'#efe4d2'}),
+  aptCream:facade('apt',{wall:'#d6ccb6',trim:'#ede8de',balcony:1}),
+  aptLav:facade('apt',{wall:'#aea6bd',trim:'#e9e6ee'}),
+  decoPink:facade('deco',{wall:'#d9aab0',accent:'#3a8f8a'}),
+  decoTeal:facade('deco',{wall:'#93bdb5',accent:'#c06a78'}),
+  decoYellow:facade('deco',{wall:'#dcc58e',accent:'#3f6f9e'}),
+  decoWhite:facade('deco',{wall:'#ddd8cc',accent:'#c8704f'}),
   brick:facade('brick',{trim:'#2a2a2a'}),
-  houseWhite:facade('house',{wall:'#f2efe8',trim:'#ffffff',shutter:'#3d5a80'}),
-  houseBlue:facade('house',{wall:'#a8c6e0',trim:'#ffffff',shutter:'#2b3a55'}),
-  houseYellow:facade('house',{wall:'#f3dc9c',trim:'#ffffff',shutter:'#6b4a2b'}),
-  houseSage:facade('house',{wall:'#b9cbb0',trim:'#ffffff',shutter:'#44523a'}),
-  stone:facade('stone',{wall:'#e3d6bd',trim:'#f3ead7'}),
-  white:facade('stone',{wall:'#eef0f2',trim:'#ffffff'}),
+  houseWhite:facade('house',{wall:'#e0dbd0',trim:'#f0ede6',shutter:'#3d5a80'}),
+  houseBlue:facade('house',{wall:'#8faabf',trim:'#ecebe6',shutter:'#2b3a55'}),
+  houseYellow:facade('house',{wall:'#d8c38a',trim:'#efe9dc',shutter:'#6b4a2b'}),
+  houseSage:facade('house',{wall:'#a4b39a',trim:'#ecebe4',shutter:'#44523a'}),
+  stone:facade('stone',{wall:'#cdbf9f',trim:'#e2d8c4'}),
+  white:facade('stone',{wall:'#d6d6d2',trim:'#e8e8e4'}),
   policeBlue:facade('apt',{wall:'#3f63a8',trim:'#e9eef8'})
 };
 const ROOF=new T.MeshStandardMaterial({map:TX.gravel,roughness:.95});
@@ -2301,7 +2301,7 @@ const PP=(()=>{const gl2=renderer.capabilities.isWebGL2;const o={on:!MOBILE,w:1,
       c+=(texture2D(tB1,vUv).rgb*.75+texture2D(tB2,vUv).rgb*.9)*bloom;
       float l=dot(c,vec3(.2126,.7152,.0722));
       // colour grade: richer colour, cool blue-grey shadows, warm amber highlights, a little smog lift
-      vec3 g=mix(vec3(l),c,1.12);g*=mix(vec3(.9,.96,1.08),vec3(1.07,1.,.88),smoothstep(.02,.6,l));g=g*.97+vec3(.012,.01,.006);
+      vec3 g=mix(vec3(l),c,1.02);g*=mix(vec3(.9,.95,1.06),vec3(1.09,1.,.84),smoothstep(.02,.6,l));g=g*.95+vec3(.022,.017,.009);
       c=mix(c,g,grade);
       c=toS(c);
       // gentle S-curve contrast in display space
@@ -2333,7 +2333,7 @@ const api={
   resume(){active=true;paused=false;keys.clear();cam.rmb=false;last=performance.now();cancelAnimationFrame(raf);raf=requestAnimationFrame(frame);resize();if(P.car&&radio.idx>=0)radioPlay();},
   resize,
   get save(){return save;},
-  _dbg:{P,cars,npcs,get stars(){return stars;},set stars(v){stars=v;},startHeist,startMission,interact,toggleCar,playerPunch,get heist(){return heist;},set heistProg(v){if(heist)heist.prog=v;},SP,tut,toggleMap,bag,time:()=>time,scene,renderer,sun,step,info:()=>renderer.info.render,keys,camUpdate,camera,weather,ROOMS,openShop,closeShop,enterInterior,exitInterior,selectWeapon,fireWeapon,get shopOpen(){return shopOpen;},tod,todApply,gps,setWaypoint,clearWaypoint,planRoute,poiList,radio,radioNext,playerHitBy,get lastFoe(){return lastFoe;},cam,tb,render:()=>renderer.render(scene,camera)}
+  _dbg:{PP,P,cars,npcs,get stars(){return stars;},set stars(v){stars=v;},startHeist,startMission,interact,toggleCar,playerPunch,get heist(){return heist;},set heistProg(v){if(heist)heist.prog=v;},SP,tut,toggleMap,bag,time:()=>time,scene,renderer,sun,step,info:()=>renderer.info.render,keys,camUpdate,camera,weather,ROOMS,openShop,closeShop,enterInterior,exitInterior,selectWeapon,fireWeapon,get shopOpen(){return shopOpen;},tod,todApply,gps,setWaypoint,clearWaypoint,planRoute,poiList,radio,radioNext,playerHitBy,get lastFoe(){return lastFoe;},cam,tb,render:()=>renderer.render(scene,camera)}
 };
 return api;
 }
