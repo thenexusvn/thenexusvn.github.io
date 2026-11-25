@@ -1239,16 +1239,16 @@ function startExit(c){const D=c.m.D,o=L2W(c,c.spec.w/2+.6,D.zc-.25);if(resolve(o
 function finishEnter(c){c.kind='player';c.ai=null;c.driver=false;c.pseat=true;setDriverLook(c,CHARS[save.char]||CHARS.minh);P.car=c;P.H.root.visible=false;mount(c);engineOn();P.blocking=false;P.pend=null;cam.lastDrag=-1e9;tutEvent('enter');
   if(radio.idx>=0&&radioPlay())showPrompt('Radio: '+radioNames()[radio.idx]+' · R đổi bài',1.8);}
 function finishExit(q){const c=q.c;P.seq=null;dismount();c.kind='parked';c.driver=false;c.pseat=false;P.car=null;P.H.root.visible=true;c.slam=1;c.doorT=0;radioStop();engineOff();tutEvent('exit');}
-function pullDriver(c){const S=c.m.D.seat,a=L2W(c,S.x,S.z),pol=c.kind==='police'||c.type==='police'||(P.seq&&P.seq.kind0==='police');
+function pullDriver(c){const a=L2W(c,c.spec.w/2+.25,c.m.D.zc-.1),pol=c.kind==='police'||c.type==='police'||(P.seq&&P.seq.kind0==='police');
   const n=newNPC(pol?'cop':'ped',a[0],a[1],{look:c.look||randomLook(pol?'cop':'ped'),state:'down',t:99,onRoad:true});n.h=c.h-Math.PI/2;n.b=null;c.driver=false;
   if(pol){crime(2,true);}else{crime(1,false);if(Math.random()<.3){n.fighter=true;}}return n;}
 function seqUpdate(dt){const q=P.seq,c=q.c,H=P.H,D=c.m.D,S=D.seat;q.t+=dt;let spd=0;const out=L2W(c,c.spec.w/2+.6,D.zc-.25),seat=L2W(c,S.x,S.z),faceIn=c.h-Math.PI/2,faceOut=c.h+Math.PI/2;
   if(q.k==='in'){
     if(q.ph==='walk'){const dx=out[0]-P.x,dz=out[1]-P.z,d=hyp(dx,dz);if(d>.08&&q.t<1.6){const st=Math.min(d,4.6*dt);P.x+=dx/d*st;P.z+=dz/d*st;P.h=lerpA(P.h,Math.atan2(dx,dz),1-Math.exp(-14*dt));spd=4.6;}else{P.x=out[0];P.z=out[1];q.ph='open';q.t=0;c.doorT=DOOR_OPEN;sfx('door');}}
     else if(q.ph==='open'){P.h=lerpA(P.h,faceIn,1-Math.exp(-14*dt));if(q.t>.42){q.t=0;q.ph=c.driver?'pull':'climb';if(c.driver)q.n=pullDriver(c);}}
-    else if(q.ph==='pull'){const n=q.n,k=Math.min(1,q.t/.6),e=ease(k),dst=L2W(c,c.spec.w/2+1.7,D.zc+.2);
-      if(n&&npcs.includes(n)){n.x=seat[0]+(dst[0]-seat[0])*e;n.z=seat[1]+(dst[1]-seat[1])*e;n.h=faceOut;if(k>.55)n.H.ko=1;if(q.t>1.05){n.t=1.3;n.onRoad=false;}}
-      P.x=out[0]+(dst[0]-out[0])*.18*Math.sin(k*Math.PI);P.z=out[1]+(dst[1]-out[1])*.18*Math.sin(k*Math.PI);
+    else if(q.ph==='pull'){const n=q.n,k=Math.min(1,q.t/.6),e=ease(k),src=L2W(c,c.spec.w/2+.25,D.zc-.1),dst=L2W(c,c.spec.w/2+1.4,D.zc-1.4);
+      if(n&&npcs.includes(n)){n.x=src[0]+(dst[0]-src[0])*e;n.z=src[1]+(dst[1]-src[1])*e;n.h=faceIn;if(k>.55)n.H.ko=1;if(q.t>1.05){n.t=1.3;n.onRoad=false;}}
+      P.x=out[0]+(dst[0]-out[0])*.12*Math.sin(k*Math.PI);P.z=out[1]+(dst[1]-out[1])*.12*Math.sin(k*Math.PI);P.h=lerpA(P.h,faceIn,1-Math.exp(-10*dt));
       if(q.t>1.05){q.ph='climb';q.t=0;}}
     else if(q.ph==='climb'){const k=Math.min(1,q.t/.55),e=ease(k);P.x=out[0]+(seat[0]-out[0])*e;P.z=out[1]+(seat[1]-out[1])*e;P.h=lerpA(faceIn,c.h,e);
       if(k>.6&&H.root.visible){H.root.visible=false;c.pseat=true;setDriverLook(c,CHARS[save.char]||CHARS.minh);}
@@ -1858,6 +1858,7 @@ function interactOption(){const t=P.car||P,near=(p,r)=>p&&hyp(P.x-p.x,P.z-p.z)<r
   if(!P.car&&near(SP.apt,2.6))return save.apt?{k:'E',txt:L('Căn hộ: lưu game, hồi máu','Apartment: save and heal'),fn:stashAtHome}:{k:'E',txt:L('Mua căn hộ ven biển · ','Buy beach apartment · ')+fmt$(APT_PRICE),fn:()=>{if(save.money<APT_PRICE){showPrompt(L('Không đủ tiền','Not enough money'),1.4);return;}save.money-=APT_PRICE;save.apt=true;sfx('cash');writeSave();banner(L('Căn hộ ven biển','Beach apartment'),L('Nhà an toàn thứ hai: lưu game, hồi máu, cất tiền','Second safehouse: save, heal, stash cash'));}};
   for(const s of SP.shops){const r=s.id==='garage'?5.5:2.6;if((s.id==='garage'||!P.car)&&hyp(t.x-s.x,t.z-s.z)<r)return{k:'E',txt:L('Vào ','Enter ')+TT(SHOPS[s.id].n),fn:()=>openShop(s.id)};}
   if(!mis&&!(heist&&heist.stage==='vault'))for(const k in GIVERS){const p=giverPos[k];if(p&&hyp(t.x-p.x,t.z-p.z)<3.2)return{k:'E',txt:'Nhận việc: '+GIVERS[k].name,fn:()=>startMission(k)};}
+  if(P.seq)return null;
   if(!P.car){let best=null,bd=4.5;for(const c of cars){const d=hyp(c.x-P.x,c.z-P.z);if(d<bd){bd=d;best=c;}}if(best)return{k:'F',txt:best.driver?(best.kind==='police'?'Cướp xe cảnh sát':'Kéo tài xế ra, lấy xe'):'Lên xe',fn:toggleCar,noE:true};}
   else if(Math.abs(P.car.vf)<6)return{k:'F',txt:'Xuống xe',fn:toggleCar,noE:true};
   return null;}
