@@ -1214,7 +1214,7 @@ const HG2=(()=>{const V=(x,y)=>new T.Vector2(x,y);
     upper:limb(.058,.046,.3,.12),fore:limb(.047,.035,.27,.1),thigh:limb(.092,.064,.45,.08),shin:limb(.066,.044,.42,.14),
     head:new T.SphereGeometry(.118,24,18),jaw:new T.SphereGeometry(.09,18,12),ear:new T.SphereGeometry(.026,8,6),nose:new T.SphereGeometry(.021,10,8),eye:new T.SphereGeometry(.0185,10,8),iris:new T.SphereGeometry(.0105,8,6),
     brow:new T.BoxGeometry(.048,.011,.014),mouth:new T.BoxGeometry(.044,.009,.01),neck:new T.CylinderGeometry(.052,.058,.13,12),
-    hairCap:new T.SphereGeometry(.126,24,12,0,Math.PI*2,0,Math.PI*.5),hairBack:new T.SphereGeometry(.124,20,10,Math.PI*.2,Math.PI*1.6,Math.PI*.35,Math.PI*.3),pony,longH,bun,
+    hairCap:new T.SphereGeometry(.126,24,12,0,Math.PI*2,0,Math.PI*.36),hairBack:new T.SphereGeometry(.124,20,10,Math.PI*.85,Math.PI*1.3,Math.PI*.3,Math.PI*.33),pony,longH,bun,
     bust:new T.SphereGeometry(.068,14,10),panel:new T.BoxGeometry(.17,.4,.016),collar:new T.TorusGeometry(.085,.016,6,20,Math.PI),
     hand:new T.SphereGeometry(.048,12,10),thumb,shoe:new T.SphereGeometry(.07,14,10),sole:new T.BoxGeometry(.118,.03,.275),glasses:new T.TorusGeometry(.024,.004,6,14),cap:HG.cap,brim:HG.brim,skirt:HG.skirt,shadow:HG.shadow};})();
 const mixHex=(a,b,k)=>{const A=new T.Color(a),B=new T.Color(b);return '#'+A.lerp(B,k).getHexString();};
