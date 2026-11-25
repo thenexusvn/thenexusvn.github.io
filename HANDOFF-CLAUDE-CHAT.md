@@ -244,3 +244,11 @@ Python helper scripts used during development:
 - Các bước: logo + Loading → Bắt đầu → Điều khoản (tick đồng ý, link đọc đầy đủ; lưu `nexus-terms`) → Đăng nhập/Tạo tài khoản (Google hoặc email, kèm khuyến nghị dùng tài khoản Google cá nhân; bỏ qua nếu đã đăng nhập) → Tên + ảnh đại diện (`ND.setProfile`, avatar lưu ở `photoURL` dạng `https://thenexusvn.github.io/#av=aN`) → chữ "giữ bí mật… / Enjoy!" rồi vào web. Có nút VI/EN.
 - Nội dung Điều khoản & Chính sách: `window.NEXUS_TERMS` (vi/en), có trang riêng `#terms` (nút "Điều khoản" ở cột trái). Đây là bản mẫu, chưa qua luật sư xem.
 - Ảnh đại diện hiện cạnh tên ở cột trái (`nexusAvatarHTML`).
+
+## CommsHub: nhắn riêng, nhóm chat, kết bạn (11/2026)
+- Code ở khối `HUB` trong `index.html` (ngay trước phần FEEDBACK); ghi đè `renderChans`, `renderChat`, `openChannel` để thêm phòng riêng.
+- Firestore mới (đã thêm vào `firestore.rules`, phải dán vào Firebase console):
+  - `profiles/{uid}` {name, photo, at}: mỗi tài khoản thật tự ghi khi mở web. Danh sách "Mọi người" và tổng số người lấy từ đây. Tài khoản chỉ xuất hiện sau khi đã mở web bản mới ít nhất một lần.
+  - `friends/{a_b}` {users, by, status}: lời mời (pending) → chấp nhận (ok).
+  - `rooms/{id}` {type dm|group, members, owner, name, names, last, lastBy, lastAt} và `rooms/{id}/messages`. DM có id `dm_a_b`.
+- Chấm xanh online lấy từ `presence`. Chưa đọc: so `lastAt` với `localStorage['nexus-read-<id>']`.

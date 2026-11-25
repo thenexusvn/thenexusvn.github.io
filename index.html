@@ -306,6 +306,28 @@ select.input{appearance:none;background-image:linear-gradient(45deg,transparent 
 .chans button svg{width:14px;height:14px}
 .chans .badge{margin-left:auto;min-width:18px;height:18px;border-radius:99px;background:var(--lime);color:var(--lime-ink);font-size:11px;font-weight:700;display:grid;place-items:center;padding:0 5px}
 .chans .chip{margin-top:auto;align-self:flex-start}
+.hub-new{display:grid;gap:6px;margin:0 4px 8px}.hub-new .btn{justify-content:center}
+.hub-sec{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--dim);padding:12px 10px 4px}
+.hub-empty{font-size:12.5px;color:var(--dim);padding:4px 10px;margin:0}
+.chans button .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hub-mini{position:relative;display:inline-grid;flex:none}.hub-mini .av{width:22px;height:22px;font-size:10px}.hub-mini .ua-av,.hub-mini .hub-av{width:22px;height:22px;font-size:13px;margin:0}
+.hub-mini.grp{width:22px;height:22px;border-radius:50%;background:var(--muted);place-items:center}.hub-mini.grp svg{width:12px;height:12px}
+.hub-mini .dot{position:absolute;right:-1px;bottom:-1px;width:8px;height:8px;border-radius:50%;background:#4ade80;border:2px solid var(--bg)}
+.hub-mini.big .av,.hub-mini.big .hub-av{width:40px;height:40px;font-size:20px}.hub-mini.big .dot{width:11px;height:11px}
+.av.hub-av{font-size:19px;margin:0}
+.ppl-modal{position:fixed;inset:0;z-index:300;background:rgba(5,6,8,.72);display:grid;place-items:center;padding:16px}
+.ppl-modal[hidden]{display:none}
+.ppl-box{padding:20px;width:min(620px,100%);max-height:calc(100vh - 32px);display:grid;grid-template-rows:auto auto auto auto 1fr;gap:12px;overflow:hidden}
+.ppl-hd{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.ppl-hd h3{font:700 20px var(--display);margin:0}
+.ppl-total{margin:4px 0 0;font-size:14px}.ppl-total b{font:800 22px var(--display);color:var(--lime)}
+.ppl-tabs{justify-self:start}
+.ppl-group{display:flex;gap:8px}.ppl-group .input{flex:1}
+.ppl-list{overflow-y:auto;display:grid;gap:4px;align-content:start;min-height:120px}
+.ppl-row{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:8px;border-radius:12px}.ppl-row:hover{background:var(--muted)}
+.ppl-nm{display:grid;gap:2px;min-width:0}.ppl-nm b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ppl-act{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.ppl-act .pick{display:flex;gap:6px;align-items:center;font-size:13px;cursor:pointer}.ppl-act .pick input{width:18px;height:18px;accent-color:var(--lime)}
+@media (max-width:560px){.ppl-row{grid-template-columns:auto 1fr}.ppl-act{grid-column:1/-1;justify-content:flex-start}}
 .chat{display:grid;grid-template-rows:auto 1fr auto;min-height:0}
 .chat-h{padding:14px 24px;border-bottom:1px solid var(--line)}
 .chat-h h2{font:600 18px var(--display);display:flex;gap:6px;align-items:center}
@@ -417,7 +439,7 @@ select.input{appearance:none;background-image:linear-gradient(45deg,transparent 
   .feature .info{padding:22px}
   .hub{grid-template-columns:1fr;grid-template-rows:auto 1fr}
   .chans{flex-direction:row;overflow-x:auto;border-right:0;border-bottom:1px solid var(--line);padding:10px 12px}
-  .chans .eyebrow,.chans .chip{display:none}
+  .chans .eyebrow,.chans .chip,.chans .hub-sec,.chans .hub-empty{display:none}.hub-new{display:flex;margin:0}
   .chans button{flex:none}
   .msgs,.chat-h,.compose{padding-left:16px;padding-right:16px}
 }
@@ -703,7 +725,7 @@ const D={
 "Nước tăng lực":"Energy drink","Nổi bật tuần này":"Featured this week","P: tạm dừng":"P: pause","PHỞ ĐÊM":"LATE-NIGHT PHỞ","Phát":"Play","Phát ngẫu nhiên":"Shuffle play","Phát từ đầu":"Play from the start",
 "Phần thưởng tím cần Gamepass.":"Purple rewards need the Gamepass.","Phở bò tái":"Rare beef phở","Premium · Nghe theo thứ tự, không quảng cáo":"Premium · Play in order, no ads","Premium: theo thứ tự, không quảng cáo":"Premium: in order, no ads","Qua 6 điểm trước khi hết giờ":"Hit 6 checkpoints before time runs out",
 "Quy tắc của Vault":"Vault rules","Quảng cáo":"Ad","R: đổi bài radio trên xe":"R: change the car radio song","Ra ngoài":"Go outside","Radio chưa sẵn sàng":"Radio is not ready","Radio: tắt":"Radio: off","Rap Việt":"Vietnamese rap","Remix Việt":"Vietnamese remix","Rời đội":"Leave team","Rủ trận 5v5 chiều nay":"5v5 this afternoon, join us","Rủ trận, bàn chiến thuật":"Organize games, talk tactics",
-"SUV 7 chỗ":"7-seat SUV","Điều khoản · Nexus":"Terms · Nexus","Điều khoản":"Terms","PHỐ CỔ ĐÈN LỒNG":"LANTERN OLD QUARTER","CẦU MÁI ĐỎ":"RED ROOF BRIDGE","TRÀ QUÁN PHỐ CỔ":"OLD QUARTER TEAHOUSE","CẢNG BẮC NEXUS":"NEXUS NORTH HARBOUR","CHỢ CÁ CẢNG BẮC":"NORTH HARBOUR FISH MARKET","NHÀ HÀNG HẢI SẢN BIỂN XANH":"BLUE SEA SEAFOOD","TẠP HOÁ BẾN CẢNG":"DOCKSIDE STORE","KHO HÀNG 07":"WAREHOUSE 07","KHO HÀNG 08":"WAREHOUSE 08","NHÀ NGHỈ THUYỀN TRƯỞNG":"CAPTAIN'S INN","KHÁCH SẠN ĐỒI MÂY":"CLOUD HILL HOTEL","CHỢ ĐÊM ĐỒI MÂY":"CLOUD HILL NIGHT MARKET","ĐỒI MÂY":"CLOUD HILL","SALOON CHIM ƯNG":"EAGLE SALOON","VĂN PHÒNG CẢNH SÁT TRƯỞNG":"SHERIFF'S OFFICE","CỬA HÀNG TỔNG HỢP":"GENERAL STORE","THỢ SÚNG":"GUNSMITH","TIỆM CẮT TÓC":"BARBER","KHÁCH SẠN MỎ BẠC":"SILVER MINE HOTEL","QUÁN ĂN THỢ MỎ":"MINERS' DINER","KHO QUẶNG":"ORE STORE","MỎ BẠC":"SILVER MINE","NEXUS FIT · THỜI TRANG TÂY":"NEXUS FIT · WEST FASHION","RẠP PHIM NEXUS":"NEXUS CINEMA","NEXUS TÂY MALL":"WEST NEXUS MALL","NEXUS MOTORS TÂY":"NEXUS MOTORS WEST","QUÁN CƠM TÂY THÀNH":"WEST TOWN DINER","NEXUS TÂY":"WEST NEXUS","BIỂN XANH":"BLUE SEA","NEXUS CITY: CUỘC PHIÊU LƯU MỚI":"NEXUS CITY: A NEW ADVENTURE","Bắp rang bơ":"Buttered popcorn","Trà quán Phố Cổ":"Old Quarter Teahouse","Trà sen nóng":"Hot lotus tea","+20 máu":"+20 HP","Bánh đậu xanh":"Mung bean cake","+30 máu":"+30 HP","Cao lầu":"Cao lau noodles","+70 máu":"+70 HP","Cà phê trứng":"Egg coffee","Nhà hàng Hải sản Biển Xanh":"Blue Sea Seafood Restaurant","Mực nướng":"Grilled squid","+40 máu":"+40 HP","Tôm hùm bơ tỏi":"Garlic butter lobster","Cá kho tộ":"Caramelised clay-pot fish","Nước dừa":"Coconut water","Saloon Chim Ưng":"Eagle Saloon","Đậu hầm thịt xông khói":"Bacon and bean stew","+45 máu":"+45 HP","Bò nướng than":"Charcoal-grilled beef","Bia gừng":"Ginger beer","THỰC ĐƠN":"MENU","CẢNH SÁT NEXUS":"NEXUS POLICE","NEXUS PLAZA · THỜI TRANG":"NEXUS PLAZA · FASHION","+15 máu":"+15 HP","+10 máu, chạy nhanh hơn 60 giây":"+10 HP, run faster for 60 seconds","+35 máu":"+35 HP","Quầy bar Nexus Grand":"Nexus Grand bar","Nước cam ép":"Fresh orange juice","Cà phê sữa đá":"Vietnamese iced milk coffee","Mocktail nhiệt đới":"Tropical mocktail","Bít tết bò":"Beef steak","Xe hatchback nhỏ":"Small hatchback","Xe gia đình 7 chỗ":"7-seat minivan","Xe tải van":"Cargo van","Bán tải":"Pickup truck","Xe địa hình gầm cao":"Lifted off-roader","Coupe 2 cửa":"2-door coupe","Xe cơ bắp Mỹ":"American muscle car","Limousine":"Limousine","Xe buýt thành phố":"City bus","Siêu xe Hyper X":"Hyper X hypercar","05  NEXUS · TRUNG TÂM":"05  NEXUS · DOWNTOWN","TRUY NÃ":"WANTED","BIA TẬP":"TARGET","Sedan gia đình":"Family sedan","Shift: chạy":"Shift: sprint","Sinh học":"Biology","Sinh học — Di truyền học":"Biology: genetics","Sinh tồn · Bạn và 9 bot":"Survival · You and 9 bots","Siêu xe Nexus GT":"Nexus GT supercar","Chơi miễn phí":"Free to play",
+"SUV 7 chỗ":"7-seat SUV","Tạo nhóm chat":"Create group chat","Nhắn riêng":"Direct message","Mọi người & bạn bè":"People & friends","Kênh chung":"Public channels","Tin nhắn của bạn":"Your messages","Chưa có cuộc trò chuyện nào. Bấm “Nhắn riêng” hoặc “Tạo nhóm chat”.":"No conversations yet. Tap “Direct message” or “Create group chat”.","Mọi người trên Nexus":"Everyone on Nexus","người đang dùng Nexus":"people using Nexus","Kết bạn":"Add friend","Chấp nhận":"Accept","Từ chối":"Decline","Bạn bè":"Friends","Nhắn tin":"Message","Muốn kết bạn với bạn":"Wants to be your friend","Đã gửi · Huỷ":"Sent · Cancel","Chọn":"Select","Chọn ít nhất 1 người":"Pick at least 1 person","Tên nhóm (VD: Nhóm 12A1)":"Group name (e.g. Class 12A1)","Tìm theo tên":"Search by name","Tìm người":"Find people","Rời nhóm":"Leave group","Xoá nhóm":"Delete group","Xoá cuộc trò chuyện":"Delete conversation","Tin nhắn riêng · chỉ hai bạn đọc được":"Private messages · only the two of you can read them","Chưa có tin nhắn. Gửi lời chào đầu tiên đi 👋":"No messages yet. Say hi 👋","Đã gửi lời mời kết bạn":"Friend request sent","Đã thành bạn bè":"You are now friends","Đã rời nhóm":"You left the group","Đã xoá cuộc trò chuyện":"Conversation deleted","Bấm lần nữa để xác nhận":"Tap again to confirm","Không tìm thấy ai.":"No one found.","Chưa có ai.":"No one yet.","Cần kết nối máy chủ để nhắn riêng và tạo nhóm.":"Direct messages and groups need the server connection.","Nhóm tối đa 50 người":"Groups can have up to 50 people","Điều khoản · Nexus":"Terms · Nexus","Điều khoản":"Terms","PHỐ CỔ ĐÈN LỒNG":"LANTERN OLD QUARTER","CẦU MÁI ĐỎ":"RED ROOF BRIDGE","TRÀ QUÁN PHỐ CỔ":"OLD QUARTER TEAHOUSE","CẢNG BẮC NEXUS":"NEXUS NORTH HARBOUR","CHỢ CÁ CẢNG BẮC":"NORTH HARBOUR FISH MARKET","NHÀ HÀNG HẢI SẢN BIỂN XANH":"BLUE SEA SEAFOOD","TẠP HOÁ BẾN CẢNG":"DOCKSIDE STORE","KHO HÀNG 07":"WAREHOUSE 07","KHO HÀNG 08":"WAREHOUSE 08","NHÀ NGHỈ THUYỀN TRƯỞNG":"CAPTAIN'S INN","KHÁCH SẠN ĐỒI MÂY":"CLOUD HILL HOTEL","CHỢ ĐÊM ĐỒI MÂY":"CLOUD HILL NIGHT MARKET","ĐỒI MÂY":"CLOUD HILL","SALOON CHIM ƯNG":"EAGLE SALOON","VĂN PHÒNG CẢNH SÁT TRƯỞNG":"SHERIFF'S OFFICE","CỬA HÀNG TỔNG HỢP":"GENERAL STORE","THỢ SÚNG":"GUNSMITH","TIỆM CẮT TÓC":"BARBER","KHÁCH SẠN MỎ BẠC":"SILVER MINE HOTEL","QUÁN ĂN THỢ MỎ":"MINERS' DINER","KHO QUẶNG":"ORE STORE","MỎ BẠC":"SILVER MINE","NEXUS FIT · THỜI TRANG TÂY":"NEXUS FIT · WEST FASHION","RẠP PHIM NEXUS":"NEXUS CINEMA","NEXUS TÂY MALL":"WEST NEXUS MALL","NEXUS MOTORS TÂY":"NEXUS MOTORS WEST","QUÁN CƠM TÂY THÀNH":"WEST TOWN DINER","NEXUS TÂY":"WEST NEXUS","BIỂN XANH":"BLUE SEA","NEXUS CITY: CUỘC PHIÊU LƯU MỚI":"NEXUS CITY: A NEW ADVENTURE","Bắp rang bơ":"Buttered popcorn","Trà quán Phố Cổ":"Old Quarter Teahouse","Trà sen nóng":"Hot lotus tea","+20 máu":"+20 HP","Bánh đậu xanh":"Mung bean cake","+30 máu":"+30 HP","Cao lầu":"Cao lau noodles","+70 máu":"+70 HP","Cà phê trứng":"Egg coffee","Nhà hàng Hải sản Biển Xanh":"Blue Sea Seafood Restaurant","Mực nướng":"Grilled squid","+40 máu":"+40 HP","Tôm hùm bơ tỏi":"Garlic butter lobster","Cá kho tộ":"Caramelised clay-pot fish","Nước dừa":"Coconut water","Saloon Chim Ưng":"Eagle Saloon","Đậu hầm thịt xông khói":"Bacon and bean stew","+45 máu":"+45 HP","Bò nướng than":"Charcoal-grilled beef","Bia gừng":"Ginger beer","THỰC ĐƠN":"MENU","CẢNH SÁT NEXUS":"NEXUS POLICE","NEXUS PLAZA · THỜI TRANG":"NEXUS PLAZA · FASHION","+15 máu":"+15 HP","+10 máu, chạy nhanh hơn 60 giây":"+10 HP, run faster for 60 seconds","+35 máu":"+35 HP","Quầy bar Nexus Grand":"Nexus Grand bar","Nước cam ép":"Fresh orange juice","Cà phê sữa đá":"Vietnamese iced milk coffee","Mocktail nhiệt đới":"Tropical mocktail","Bít tết bò":"Beef steak","Xe hatchback nhỏ":"Small hatchback","Xe gia đình 7 chỗ":"7-seat minivan","Xe tải van":"Cargo van","Bán tải":"Pickup truck","Xe địa hình gầm cao":"Lifted off-roader","Coupe 2 cửa":"2-door coupe","Xe cơ bắp Mỹ":"American muscle car","Limousine":"Limousine","Xe buýt thành phố":"City bus","Siêu xe Hyper X":"Hyper X hypercar","05  NEXUS · TRUNG TÂM":"05  NEXUS · DOWNTOWN","TRUY NÃ":"WANTED","BIA TẬP":"TARGET","Sedan gia đình":"Family sedan","Shift: chạy":"Shift: sprint","Sinh học":"Biology","Sinh học — Di truyền học":"Biology: genetics","Sinh tồn · Bạn và 9 bot":"Survival · You and 9 bots","Siêu xe Nexus GT":"Nexus GT supercar","Chơi miễn phí":"Free to play",
 "Skin chỉ thay đổi ngoại hình, không ảnh hưởng sức mạnh.":"Skins only change your look, not your power.","Snack khoai tây":"Potato chips","Space: bắn theo hướng nòng":"Space: fire where the barrel points","Space: nhảy, phanh tay":"Space: jump, handbrake","SÂN VẬN ĐỘNG NEXUS":"NEXUS STADIUM","SÚNG TẦM XA":"LONG RANGE GUNS",
 "Sân":"Court","Sân A — gần nhà thể chất":"Court A, by the gym","Sân B":"Court B","Sân chính":"Main court","Sân vận động":"Stadium","Súng Tầm Xa":"Long Range Guns","Súng lục":"Pistol",
 "Súng mua ở Súng Tầm Xa. Phím 1 đến 4 để đổi vũ khí. Giữ chuột phải hoặc K để ngắm, click hoặc J để bắn. Bắn người là phạm tội.":"Buy guns at Long Range Guns. Keys 1 to 4 switch weapons. Hold right mouse or K to aim, click or J to shoot. Shooting people is a crime.",
@@ -760,6 +782,7 @@ const D={
 };
 const NODIA={chung:'general',Mang:'Bring',Xe:'Car','Xe ':'Car'};
 const R=[
+[/^Tạo nhóm \((\d+) người\)$/,m=>'Create group ('+m[1]+' people)'],[/^(\d+) đang online$/,m=>m[1]+' online'],[/^Nhắn cho (.+)$/,m=>'Message '+m[1]],[/^Đã tạo nhóm “(.+)”$/,m=>'Created group “'+m[1]+'”'],[/^Nhóm của (.+)$/,m=>m[1]+"'s group"],
 [/^([\d.]+)đ$/,m=>m[1].replace(/\./g,',')+' VND'],[/^Không sao chép được\. Link: (.+)$/,m=>"Couldn't copy. Link: "+m[1]],[/^Không thêm được bài\. Thử lại\.$/,()=>'Could not add the song. Try again.'],[/^Nhắn vào #(.+)$/,m=>'Message #'+(NODIA[m[1]]||D[m[1]]||m[1])],[/^(.+) đã hạ bạn$/,m=>(D[m[1]]||m[1])+' knocked you out'],
 [/^(\d+) đánh giá$/,m=>m[1]+(m[1]==='1'?' review':' reviews')],[/^(\d) sao$/,m=>m[1]+(m[1]==='1'?' star':' stars')],
 [/^Bạn thêm được tối đa (\d+) bài(.*)$/,m=>'You can add up to '+m[1]+' songs'+(m[2]?' (SonicDeck Premium: 100 songs)':'')+'.'],[/^(\d+) bài$/,m=>m[1]+' songs'],[/^đăng bởi (.+)$/,m=>'posted by '+m[1]],[/^Phát (.+)$/,m=>'Play '+m[1]],[/^Xoá bài (.+)$/,m=>'Delete '+m[1]],[/^Đã thêm "(.+)" vào SonicDeck$/,m=>'Added "'+m[1]+'" to SonicDeck'],[/^Không thêm được bài\. (.*)$/,m=>'Could not add the song. '+t(m[1])],
@@ -1048,7 +1071,7 @@ return{t,setLang,get lang(){return lang;},D};
     <div class="hub">
       <div class="chans" id="chans"></div>
       <div class="chat">
-        <div class="chat-h"><h2><svg class="i"><use href="#i-hash"/></svg><span id="chName">chung</span></h2><p class="muted small" id="chDesc"></p></div>
+        <div class="chat-h"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><h2><svg class="i" id="chIcon"><use href="#i-hash"/></svg><span id="chName">chung</span></h2><button class="btn btn-ghost btn-sm" type="button" id="chLeave" hidden>Rời nhóm</button></div><p class="muted small" id="chDesc"></p></div>
         <div class="msgs" id="msgs" aria-live="polite"></div>
         <form class="compose" id="compose"><input class="input" id="msgIn" autocomplete="off" placeholder="Nhắn vào #chung" aria-label="Tin nhắn"><button class="btn btn-lime" aria-label="Gửi"><svg class="i"><use href="#i-send"/></svg></button></form>
       </div>
@@ -1175,6 +1198,15 @@ return{t,setLang,get lang(){return lang;},D};
     </form>
   </div>
   <div id="fbThanks" hidden><h3>Cảm ơn bạn!</h3><p class="muted small">Đánh giá đã được gửi tới người quản lý Nexus.</p></div>
+</div>
+<div class="ppl-modal" id="pplModal" hidden role="dialog" aria-modal="true" aria-labelledby="pplTitle">
+  <div class="card ppl-box">
+    <div class="ppl-hd"><div><h3 id="pplTitle">Mọi người trên Nexus</h3><p class="ppl-total"><b id="pplCount">0</b> <span id="pplCountW">người đang dùng Nexus</span> · <span id="pplOnline" class="muted"></span></p></div><button class="btn btn-ghost btn-sm" type="button" id="pplClose">Đóng</button></div>
+    <div class="ppl-tabs seg lime" role="group"><button type="button" data-ptab="dm">Nhắn riêng</button><button type="button" data-ptab="group">Tạo nhóm chat</button><button type="button" data-ptab="people">Kết bạn</button></div>
+    <div id="pplGroup" hidden class="ppl-group"><input class="input" id="pplGName" maxlength="40" placeholder="Tên nhóm (VD: Nhóm 12A1)"><button class="btn btn-lime btn-sm" type="button" id="pplMake" disabled>Chọn ít nhất 1 người</button></div>
+    <input class="input" id="pplQ" type="search" placeholder="Tìm theo tên" aria-label="Tìm người">
+    <div class="ppl-list" id="pplList"></div>
+  </div>
 </div>
 <div class="modal" id="modal" hidden role="dialog" aria-modal="true" aria-labelledby="mdTitle">
   <div class="card">
@@ -1973,7 +2005,7 @@ function renderChat(){
   const banned=signedIn()&&ND.isBanned();$('#msgIn').placeholder=banned?'Bạn đã bị quản trị viên chặn nhắn tin':signedIn()?'Nhắn vào #'+c.id:(ND.mode==='cloud'?'Đăng nhập để nhắn tin':'Đặt tên hiển thị để nhắn tin');$('#msgIn').disabled=banned;
   const adm=ND.admin;
   const box=$('#msgs'),atBottom=box.scrollHeight-box.scrollTop-box.clientHeight<60;
-  box.innerHTML=chMsgs.length?chMsgs.map(m=>{const mine=u&&m.uid===u.uid,isB=adm&&ND.isBanned(m.uid);return `<div class="msg${mine?' me':''}${m.admin?' adm':''}${isB?' banned':''}"><span class="av">${m.admin?'♛':esc(initials(m.name))}</span><div><div class="who">${esc(m.name||'Ẩn danh')}${m.admin?'<span class="admin-badge">ADMIN</span>':''}<time>${hhmm(ND.tsMs(m.createdAt))}</time>${mine||adm?`<button class="del" data-delmsg="${esc(m.id)}" aria-label="Xoá tin nhắn">Xoá</button>`:''}${adm&&!mine&&!m.admin?(isB?`<button class="ban" data-unban="${esc(m.uid)}">Bỏ chặn</button>`:`<button class="ban" data-ban="${esc(m.uid)}" data-bname="${esc(m.name||'')}">Chặn</button>`):''}</div><div class="txt">${esc(m.text)}</div></div></div>`;}).join('')
+  box.innerHTML=chMsgs.length?chMsgs.map(m=>{const mine=u&&m.uid===u.uid,isB=adm&&ND.isBanned(m.uid);return `<div class="msg${mine?' me':''}${m.admin?' adm':''}${isB?' banned':''}">${m.admin?'<span class="av">♛</span>':avHTML(HUB.people[m.uid],m.name)}<div><div class="who">${esc(m.name||'Ẩn danh')}${m.admin?'<span class="admin-badge">ADMIN</span>':''}<time>${hhmm(ND.tsMs(m.createdAt))}</time>${mine||adm?`<button class="del" data-delmsg="${esc(m.id)}" aria-label="Xoá tin nhắn">Xoá</button>`:''}${adm&&!mine&&!m.admin?(isB?`<button class="ban" data-unban="${esc(m.uid)}">Bỏ chặn</button>`:`<button class="ban" data-ban="${esc(m.uid)}" data-bname="${esc(m.name||'')}">Chặn</button>`):''}</div><div class="txt">${esc(m.text)}</div></div></div>`;}).join('')
     :`<div class="empty muted" style="padding:24px;text-align:center">Chưa có tin nhắn trong #${esc(c.id)}. Mở đầu câu chuyện đi.</div>`;
   if(atBottom||!box.dataset.init){box.scrollTop=box.scrollHeight;box.dataset.init=1;}
 }
@@ -1988,6 +2020,116 @@ $('#msgs').addEventListener('click',async e=>{const b=e.target.closest('[data-de
 ND.on('bans',()=>{renderChat();renderAdminBans&&renderAdminBans();});
 $('#compose').addEventListener('submit',async e=>{e.preventDefault();const v=$('#msgIn').value.trim();if(!v)return;if(!signedIn()){needSignIn('nhắn tin');return;}if(ND.isBanned()){toast('Bạn đã bị quản trị viên chặn nhắn tin');return;}
   $('#msgIn').value='';$('#msgs').dataset.init='';try{await ND.sendMessage(chCur,v);}catch(err){$('#msgIn').value=v;toast(err.message||'Không gửi được. Thử lại.');}});
+
+/* ===== COMMSHUB: everyone on Nexus, friends, private chats and group chats (real Firestore data) =====
+   profiles/{uid}  {name, photo, at}           one row per real account, written when the account opens the site
+   friends/{a_b}   {users:[a,b], by, status}   a friend request (status 'pending') or a friendship ('ok')
+   rooms/{id}      {type:'dm'|'group', name, members:[uid], owner, last, lastBy, lastAt, createdAt}
+   rooms/{id}/messages/{mid} {text, uid, name, createdAt} */
+const hubCloud=()=>ND.mode==='cloud'&&!!ND._db;
+const HUB={people:{},friends:{},rooms:{},online:new Set(),unsub:[],uid:null,roomCur:null,roomMsgs:[],roomUnsub:null,profSaved:''};
+const avOf=p=>{const m=/av=(a\d+)/.exec((p&&p.photo)||'');return m?m[1]:null;};
+const avHTML=(p,name)=>{const a=avOf(p);return a&&window.nexusAvatarHTML?window.nexusAvatarHTML(a,'av hub-av'):`<span class="av">${esc(initials(name||(p&&p.name)))}</span>`;};
+const pairId=(a,b)=>a<b?a+'_'+b:b+'_'+a;
+const readKey=id=>'nexus-read-'+id;
+const lastRead=id=>{try{return +localStorage.getItem(readKey(id))||0;}catch(_){return 0;}};
+const markRead=id=>{try{localStorage.setItem(readKey(id),String(Date.now()));}catch(_){}};
+function hubStop(){HUB.unsub.forEach(f=>{try{f();}catch(_){}});HUB.unsub=[];HUB.people={};HUB.friends={};HUB.rooms={};HUB.uid=null;}
+function hubStart(){const u=me();if(!hubCloud()||!signedIn()){if(HUB.uid)hubStop();renderChans();return;}
+  const db=ND._db,FV=ND._FV;
+  // keep my public profile row up to date (name and avatar)
+  const sig=u.uid+'|'+u.name+'|'+(u.photo||'');if(HUB.profSaved!==sig){HUB.profSaved=sig;db.collection('profiles').doc(u.uid).set({name:String(u.name||'Bạn').slice(0,40),photo:String(u.photo||'').slice(0,120),at:FV.serverTimestamp()},{merge:true}).catch(e=>console.warn('profile',e));}
+  if(HUB.uid===u.uid)return;hubStop();HUB.uid=u.uid;
+  HUB.unsub.push(db.collection('profiles').limit(1000).onSnapshot(s=>{HUB.people={};s.docs.forEach(d=>HUB.people[d.id]=d.data());renderChans();renderPeople();renderChat();},e=>console.warn('profiles',e)));
+  HUB.unsub.push(db.collection('friends').where('users','array-contains',u.uid).onSnapshot(s=>{HUB.friends={};s.docs.forEach(d=>HUB.friends[d.id]=d.data());renderChans();renderPeople();},e=>console.warn('friends',e)));
+  HUB.unsub.push(db.collection('rooms').where('members','array-contains',u.uid).onSnapshot(s=>{HUB.rooms={};s.docs.forEach(d=>HUB.rooms[d.id]=Object.assign({id:d.id},d.data()));if(HUB.roomCur&&!HUB.rooms[HUB.roomCur])openChannel('chung');renderChans();if(HUB.roomCur)renderChat();},e=>console.warn('rooms',e)));
+  const pres=()=>db.collection('presence').where('t','>',new Date(Date.now()-150000)).get().then(s=>{HUB.online=new Set(s.docs.map(d=>d.id));renderPeople();renderChans();}).catch(()=>{});pres();const iv=setInterval(pres,60000);HUB.unsub.push(()=>clearInterval(iv));}
+ND.on('user',()=>hubStart());ND.on('mode',()=>hubStart());
+const friendState=uid=>{const f=HUB.friends[pairId(HUB.uid,uid)];if(!f)return 'none';if(f.status==='ok')return 'friend';return f.by===HUB.uid?'sent':'incoming';};
+const roomTitle=r=>{if(r.type==='dm'){const o=(r.members||[]).find(x=>x!==HUB.uid)||HUB.uid;const p=HUB.people[o];return p?p.name:((r.names&&r.names[o])||'Bạn bè');}return r.name||'Nhóm chat';};
+const roomSorted=()=>Object.values(HUB.rooms).sort((a,b)=>ND.tsMs(b.lastAt||b.createdAt)-ND.tsMs(a.lastAt||a.createdAt));
+function roomRow(r){const unread=r.lastAt&&r.lastBy!==HUB.uid&&ND.tsMs(r.lastAt)>lastRead(r.id)&&HUB.roomCur!==r.id;
+  const o=r.type==='dm'?(r.members||[]).find(x=>x!==HUB.uid):null,p=o?HUB.people[o]:null,on=o&&HUB.online.has(o);
+  const icon=r.type==='dm'?`<span class="hub-mini">${avHTML(p,roomTitle(r))}${on?'<i class="dot"></i>':''}</span>`:`<span class="hub-mini grp">${ic('chat')}</span>`;
+  return `<button data-room="${esc(r.id)}" ${HUB.roomCur===r.id?'aria-current="true"':''}>${icon}<span class="nm">${esc(roomTitle(r))}</span>${unread?'<span class="badge">●</span>':''}</button>`;}
+
+/* the side list: create buttons, public channels, my chats */
+const _renderChansOld=renderChans;
+renderChans=function(){const on=hubCloud()&&signedIn();const reqs=on?Object.values(HUB.friends).filter(f=>f.status==='pending'&&f.by!==HUB.uid).length:0;const rooms=on?roomSorted():[];
+  $('#chans').innerHTML=`<span class="eyebrow">${ic('chat')}CommsHub</span>`
+   +`<div class="hub-new"><button type="button" class="btn btn-lime btn-sm" data-hubnew="group">${ic('plus')}Tạo nhóm chat</button><button type="button" class="btn btn-ghost btn-sm" data-hubnew="dm">${ic('send')}Nhắn riêng</button></div>`
+   +`<button type="button" class="hub-ppl" data-hubnew="people">${ic('heart')}<span class="nm">Mọi người &amp; bạn bè</span>${reqs?`<span class="badge">${reqs}</span>`:''}</button>`
+   +`<span class="hub-sec">Kênh chung</span>`+CH.map(c=>`<button data-ch="${c.id}" ${!HUB.roomCur&&c.id===chCur?'aria-current="true"':''}>${ic('hash')}${c.id}</button>`).join('')
+   +(on?`<span class="hub-sec">Tin nhắn của bạn</span>`+(rooms.length?rooms.map(roomRow).join(''):`<p class="hub-empty">Chưa có cuộc trò chuyện nào. Bấm “Nhắn riêng” hoặc “Tạo nhóm chat”.</p>`):'')
+   +`<span class="chip chip-lime">Miễn phí cho mọi người</span>`;};
+
+/* the people panel: everyone with a Nexus account, friend requests, pick people for a chat */
+let pplMode='people',pplPick=new Set(),pplQ='';
+function openPeople(mode){if(ND.mode!=='cloud'){toast('Cần kết nối máy chủ để nhắn riêng và tạo nhóm.');return;}if(!signedIn()){needSignIn('nhắn riêng và kết bạn');return;}
+  pplMode=mode;pplPick=new Set();pplQ='';$('#pplModal').hidden=false;$('#pplQ').value='';$('#pplGName').value='';renderPeople();setTimeout(()=>$('#pplQ').focus(),50);}
+function renderPeople(){const m=$('#pplModal');if(!m||m.hidden)return;const all=Object.entries(HUB.people).map(([uid,p])=>Object.assign({uid},p));
+  const n=all.length;$('#pplCount').textContent=n;$('#pplCountW').textContent=n===1?'người đang dùng Nexus':'người đang dùng Nexus';
+  $('#pplOnline').textContent=all.filter(p=>HUB.online.has(p.uid)).length+' đang online';
+  $('#pplTitle').textContent=pplMode==='group'?'Tạo nhóm chat':pplMode==='dm'?'Nhắn riêng':'Mọi người trên Nexus';
+  $('#pplGroup').hidden=pplMode!=='group';$$('#pplModal [data-ptab]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.ptab===pplMode)));
+  const q=pplQ.trim().toLowerCase();const rank=p=>p.uid===HUB.uid?0:friendState(p.uid)==='incoming'?1:friendState(p.uid)==='friend'?2:HUB.online.has(p.uid)?3:4;
+  const list=all.filter(p=>!q||String(p.name||'').toLowerCase().includes(q)).sort((a,b)=>rank(a)-rank(b)||String(a.name).localeCompare(String(b.name)));
+  $('#pplList').innerHTML=list.length?list.map(p=>{const mine=p.uid===HUB.uid,st=mine?'me':friendState(p.uid),on=HUB.online.has(p.uid);
+      let act='';if(!mine){if(pplMode==='group')act=`<label class="pick"><input type="checkbox" data-pick="${esc(p.uid)}" ${pplPick.has(p.uid)?'checked':''}><span>Chọn</span></label>`;
+        else{act=(st==='none'?`<button class="btn btn-ghost btn-sm" data-fr="add" data-u="${esc(p.uid)}">Kết bạn</button>`:st==='sent'?`<button class="btn btn-ghost btn-sm" data-fr="cancel" data-u="${esc(p.uid)}">Đã gửi · Huỷ</button>`:st==='incoming'?`<button class="btn btn-lime btn-sm" data-fr="accept" data-u="${esc(p.uid)}">Chấp nhận</button><button class="btn btn-ghost btn-sm" data-fr="cancel" data-u="${esc(p.uid)}">Từ chối</button>`:`<span class="chip">Bạn bè</span><button class="btn btn-ghost btn-sm" data-fr="cancel" data-u="${esc(p.uid)}" title="Huỷ kết bạn">✕</button>`)
+          +`<button class="btn btn-lime btn-sm" data-dm="${esc(p.uid)}">${ic('send')}Nhắn tin</button>`;}}
+      return `<div class="ppl-row"><span class="hub-mini big">${avHTML(p,p.name)}${on?'<i class="dot"></i>':''}</span><div class="ppl-nm"><b>${esc(p.name||'Ẩn danh')}</b>${mine?' <span class="chip chip-lime">Bạn</span>':''}<span class="muted small">${on?'Đang online':st==='friend'?'Bạn bè':st==='incoming'?'Muốn kết bạn với bạn':''}</span></div><div class="ppl-act">${act}</div></div>`;}).join('')
+    :`<p class="muted" style="padding:20px;text-align:center">${n?'Không tìm thấy ai.':'Chưa có ai.'}</p>`;
+  $('#pplMake').textContent=pplPick.size?`Tạo nhóm (${pplPick.size+1} người)`:'Chọn ít nhất 1 người';$('#pplMake').disabled=!pplPick.size;}
+async function friendAct(kind,uid){const db=ND._db,FV=ND._FV,id=pairId(HUB.uid,uid),ref=db.collection('friends').doc(id);
+  try{if(kind==='add'){await ref.set({users:[HUB.uid,uid].sort(),by:HUB.uid,status:'pending',at:FV.serverTimestamp()});toast('Đã gửi lời mời kết bạn');}
+    else if(kind==='accept'){await ref.update({status:'ok'});toast('Đã thành bạn bè');}
+    else if(kind==='cancel'){await ref.delete();}}catch(err){toast(permMsg(err));}}
+async function openDM(uid){const db=ND._db,FV=ND._FV,id='dm_'+pairId(HUB.uid,uid);
+  if(!HUB.rooms[id]){try{const p=HUB.people[uid]||{},mine=me();await db.collection('rooms').doc(id).set({type:'dm',members:[HUB.uid,uid].sort(),owner:HUB.uid,name:'',names:{[HUB.uid]:String(mine.name||'').slice(0,40),[uid]:String(p.name||'').slice(0,40)},createdAt:FV.serverTimestamp(),lastAt:FV.serverTimestamp(),last:'',lastBy:''});}
+    catch(err){try{const s=await db.collection('rooms').doc(id).get();if(!s.exists){toast(permMsg(err));return;}}catch(_){toast(permMsg(err));return;}}}
+  $('#pplModal').hidden=true;openRoom(id);}
+async function makeGroup(){const name=$('#pplGName').value.trim().slice(0,40)||'Nhóm của '+(me().name||'bạn');const members=[HUB.uid,...pplPick];if(members.length>50){toast('Nhóm tối đa 50 người');return;}
+  const db=ND._db,FV=ND._FV;try{const ref=db.collection('rooms').doc();const names={};members.forEach(u=>names[u]=String((HUB.people[u]||{}).name||'').slice(0,40));
+    await ref.set({type:'group',name,members,owner:HUB.uid,names,createdAt:FV.serverTimestamp(),lastAt:FV.serverTimestamp(),last:'',lastBy:''});$('#pplModal').hidden=true;HUB.rooms[ref.id]=HUB.rooms[ref.id]||{id:ref.id,type:'group',name,members};openRoom(ref.id);toast('Đã tạo nhóm “'+name+'”');}
+  catch(err){toast(permMsg(err));}}
+function openRoom(id){HUB.roomCur=id;if(chUnsub)chUnsub();chUnsub=null;if(HUB.roomUnsub)HUB.roomUnsub();HUB.roomMsgs=[];$('#msgs').dataset.init='';markRead(id);renderChans();renderChat();
+  HUB.roomUnsub=ND._db.collection('rooms').doc(id).collection('messages').orderBy('createdAt','desc').limit(100).onSnapshot(s=>{HUB.roomMsgs=s.docs.map(d=>Object.assign({id:d.id},d.data())).reverse();markRead(id);renderChat();},e=>{console.warn(e);});
+  if(innerWidth<860)$('#msgIn').focus();}
+async function leaveRoom(){const r=HUB.rooms[HUB.roomCur];if(!r)return;const db=ND._db,FV=ND._FV;try{if(r.type==='group'&&r.owner!==HUB.uid)await db.collection('rooms').doc(r.id).update({members:FV.arrayRemove(HUB.uid)});else await db.collection('rooms').doc(r.id).delete();openChannel('chung');toast(r.type==='group'?'Đã rời nhóm':'Đã xoá cuộc trò chuyện');}catch(err){toast(permMsg(err));}}
+
+/* chat area: a channel or one of my rooms */
+const _openChannelOld=openChannel;
+openChannel=function(id){HUB.roomCur=null;if(HUB.roomUnsub){HUB.roomUnsub();HUB.roomUnsub=null;}_openChannelOld(id);};
+const _renderChatOld=renderChat;
+renderChat=function(){if(!HUB.roomCur){$('#chLeave').hidden=true;$('#chIcon').innerHTML='<use href="#i-hash"/>';_renderChatOld();return;}
+  const r=HUB.rooms[HUB.roomCur]||{},u=me();$('#chName').textContent=roomTitle(r);$('#chIcon').innerHTML=r.type==='group'?'<use href="#i-chat"/>':'<use href="#i-send"/>';
+  $('#chDesc').textContent=r.type==='group'?(r.members||[]).map(x=>(HUB.people[x]||{}).name||(r.names&&r.names[x])||'?').join(', '):'Tin nhắn riêng · chỉ hai bạn đọc được';
+  $('#chLeave').hidden=false;$('#chLeave').textContent=r.type==='group'&&r.owner!==HUB.uid?'Rời nhóm':r.type==='group'?'Xoá nhóm':'Xoá cuộc trò chuyện';
+  $('#msgIn').disabled=false;$('#msgIn').placeholder='Nhắn cho '+roomTitle(r);
+  const box=$('#msgs'),atBottom=box.scrollHeight-box.scrollTop-box.clientHeight<60;
+  box.innerHTML=HUB.roomMsgs.length?HUB.roomMsgs.map(m=>{const mine=u&&m.uid===u.uid,p=HUB.people[m.uid];return `<div class="msg${mine?' me':''}">${avHTML(p,m.name)}<div><div class="who">${esc((p&&p.name)||m.name||'Ẩn danh')}<time>${hhmm(ND.tsMs(m.createdAt))}</time>${mine?`<button class="del" data-delmsg="${esc(m.id)}" aria-label="Xoá tin nhắn">Xoá</button>`:''}</div><div class="txt">${esc(m.text)}</div></div></div>`;}).join('')
+    :`<div class="empty muted" style="padding:24px;text-align:center">Chưa có tin nhắn. Gửi lời chào đầu tiên đi 👋</div>`;
+  if(atBottom||!box.dataset.init){box.scrollTop=box.scrollHeight;box.dataset.init=1;}};
+async function sendRoom(text){const db=ND._db,FV=ND._FV,u=me(),id=HUB.roomCur;text=String(text).slice(0,500);
+  await db.collection('rooms').doc(id).collection('messages').add({text,uid:u.uid,name:String(u.name||'Ẩn danh').slice(0,40),createdAt:FV.serverTimestamp()});
+  db.collection('rooms').doc(id).update({last:text.slice(0,80),lastBy:u.uid,lastAt:FV.serverTimestamp()}).catch(()=>{});}
+
+/* wire up */
+$('#chans').addEventListener('click',e=>{const n=e.target.closest('[data-hubnew]');if(n){openPeople(n.dataset.hubnew);return;}const r=e.target.closest('[data-room]');if(r)openRoom(r.dataset.room);},true);
+$('#pplModal').addEventListener('click',e=>{if(e.target.id==='pplModal'||e.target.closest('#pplClose')){$('#pplModal').hidden=true;return;}
+  const f=e.target.closest('[data-fr]');if(f){friendAct(f.dataset.fr,f.dataset.u);return;}const d=e.target.closest('[data-dm]');if(d){openDM(d.dataset.dm);return;}
+  const t=e.target.closest('[data-ptab]');if(t){pplMode=t.dataset.ptab;pplPick=new Set();renderPeople();}});
+$('#pplModal').addEventListener('change',e=>{const c=e.target.closest('[data-pick]');if(!c)return;c.checked?pplPick.add(c.dataset.pick):pplPick.delete(c.dataset.pick);renderPeople();});
+$('#pplQ').addEventListener('input',e=>{pplQ=e.target.value;renderPeople();});
+$('#pplMake').addEventListener('click',makeGroup);
+$('#chLeave').addEventListener('click',e=>{const b=e.currentTarget;if(b.dataset.sure!=='1'){b.dataset.sure='1';const o=b.textContent;b.textContent='Bấm lần nữa để xác nhận';setTimeout(()=>{if(b.isConnected){b.dataset.sure='';b.textContent=o;}},3000);return;}b.dataset.sure='';leaveRoom();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#pplModal').hidden)$('#pplModal').hidden=true;});
+// messages in a room: delete my own, send through the room
+$('#msgs').addEventListener('click',async e=>{if(!HUB.roomCur)return;const b=e.target.closest('[data-delmsg]');if(!b)return;e.stopImmediatePropagation();try{await ND._db.collection('rooms').doc(HUB.roomCur).collection('messages').doc(b.dataset.delmsg).delete();}catch(err){toast(permMsg(err));}},true);
+$('#compose').addEventListener('submit',async e=>{if(!HUB.roomCur)return;e.preventDefault();e.stopImmediatePropagation();const v=$('#msgIn').value.trim();if(!v)return;if(ND.isBanned()){toast('Bạn đã bị quản trị viên chặn nhắn tin');return;}
+  $('#msgIn').value='';$('#msgs').dataset.init='';try{await sendRoom(v);}catch(err){$('#msgIn').value=v;toast(permMsg(err));}},true);
+renderChans();hubStart();
 
 /* ===== FEEDBACK: pop-up rating, saved to Firestore `feedback` (only admins can read it) ===== */
 const FBK='nexus-feedback';
