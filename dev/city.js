@@ -221,6 +221,49 @@ const FAC={
   white:facade('stone',{wall:'#d6d6d2',trim:'#e8e8e4'}),
   policeBlue:facade('apt',{wall:'#3f63a8',trim:'#e9eef8'})
 };
+/* ---------- foliage: alpha-tested leaf cards (much fuller and softer than solid blobs) ---------- */
+const LEAFTX=makeTex(256,256,(g,w,h)=>{g.clearRect(0,0,w,h);
+  for(let i=0;i<340;i++){const a=Math.random()*Math.PI*2,rr=Math.sqrt(Math.random())*112,x=128+Math.cos(a)*rr,y=128+Math.sin(a)*rr*.92,l=5+Math.random()*9,v=150+Math.random()*95|0;
+    g.save();g.translate(x,y);g.rotate(Math.random()*Math.PI);g.fillStyle=`rgb(${v*.82|0},${v},${v*.7|0})`;g.beginPath();g.ellipse(0,0,l,l*.48,0,0,7);g.fill();g.strokeStyle='rgba(40,60,30,.35)';g.lineWidth=1;g.beginPath();g.moveTo(-l,0);g.lineTo(l,0);g.stroke();g.restore();}
+  g.fillStyle='#ffffff';g.fillRect(0,236,20,20);},{repeat:false});
+const NEEDLETX=makeTex(256,128,(g,w,h)=>{g.clearRect(0,0,w,h);g.strokeStyle='#8a7a60';g.lineWidth=3;g.beginPath();g.moveTo(4,h/2);g.lineTo(w-6,h/2);g.stroke();
+  for(let x=6;x<w-8;x+=2.2){const t=x/w,len=(1-t*.7)*h*.46*(.75+Math.random()*.35);for(const s of[-1,1]){const v=140+Math.random()*90|0;g.strokeStyle=`rgb(${v*.8|0},${v},${v*.85|0})`;g.lineWidth=1.3;g.beginPath();g.moveTo(x,h/2);g.lineTo(x+len*.55,h/2+s*len);g.stroke();}}
+  g.fillStyle='#ffffff';g.fillRect(0,h-12,12,12);},{repeat:false});
+const FOLIAGE=(tex)=>{const m=new T.MeshStandardMaterial({map:tex,alphaTest:.45,side:T.DoubleSide,vertexColors:true,roughness:.92});m.userData.depth=new T.MeshDepthMaterial({depthPacking:T.RGBADepthPacking,map:tex,alphaTest:.45});return m;};
+const LEAFM=FOLIAGE(LEAFTX),NEEDLEM=FOLIAGE(NEEDLETX);let PINEG=null,BROADG2=null;
+function folBuilder(){const P=[],N=[],U=[],C=[];const col=new T.Color();
+  return{P,N,U,C,
+    card(cx,cy,cz,ax,ay,az,bx,by,bz,nx,ny,nz,u0,u1,v0,v1,hex,k){col.copy(lin(hex)).multiplyScalar(k||1);
+      const v=[[cx-ax-bx,cy-ay-by,cz-az-bz,u0,v0],[cx+ax-bx,cy+ay-by,cz+az-bz,u1,v0],[cx+ax+bx,cy+ay+by,cz+az+bz,u1,v1],[cx-ax+bx,cy-ay+by,cz-az+bz,u0,v1]];
+      for(const i of[0,1,2,0,2,3]){const q=v[i];P.push(q[0],q[1],q[2]);N.push(nx,ny,nz);U.push(q[3],q[4]);C.push(col.r,col.g,col.b);}},
+    solid(geo,hex,uv){const g=geo.index?geo.toNonIndexed():geo;const p=g.attributes.position.array,n=g.attributes.normal.array;col.copy(lin(hex));for(let i=0;i<p.length/3;i++){P.push(p[i*3],p[i*3+1],p[i*3+2]);N.push(n[i*3],n[i*3+1],n[i*3+2]);U.push(uv[0],uv[1]);C.push(col.r,col.g,col.b);}},
+    geo(){const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(P,3));g.setAttribute('normal',new T.Float32BufferAttribute(N,3));g.setAttribute('uv',new T.Float32BufferAttribute(U,2));g.setAttribute('color',new T.Float32BufferAttribute(C,3));g.computeBoundingSphere();return g;}};}
+// broadleaf tree: trunk + a few branches + ~30 leaf cards spread through an ellipsoid crown, normals pointing out of the crown
+function broadleafGeo(o){o=o||{};let s=o.seed||7;const r=()=>{s=(s*16807)%2147483647;return(s-1)/2147483646;};
+  const B=folBuilder(),cy=o.cy||4.3,R=o.r||2.1,H=o.h||1.7,n=o.n||(MOBILE?20:32),hex=o.color||'#5f9a45';
+  B.solid(new T.CylinderGeometry(.13,.24,cy+.2,7).translate(0,(cy+.2)/2,0),'#5e4430',[.03,.03]);
+  for(let k=0;k<3;k++){const a=k/3*Math.PI*2+.4,br=new T.CylinderGeometry(.05,.09,1.6,5).translate(0,.8,0).rotateZ(.7).rotateY(a).translate(0,cy-.9,0);B.solid(br,'#5e4430',[.03,.03]);}
+  for(let i=0;i<n;i++){const th=r()*Math.PI*2,ph=Math.acos(1-2*r()),rr=Math.pow(r(),.45);const dx=Math.sin(ph)*Math.cos(th),dy=Math.cos(ph),dz=Math.sin(ph)*Math.sin(th);
+    const px=dx*R*rr*.85,py=cy+dy*H*rr*.85,pz=dz*R*rr*.85;const sz=(1.1+r()*.7)*(R/2.1);
+    // random card orientation
+    const a1=r()*Math.PI*2,a2=(r()-.5)*Math.PI;const ax=Math.cos(a1)*Math.cos(a2)*sz/2,ay=Math.sin(a2)*sz/2,az=Math.sin(a1)*Math.cos(a2)*sz/2;
+    let bx=-Math.sin(a1)*sz/2,by=(r()-.5)*sz*.6,bz=Math.cos(a1)*sz/2;
+    const nl=Math.hypot(dx,dy*1.2+.25,dz)||1,shade=.62+.48*rr+(dy>0?.12:0);B.card(px,py,pz,ax,ay,az,bx,by,bz,dx/nl,(dy*1.2+.25)/nl,dz/nl,.1,.9,.1,.9,hex,shade);}
+  return B.geo();}
+// conifer: tiers of drooping branch cards around a tall trunk
+function coniferGeo(o){o=o||{};let s=o.seed||11;const r=()=>{s=(s*16807)%2147483647;return(s-1)/2147483646;};
+  const B=folBuilder(),Ht=o.h||9.6,R0=o.r||2.5,hex=o.color||'#3f6b42';
+  B.solid(new T.CylinderGeometry(.09,.3,Ht,7).translate(0,Ht/2,0),'#4e3a2a',[.02,.05]);
+  const tiers=MOBILE?7:10;for(let t=0;t<tiers;t++){const k=t/(tiers-1),y=1.8+k*(Ht-2.4),R=R0*(1-k*.86)+.25,nb=Math.max(4,Math.round(9-k*4));
+    for(let j=0;j<nb;j++){const a=j/nb*Math.PI*2+t*.7+r()*.3,ca=Math.cos(a),sa=Math.sin(a),droop=.35+r()*.2;
+      const len=R*(.9+r()*.25),wid=len*.42;const ex=ca*len/2,ey=-Math.sin(droop)*len/2,ez=sa*len/2;const cx=ex,cy=y+ey,cz=ez;
+      const bx=-sa*wid/2,bz=ca*wid/2;const shade=.7+.45*(1-k*.3)*(.85+r()*.3);
+      B.card(cx,cy,cz,ex,ey,ez,bx,0,bz,ca*.35,.94,sa*.35,.06,.98,.06,.94,hex,shade);}}
+  // a small spike at the top
+  B.card(0,Ht+.2,0,0,.7,0,.35,0,0,0,0,1,.06,.98,.06,.94,hex,1.1);B.card(0,Ht+.2,0,0,.7,0,0,0,.35,1,0,0,.06,.98,.06,.94,hex,1.1);
+  return B.geo();}
+function instFol(geo,m,list,fn){const im=inst(geo,m,list,fn,true);if(im){im.customDepthMaterial=m.userData.depth;im.frustumCulled=false;}return im;}
+
 const ROOF=new T.MeshStandardMaterial({map:TX.gravel,roughness:.95});
 const SHINGLE={red:new T.MeshStandardMaterial({map:TX.shingleRed,roughness:.9}),grey:new T.MeshStandardMaterial({map:TX.shingleGrey,roughness:.9})};
 function textTex(text,o){o=o||{};const w=o.w||512,h=o.h||128;return makeTex(w,h,(g)=>{g.fillStyle=o.bg||'rgba(0,0,0,0)';g.fillRect(0,0,w,h);g.font=`700 ${o.size||64}px ${o.font||'"Space Grotesk",Inter,system-ui,sans-serif'}`;g.textAlign='center';g.textBaseline='middle';if(o.glow){g.shadowColor=o.glow;g.shadowBlur=18;}g.fillStyle=o.fg||'#fff';g.fillText(text,w/2,h/2+2);if(o.glow){g.shadowBlur=36;g.fillText(text,w/2,h/2+2);}},{repeat:false});}
@@ -616,7 +659,7 @@ function inst(geo,m,list,fn,cast){if(!list.length)return null;const im=new T.Ins
       const y=heightAt(x,z);if(heightAt(x+3,z)-y>2.4||heightAt(x,z+3)-y>2.4)continue;trees.push([x,y,z,.8+rng()*.7]);if(bd<60*60)addCol({t:'c',x,z,r:.45});}
     const tr=new T.CylinderGeometry(.18,.28,3,6);tr.translate(0,1.5,0);const c1=new T.ConeGeometry(2.2,4.2,8);c1.translate(0,4.2,0);const c2=new T.ConeGeometry(1.6,3.4,8);c2.translate(0,6.4,0);const cones=mergeGeos([c1,c2]);cones.computeVertexNormals();
     const pl=(p,d,i)=>{d.position.set(p[0],p[1]-.1,p[2]);d.scale.setScalar(p[3]);d.rotation.y=i*1.7;};
-    const a=inst(tr,mat('#5a4030',.95),trees,pl,true),b=inst(cones,new T.MeshStandardMaterial({color:lin('#3d6e40'),map:TX.needles,roughness:.95}),trees,pl,true);if(a)a.frustumCulled=false;if(b)b.frustumCulled=false;}
+    instFol(PINEG||(PINEG=coniferGeo({seed:11})),NEEDLEM,trees,pl);}
   HZ.road=RP;HZ.roadH=h;}
 /* ===== the wilds: terrain + roads (pure math, no three.js) ===== */
 function wildBuild(ST,EXTX0,EXTZ0){
@@ -855,9 +898,9 @@ function wildBuild(ST,EXTX0,EXTZ0){
     for(let k=0;k<NR*6&&rocks.length<NR;k++){const x=W.WX0+rng()*(W.WX1-W.WX0),z=W.WZ0+rng()*(W.WZ1-W.WZ0);if(!ok(x,z,9))continue;const y=heightAt(x,z);if(y<30&&Math.hypot(x-L.x,z-L.z)>L.r+40&&rng()<.7)continue;const s=.6+rng()*2.2;rocks.push([x,y,z,s]);if(s>1)addCol({t:'c',x,z,r:s*.8});}
     const tr=new T.CylinderGeometry(.18,.3,3,6,1,true);tr.translate(0,1.5,0);const c1=new T.ConeGeometry(2.3,4.4,8,1,true);c1.translate(0,4.3,0);const c2=new T.ConeGeometry(1.7,3.6,8,1,true);c2.translate(0,6.6,0);const c3=new T.ConeGeometry(1.1,2.6,8,1,true);c3.translate(0,8.4,0);const cones=mergeGeos([c1,c2,c3]);cones.computeVertexNormals();
     const pl=(p,d,i)=>{d.position.set(p[0],p[1]-.15,p[2]);d.scale.setScalar(p[3]);d.rotation.y=i*1.7;};
-    for(const im of[inst(tr,mat('#5a4030',.95),pines,pl,true),inst(cones,new T.MeshStandardMaterial({color:lin('#3a6a3e'),map:TX.needles,roughness:.95}),pines,pl,true)])if(im)im.frustumCulled=false;
+    instFol(PINEG||(PINEG=coniferGeo({seed:11})),NEEDLEM,pines,pl);
     const bt=new T.CylinderGeometry(.22,.32,3.2,6);bt.translate(0,1.6,0);const cn=new T.IcosahedronGeometry(2.4,0);cn.translate(0,4.4,0);
-    for(const im of[inst(bt,mat('#6a4a34',.95),broad,pl,true),inst(cn,new T.MeshStandardMaterial({color:lin('#7aa84e'),map:TX.foliage,roughness:.9,flatShading:false}),broad,pl,true)])if(im)im.frustumCulled=false;
+    instFol(BROADG2||(BROADG2=broadleafGeo({seed:5,cy:4.4,r:2.4,h:1.9,color:'#6a9e48'})),LEAFM,broad,pl);
     const rg=new T.DodecahedronGeometry(1,0);const ri=inst(rg,mat('#8d877d',.95),rocks,(p,d,i)=>{d.position.set(p[0],p[1]+p[3]*.25,p[2]);d.scale.set(p[3]*1.2,p[3]*.8,p[3]);d.rotation.set(i*.7,i*1.3,0);},true);if(ri)ri.frustumCulled=false;}
   /* ---- 20 hidden Nexus gems to find around the wilds and the hills ---- */
   {const C=PL.camp,S=PL.summit,F=PL.farm,V=PL.village,M=WILD.mineIn;const pts=[[S.x-9,S.z-6],[L.x+14,L.z-L.r-24],[L.x+2,L.z+L.r-12],[C.x+10,C.z-14],[M.x,M.z],[F.x+36,F.z-46],[V.x+12,V.z+18],[SP.lighthouse.x+5,SP.lighthouse.z+4],
@@ -1099,9 +1142,9 @@ function wildBuild(ST,EXTX0,EXTZ0){
     const im1=inst(pole,mat('#2b2f36',.5,.5),LAMPS,(p,d)=>d.position.set(p[0],p[1],p[2]),true),im2=inst(head,new T.MeshBasicMaterial({color:0xfff1c8,toneMapped:false}),LAMPS,(p,d)=>d.position.set(p[0],p[1],p[2]),false);for(const im of[im1,im2])if(im)im.frustumCulled=false;}
   {const pl=(p,d,i)=>{d.position.set(p[0],p[1]-.15,p[2]);d.scale.setScalar(p[3]);d.rotation.y=i*1.7;};
     const bt=new T.CylinderGeometry(.22,.32,3.2,6);bt.translate(0,1.6,0);const cn=new T.IcosahedronGeometry(2.4,0);cn.translate(0,4.4,0);
-    for(const im of[inst(bt,mat('#6a4a34',.95),TREES,pl,true),inst(cn,new T.MeshStandardMaterial({color:lin('#6f9e48'),map:TX.foliage,roughness:.9}),TREES,pl,true)])if(im)im.frustumCulled=false;
+    instFol(BROADG2||(BROADG2=broadleafGeo({seed:5,cy:4.4,r:2.4,h:1.9,color:'#6a9e48'})),LEAFM,TREES,pl);
     const tr=new T.CylinderGeometry(.18,.3,3,6,1,true);tr.translate(0,1.5,0);const c1=new T.ConeGeometry(2.3,4.4,8,1,true);c1.translate(0,4.3,0);const c2=new T.ConeGeometry(1.7,3.6,8,1,true);c2.translate(0,6.6,0);const c3=new T.ConeGeometry(1.1,2.6,8,1,true);c3.translate(0,8.4,0);const cones=mergeGeos([c1,c2,c3]);cones.computeVertexNormals();
-    for(const im of[inst(tr,mat('#5a4030',.95),PINES,pl,true),inst(cones,new T.MeshStandardMaterial({color:lin('#3a6a3e'),map:TX.needles,roughness:.95}),PINES,pl,true)])if(im)im.frustumCulled=false;
+    instFol(PINEG||(PINEG=coniferGeo({seed:11})),NEEDLEM,PINES,pl);
     const fg=new T.SphereGeometry(.16,6,5);const groups={};for(const f of FLOW)(groups[f[3]]||(groups[f[3]]=[])).push(f);for(const c in groups){const im=inst(fg,mat(c,.7),groups[c],(p,d)=>{d.position.set(p[0],p[1]+.28,p[2]);},false);if(im)im.frustumCulled=false;}}
   // fishing boats that bob on the swell
   for(const b of BOATS){const g=new T.Group();const L2=b.len;g.add(new T.Mesh(buildVC([{geo:new T.BoxGeometry(2.6,1.1,L2),pos:[0,.35,0],color:b.c},{geo:new T.BoxGeometry(2.7,.18,L2+.1),pos:[0,.95,0],color:'#f4f1ea'},{geo:new T.CylinderGeometry(0,1.3,2.2,4).rotateX(Math.PI/2).rotateZ(Math.PI/4),pos:[0,.45,L2/2+1],color:b.c},
@@ -1288,8 +1331,7 @@ const VCM=new T.MeshStandardMaterial({vertexColors:true,roughness:.85}),VCMI=new
 // round street/park trees: trunk + lumpy canopy merged into one vertex-coloured geometry, one InstancedMesh
 {const can=new T.IcosahedronGeometry(1.9,1);const cp=can.attributes.position;for(let i=0;i<cp.count;i++){const x=cp.getX(i),y=cp.getY(i),z=cp.getZ(i),k=1+Math.sin(x*3.1+z*2.3)*.12+Math.cos(y*4.2)*.08;cp.setXYZ(i,x*k,y*k*.85,z*k);}can.computeVertexNormals();
   const can2=new T.IcosahedronGeometry(1.3,1);
-  const g=buildVC([{geo:new T.CylinderGeometry(.16,.24,3.2,7),pos:[0,1.6,0],color:'#6b4c34'},{geo:can,pos:[0,4.2,0],color:'#4f8a3a'},{geo:can2,pos:[.9,3.6,.5],color:'#5d9a42'},{geo:can2,pos:[-.8,4.9,-.4],color:'#46803a'}]);
-  const FOLM=new T.MeshStandardMaterial({vertexColors:true,roughness:.9,map:TX.foliage});const im=inst(g,FOLM,props.tree,(p,d,i)=>{d.position.set(p[0],.25,p[1]);d.rotation.y=i*1.7;d.scale.setScalar(p[2]);},true);
+  const g=broadleafGeo({seed:3,cy:4.1,r:2.0,h:1.6});const im=instFol(g,LEAFM,props.tree,(p,d,i)=>{d.position.set(p[0],.25,p[1]);d.rotation.y=i*1.7;d.scale.setScalar(p[2]);});
   if(im){const c=new T.Color();props.tree.forEach((p,i)=>{c.setHSL(.2+((i*13)%10)/90,.25+((i*7)%10)/50,.72+((i*11)%10)/60);c.multiplyScalar(1.25);im.setColorAt(i,c);});im.instanceColor.needsUpdate=true;}}
 // hydrants and bins
 {const hy=buildVC([{geo:new T.CylinderGeometry(.16,.18,.7,10),pos:[0,.35,0],color:'#c8281e'},{geo:new T.SphereGeometry(.17,10,6,0,Math.PI*2,0,Math.PI/2),pos:[0,.7,0],color:'#c8281e'},{geo:new T.CylinderGeometry(.06,.06,.42,6).rotateZ(Math.PI/2),pos:[0,.48,0],color:'#d8d8d8'}]);
