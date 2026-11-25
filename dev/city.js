@@ -586,7 +586,7 @@ function wildBuild(ST,EXTX0,EXTZ0){
     v+=160*Math.max(ss(-1290,-1480,x),ss(-1490,-1680,z));
     v*=ss(0,80,dc)*ss(-110,-175,z)*ss(445,385,x);
     return Math.max(.04,v);};
-  const L=PL.lake;L.y=Math.round(nat0(L.x,L.z)-1);
+  const L=PL.lake;{let m=1e9;for(let a=0;a<6.28;a+=.2)m=Math.min(m,nat0(L.x+Math.cos(a)*(L.r+25),L.z+Math.sin(a)*(L.r+25)));L.y=Math.round(Math.min(nat0(L.x,L.z),m)-2);}
   PL.farm.r=75;const flats=[[PL.village,90,40],[PL.camp,22,25],[PL.mine,16,18],[PL.farm,75,40]];for(const[p]of flats)p.y=nat0(p.x,p.z);
   /* ---- roads: Catmull-Rom through hand-placed points, resampled every 2 m ---- */
   const spline=CP=>{const raw=[];for(let k=0;k<CP.length-1;k++){const p0=CP[Math.max(0,k-1)],p1=CP[k],p2=CP[k+1],p3=CP[Math.min(CP.length-1,k+2)];
@@ -622,14 +622,15 @@ function wildBuild(ST,EXTX0,EXTZ0){
     if(x<EXTX0+2){const dzr=Math.max(RZ0-z,z-RZ1);if(dzr<16)v=dzr<=0?-3:-3*(1-ss(0,16,dzr))+v*ss(0,16,dzr);}
     // rock face behind the old mine portal
     {const M=PL.mine,ux=-105/163.4,uz=-125/163.4,ex=M.x+ux*13,ez=M.z+uz*13,dm=(x-ex)*ux+(z-ez)*uz,lat=Math.abs((x-ex)*uz-(z-ez)*ux);if(dm>-1&&lat<16)v=Math.max(v,M.y+Math.min(14,(dm+1)*3.2)*(1-ss(9,16,lat)));}
-    const ds=hy(x-PL.summit.x,z-PL.summit.z);if(ds<260)v=Math.min(v,PL.summit.y+1+Math.max(0,ds-SUMR)*.2);if(ds<SUMR+22){const w=1-ss(SUMR,SUMR+22,ds);v=v*(1-w)+PL.summit.y*w;}
+    const ds=hy(x-PL.summit.x,z-PL.summit.z);if(ds<330)v=Math.min(v,PL.summit.y+1+Math.max(0,ds-SUMR)*.075+Math.max(0,ds-200)*.5);if(ds<SUMR+22){const w=1-ss(SUMR,SUMR+22,ds);v=v*(1-w)+PL.summit.y*w;}
     const d=RD[k];if(d<RM){const bh=RH[k],reach=Math.min(RM,10+Math.max(9,Math.abs(v-bh)*1.5));if(d<reach){const w=1-ss(8,reach,d);v=v*(1-w)+bh*w;}}
     H[k]=Math.max(-12,v);}
   const G={X0,Z0,ST,NX,NZ,H,RD};
   return{G,roads,PL,nat0,ss,nz,bump,jb,WX0,WX1,WZ0,WZ1};}
 /* ---------- the wilds north and west of the city: meadow, pine forest, a lake with a waterfall, a village with farms,
    a campsite, an old mine, a lighthouse and a mountain summit, joined by a country road ---------- */
-{const W=wildBuild(MOBILE?8:6,EXT.x0,EXT.z0),G=W.G,PL=W.PL,ss=W.ss,nz=W.nz;WGRID=G;
+{const glowTex0=()=>makeTex(64,64,(g)=>{const r=g.createRadialGradient(32,32,0,32,32,32);r.addColorStop(0,'rgba(255,230,190,1)');r.addColorStop(.3,'rgba(255,170,80,.5)');r.addColorStop(1,'rgba(255,120,40,0)');g.fillStyle=r;g.fillRect(0,0,64,64);},{repeat:false});
+  const W=wildBuild(MOBILE?8:6,EXT.x0,EXT.z0),G=W.G,PL=W.PL,ss=W.ss,nz=W.nz;WGRID=G;
   Object.assign(WILD,{PL,roads:W.roads,jb:W.jb,lake:PL.lake,gems:[],places:[],anim:{}});
   const L=PL.lake,{X0,Z0,ST,NX,NZ,H,RD}=G;
   const rng=(()=>{let s=4242;return()=>{s=(s*16807)%2147483647;return s/2147483647;};})();
@@ -645,7 +646,7 @@ function wildBuild(ST,EXTX0,EXTZ0){
       if(city<260&&nz(x*5.1,z*4.7)>.55)c.lerp(nz(x*3,z*7)>0?fl:fw,.55);
       if(city>230)c.lerp(forest,clamp((city-230)/200,0,.6)*clamp(.6+nz(x*.7,z*.9),0,1));
       c.lerp(rock,clamp((slope-.18)*3.2,0,1));if(y>92)c.lerp(snow,clamp((y-92)/18,0,1)*clamp(1-(slope-.35)*2,0,1));
-      const dl=Math.hypot(x-L.x,z-L.z);if(dl<L.r+5)c.lerp(mud,clamp((L.r+5-dl)/6,0,1));if(RD[k]<11)c.lerp(dirt,.45);
+      const dl=Math.hypot(x-L.x,z-L.z);if(dl<L.r+5)c.lerp(mud,clamp((L.r+5-dl)/6,0,1));{const M=PL.mine,dm=Math.hypot(x-(M.x-8.4),z-(M.z-10));if(dm<24)c.lerp(rock,clamp((24-dm)/8,0,.85));}if(RD[k]<11)c.lerp(dirt,.45);
       col[k*3]=c.r;col[k*3+1]=c.g;col[k*3+2]=c.b;}
     const idx=[];for(let iz=0;iz<NZ-1;iz++)for(let ix=0;ix<NX-1;ix++){const x=X0+(ix+.5)*ST,z=Z0+(iz+.5)*ST;if(inCity(x,z)||x>452)continue;const a=iz*NX+ix,b=a+1,cc=a+NX,d=cc+1;idx.push(a,cc,b,b,cc,d);}
     const tg=new T.BufferGeometry();tg.setAttribute('position',new T.BufferAttribute(pos,3));tg.setAttribute('normal',new T.BufferAttribute(nor,3));tg.setAttribute('uv',new T.BufferAttribute(uv,2));tg.setAttribute('color',new T.BufferAttribute(col,3));tg.setIndex(idx);tg.computeBoundingSphere();
@@ -703,7 +704,8 @@ function wildBuild(ST,EXTX0,EXTZ0){
     for(const s of WILD.shops)sign(s.id==='mart'?'TẠP HOÁ':'QUÁN CƠM',s.x,vy+3,s.z+(s.z>V.z?-.05:.05)+(s.z>V.z?-.5:.5),s.z>V.z?Math.PI:0,3.4,.8,{fg:'#fff',bg:s.id==='mart'?'#b5382b':'#2b6cb0',size:64,w:512,h:120});
     const wl=buildVC([{geo:new T.CylinderGeometry(1.2,1.3,1,14),pos:[0,.5,0],color:'#9a958c'},{geo:new T.CylinderGeometry(1,1,.05,14),pos:[0,.98,0],color:'#1f3b4a'},{geo:new T.BoxGeometry(.15,2.4,.15),pos:[-1.1,1.2,0],color:'#5a4030'},{geo:new T.BoxGeometry(.15,2.4,.15),pos:[1.1,1.2,0],color:'#5a4030'},{geo:new T.BoxGeometry(2.8,.12,1.6),pos:[0,2.45,0],color:'#7a3b2e'}]);
     const wm=new T.Mesh(wl,new T.MeshStandardMaterial({vertexColors:true,roughness:.85}));wm.position.set(V.x+12,vy,V.z+14);wm.castShadow=Q.shadows;scene.add(wm);addCol({t:'c',x:V.x+12,z:V.z+14,r:1.4});
-    sign('LÀNG THÔNG',V.x+70,vy+3.6,V.z-12,Math.PI/2,6,1.2,{fg:'#fff',bg:'#7a5232',size:64,w:512,h:110});
+    {const R1=W.roads[0];let bi=0,bd=1e9;R1.P.forEach((p,i)=>{const dd=hyp(p[0]-(V.x+75),p[1]-V.z);if(dd<bd){bd=dd;bi=i;}});const a=R1.P[bi-1],b=R1.P[bi+1],tx=b[0]-a[0],tz=b[1]-a[1],l=hyp(tx,tz),sx=R1.P[bi][0]+(-tz/l)*8,sz=R1.P[bi][1]+(tx/l)*8,sy=heightAt(sx,sz);
+    sign('LÀNG THÔNG',sx,sy+3.4,sz,Math.atan2(tx,tz)+Math.PI,6,1.2,{fg:'#fff',bg:'#7a5232',size:64,w:512,h:110});for(const o of[-2.6,2.6]){const pm=new T.Mesh(new T.CylinderGeometry(.09,.09,4,6),mat('#5a4030',.9));pm.position.set(sx+(tx/l)*o,sy+2,sz+(tz/l)*o);scene.add(pm);}}
     for(const[dx,dz]of[[-30,-12],[20,-12],[-20,12],[30,12],[70,-14]])props.flood.push([V.x+dx,V.z+dz,vy+4.2]);
     WILD.places.push({id:'village',n:'Làng Thông',en:'Pine Village',x:V.x,z:V.z,r:70,rw:250});SP.village={x:V.x,z:V.z};}
   /* ---- farm: barn, silo, fields of wheat and vegetables, fences, hay bales ---- */
@@ -729,7 +731,8 @@ function wildBuild(ST,EXTX0,EXTZ0){
     fire.add(new T.Mesh(buildVC(stones),new T.MeshStandardMaterial({vertexColors:true,roughness:.9})));
     const f1=new T.Mesh(new T.ConeGeometry(.45,1.3,8),new T.MeshBasicMaterial({color:'#ff7a1a',transparent:true,opacity:.9,toneMapped:false}));f1.position.y=.75;
     const f2=new T.Mesh(new T.ConeGeometry(.25,.9,8),new T.MeshBasicMaterial({color:'#ffd27a',transparent:true,opacity:.95,toneMapped:false}));f2.position.y=.6;fire.add(f1,f2);
-    const gl=new T.Mesh(new T.CircleGeometry(4,24).rotateX(-Math.PI/2),new T.MeshBasicMaterial({map:makeTex(64,64,(g,w,h)=>{const r=g.createRadialGradient(32,32,0,32,32,32);r.addColorStop(0,'rgba(255,160,60,.9)');r.addColorStop(1,'rgba(255,120,40,0)');g.fillStyle=r;g.fillRect(0,0,w,h);},{repeat:false}),transparent:true,depthWrite:false,blending:T.AdditiveBlending,toneMapped:false}));gl.position.y=.05;fire.add(gl);
+    const gl=new T.Mesh(new T.CircleGeometry(8,24).rotateX(-Math.PI/2),new T.MeshBasicMaterial({map:makeTex(64,64,(g,w,h)=>{const r=g.createRadialGradient(32,32,0,32,32,32);r.addColorStop(0,'rgba(255,160,60,.9)');r.addColorStop(1,'rgba(255,120,40,0)');g.fillStyle=r;g.fillRect(0,0,w,h);},{repeat:false}),transparent:true,depthWrite:false,blending:T.AdditiveBlending,toneMapped:false}));gl.position.y=.05;fire.add(gl);
+    {const sp=new T.Sprite(new T.SpriteMaterial({map:glowTex0(),color:'#ffb060',transparent:true,depthWrite:false,blending:T.AdditiveBlending,toneMapped:false}));sp.scale.set(6,6,1);sp.position.y=1.1;fire.add(sp);WILD.anim.fireSp=sp;}
     fire.position.set(C.x,cy,C.z+2);scene.add(fire);WILD.anim.fire={f1,f2,gl};addCol({t:'c',x:C.x,z:C.z+2,r:.9});
     const lg=new T.CylinderGeometry(.28,.28,2.2,8);lg.rotateZ(Math.PI/2);lg.translate(0,.28,0);const logs=[[0,4.2,0],[-3.3,1.6,1.1],[3.3,1.6,-1.1]];
     inst(lg,mat('#6b4a32',.9),logs,(p,d)=>{d.position.set(C.x+p[0],cy,C.z+2+p[1]);d.rotation.y=p[2];},true);
@@ -751,7 +754,7 @@ function wildBuild(ST,EXTX0,EXTZ0){
     WILD.mineIn={x:ex-ux*.9,z:ez-uz*.9,y:my};WILD.places.push({id:'mine',n:'Mỏ Cũ',en:'The Old Mine',x:M.x,z:M.z,r:26,rw:300});}
   /* ---- summit: stone plaza, lattice radio mast with a blinking light, flag, benches ---- */
   {const S=PL.summit,sy=S.y;const pl=new T.CircleGeometry(S.r,48);pl.rotateX(-Math.PI/2);const m=new T.Mesh(pl,new T.MeshStandardMaterial({map:TX.walk,color:lin('#cfc6b6'),roughness:.9}));m.position.set(S.x,sy+.1,S.z);m.receiveShadow=Q.shadows;scene.add(m);
-    const wall=new T.TorusGeometry(S.r,.35,8,64,Math.PI*1.6);wall.rotateX(Math.PI/2);wall.rotateY(-Math.PI*.15);const wm=new T.Mesh(wall,mat('#bfb6a6',.85));wm.position.set(S.x,sy+.45,S.z);scene.add(wm);
+    const wall=new T.TorusGeometry(S.r,.22,6,64,Math.PI*1.6);wall.rotateX(Math.PI/2);wall.rotateY(-Math.PI*.15);const wm=new T.Mesh(wall,mat('#bfb6a6',.85));wm.position.set(S.x,sy+.3,S.z);scene.add(wm);
     const lt=makeTex(64,256,(g,w,h)=>{g.clearRect(0,0,w,h);g.strokeStyle='#e04040';g.lineWidth=5;g.strokeRect(2,0,w-4,h);for(let y=0;y<h;y+=32){g.beginPath();g.moveTo(0,y);g.lineTo(w,y+32);g.moveTo(w,y);g.lineTo(0,y+32);g.stroke();g.beginPath();g.moveTo(0,y);g.lineTo(w,y);g.stroke();}},{repeat:true});lt.repeat.set(1,4);
     const mast=new T.Mesh(new T.CylinderGeometry(.45,2.2,30,4,1,true),new T.MeshStandardMaterial({map:lt,transparent:true,alphaTest:.4,side:T.DoubleSide,roughness:.6,metalness:.5}));mast.position.set(S.x+6,sy+15,S.z-5);mast.rotation.y=Math.PI/4;scene.add(mast);
     const bl=new T.Mesh(new T.SphereGeometry(.35,10,8),new T.MeshBasicMaterial({color:'#ff2a2a',toneMapped:false}));bl.position.set(S.x+6,sy+30.4,S.z-5);scene.add(bl);WILD.anim.blink=bl;addCol({t:'c',x:S.x+6,z:S.z-5,r:2});
@@ -2158,7 +2161,7 @@ function wildUpdate(dt){const A=WILD.anim,nk=1-tod.day,me=P.car||P;
   const wf=inWildArea(me.x,me.z)?(MOBILE?1.5:2.2):1;wildFog+=(wf-wildFog)*Math.min(1,dt*.6);scene.fog.far*=wildFog;
   if(A.fall)A.fall.offset.y+=dt*1.4;
   if(A.foam){const k=1+Math.sin(time*3)*.06;A.foam.scale.set(k,1,k);A.foam.material.opacity=.42+Math.sin(time*5)*.08;}
-  if(A.fire){const f=A.fire,k=1+Math.sin(time*17)*.12+Math.sin(time*29)*.08;f.f1.scale.set(1,k,1);f.f2.scale.set(1,1.3-k*.3,1);f.gl.material.opacity=.35+nk*.65;}
+  if(A.fire){const f=A.fire,k=1+Math.sin(time*17)*.12+Math.sin(time*29)*.08;f.f1.scale.set(1,k,1);f.f2.scale.set(1,1.3-k*.3,1);f.gl.material.opacity=.35+nk*.65;if(A.fireSp){A.fireSp.material.opacity=.25+nk*.75;const q=5.5+Math.sin(time*13)*.4;A.fireSp.scale.set(q,q,1);}}
   if(A.blink)A.blink.visible=Math.floor(time*1.2)%2===0;
   if(A.flag)A.flag.rotation.y=Math.sin(time*1.7)*.25;
   if(A.beam){const b=A.beam;b.g.rotation.y+=dt*.9;b.g.visible=nk>.15;b.m.opacity=.16*Math.min(1,(nk-.15)*3);b.lamp.material.color.setHex(nk>.15?0xfff2b0:0xb8b8a8);}
