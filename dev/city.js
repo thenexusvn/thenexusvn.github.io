@@ -1360,7 +1360,7 @@ function gunGeo(w){if(WMESH[w])return WMESH[w];const L2=WEAP[w].len,parts=[{geo:
   return WMESH[w]=buildVC(parts);}
 const GUNM=new T.MeshStandardMaterial({vertexColors:true,roughness:.45,metalness:.5});
 function attachWeapon(){if(weaponMesh&&weaponMesh.parent)weaponMesh.parent.remove(weaponMesh);weaponMesh=null;if(P.weapon==='fist')return;weaponMesh=new T.Mesh(gunGeo(P.weapon),GUNM);weaponMesh.castShadow=Q.shadows;P.H.elR.add(weaponMesh);}
-function selectWeapon(w){if(w!=='fist'&&!save.weapons[w]){showPrompt(L('Chưa có súng này · mua ở Súng Tầm Xa','You do not own this gun · buy it at Súng Tầm Xa'),1.6);return;}P.weapon=w;P.trigger=false;attachWeapon();hudT=0;lastHUD='';}
+function selectWeapon(w){if(w!=='fist'&&!save.weapons[w]){showPrompt(L('Chưa có súng này · mua ở Súng Tầm Xa','You do not own this gun · buy it at Long Range Guns'),1.6);return;}P.weapon=w;P.trigger=false;attachWeapon();hudT=0;lastHUD='';}
 function cycleWeapon(){const own=WORDER.filter(w=>w==='fist'||save.weapons[w]);const i=own.indexOf(P.weapon);selectWeapon(own[(i+1)%own.length]);}
 function giveCopGun(n){const m=new T.Mesh(gunGeo('pistol'),GUNM);n.H.elR.add(m);n.gun=true;}
 // tracers (one LineSegments, pooled) and muzzle flashes (reuse the impact sprites)
@@ -1378,7 +1378,7 @@ function rayHit(o,d,range,ignore){let best=range,hit=null,kind=null;
   if(d.y<-1e-3){const t=-o.y/d.y;if(t<best){best=t;hit=null;kind='ground';}}
   for(let t=1;t<best;t+=1){const x=o.x+d.x*t,y=o.y+d.y*t,z=o.z+d.z*t;if(inBld(x,z,y)&&y<60){best=t;hit=null;kind='wall';break;}}
   return{t:best,hit,kind};}
-function fireWeapon(){const w=P.weapon,W=WEAP[w];if(!W)return;if(save.ammo[w]<=0){sfx('empty');showPrompt(L('Hết đạn · mua thêm ở Súng Tầm Xa','Out of ammo · buy more at Súng Tầm Xa'),1.4);P.trigger=false;return;}
+function fireWeapon(){const w=P.weapon,W=WEAP[w];if(!W)return;if(save.ammo[w]<=0){sfx('empty');showPrompt(L('Hết đạn · mua thêm ở Súng Tầm Xa','Out of ammo · buy more at Long Range Guns'),1.4);P.trigger=false;return;}
   save.ammo[w]--;P.fireCD=W.rate;P.lastShot=time;P.lastPunch=time;sfx(w);cam.shake=Math.max(cam.shake,w==='rifle'?.06:.03);
   muzzlePos(P.H,_o);if(P.aiming){camera.getWorldDirection(_d);const tgt=camera.position.clone().addScaledVector(_d,60);_d.copy(tgt).sub(_o).normalize();}
   else{const f=nearestFoe(W.range*.6,1.2);if(f){P.h=Math.atan2(f.x-P.x,f.z-P.z);_d.set(f.x-_o.x,1.25-_o.y,f.z-_o.z).normalize();}else _d.set(Math.sin(P.h),0,Math.cos(P.h));}
