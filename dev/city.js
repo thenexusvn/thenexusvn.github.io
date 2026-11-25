@@ -1203,7 +1203,7 @@ const humanPool=[];
 const HG2=(()=>{const V=(x,y)=>new T.Vector2(x,y);
   const limb=(r0,r1,len,bul)=>{const p=[];const n=5;for(let i=0;i<=n;i++){const a=i/n*Math.PI/2;p.push(V(Math.sin(a)*r1,-len-Math.cos(a)*r1*.7));}
     p.push(V(r1*1.03,-len*.78),V((r0+r1)/2*(1+bul),-len*.42),V(r0*1.02,-len*.12));for(let i=0;i<=n;i++){const a=(1-i/n)*Math.PI/2;p.push(V(Math.sin(a)*r0,Math.cos(a)*r0*.65));}return new T.LatheGeometry(p,14);};
-  const torso=(w,c,s)=>new T.LatheGeometry([V(0,-.02),V(w*.98,-.015),V(w,.05),V(w*1.08,.14),V(c,.28),V(c*1.02,.38),V(s,.47),V(s*.82,.54),V(.075,.585),V(0,.59)],18);
+  const torso=(w,c,s)=>new T.LatheGeometry([V(0,-.02),V(w*.98,-.015),V(w,.05),V(w*1.08,.14),V(c,.28),V(c*1.02,.38),V(s,.45),V(s*.93,.52),V(s*.62,.565),V(.075,.59),V(0,.595)],18);
   const pelvis=(w)=>new T.LatheGeometry([V(0,-.14),V(w*.72,-.13),V(w*.97,-.06),V(w,.03),V(w*.9,.085),V(0,.09)],18);
   const belt=new T.TorusGeometry(.163,.014,6,28);belt.rotateX(Math.PI/2);
   const pony=new T.CylinderGeometry(.045,.018,.34,10);pony.translate(0,-.17,0);pony.rotateX(.42);
@@ -1215,7 +1215,7 @@ const HG2=(()=>{const V=(x,y)=>new T.Vector2(x,y);
     head:new T.SphereGeometry(.118,24,18),jaw:new T.SphereGeometry(.09,18,12),ear:new T.SphereGeometry(.026,8,6),nose:new T.SphereGeometry(.021,10,8),eye:new T.SphereGeometry(.0185,10,8),iris:new T.SphereGeometry(.0105,8,6),
     brow:new T.BoxGeometry(.048,.011,.014),mouth:new T.BoxGeometry(.044,.009,.01),neck:new T.CylinderGeometry(.052,.058,.13,12),
     hairCap:new T.SphereGeometry(.126,24,12,0,Math.PI*2,0,Math.PI*.36),hairBack:new T.SphereGeometry(.124,20,10,Math.PI*.85,Math.PI*1.3,Math.PI*.3,Math.PI*.33),pony,longH,bun,
-    bust:new T.SphereGeometry(.068,14,10),panel:new T.BoxGeometry(.17,.4,.016),collar:new T.TorusGeometry(.085,.016,6,20,Math.PI),
+    bust:new T.SphereGeometry(.068,14,10),panel:new T.BoxGeometry(.12,.38,.016),collar:new T.TorusGeometry(.085,.016,6,20,Math.PI),
     hand:new T.SphereGeometry(.048,12,10),thumb,shoe:new T.SphereGeometry(.07,14,10),sole:new T.BoxGeometry(.118,.03,.275),glasses:new T.TorusGeometry(.024,.004,6,14),cap:HG.cap,brim:HG.brim,skirt:HG.skirt,shadow:HG.shadow};})();
 const mixHex=(a,b,k)=>{const A=new T.Color(a),B=new T.Color(b);return '#'+A.lerp(B,k).getHexString();};
 function makeHuman(o){
@@ -1224,11 +1224,11 @@ function makeHuman(o){
   const root=new T.Group(),hips=new T.Group();root.rotation.order='YXZ';hips.position.y=.95;root.add(hips);if(F)root.scale.setScalar(.95);
   const hp=[{geo:F?G.pelvisF:G.pelvisM,color:o.pants,scale:[1,1,.72]},{geo:G.belt,color:'#2a2522',pos:[0,.06,0],scale:[F?1.08:1,1,.72]}];if(o.skirt)hp.push({geo:G.skirt,color:o.pants,pos:[0,-.1,0]});mk(hp,hips);
   const spine=new T.Group();spine.position.y=.06;hips.add(spine);
-  const sp=[{geo:F?G.torsoF:G.torsoM,color:top,scale:[1,1,.64]},{geo:G.neck,color:o.skin,pos:[0,.63,0]}];
+  const sp=[{geo:F?G.torsoF:G.torsoM,color:top,scale:[1,1,.64]},{geo:G.neck,color:o.skin,pos:[0,.62,0],scale:[1.15,1,1.1]}];
   if(F)for(const s of[-1,1])sp.push({geo:G.bust,color:top,pos:[s*.068,.34,.075],scale:[1,.95,.85]});
   if(o.jacket){sp.push({geo:G.panel,color:o.shirt,pos:[0,.27,F?.118:.124]});sp.push({geo:G.collar,color:o.jacket,pos:[0,.55,.02],scale:[1.2,1,1]});}
   mk(sp,spine);
-  const head=new T.Group();head.position.y=.8;spine.add(head);
+  const head=new T.Group();head.position.y=.775;spine.add(head);
   const sk=o.skin,dk=mixHex(sk,'#000000',.18),hd=[{geo:G.head,color:sk,scale:[.95,1.1,1.04]},{geo:G.jaw,color:o.beard?mixHex(sk,o.hair,.55):sk,pos:[0,-.062,.022],scale:[F?.86:.96,.74,.95]},
     {geo:G.ear,color:dk,pos:[-.112,-.005,0],scale:[.5,1,.8]},{geo:G.ear,color:dk,pos:[.112,-.005,0],scale:[.5,1,.8]},{geo:G.nose,color:sk,pos:[0,-.018,.118],scale:[.8,1.35,1.1]},
     {geo:G.mouth,color:F?'#b4505c':'#8f4a46',pos:[0,-.07,.104]}];
@@ -1241,7 +1241,7 @@ function makeHuman(o){
   if(o.cap)hd.push({geo:G.cap,color:o.cap,pos:[0,.1,0]},{geo:G.brim,color:o.cap,pos:[0,.07,.13]});
   mk(hd,head);
   const arm={},el={},sleeve=o.sleeve===false?o.skin:top,fore=o.longSleeve||o.jacket?top:o.skin;
-  for(const s of[-1,1]){const sh=new T.Group();sh.position.set(s*(F?.21:.235),.55,0);sh.rotation.z=s*.07;spine.add(sh);mk([{geo:G.upper,color:sleeve,scale:F?[.9,1,.9]:[1,1,1]}],sh);const e=new T.Group();e.position.y=-.3;sh.add(e);
+  for(const s of[-1,1]){const sh=new T.Group();sh.position.set(s*(F?.2:.222),.5,0);sh.rotation.z=s*.07;spine.add(sh);mk([{geo:G.upper,color:sleeve,scale:F?[.9,1,.9]:[1,1,1]}],sh);const e=new T.Group();e.position.y=-.3;sh.add(e);
     mk([{geo:G.fore,color:fore,scale:F?[.9,1,.9]:[1,1,1]},{geo:G.hand,color:o.skin,pos:[0,-.3,.005],scale:[.72,1,.42]},{geo:G.thumb,color:o.skin,pos:[-s*.03,-.28,.018]}],e);arm[s]=sh;el[s]=e;}
   const leg={},kn={},legC=o.skirt?o.skin:o.pants;
   for(const s of[-1,1]){const hpG=new T.Group();hpG.position.set(s*(F?.095:.09),-.04,0);hips.add(hpG);mk([{geo:G.thigh,color:legC,scale:F?[1.04,1,1]:[1,1,1]}],hpG);const k=new T.Group();k.position.y=-.46;hpG.add(k);
