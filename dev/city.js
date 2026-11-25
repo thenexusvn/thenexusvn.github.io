@@ -252,17 +252,33 @@ function broadleafGeo(o){o=o||{};let s=o.seed||7;const r=()=>{s=(s*16807)%214748
   return B.geo();}
 // conifer: tiers of drooping branch cards around a tall trunk
 function coniferGeo(o){o=o||{};let s=o.seed||11;const r=()=>{s=(s*16807)%2147483647;return(s-1)/2147483646;};
-  const B=folBuilder(),Ht=o.h||9.6,R0=o.r||2.5,hex=o.color||'#3f6b42';
+  const B=folBuilder(),Ht=o.h||9.6,R0=o.r||3.0,hex=o.color||'#557f4c';
   B.solid(new T.CylinderGeometry(.09,.3,Ht,7).translate(0,Ht/2,0),'#4e3a2a',[.02,.05]);
-  const tiers=MOBILE?7:10;for(let t=0;t<tiers;t++){const k=t/(tiers-1),y=1.8+k*(Ht-2.4),R=R0*(1-k*.86)+.25,nb=Math.max(4,Math.round(9-k*4));
+  const tiers=MOBILE?9:14;for(let t=0;t<tiers;t++){const k=t/(tiers-1),y=1.5+k*(Ht-2.1),R=R0*(1-k*.88)+.3,nb=Math.max(5,Math.round((MOBILE?9:13)-k*7));
     for(let j=0;j<nb;j++){const a=j/nb*Math.PI*2+t*.7+r()*.3,ca=Math.cos(a),sa=Math.sin(a),droop=.35+r()*.2;
-      const len=R*(.9+r()*.25),wid=len*.42;const ex=ca*len/2,ey=-Math.sin(droop)*len/2,ez=sa*len/2;const cx=ex,cy=y+ey,cz=ez;
+      const len=R*(.95+r()*.3),wid=len*.62;const ex=ca*len/2,ey=-Math.sin(droop)*len/2,ez=sa*len/2;const cx=ex,cy=y+ey,cz=ez;
       const bx=-sa*wid/2,bz=ca*wid/2;const shade=.7+.45*(1-k*.3)*(.85+r()*.3);
       B.card(cx,cy,cz,ex,ey,ez,bx,0,bz,ca*.35,.94,sa*.35,.06,.98,.06,.94,hex,shade);}}
   // a small spike at the top
   B.card(0,Ht+.2,0,0,.7,0,.35,0,0,0,0,1,.06,.98,.06,.94,hex,1.1);B.card(0,Ht+.2,0,0,.7,0,0,0,.35,1,0,0,.06,.98,.06,.94,hex,1.1);
   return B.geo();}
 function instFol(geo,m,list,fn){const im=inst(geo,m,list,fn,true);if(im){im.customDepthMaterial=m.userData.depth;im.frustumCulled=false;}return im;}
+
+/* ---------- grass tufts around the player on the hills and in the wilds (one instanced mesh, recycled as you move) ---------- */
+const GRASSTX=makeTex(128,128,(g,w,h)=>{g.clearRect(0,0,w,h);for(let i=0;i<70;i++){const x=6+Math.random()*(w-12),ht=h*(.45+Math.random()*.55),lean=(Math.random()-.5)*26,v=120+Math.random()*110|0;
+  const gr=g.createLinearGradient(0,h,0,h-ht);gr.addColorStop(0,`rgb(${v*.45|0},${v*.6|0},${v*.3|0})`);gr.addColorStop(1,`rgb(${v*.85|0},${v},${v*.55|0})`);g.fillStyle=gr;g.beginPath();g.moveTo(x-2.2,h);g.quadraticCurveTo(x+lean*.4,h-ht*.6,x+lean,h-ht);g.quadraticCurveTo(x+lean*.4+1,h-ht*.6,x+2.2,h);g.fill();}},{repeat:false});
+const GRASS=(()=>{if(MOBILE)return null;const CELL=1.6,RAD=34,NC=Math.ceil(RAD*2/CELL),COUNT=NC*NC;
+  const q=[];for(let k=0;k<3;k++){const a=k/3*Math.PI;const ca=Math.cos(a)*.55,sa=Math.sin(a)*.55;q.push([-ca,0,-sa,0,0],[ca,0,sa,1,0],[ca,.62,sa,1,1],[-ca,0,-sa,0,0],[ca,.62,sa,1,1],[-ca,.62,-sa,0,1]);}
+  const P=[],N=[],U=[];for(const v of q){P.push(v[0],v[1],v[2]);N.push(0,1,0);U.push(v[3],v[4]);}
+  const geo=new T.BufferGeometry();geo.setAttribute('position',new T.Float32BufferAttribute(P,3));geo.setAttribute('normal',new T.Float32BufferAttribute(N,3));geo.setAttribute('uv',new T.Float32BufferAttribute(U,2));
+  const m=new T.MeshStandardMaterial({map:GRASSTX,alphaTest:.4,side:T.DoubleSide,color:lin('#9fc07a'),roughness:1});
+  const im=new T.InstancedMesh(geo,m,COUNT);im.frustumCulled=false;im.receiveShadow=Q.shadows;im.count=0;scene.add(im);
+  const hsh=(a,b)=>{const s=Math.sin(a*127.1+b*311.7)*43758.5453;return s-Math.floor(s);};const dm=new T.Object3D();let lx=1e9,lz=1e9;
+  return{update(px,pz){if(Math.abs(px-lx)<3&&Math.abs(pz-lz)<3)return;lx=px;lz=pz;let n=0;const ix0=Math.floor((px-RAD)/CELL),iz0=Math.floor((pz-RAD)/CELL);
+      for(let a=0;a<NC;a++)for(let b=0;b<NC;b++){const ix=ix0+a,iz=iz0+b,r1=hsh(ix,iz),r2=hsh(iz,ix);const x=(ix+r1)*CELL,z=(iz+r2)*CELL;if((x-px)*(x-px)+(z-pz)*(z-pz)>RAD*RAD)continue;
+        if(!inHills(x,z))continue;const y=heightAt(x,z);if(y<.35)continue;if(inWild(x,z)&&WGRID&&WGRID.RD){const G=WGRID,gx=Math.round((x-G.X0)/G.ST),gz=Math.round((z-G.Z0)/G.ST);if(gx>=0&&gz>=0&&gx<G.NX&&gz<G.NZ&&G.RD[gz*G.NX+gx]<6)continue;}
+        const s=.7+hsh(ix*3,iz*7)*.8;dm.position.set(x,y-.04,z);dm.rotation.set(0,r1*6.28,0);dm.scale.set(s,s*(.8+r2*.6),s);dm.updateMatrix();im.setMatrixAt(n++,dm.matrix);}
+      im.count=n;im.instanceMatrix.needsUpdate=true;}};})();
 
 const ROOF=new T.MeshStandardMaterial({map:TX.gravel,roughness:.95});
 const SHINGLE={red:new T.MeshStandardMaterial({map:TX.shingleRed,roughness:.9}),grey:new T.MeshStandardMaterial({map:TX.shingleGrey,roughness:.9})};
@@ -3329,7 +3345,7 @@ const PP=(()=>{const gl2=renderer.capabilities.isWebGL2;const o={on:opt.gfx?opt.
     const u=fin.u;u.tDiffuse.value=main.texture;u.tB1.value=b1.texture;u.tB2.value=b3.texture;u.px.value.set(1/o.w,1/o.h);u.time.value=time;u.night.value=nk;u.bloom.value=.42+nk*.45;
     renderer.setRenderTarget(null);renderer.render(fin.sc,cam);};
   return o;})();
-function frame(now){raf=requestAnimationFrame(frame);const raw=(now-last)/1000||0;let dt=Math.max(0,Math.min(.05,raw));last=now;if(hitStop>0){hitStop-=dt;dt*=.12;}if(raw>0&&raw<1)adapt(raw);if(!paused&&!mapOpen&&!shopOpen)step(dt);camUpdate(dt);hudUpdate(dt);audioUpdate(dt);PP.render();}
+function frame(now){raf=requestAnimationFrame(frame);const raw=(now-last)/1000||0;let dt=Math.max(0,Math.min(.05,raw));last=now;if(hitStop>0){hitStop-=dt;dt*=.12;}if(raw>0&&raw<1)adapt(raw);if(!paused&&!mapOpen&&!shopOpen)step(dt);camUpdate(dt);hudUpdate(dt);audioUpdate(dt);if(GRASS&&!P.inside)GRASS.update(P.car?P.car.x:P.x,P.car?P.car.z:P.z);PP.render();}
 function resize(){const w=view.clientWidth||innerWidth,h=view.clientHeight||innerHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();const pr=renderer.getPixelRatio();PP.setSize(Math.round(w*pr),Math.round(h*pr));}
 window.addEventListener('resize',()=>{if(!view.closest('[hidden]'))resize();});
 camera.position.set(P.x,4,P.z+7);
