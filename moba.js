@@ -1108,7 +1108,7 @@ function camUpdate(dt){const u=M.me;const k=1-Math.exp(-dt*9);
 renderer.domElement.addEventListener('wheel',e=>{if(state!=='match')return;camZ=clamp(camZ+(e.deltaY>0?.06:-.06),.75,1.3);},{passive:true});
 /* ---------------- loop: fps cap, auto resolution, fps meter ---------------- */
 let last=0,raf=0,acc=0,perf={t:0,n:0,lowT:0,hiT:0,fps:60};
-function dynRes(dt){perf.t+=dt;perf.n++;if(perf.t<1)return;perf.fps=perf.n/perf.t;perf.t=0;perf.n=0;
+function dynRes(dt){if(dt>.25||document.hidden){perf.t=0;perf.n=0;return;}perf.t+=dt;perf.n++;if(perf.t<1)return;perf.fps=perf.n/perf.t;perf.t=0;perf.n=0;
   if(SET.showFps&&H.fps)H.fps.textContent=Math.round(perf.fps)+' FPS';
   if(!SET.dynres||state!=='match')return;const target=SET.fps>=60?50:27;
   if(perf.fps<target){perf.lowT++;perf.hiT=0;}else if(perf.fps>(SET.fps>=60?58:29.5)){perf.hiT++;perf.lowT=0;}else{perf.lowT=0;perf.hiT=0;}
@@ -1116,7 +1116,7 @@ function dynRes(dt){perf.t+=dt;perf.n++;if(perf.t<1)return;perf.fps=perf.n/perf.
   else if(perf.hiT>=6&&Q.dpr<Q.dprBase){Q.dpr=Math.min(Q.dprBase,Q.dpr+.25);renderer.setPixelRatio(Q.dpr);resize();perf.hiT=0;}}
 function frame(ts){if(!running)return;raf=requestAnimationFrame(frame);let dt=(ts-last)/1000||.016;
   if(SET.fps<60){acc+=dt;last=ts;if(acc<1/SET.fps-.004)return;dt=acc;acc=0;}else last=ts;
-  dt=Math.min(.05,dt);dynRes(dt);
+  dynRes(dt);dt=Math.min(.05,dt);
   if(state==='match'&&M){if(!PAUSED){step(dt);if(!M)return;}syncModels(PAUSED?0:dt);camUpdate(dt);aimTick();if(H.bars)hudUpdate(dt);if(aimMesh&&aimMesh.visible)aimMesh.position.set(M.me.x,.12,M.me.z);if(GRASS)GRASS.count=Math.floor(GRASS.instanceMatrix.count*Math.min(1,Q.grass/1.6));present(scene,camera);}
   else if(state==='end'&&M){step(dt);syncModels(dt);present(scene,camera);}
   else{if(state==='select')selectTick(dt);if(state==='loading')loadingTick(dt);lobbyFrame(dt);LS.cam.aspect=camera.aspect;LS.cam.updateProjectionMatrix();renderer.domElement.style.filter='';present(LS.scene,LS.cam);}}
