@@ -119,6 +119,27 @@ A school super-app, rebuilt from v0-thenexus.vercel.app. Single-page vanilla JS 
   - **F to get out** (below about 16 km/h): `startExit` runs open → step out. The door closes on its own with a slam sound.
   - If the door spot is blocked, the old instant enter/exit is used. `seqUpdate` replaces player input during a sequence. A knock-down cancels the sequence (`seqCancel`).
 
+- **The wilds (Nov 2026):** the map now runs north and west of the city.
+  - **Area:** `WZ` is the grid (x -1500..545, z -1700..-110). `WA` is where the player may go, and `AREAS=[EXT,HZ,WA]` is the walkable union used by `resolve`.
+  - **Height lookup:** `heightAt` checks the west-hills grid `HGRID` first, then the wild grid `WGRID` (built by `wildBuild`, pure math, cell size 6 m, 8 m on mobile). `inHills` now also covers the wilds, so cars tilt and feel slope everywhere.
+  - **Roads:** R1 is asphalt, from the city's north gate through the meadow, the village, the mine valley and switchbacks up to Nexus Peak. R2 is gravel, branching to Mirror Lake and the campsite. Both are carved into the terrain.
+  - **Places** (each `WILD.places` entry pays money the first time you discover it; saved in `save.disc`):
+    - Wildflower Meadow and Old Pine Forest.
+    - Mirror Lake, with a dock, a rowboat and an island. The water is solid except on the dock (`onDock`, `WILD.lake`).
+    - Silver Falls: an animated sheet on the cliff on the north shore.
+    - Pine Village: cabins, a well, and a shop and a café you can use with E (`WILD.shops` → `openShop`).
+    - Windy Hill Farm: barn, silo, fields, fences, hay.
+    - Whispering Pines campsite: tents, and a campfire where E calls `campRest` to heal, skip the night and save. A parked SUV and dirt bike are there.
+    - The Old Mine: portal set into a rock face, rails, a cart.
+    - Nexus Peak: plaza, radio mast with a blinking light, a flag, a parked sports car.
+    - North Cape Lighthouse on the north beach, with a beam that turns at night.
+    - Nexus Pass lookout in the hills.
+  - **Gems:** 20 Nexus gems hidden around the wilds and hills (`WILD.gems`, saved in `save.gems`). Each gives $150, and finding all 20 gives $5,000.
+  - **River:** keeps flowing west through its own valley, with a bank collider.
+  - **Trees:** about 3,600 pines, broadleaf trees and boulders (fewer on mobile), all with colliders.
+  - **Map and GPS:** the map covers everything and shows explored and gem counts. `planRoute` routes along the wild roads (`wildPath`) and falls back to `planRouteCity` in town.
+  - **Fog:** draws further out while you are in the wilds. The distant mountain ring moved out to 1.75–2.3 km.
+
 ## Public link
 https://thenexusvn.github.io (GitHub Pages). Firebase project `nexus-4012e`: Google, Email/Password and Anonymous sign-in on; Firestore in asia-southeast1 with `firestore.rules` published; authorized domain `thenexusvn.github.io`.
 
