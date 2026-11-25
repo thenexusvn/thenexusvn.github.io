@@ -218,3 +218,10 @@ Python helper scripts used during development:
 - `build_artifact.py`: makes the single-file web build. Usage: `python build_artifact.py <project_dir> <out.html>`.
 - `lzbuild.py` with `lz1.js`–`lz4.js`: the source parts that were assembled into lastzone.js. lastzone.js is now the file to edit directly.
 - `lzi18n.py`: added the Last Zone English strings to index.html.
+
+## Xe mới, nội thất, ngồi ăn, hạ cánh dễ (11/2026)
+- 10 loại xe mới trong `CAR_T`/`CAR_BODY`: hatch, coupe, muscle, pickup, van, minivan, jeep, limo, hyper, bus. Chi tiết riêng theo loại ở `carExtras()` (cánh gió hyper, cản trước + bánh dự phòng jeep, thùng bán tải, cột cửa sổ + bảng tuyến xe buýt...). `spec.offs` = các vòng va chạm dọc thân (xe dài), `spec.hip`/`seatZ` chỉnh chỗ ngồi tài xế. Có trong giao thông và bán ở Nexus Motors (`VEH`).
+- Nội thất mới (`room()` x 3300–4100): diner, police, mart, guns, gym, clothes, cars (showroom), và 4 phòng dùng chung: flat, office, hotel, ware. `R.acts` = điểm bấm E, `R.seats` = ghế ngồi được. Cửa hàng ngoài phố (`XROOM`) giờ E là vào trong, tới quầy mới mở shop. Đồn cảnh sát: `SP.policeDoor`, quầy trực ban nộp phạt xoá truy nã ($250/sao), tủ giáp $350.
+- `GDOORS`: cửa của nhà ống, nhà ở, chung cư, toà văn phòng, khách sạn biển, nhà kho → vào phòng dùng chung tương ứng, ra lại đúng cửa đó (`enterInterior(id,out)`). Mesh cửa gộp lại thành 1 mesh.
+- Tiệm ăn: mua món → `P.tray` (cầm khay), E ở ghế trống → `sitDown` ngồi ăn 6 giây hồi máu dần (`sitUpdate`, `sitPose`), E/đi để đứng dậy. Ra ngoài khi đang cầm khay thì ăn mang đi.
+- Máy bay: dưới 32 m có hỗ trợ hạ cánh (tự cân cánh, tự nâng mũi, giới hạn tốc độ rơi); chạm đất mạnh thì nảy lên và mất ít máu, chỉ rơi thẳng xuống rất mạnh (>30 m/s) hoặc xuống nước mới nổ.
