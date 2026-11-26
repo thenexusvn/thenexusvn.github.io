@@ -3987,7 +3987,7 @@ const movCss=document.createElement('style');movCss.textContent=`
 .mv-who{position:absolute;left:5vw;top:30%;z-index:5;display:flex;align-items:stretch;gap:0;animation:mvWhoIn .55s cubic-bezier(.2,.9,.2,1) both}
 .mv-who.out{animation:mvWhoOut .45s ease-in forwards}
 .mv-who i{width:10px;background:var(--c);box-shadow:0 0 24px var(--c)}
-.mv-who div{padding:14px 26px 16px 20px;background:linear-gradient(100deg,rgba(0,0,0,.82),rgba(0,0,0,.55) 75%,rgba(0,0,0,0));clip-path:polygon(0 0,100% 0,92% 100%,0 100%)}
+.mv-who div{padding:14px 70px 16px 20px;background:linear-gradient(100deg,rgba(0,0,0,.82),rgba(0,0,0,.55) 75%,rgba(0,0,0,0));clip-path:polygon(0 0,100% 0,92% 100%,0 100%)}
 .mv-who small{display:block;font:800 13px Inter,system-ui,sans-serif;letter-spacing:.28em;text-transform:uppercase;color:var(--c);animation:cnKick .6s ease .15s both}
 .mv-who b{display:block;font:900 italic clamp(46px,6.4vw,92px)/.95 "Space Grotesk",Inter,sans-serif;text-transform:uppercase;letter-spacing:-.01em;margin:.08em 0 .1em;text-shadow:0 5px 0 rgba(0,0,0,.5);animation:cnSlam .6s cubic-bezier(.2,1.4,.3,1) .1s both}
 .mv-who span{display:block;font:600 clamp(15px,1.5vw,20px) Inter,system-ui,sans-serif;color:rgba(255,255,255,.92);animation:cnUp .6s ease .45s both}
@@ -4098,9 +4098,9 @@ const WHO={joseph:()=>['Joseph',L('Nhân vật chính','The hero'),L('Về Nexus
 function movWho(ak,id){const el=MOV.el,w=WHO[id]();const st=el.querySelector('.mv-stage'),old=st.querySelector('.mv-who');if(old)old.remove();
   st.insertAdjacentHTML('beforeend',`<div class="mv-who" style="--c:${w[3]}"><i></i><div><small>${cnE(w[1])}</small><b>${cnE(w[0])}</b><span>${cnE(w[2])}</span></div></div>`);
   const f=el.querySelector('.mv-flash');f.classList.remove('go');void f.offsetWidth;f.classList.add('go');
-  MOV.frz=1.5;MOV.ring=MOV.cast[ak]||null;const rg=el.querySelector('.mv-ring');rg.style.setProperty('--c',w[3]);rg.classList.toggle('on',!!MOV.ring);
+  MOV.frz=2.3;MOV.ring=MOV.cast[ak]||null;const rg=el.querySelector('.mv-ring');rg.style.setProperty('--c',w[3]);rg.classList.toggle('on',!!MOV.ring);
   view.style.filter='saturate(.15) contrast(1.25) brightness(1.05)';cinSfx('slow');const s=MOV.s;
-  setTimeout(()=>{if(MOV.s!==s)return;const c=st.querySelector('.mv-who');if(c)c.classList.add('out');rg.classList.remove('on');MOV.ring=null;setTimeout(()=>{if(c)c.remove();},500);},3800);}
+  setTimeout(()=>{if(MOV.s!==s)return;const c=st.querySelector('.mv-who');if(c)c.classList.add('out');rg.classList.remove('on');MOV.ring=null;setTimeout(()=>{if(c)c.remove();},500);},6500);}
 function movRing(){const a=MOV.ring,rg=MOV.el.querySelector('.mv-ring');if(!a||!a.H.root.parent){return;}a.H.head.getWorldPosition(_ma);_ma.y+=.15;_ma.project(camera);
   const r=view.getBoundingClientRect(),rr=root.getBoundingClientRect();rg.style.opacity=_ma.z<1?'':'0';rg.style.transform=`translate(${(_ma.x*.5+.5)*r.width+r.left-rr.left}px,${(-_ma.y*.5+.5)*r.height+r.top-rr.top}px)`;}
 function movTick(dt){const s=MOV.s;if(!s)return;const el=MOV.el;
