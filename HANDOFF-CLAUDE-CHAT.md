@@ -303,3 +303,9 @@ Python helper scripts used during development:
 - Main app: chatOK() gates CommsHub (channels, DMs, groups, people). Profile docs carry guest:true → "Khách" badge (.guest-badge) in chat, rooms, people list, profile card; sidebar shows "Khách (Guest)"; account page shows a guest note.
 - firestore.rules: chatter() = signedIn() && notBanned() for channels/profiles/friends/rooms; profiles allow 'guest' key. User must re-paste rules.
 - Signing in with email/Google clears the guest flag.
+
+## Story mode cinematics (city.js, "story cinematics" block before "free mode: collect")
+- CIN director: cine({type:'tip'|'intro'|'stamp'|'title'|'fail', wait, hold, slow, at:npc, steps, ...}). wait=true freezes time (CIN.ts eases to 0, frame() runs step(dt*CIN.ts)), letterbox bars, desaturated view, Space/Enter/E/J or click continues. Non-wait cards slow time to `slow` for `hold` seconds.
+- Stingers synthesised in cinSfx ('in','out','boss','stamp','fail','win','slow'); game audio ducks while a card is up.
+- Script: stOpening (title + mission 1), stArmed, territory title in stSpawnGang, stIntro (boss freeze-frame, camera turns to him, pointer ring), stFightTip (first exchange), stHalf, stKeyStamp (k/5 cards), Syndicate Tower open, stTowerIntro, bodyguards-down, stHeliTip, heli smoking, stHeliDown, stFail, stWantedTip, stLowTip. One-time tips are stored in save.story.tips.
+- Boss/town names are bilingual via L() in ST_TOWNS. Debug: game._dbg.cin.
