@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="nexus-build" content="20261126144410">
+<meta name="nexus-build" content="20261126144929">
 <title>Nexus</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Crect%20width%3D%22100%22%20height%3D%22100%22%20rx%3D%2226%22%20fill%3D%22%23c1f354%22%2F%3E%3Cpath%20d%3D%22M28%2076V24L72%2076V24%22%20fill%3D%22none%22%20stroke%3D%22%2308090c%22%20stroke-width%3D%2213%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Ccircle%20cx%3D%2284%22%20cy%3D%2216%22%20r%3D%229%22%20fill%3D%22%23ad8dff%22%2F%3E%3C%2Fsvg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -2926,11 +2926,12 @@ render();
 /* ===== update notice: when a new version is published, a full-screen card asks to reload ===== */
 (function(){const meta=document.querySelector('meta[name="nexus-build"]'),BUILD=meta?meta.content:'';let shown=false;
 async function check(){if(shown||!BUILD)return;try{const r=await fetch('/version.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j.build&&j.build!==BUILD)show(j);}catch(_){}}
+const EN=()=>{try{return localStorage.getItem('nexus-lang')==='en';}catch(_){return false;}},L=(v,e)=>EN()?e:v;
 function show(j){shown=true;const d=document.createElement('div');d.className='upd';d.setAttribute('role','alertdialog');d.setAttribute('aria-modal','true');
-  d.innerHTML=`<div class="upd-card"><div class="upd-ic">✨</div><h2>Có bản cập nhật mới</h2><p class="upd-en">There's an update</p><p class="upd-note"></p><button type="button" class="btn btn-lime upd-go">Tải lại ngay</button><p class="upd-s">Tải lại để dùng bản mới nhất của Nexus.</p></div>`;
-  if(j.note)d.querySelector('.upd-note').textContent=j.note;else d.querySelector('.upd-note').remove();document.body.appendChild(d);
+  d.innerHTML=`<div class="upd-card"><div class="upd-ic">✨</div><h2 data-noi18n>${L('Có bản cập nhật mới',"There's an update")}</h2><p class="upd-note" data-noi18n></p><button type="button" class="btn btn-lime upd-go" data-noi18n>${L('Tải lại ngay','Reload now')}</button><p class="upd-s" data-noi18n>${L('Tải lại để dùng bản mới nhất của Nexus.','Reload to get the latest version of Nexus.')}</p></div>`;
+  const nt=EN()?(j.note_en||(window.NexusI18n&&window.NexusI18n.t?window.NexusI18n.t(j.note||''):'')||''):(j.note||'');if(nt)d.querySelector('.upd-note').textContent=nt;else d.querySelector('.upd-note').remove();document.body.appendChild(d);
   try{for(const k of['NexusCity','NexusLastZone','NexusMobaUI']){const g=window[k];if(g&&g.game&&g.game.setPaused)g.game.setPaused(true);}}catch(_){}
-  const b=d.querySelector('.upd-go');b.focus();b.addEventListener('click',async()=>{b.disabled=true;b.textContent='Đang tải lại...';try{await fetch('/index.html',{cache:'reload'});await fetch(location.pathname,{cache:'reload'});}catch(_){}location.reload();});}
+  const b=d.querySelector('.upd-go');b.focus();b.addEventListener('click',async()=>{b.disabled=true;b.textContent=L('Đang tải lại...','Reloading...');try{await fetch('/index.html',{cache:'reload'});await fetch(location.pathname,{cache:'reload'});}catch(_){}location.reload();});}
 setTimeout(check,6000);setInterval(check,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)check();});addEventListener('focus',check);
 window.NexusUpdate={check,get build(){return BUILD;}};})();
 </script>
