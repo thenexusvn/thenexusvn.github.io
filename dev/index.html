@@ -2566,7 +2566,7 @@ async function begin(tutorial,mode){mode=mode||'free';if(game){if(curMode===mode
   await new Promise(r=>setTimeout(r,40));
   try{game=window.NexusCity2.create({view:$('#cityView'),hudRoot:$('#cityHud'),char,tutorial,gfx,mode,mobile:matchMedia('(pointer:coarse)').matches,onStory:()=>storyLine(),onMenu:()=>{pause();showStart('new');},onSave:sv=>{recText(sv);if(!stale&&window.NexusData)window.NexusData.saveGame('city',sv);}});}
   catch(e){console.error(e);$('#cStatus').textContent='Trình duyệt này chưa chạy được đồ hoạ 3D (WebGL). Thử Chrome, Edge hoặc Safari bản mới.';loading=false;$('#cGoTut').disabled=$('#cGo').disabled=false;return;}
-  loading=false;$('#cStatus').textContent='';$('#cStart').hidden=true;$('#cPause').textContent='Tạm dừng';game.start();}
+  loading=false;$('#cGoTut').disabled=$('#cGo').disabled=false;$('#cStatus').textContent='';$('#cStart').hidden=true;$('#cPause').textContent='Tạm dừng';game.start();}
 $('#cGoTut').addEventListener('click',()=>begin(true,'free'));$('#cGo').addEventListener('click',()=>begin(false,'free'));
 $('#cStoryBtn').addEventListener('click',()=>showStart('story'));$('#cStoryBack').addEventListener('click',()=>showStart(game?'resume':'new'));
 $('#cStoryGo').addEventListener('click',()=>begin(false,'story'));
