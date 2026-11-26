@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="nexus-build" content="20261126185639">
+<meta name="nexus-build" content="20261126190327">
 <title>Nexus</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Crect%20width%3D%22100%22%20height%3D%22100%22%20rx%3D%2226%22%20fill%3D%22%23c1f354%22%2F%3E%3Cpath%20d%3D%22M28%2076V24L72%2076V24%22%20fill%3D%22none%22%20stroke%3D%22%2308090c%22%20stroke-width%3D%2213%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Ccircle%20cx%3D%2284%22%20cy%3D%2216%22%20r%3D%229%22%20fill%3D%22%23ad8dff%22%2F%3E%3C%2Fsvg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1471,7 +1471,7 @@ window.NexusMod=(function(){
 })();
 </script>
 <script src="firebase-config.js?v=20261125-2"></script>
-<script src="loopyfx.js?v=1"></script>
+<script src="loopyfx.js?v=2"></script>
 <script>
 /* ===== NexusData: real shared data through Firebase (Auth + Firestore).
    Without a config it falls back to this browser only (localStorage), with the same API. ===== */
@@ -2742,7 +2742,12 @@ function gxSnd(k){const ac=gx.ac;if(!ac)return;const t=ac.currentTime,outs=[ac.d
 if(window.LoopyFX){LoopyFX.onSound(gxSnd);LoopyFX.width=720;}
 function gxAc(){if(!gx.ac){const C=window.AudioContext||window.webkitAudioContext;if(C)try{gx.ac=new C();}catch(_){}}if(gx.ac&&gx.ac.state==='suspended')gx.ac.resume();return gx.ac;}
 function gxBuild(){if(!window.LoopyFX)return;$('#stGfx').innerHTML=`<button type="button" data-g="" aria-pressed="${!gx.id}"><span class="e">🚫</span>${esc(GL('Không','None'))}</button>`+LoopyFX.list.map(f=>`<button type="button" data-g="${f.id}" aria-pressed="${gx.id===f.id}"><span class="e">${f.e}</span>${esc(f.n)}</button>`).join('');}
-$('#stGfx').addEventListener('click',e=>{const b=e.target.closest('[data-g]');if(!b||(st.rec&&st.rec.state==='recording'))return;gxAc();gx.id=b.dataset.g;gx.fx=gx.id?LoopyFX.make(gx.id):null;gxBuild();});
+async function gxPeople(){if(gx.ppl||!window.LoopyFX)return;gx.ppl=1;try{const u=me(),db=ND._db;if(!db||ND.mode!=='cloud'){gx.ppl=0;return;}
+  const [ps,fs]=await Promise.all([db.collection('profiles').limit(120).get(),u&&!u.anon?db.collection('friends').where('users','array-contains',u.uid).get().catch(()=>null):null]);
+  const fr=new Set();if(fs)fs.docs.forEach(d=>{const x=d.data();if(x.status==='ok')(x.users||[]).forEach(id=>{if(id!==u.uid)fr.add(id);});});
+  const list=[];ps.docs.forEach(d=>{if(u&&d.id===u.uid)return;const x=d.data();if(!x.name)return;list.push({name:String(x.name).slice(0,18),friend:fr.has(d.id)});});
+  for(let i=list.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[list[i],list[j]]=[list[j],list[i]];}list.sort((a,b)=>b.friend-a.friend);LoopyFX.people=list;}catch(e){console.warn(e);gx.ppl=0;}}
+$('#stGfx').addEventListener('click',e=>{const b=e.target.closest('[data-g]');if(!b||(st.rec&&st.rec.state==='recording'))return;gxAc();gx.id=b.dataset.g;if(/^nexus/.test(b.dataset.g))gxPeople().then(()=>{if(gx.id===b.dataset.g)gx.fx=LoopyFX.make(gx.id);});gx.fx=gx.id?LoopyFX.make(gx.id):null;gxBuild();});
 $('#stReplay').addEventListener('click',()=>{gxAc();if(gx.fx)gx.fx.start(performance.now());else toast(GL('Chọn một filter trò chơi trước','Pick a game filter first'));});
 $('#stCv').addEventListener('pointerdown',e=>{if(!gx.fx)return;const r=e.currentTarget.getBoundingClientRect();gx.fx.tap((e.clientX-r.left)/r.width*720,(e.clientY-r.top)/r.height*1280,performance.now());});
 function gxLoop(){cancelAnimationFrame(gx.raf);const cv=$('#stCv'),c=cv.getContext('2d'),v=$('#stVid');gx.last=performance.now();$('#stFrame').classList.add('cvon');

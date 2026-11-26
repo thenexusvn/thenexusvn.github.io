@@ -42,34 +42,117 @@ function meter(o){let t0=-1,val=0;const cf=Conf();let done=false,lastP=-1;
       if(done&&o.verdict)T(c,o.verdict(val),cx,y+bh/2+140,40,o.col2);
       if(t0<0)T(c,L('Bấm quay để đo','Press record to measure'),cx,y+bh/2+140,30,'#fff');cf.draw(c,W,H,dt);},tap(){}};}
 /* ---------- data ---------- */
-const FOODS=()=>[['🍜',L('Phở bò','Beef pho')],['🥖',L('Bánh mì','Banh mi')],['🍚',L('Cơm tấm','Broken rice')],['🥢',L('Bún chả','Bun cha')],['🍲',L('Lẩu thái','Thai hotpot')],['🧋',L('Trà sữa','Milk tea')],['🍕',L('Pizza','Pizza')],['🍔',L('Burger','Burger')],['🍣',L('Sushi','Sushi')],['🌮',L('Taco','Taco')],['🍗',L('Gà rán','Fried chicken')],['🥗',L('Salad','Salad')],['🍝',L('Mì Ý','Spaghetti')],['🍦',L('Kem','Ice cream')],['🦐',L('Bánh xèo','Banh xeo')],['🥟',L('Há cảo','Dumplings')]];
 const QUIZ=()=>[[L('Thủ đô của Úc là?','Capital of Australia?'),['Sydney','Canberra','Melbourne','Perth'],1],[L('Hành tinh lớn nhất?','Largest planet?'),[L('Sao Hỏa','Mars'),L('Trái Đất','Earth'),L('Sao Mộc','Jupiter'),L('Sao Kim','Venus')],2],
   [L('Nước sôi ở bao nhiêu độ C?','Water boils at (°C)?'),['90','100','120','80'],1],[L('Con vật nhanh nhất trên cạn?','Fastest land animal?'),[L('Ngựa','Horse'),L('Báo săn','Cheetah'),L('Sư tử','Lion'),L('Thỏ','Rabbit')],1],
   [L('1 năm có bao nhiêu tuần?','Weeks in a year?'),['48','50','52','54'],2],[L('Ai vẽ Mona Lisa?','Who painted the Mona Lisa?'),['Picasso','Van Gogh','Da Vinci','Monet'],2],
   [L('Đại dương lớn nhất?','Largest ocean?'),[L('Đại Tây Dương','Atlantic'),L('Ấn Độ Dương','Indian'),L('Thái Bình Dương','Pacific'),L('Bắc Băng Dương','Arctic')],2],
   [L('Kim loại nào ở thể lỏng?','Which metal is liquid?'),[L('Sắt','Iron'),L('Thủy ngân','Mercury'),L('Đồng','Copper'),L('Vàng','Gold')],1],[L('Bao nhiêu chân có con nhện?','How many legs does a spider have?'),['6','8','10','12'],1],
   [L('Núi cao nhất thế giới?','Tallest mountain?'),['K2','Everest','Fansipan','Kilimanjaro'],1],[L('7 x 8 = ?','7 x 8 = ?'),['54','56','58','64'],1],[L('Quốc gia có hình chữ S?','Which country is S-shaped?'),[L('Thái Lan','Thailand'),L('Việt Nam','Vietnam'),L('Lào','Laos'),L('Nhật Bản','Japan')],1]];
+const FOODS=()=>[['🍜',L('Phở bò','Beef pho')],['🥖',L('Bánh mì','Banh mi')],['🍚',L('Cơm tấm','Broken rice')],['🥢',L('Bún chả','Bun cha')],['🍲',L('Lẩu thái','Thai hotpot')],['🧋',L('Trà sữa','Milk tea')],['🍕','Pizza'],['🍔','Burger'],['🍣','Sushi'],['🍗',L('Gà rán','Fried chicken')],['🍝',L('Mì Ý','Spaghetti')],['🍦',L('Kem','Ice cream')],['🥞',L('Bánh xèo','Banh xeo')],['🥟',L('Há cảo','Dumplings')],['🍢',L('Xiên que','Skewers')],['🍡','Tokbokki'],['🥭',L('Xoài lắc','Shaken mango')],['🦪',L('Ốc','Snails')],['🍠',L('Khoai lang nướng','Sweet potato')],['🌯',L('Bánh tráng cuốn','Rice paper rolls')]];
+const TREND=()=>[['🍵',L('Matcha latte','Matcha latte')],['🍫',L('Socola Dubai','Dubai chocolate')],['🍋',L('Trà chanh giã tay','Hand-pounded lemon tea')],['🌶️',L('Bánh tráng chấm','Dipped rice paper')],['🔥',L('Mì cay 7 cấp','7-level spicy noodles')],['🐔',L('Gà ủ muối','Salt-baked chicken')],['🍳',L('Bánh mì chảo','Pan banh mi')],['🥑',L('Kem bơ','Avocado ice cream')],['🧀',L('Trà sữa phô mai','Cheese milk tea')],['🐚',L('Ốc len xào dừa','Coconut snails')],['🍰',L('Bông lan trứng muối','Salted egg sponge cake')],['🍘',L('Cơm cháy chà bông','Crispy rice with floss')],['🍡','Tokbokki'],['🥤',L('Nước ép cần tây','Celery juice')]];
+const MEMES=()=>[['🤲','6 7',L('Hai tay lên xuống như cân, hô "six seven"!','Hands up and down like scales, say "six seven"!')],['😤','Huss huss huss',L('Thở mạnh 3 lần thật ngầu: huss huss huss!','Three big cool breaths: huss huss huss!')],
+  ['🗿','Sigma face',L('Nhìn thẳng camera, nhướng 1 bên mày','Stare at the camera, raise one eyebrow')],['😌','Chill guy',L('Đút tay túi quần, cười nhẹ, thật chill','Hands in pockets, slight smile, so chill')],['🥁','Tung tung tung sahur',L('Gõ tay lên bàn 3 nhịp: tung tung tung!','Drum three beats: tung tung tung!')],
+  ['🤫','Mewing',L('Ngậm miệng, chỉ tay lên quai hàm','Lips shut, point at your jawline')],['✨','Aura +1000',L('Vuốt tóc thật chậm, tạo dáng','Slowly fix your hair and pose')],['😏','Rizz',L('Nháy mắt và chỉ tay vào camera','Wink and point at the camera')],
+  ['🙏',L('Ê xin vía','Gimme the luck'),L('Chắp tay xin vía thật thành tâm','Hands together, ask for the luck')],['🫡',L('Nghiêm!','Salute!'),L('Đứng nghiêm chào cờ 3 giây','Stand to attention for 3 seconds')],['💃',L('Lắc hông','Hip shake'),L('Lắc hông 3 cái theo nhạc','Shake your hips 3 times')],['🐸',L('Ếch ngồi đáy giếng','Frog face'),L('Phồng má như con ếch','Puff your cheeks like a frog')]];
+const DARES=()=>[L('Nhảy 10 giây không cần nhạc','Dance 10 seconds with no music'),L('Nói giọng miền khác 15 giây','Talk in a different accent for 15 seconds'),L('Hít đất 10 cái ngay bây giờ','Do 10 push-ups right now'),L('Hát to điệp khúc bài bạn thích','Sing your favourite chorus out loud'),L('Nhắn "nhớ bạn" cho người thứ 3 trong danh bạ','Text "miss you" to the 3rd person in your contacts'),
+  L('Đăng story bức ảnh xấu nhất của bạn','Post your worst photo on your story'),L('Ăn một muỗng chanh','Eat a spoon of lemon'),L('Làm mặt xấu 5 giây không cười','Ugly face for 5 seconds, no laughing'),L('Gọi tên crush bằng chữ cái đầu','Say your crush\'s initial'),L('Giả làm MC giới thiệu chính mình','Introduce yourself like a TV host')];
+const TRUTHS=()=>[L('Lần cuối bạn khóc là khi nào?','When did you last cry?'),L('Crush hiện tại tên bắt đầu bằng chữ gì?','What letter does your crush\'s name start with?'),L('Điểm thấp nhất bạn từng bị là mấy?','Your lowest test score ever?'),L('Bạn sợ điều gì nhất?','What are you most afraid of?'),L('Bí mật nhỏ chưa ai biết?','A small secret nobody knows?'),L('Bạn từng nói dối ba mẹ chuyện gì?','A lie you told your parents?')];
+let PEOPLE=[];
+const people=n=>{const L2=PEOPLE.slice();const fill=[L('Bạn bí ẩn','Mystery friend')];let i=1;while(L2.length<n)L2.push({name:fill[0]+' #'+(i++),friend:false});return L2;};
+/* ---------- ranking: items appear one by one, tap a numbered slot on the right ---------- */
+function ranking(o){let items=[],cur=0,slots=[],t0=-1,doneT=-1;const cf=Conf(),N=o.n;
+  const geo=()=>{const top=170,sh=N>5?92:118,h=N>5?80:98;return{x:W0-250,top,sh,h,w:220};};
+  return{start(now){items=o.items().slice(0,N);cur=0;slots=Array(N).fill(null);t0=now;doneT=-1;},
+    draw(c,W,H,now,dt){pill(c,o.title(),W/2,90,30,o.col||'#c1f354');const g=geo();
+      for(let i=0;i<N;i++){const y=g.top+i*g.sh;rr(c,g.x,y,g.w,g.h,20);c.fillStyle=slots[i]?'rgba(193,243,84,.92)':'rgba(10,12,20,.7)';c.fill();c.lineWidth=3;c.strokeStyle='#fff';c.stroke();
+        T(c,String(i+1),g.x+32,y+g.h/2,36,slots[i]?'#111':'#fff',{ns:!!slots[i],w:900});if(slots[i]){T(c,slots[i][0],g.x+84,y+g.h/2,40,'#fff',{ns:1});T(c,slots[i][1],g.x+114,y+g.h/2,slots[i][1].length>11?17:21,'#111',{ns:1,al:'left',w:800});}}
+      if(t0<0){T(c,L('Bấm quay, rồi chạm số để xếp','Record, then tap a number'),(W-250)/2,250,26,'#fff');return;}
+      if(cur<items.length){const it=items[cur],bob=Math.sin(now/220)*8,bw=W-300;rr(c,24,180+bob,bw,190,30);c.fillStyle='rgba(10,12,20,.8)';c.fill();c.lineWidth=4;c.strokeStyle=o.col||'#ffd166';c.stroke();
+        T(c,it[0],24+bw/2,240+bob,74,'#fff',{ns:1});T(c,it[1],24+bw/2,318+bob,it[1].length>14?28:36,'#fff');T(c,(cur+1)+'/'+N+' · '+L('chạm số bên phải','tap a number'),24+bw/2,410,22,'#fff');}
+      else{if(doneT<0){doneT=now;cf.burst(120);snd('win');}T(c,o.done?o.done():L('Xong! 🎉','Done! 🎉'),(W-250)/2,270,28,'#c1f354',{w:900});}
+      cf.draw(c,W,H,dt);},
+    tap(x,y){if(t0<0||cur>=items.length)return;const g=geo();if(x<g.x||x>g.x+g.w)return;const i=Math.floor((y-g.top)/g.sh);if(i<0||i>=N||slots[i]||y-g.top-i*g.sh>g.h)return;slots[i]=items[cur++];snd(cur>=items.length?'ding':'tick');}};}
+/* ---------- tap mini-games ---------- */
+function flappy(){let st=0,y=0,v=0,pipes=[],score=0,best=0,t0=-1,dead=false,lastT=0;
+  const reset=now=>{y=500;v=0;pipes=[];score=0;dead=false;t0=now;lastT=now;};
+  return{start(now){reset(now);st=1;},
+    draw(c,W,H,now,dt){pill(c,L('🐤 Bay qua ống · chạm để bay','🐤 Flappy · tap to fly'),W/2,90,30,'#ffd166');
+      if(!st){T(c,'🐤',W/2,500,120,'#fff',{ns:1});T(c,L('Bấm quay rồi chạm màn hình','Record, then tap the screen'),W/2,640,28,'#fff');return;}
+      if(!dead){v+=1500*dt;y+=v*dt;if(now-lastT>1500){lastT=now;const gap=320,gy=260+Math.random()*(H-760);pipes.push({x:W+60,gy,gap,p:false});}
+        for(const p of pipes){p.x-=260*dt;if(!p.p&&p.x<150){p.p=true;score++;snd('tick');}if(p.x<210&&p.x>40&&(y<p.gy||y>p.gy+p.gap)){dead=true;}}
+        if(y>H-60||y<20)dead=true;if(dead){best=Math.max(best,score);snd('win');}}
+      pipes=pipes.filter(p=>p.x>-120);for(const p of pipes){c.fillStyle='rgba(47,212,122,.82)';rr(c,p.x-60,-20,120,p.gy+20,16);c.fill();rr(c,p.x-60,p.gy+p.gap,120,H,16);c.fill();c.lineWidth=5;c.strokeStyle='#145c33';c.stroke();}
+      c.save();c.translate(150,y);c.rotate(Math.max(-.5,Math.min(1.2,v/900)));T(c,'🐤',0,0,90,'#fff',{ns:1});c.restore();
+      T(c,String(score),W/2,200,96,'#fff',{w:900});if(dead){T(c,L('Thua rồi! Chạm để chơi lại','Game over! Tap to retry'),W/2,H*.45,40,'#ff5fa2',{w:900});T(c,L('Kỷ lục: ','Best: ')+best,W/2,H*.45+60,34,'#ffd166');}},
+    tap(x,y2,now){if(!st)return;if(dead){reset(now);return;}v=-560;snd('tick');}};}
+function whack(){let t0=-1,holes=[],score=0,done=false;const cf=Conf();
+  const pos=W=>{const P=[];for(let r=0;r<3;r++)for(let k=0;k<3;k++)P.push({x:W/2+(k-1)*210,y:780+r*170});return P;};
+  return{start(now){t0=now;score=0;done=false;holes=pos(W0).map(p=>({...p,t:0,up:0,kind:'',hit:0}));},
+    draw(c,W,H,now,dt){pill(c,L('🔨 Đập chuột · 20 giây','🔨 Whack-a-mole · 20 sec'),W/2,90,30,'#ff8a3d');if(t0<0){T(c,L('Bấm quay rồi chạm vào chuột','Record, then tap the moles'),W/2,200,28,'#fff');return;}
+      const left=Math.max(0,20-(now-t0)/1000);if(left<=0&&!done){done=true;cf.burst(110);snd('win');}
+      for(const h of holes){c.fillStyle='rgba(40,25,15,.85)';c.beginPath();c.ellipse(h.x,h.y+40,80,26,0,0,7);c.fill();
+        if(!done){h.t-=dt;if(h.t<=0&&!h.up&&Math.random()<dt*1.4){h.up=1;h.t=.9+Math.random()*.6;h.kind=Math.random()<.2?'💣':'🐹';h.hit=0;}else if(h.up&&h.t<=0){h.up=0;h.t=.3;}}
+        if(h.up||h.hit>0){const k=h.hit>0?1:Math.min(1,(1.5-h.t)*5);T(c,h.hit>0?'💥':h.kind,h.x,h.y+40-50*k,92,'#fff',{ns:1});if(h.hit>0)h.hit-=dt;}}
+      T(c,L('Điểm ','Score ')+score,W/2,200,64,'#fff',{w:900});T(c,'⏱ '+Math.ceil(left),W/2,280,44,left<5?'#ff3b47':'#ffd166',{w:900});
+      if(done)T(c,score>=15?L('Thợ săn chuột 🏆','Mole hunter 🏆'):L('Tay hơi chậm 😅','A bit slow 😅'),W/2,H*.42,48,'#c1f354',{w:900});cf.draw(c,W,H,dt);},
+    tap(x,y){if(t0<0||done)return;for(const h of holes)if(h.up&&Math.hypot(x-h.x,y-(h.y-10))<90){h.up=0;h.hit=.35;h.t=.4;score+=h.kind==='💣'?-3:1;snd(h.kind==='💣'?'win':'tick');return;}}};}
+function tapspeed(){let t0=-1,n=0,done=false,pops=[];const cf=Conf();
+  return{start(now){t0=now;n=0;done=false;pops=[];},
+    draw(c,W,H,now,dt){pill(c,L('👆 Bấm siêu tốc · 10 giây','👆 Speed tap · 10 sec'),W/2,90,30,'#7df9ff');if(t0<0){T(c,L('Bấm quay rồi chạm liên tục!','Record, then tap like crazy!'),W/2,200,28,'#fff');return;}
+      const left=Math.max(0,10-(now-t0)/1000);if(left<=0&&!done){done=true;cf.burst(110);snd('win');}
+      T(c,String(n),W/2,260,150,'#fff',{w:900});T(c,'⏱ '+left.toFixed(1),W/2,380,44,left<3?'#ff3b47':'#ffd166',{w:900});
+      pops=pops.filter(p=>(p.t+=dt)<.6);for(const p of pops){c.globalAlpha=1-p.t/.6;T(c,'+1',p.x,p.y-p.t*120,48,'#c1f354',{w:900});c.globalAlpha=1;}
+      if(done){const r=n/10;T(c,r>=8?L('Ngón tay thần thánh ⚡','God-tier fingers ⚡'):r>=5?L('Nhanh đó nha 💨','Pretty fast 💨'):L('Ngón tay ngủ quên 😴','Sleepy fingers 😴'),W/2,470,44,'#c1f354',{w:900});T(c,(r).toFixed(1)+L(' lần/giây',' taps/sec'),W/2,530,32,'#fff');}
+      cf.draw(c,W,H,dt);},
+    tap(x,y){if(t0<0||done)return;n++;pops.push({x,y,t:0});if(n%5===0)snd('tick');}};}
+/* ---------- meme challenge: five memes, a countdown each, then do it ---------- */
+function memes(){let list=[],t0=-1,last=-1;const cf=Conf();let fin=false;
+  return{start(now){list=shuffle(MEMES()).slice(0,5);t0=now;last=-1;fin=false;},
+    draw(c,W,H,now,dt){pill(c,L('🔥 5 meme · làm theo ngay!','🔥 5 memes · copy them!'),W/2,90,30,'#ff5fa2');
+      if(t0<0){T(c,L('Bấm quay, 5 meme sẽ hiện ra','Record and 5 memes will pop up'),W/2,200,28,'#fff');return;}
+      const t=(now-t0)/1000,per=5,i=Math.floor(t/per);
+      for(let k=0;k<5;k++){c.beginPath();c.arc(W/2-80+k*40,150,12,0,7);c.fillStyle=k<i?'#c1f354':k===i?'#fff':'rgba(255,255,255,.3)';c.fill();}
+      if(i>=5){if(!fin){fin=true;cf.burst(130);snd('win');}T(c,L('Hoàn thành 5/5 🎉','All 5 done 🎉'),W/2,320,60,'#c1f354',{w:900});cf.draw(c,W,H,dt);return;}
+      const m=list[i],lt=t-i*per;if(i!==last){last=i;snd('ding');}
+      const k=back(Math.min(1,lt*3));c.save();c.translate(W/2,300);c.scale(k,k);rr(c,-W*.42,-120,W*.84,250,34);c.fillStyle='rgba(10,12,20,.82)';c.fill();c.lineWidth=5;c.strokeStyle='#ff5fa2';c.stroke();
+      T(c,m[0],-W*.42+90,-20,100,'#fff',{ns:1});T(c,m[1],40,-30,m[1].length>12?44:60,'#fff',{w:900,it:1});c.restore();
+      T(c,m[2],W/2,470,m[2].length>34?24:28,'#fff',{w:700});
+      if(lt<1.5){T(c,String(3-Math.floor(lt*2)),W/2,600,120,'#ffd166',{w:900});}else{const g=Math.sin(now/90)*.06+1;c.save();c.translate(W/2,600);c.scale(g,g);T(c,L('LÀM ĐI!','DO IT!'),0,0,90,'#c1f354',{w:900,it:1});c.restore();
+        c.fillStyle='rgba(255,255,255,.3)';rr(c,W/2-200,680,400,12,6);c.fill();c.fillStyle='#c1f354';rr(c,W/2-200,680,400*Math.min(1,(lt-1.5)/(per-1.5)),12,6);c.fill();}
+      cf.draw(c,W,H,dt);},tap(){}};}
+/* ---------- truth or dare ---------- */
+function dare(){let t0=-1,kind=0,txt='',last=-1;const cf=Conf();let shown=false;
+  return{start(now){t0=now;kind=Math.random()<.5?0:1;txt=R(kind?DARES():TRUTHS());last=-1;shown=false;},
+    draw(c,W,H,now,dt){pill(c,L('😈 Sự thật hay thử thách','😈 Truth or dare'),W/2,90,30,'#ff3b47');
+      if(t0<0){T(c,L('Bấm quay · chạm để đổi câu khác','Record · tap for another one'),W/2,200,28,'#fff');return;}
+      const t=(now-t0)/1000,ph=Math.floor(t*12);
+      if(t<1.6){const k=ph%2;if(ph!==last){last=ph;snd('tick');}pill(c,k?L('THỬ THÁCH','DARE'):L('SỰ THẬT','TRUTH'),W/2,260,64,k?'#ff3b47':'#2f8dff','#fff');}
+      else{if(!shown){shown=true;cf.burst(70);snd('win');}pill(c,kind?L('THỬ THÁCH','DARE'):L('SỰ THẬT','TRUTH'),W/2,230,52,kind?'#ff3b47':'#2f8dff','#fff');
+        rr(c,40,300,W-80,200,28);c.fillStyle='rgba(10,12,20,.82)';c.fill();c.lineWidth=4;c.strokeStyle=kind?'#ff3b47':'#2f8dff';c.stroke();
+        const words=txt.split(' ');let line='',ly=370;const lines=[];for(const w of words){if((line+' '+w).length>26){lines.push(line);line=w;}else line=line?line+' '+w:w;}lines.push(line);
+        lines.forEach((l2,j)=>T(c,l2,W/2,ly+j*52-(lines.length-1)*20,40,'#fff',{w:800}));}
+      cf.draw(c,W,H,dt);},tap(x,y,now){if(t0>=0&&(now-t0)>1700)this.start(now);}};}
 /* ---------- the 15 filters ---------- */
 const DEF={
-  food:()=>randomizer({title:()=>L('🍽️ Chấm điểm món ăn','🍽️ Rate this food'),col:'#ffd166',col2:'#ff8a3d',items:()=>Array.from({length:10},(_,i)=>{const s=i+1;return['⭐',s+'/10'];}),
-    sub:it=>{const s=parseInt(it[1]);return '★★★★★'.slice(0,Math.ceil(s/2))+'☆☆☆☆☆'.slice(0,5-Math.ceil(s/2))+'  '+(s>=9?L('Ngon xỉu 🤤','Insanely good 🤤'):s>=7?L('Ngon nha 😋','Pretty tasty 😋'):s>=5?L('Tạm được 🙂','It is okay 🙂'):s>=3?L('Hơi dở 😬','Kinda bad 😬'):L('Thôi khỏi 🤢','Nope 🤢'));}}),
-  rank:()=>{let items=[],cur=0,slots=[null,null,null,null,null],t0=-1,doneT=-1;const cf=Conf();
-    return{start(now){items=shuffle(FOODS()).slice(0,5);cur=0;slots=[null,null,null,null,null];t0=now;doneT=-1;},
-      draw(c,W,H,now,dt){pill(c,L('🏆 Xếp hạng món ăn','🏆 Rank the food'),W/2,90,32,'#c1f354');
-        const sx=W-250,sy=200;for(let i=0;i<5;i++){const y=sy+i*118;rr(c,sx,y,220,98,22);c.fillStyle=slots[i]?'rgba(193,243,84,.9)':'rgba(10,12,20,.7)';c.fill();c.lineWidth=3;c.strokeStyle='#fff';c.stroke();
-          T(c,String(i+1),sx+36,y+50,44,slots[i]?'#111':'#fff',{ns:!!slots[i],w:900});if(slots[i]){T(c,slots[i][0],sx+100,y+50,52,'#fff',{ns:1});T(c,slots[i][1],sx+150,y+50,22,'#111',{ns:1,al:'left',w:700});}}
-        if(t0<0){T(c,L('Bấm quay rồi chạm số để xếp','Record, then tap a number to place'),W/2-110,190,26,'#fff');return;}
-        if(cur<items.length){const it=items[cur],bob=Math.sin(now/220)*8;rr(c,40,180+bob,W-340,170,30);c.fillStyle='rgba(10,12,20,.78)';c.fill();c.lineWidth=4;c.strokeStyle='#ffd166';c.stroke();
-          T(c,it[0],130,265+bob,90,'#fff',{ns:1});T(c,it[1],W/2-90,265+bob,it[1].length>10?38:48,'#fff',{al:'center'});T(c,L('Chạm số 1–5 bên phải','Tap a number 1–5 on the right'),W/2-110,395,24,'#fff');}
-        else{if(doneT<0){doneT=now;cf.burst(110);snd('win');}T(c,L('Bảng xếp hạng của bạn!','Your ranking!'),W/2-110,260,44,'#c1f354',{w:900});}
-        cf.draw(c,W,H,dt);},
-      tap(x,y){if(t0<0||cur>=items.length)return;const sx=W0-250,sy=200;if(x<sx||x>sx+220)return;const i=Math.floor((y-sy)/118);if(i<0||i>4||slots[i])return;slots[i]=items[cur++];snd(cur>=items.length?'ding':'tick');}};},
-  eat:()=>randomizer({title:()=>L('🍲 Hôm nay ăn gì?','🍲 What should I eat today?'),col:'#ff8a3d',col2:'#ffd166',items:FOODS,sub:()=>L('Đi ăn liền thôi!','Let us go eat!')}),
+  top10:()=>ranking({n:10,title:()=>L('🏆 Top 10 món ăn ngon nhất','🏆 Top 10 foods of all time'),col:'#ffd166',items:()=>shuffle(FOODS().concat(TREND())),done:()=>L('Top 10 của bạn đây! 🍽️','Here is your top 10! 🍽️')}),
+  trend:()=>randomizer({title:()=>L('🔥 Món đang trend hợp với bạn','🔥 Your trending food'),col:'#ff5fa2',col2:'#ffd166',items:TREND,dur:3.6,sub:()=>L('Độ hot: 🔥🔥🔥🔥🔥 · đi ăn liền!','Hype: 🔥🔥🔥🔥🔥 · go eat it now!')}),
+  meme5:()=>memes(),
+  nexusrank:()=>{const cats=[[L('Ai sẽ giàu nhất?','Who will be the richest?'),'💰'],[L('Ai chơi game giỏi nhất?','Best gamer?'),'🎮'],[L('Ai hay trễ hẹn nhất?','Always late?'),'⏰'],[L('Ai hài hước nhất?','Funniest?'),'😂'],[L('Ai học giỏi nhất?','Smartest?'),'🧠'],[L('Ai dễ thương nhất?','Cutest?'),'🥰']];const cat=R(cats);
+    return ranking({n:5,title:()=>L('👥 Xếp hạng bạn Nexus · ','👥 Rank your Nexus friends · ')+cat[0],col:'#a78bfa',items:()=>shuffle(people(5)).slice(0,5).map(p=>[p.friend?'⭐':cat[1],p.name]),done:()=>L('Đã xếp xong bạn bè 👀','Friends ranked 👀')});},
+  nexusbff:()=>{const q=R([[L('Ai trên Nexus sẽ là bạn thân của bạn?','Who on Nexus will be your best friend?'),L('Rủ đi trà sữa liền!','Take them out for milk tea!')],[L('Ai sẽ bao bạn trà sữa hôm nay?','Who buys you milk tea today?'),L('Nhắn họ ngay đi 😆','Text them now 😆')],[L('Ai sẽ cùng bạn leo rank tối nay?','Who climbs rank with you tonight?'),L('Mở game thôi! 🎮','Open the game! 🎮')]]);
+    return randomizer({title:()=>'👥 '+q[0],col:'#a78bfa',col2:'#7df9ff',items:()=>shuffle(people(6)).slice(0,10).map(p=>[p.friend?'⭐':'🧑',p.name]),dur:3.8,sub:()=>q[1]});},
+  score7:()=>randomizer({title:()=>L('📝 Khi nào bạn được 7 điểm?','📝 When will you score a 7?'),col:'#7df9ff',col2:'#c1f354',dur:3.8,
+    items:()=>[['📅',L('Tuần sau','Next week')],['🗓️',L('Kỳ thi tới','Next exam')],['⏳',L('Năm sau','Next year')],['🌙',L('Trong mơ','In your dreams')],['🍀',L('Ngày mai luôn','Tomorrow!')],['📚',L('Khi chịu học bài','When you study')],['😭',L('Không bao giờ','Never')],['🔥',L('Sắp rồi đó','Very soon')]],
+    sub:it=>it[0]==='😭'?L('Đùa thôi, học đi nha 😂','Just kidding, go study 😂'):L('Cố lên! 💪','You got this! 💪')}),
+  bo:()=>randomizer({title:()=>L('💞 Khi nào bạn có bồ?','💞 When will you get a partner?'),col:'#ff5fa2',col2:'#ffb3d1',dur:3.8,
+    items:()=>[['📅',L('Tháng sau','Next month')],['🌸',L('Mùa xuân năm sau','Next spring')],['🕐',L('Ngày mai','Tomorrow')],['👀',L('Có rồi mà giấu','Already have one 👀')],['🎓',L('Khi ra trường','After graduation')],['💍',L('Năm 30 tuổi','At 30')],['🐶',L('Lấy chó làm bồ','Your dog counts')],['🚫',L('Chưa có cửa','Not a chance')]],sub:()=>L('Tag người đó vào đi 👀','Tag them 👀')}),
+  dare:()=>dare(),
+  flappy:()=>flappy(),
+  whack:()=>whack(),
+  tapspeed:()=>tapspeed(),
   gamer:()=>randomizer({title:()=>L('🎮 Bạn là game thủ hạng gì?','🎮 What gamer rank are you?'),col:'#7df9ff',col2:'#a78bfa',
     items:()=>[['🥉',L('Đồng','Bronze')],['🥈',L('Bạc','Silver')],['🥇',L('Vàng','Gold')],['💠',L('Bạch kim','Platinum')],['💎',L('Kim cương','Diamond')],['👑',L('Cao thủ','Master')],['🔥',L('Thách đấu','Challenger')],['🐢',L('Gà mờ','Noob')]],
     sub:it=>it[1]===L('Gà mờ','Noob')?L('Về luyện thêm nha 😂','Go practise 😂'):L('GG WP!','GG WP!')}),
-  hero:()=>randomizer({title:()=>L('⚔️ Bạn là tướng nào?','⚔️ Which hero are you?'),col:'#ff5fa2',col2:'#ffd166',
-    items:()=>[['🗡️',L('Sát thủ','Assassin')],['🛡️',L('Đỡ đòn','Tank')],['🔮',L('Pháp sư','Mage')],['🏹',L('Xạ thủ','Marksman')],['✨',L('Hỗ trợ','Support')],['🪓',L('Đấu sĩ','Fighter')],['🐉',L('Rồng thần','Dragon')],['🧙',L('Phù thủy','Wizard')]],sub:()=>L('Gánh team giùm cái!','Carry the team!')}),
   hud:()=>{let t0=-1,lv=1,pops=[],hp=1,mp=.7,xp=0,lvT=-9,combo=0,cmT=-9;const cf=Conf();
     return{start(now){t0=now;lv=1;pops=[];hp=1;mp=.7;xp=0;lvT=-9;combo=0;},
       draw(c,W,H,now,dt){const t=t0<0?now/1000:(now-t0)/1000;
@@ -85,16 +168,6 @@ const DEF={
         if(t-cmT<1.4&&combo>1){T(c,combo+'x COMBO',W/2,H*.34,58,'#7df9ff',{w:900,it:1});}
         if(t-lvT<2){const k=back((t-lvT)*2.5);c.save();c.translate(W/2,H*.22);c.scale(k,k);T(c,'LEVEL UP!',0,0,96,'#ffd166',{w:900,it:1});c.restore();}
         if(t0<0)T(c,L('Bấm quay để vào trận','Press record to start the match'),W/2,H*.22,32,'#fff');cf.draw(c,W,H,dt);},tap(){}};},
-  wheel:()=>{let t0=-1,target=0,last=-1;const cf=Conf();let done=false;
-    const segs=()=>[L('Hát 1 câu','Sing a line'),L('Nhảy 5 giây','Dance 5 sec'),L('Giả giọng mèo','Meow voice'),L('Kể chuyện cười','Tell a joke'),L('Làm mặt xấu','Ugly face'),L('Nói ngược','Talk backwards'),L('Tạo dáng ngầu','Cool pose'),L('Cười 10 giây','Laugh 10 sec')];
-    const cols=['#ff5fa2','#ffd166','#7df9ff','#c1f354','#ff8a3d','#a78bfa','#2fd47a','#ff3b47'];
-    return{start(now){t0=now;target=Math.random()*8|0;done=false;last=-1;},
-      draw(c,W,H,now,dt){const cx=W/2,cy=H*.24,r=190,S=segs(),n=S.length;pill(c,L('🎡 Vòng quay thử thách','🎡 Challenge wheel'),cx,cy-r-50,32,'#ffd166');
-        let a=0;if(t0>=0){const t=(now-t0)/1000,k=Math.min(1,t/4.2);const end=Math.PI*2*6-(target+.5)*Math.PI*2/n;a=end*ease(k);const seg=Math.floor(((a/(Math.PI*2/n))%n+n)%n);if(seg!==last&&k<1){last=seg;snd('tick');}if(k>=1&&!done){done=true;cf.burst(90);snd('win');}}
-        c.save();c.translate(cx,cy);c.rotate(a-Math.PI/2);for(let i=0;i<n;i++){c.beginPath();c.moveTo(0,0);c.arc(0,0,r,i*Math.PI*2/n,(i+1)*Math.PI*2/n);c.closePath();c.fillStyle=cols[i];c.fill();c.lineWidth=3;c.strokeStyle='#111';c.stroke();
-          c.save();c.rotate((i+.5)*Math.PI*2/n);T(c,S[i],r*.58,0,20,'#111',{ns:1,w:900});c.restore();}c.restore();
-        c.beginPath();c.arc(cx,cy,26,0,7);c.fillStyle='#fff';c.fill();c.fillStyle='#fff';c.beginPath();c.moveTo(cx-18,cy-r-6);c.lineTo(cx+18,cy-r-6);c.lineTo(cx,cy-r+30);c.fill();
-        if(done)T(c,'👉 '+S[target],cx,cy+r+60,48,'#ffd166',{w:900});else if(t0<0)T(c,L('Bấm quay để quay bánh xe','Press record to spin'),cx,cy+r+60,30,'#fff');cf.draw(c,W,H,dt);},tap(){}};},
   quiz:()=>{let t0=-1,q=null;const cf=Conf();let rev=false;
     return{start(now){q=R(QUIZ());t0=now;rev=false;},
       draw(c,W,H,now,dt){pill(c,L('❓ Đố vui 5 giây','❓ 5-second quiz'),W/2,90,32,'#7df9ff');if(!q){T(c,L('Bấm quay để nhận câu hỏi','Press record for a question'),W/2,200,32,'#fff');return;}
@@ -111,24 +184,10 @@ const DEF={
         if(left>0){T(c,String(s),W/2,250,150,s<=3?'#ff3b47':'#fff',{w:900});T(c,L('ĐỪNG CƯỜI!','DO NOT LAUGH!'),W/2,370,54,'#ffd166',{w:900,it:1});
           if(Math.random()<dt*2.5)em.push({x:80+Math.random()*(W-160),y:H*.5+Math.random()*H*.3,t:0,e:R(['🤣','😂','🙃','🤪','🐸','🦆','💀','🍌'])});}
         else T(c,L('Bạn có cười không? 😂','Did you laugh? 😂'),W/2,260,56,'#c1f354',{w:900});
-        em=em.filter(p=>(p.t+=dt)<1.6);for(const p of em){const k=back(Math.min(1,p.t*3));c.save();c.globalAlpha=Math.min(1,(1.6-p.t)*2);c.translate(p.x,p.y-p.t*40);c.scale(k,k);T(c,p.e,0,0,90,'#fff',{ns:1});c.restore();}},tap(){}};},
-  cool:()=>meter({title:()=>L('😎 Đo độ ngầu','😎 Cool-o-meter'),icon:'😎',col:'#7df9ff',col2:'#a78bfa',verdict:v=>v>=90?L('Ngầu hết nấc!','Off the charts!'):v>=70?L('Ngầu đét','Seriously cool'):v>=50?L('Cũng ngầu đó','Kinda cool'):L('Ngầu... từ từ','Cool... eventually')}),
-  love:()=>meter({title:()=>L('💘 Bói tình yêu','💘 Love match'),icon:'💘',col:'#ff5fa2',col2:'#ff3b47',verdict:v=>v>=90?L('Định mệnh rồi!','Soulmates!'):v>=70?L('Hợp nhau phết','A great match'):v>=50?L('Có hy vọng','There is hope'):L('Làm bạn thôi 😅','Just friends 😅')}),
-  animal:()=>randomizer({title:()=>L('🐾 Bạn giống con vật nào?','🐾 Which animal are you?'),col:'#2fd47a',col2:'#c1f354',
-    items:()=>[['🐶',L('Cún con','Puppy')],['🐱',L('Mèo lười','Lazy cat')],['🦊',L('Cáo tinh ranh','Sly fox')],['🐼',L('Gấu trúc','Panda')],['🦁',L('Sư tử','Lion')],['🐸',L('Ếch','Frog')],['🐧',L('Chim cánh cụt','Penguin')],['🦥',L('Con lười','Sloth')],['🐹',L('Chuột hamster','Hamster')],['🦄',L('Kỳ lân','Unicorn')]]}),
-  job:()=>randomizer({title:()=>L('💼 Năm 30 tuổi bạn làm nghề gì?','💼 Your job at 30?'),col:'#a78bfa',col2:'#7df9ff',
-    items:()=>[['👨‍🚀',L('Phi hành gia','Astronaut')],['🧑‍🍳',L('Đầu bếp','Chef')],['🎤',L('Ca sĩ','Singer')],['🧑‍💻',L('Lập trình viên','Programmer')],['🎮',L('Streamer','Streamer')],['👩‍⚕️',L('Bác sĩ','Doctor')],['💰',L('Tỷ phú','Billionaire')],['🕵️',L('Thám tử','Detective')],['🎬',L('Diễn viên','Actor')],['🛵',L('Shipper','Delivery rider')]]}),
-  hearts:()=>{let P=[];return{start(){},draw(c,W,H,now,dt){if(Math.random()<dt*9)P.push({x:Math.random()*W,y:-40,v:120+Math.random()*160,s:40+Math.random()*50,r:Math.random()*6,w:Math.random()*2+1,e:R(['❤️','💖','💕','💗','💘'])});
-      P=P.filter(p=>p.y<H+60);for(const p of P){p.y+=p.v*dt;p.r+=dt;c.save();c.translate(p.x+Math.sin(p.r*p.w)*30,p.y);c.rotate(Math.sin(p.r)*.3);T(c,p.e,0,0,p.s,'#fff',{ns:1});c.restore();}
-      c.save();c.globalAlpha=.85;T(c,L('Thương lắm 💗','Love you 💗'),W/2,H*.14,64,'#ff9fc8',{w:900,it:1});c.restore();},tap(){}};},
-  crown:()=>{let S=[];return{start(){},draw(c,W,H,now,dt){const t=now/1000,cx=W/2,y=H*.15+Math.sin(t*2)*10;
-      c.save();c.translate(cx,y);c.rotate(Math.sin(t*1.3)*.06);c.shadowColor='#ffd166';c.shadowBlur=40;T(c,'👑',0,0,190,'#fff',{ns:1});c.restore();
-      if(Math.random()<dt*14)S.push({x:cx+(Math.random()-.5)*360,y:y+(Math.random()-.5)*160,t:0});S=S.filter(s=>(s.t+=dt)<.9);
-      for(const s of S){const k=Math.sin(s.t/.9*Math.PI),r=14*k;c.save();c.translate(s.x,s.y);c.fillStyle='#fff8d0';c.beginPath();for(let i=0;i<8;i++){const a=i*Math.PI/4,rr2=i%2?r*.3:r;c.lineTo(Math.cos(a)*rr2,Math.sin(a)*rr2);}c.fill();c.restore();}
-      T(c,L('Vua của ngày hôm nay','Royalty of the day'),cx,y+140,44,'#ffd166',{w:900,it:1});},tap(){}};}};
+        em=em.filter(p=>(p.t+=dt)<1.6);for(const p of em){const k=back(Math.min(1,p.t*3));c.save();c.globalAlpha=Math.min(1,(1.6-p.t)*2);c.translate(p.x,p.y-p.t*40);c.scale(k,k);T(c,p.e,0,0,90,'#fff',{ns:1});c.restore();}},tap(){}};}};
 let W0=720;
-const LIST=()=>[['food','🍽️',L('Chấm điểm món ăn','Rate the food')],['rank','🏆',L('Xếp hạng món ăn','Food ranking')],['eat','🍲',L('Hôm nay ăn gì?','What to eat?')],['gamer','🎮',L('Rank game thủ','Gamer rank')],['hero','⚔️',L('Bạn là tướng nào?','Which hero?')],
-  ['hud','🕹️',L('Màn hình game','Game HUD')],['wheel','🎡',L('Vòng quay thử thách','Challenge wheel')],['quiz','❓',L('Đố vui 5 giây','5-second quiz')],['nolaugh','😐',L('Nhịn cười','Try not to laugh')],['cool','😎',L('Đo độ ngầu','Cool-o-meter')],
-  ['love','💘',L('Bói tình yêu','Love match')],['animal','🐾',L('Bạn là con gì?','Which animal?')],['job','💼',L('Nghề năm 30 tuổi','Job at 30')],['hearts','❤️',L('Mưa tim','Heart rain')],['crown','👑',L('Vương miện','Crown')]].map(([id,e,n])=>({id,e,n}));
-window.LoopyFX={get list(){return LIST();},make(id){const f=DEF[id];return f?f():null;},onSound(fn){snd=fn||(()=>{});},set width(w){W0=w;}};
+const LIST=()=>[['top10','🏆',L('Top 10 món ăn','Top 10 foods')],['trend','🔥',L('Món đang trend','Trending food')],['meme5','🤲',L('5 meme làm theo','5 meme challenge')],['nexusrank','👥',L('Xếp hạng bạn Nexus','Rank Nexus friends')],['nexusbff','🫶',L('Bạn thân trên Nexus','Nexus bestie')],
+  ['score7','📝',L('Khi nào được 7 điểm?','When do I score 7?')],['bo','💞',L('Khi nào có bồ?','When do I get a partner?')],['dare','😈',L('Sự thật hay thử thách','Truth or dare')],['flappy','🐤',L('Game: Bay qua ống','Game: Flappy')],['whack','🔨',L('Game: Đập chuột','Game: Whack-a-mole')],
+  ['tapspeed','👆',L('Game: Bấm siêu tốc','Game: Speed tap')],['hud','🕹️',L('Màn hình game','Game HUD')],['gamer','🎮',L('Rank game thủ','Gamer rank')],['quiz','❓',L('Đố vui 5 giây','5-second quiz')],['nolaugh','😐',L('Nhịn cười','Try not to laugh')]].map(([id,e,n])=>({id,e,n}));
+window.LoopyFX={get list(){return LIST();},set people(a){PEOPLE=(a||[]).slice(0,60);},make(id){const f=DEF[id];return f?f():null;},onSound(fn){snd=fn||(()=>{});},set width(w){W0=w;}};
 })();
