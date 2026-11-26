@@ -2127,7 +2127,7 @@ function dismount(){if(!P.bike)return;const H=P.H;P.bike.m.bg.remove(H.root);sce
 function loseDirty(){const d=P.dirty;P.dirty=0;if(heist&&heist.stage!=='done')heist=null;return d;}
 function wasted(){if(STORY)stDied();const fine=Math.min(save.money,Math.max(100,Math.round(save.money*.08)));save.money-=fine;const d=loseDirty();exitCarNow();clearChaos();failMission('Bất tỉnh giữa nhiệm vụ');
   P.koT=3.2;P.H.ko=1;setTimeout(()=>{P.H.ko=0;P.koT=0;P.hp=maxHp();spawnAt(SP.hospital.x,SP.hospital.z,0);P.inv=3;},2600);
-  banner('BẤT TỈNH',`Tỉnh dậy ở bệnh viện · viện phí ${fmt$(fine)}${d?` · mất ${fmt$(d)} tiền nóng`:''}`,3.6);writeSave();}
+  if(!STORY)banner('BẤT TỈNH',`Tỉnh dậy ở bệnh viện · viện phí ${fmt$(fine)}${d?` · mất ${fmt$(d)} tiền nóng`:''}`,3.6);writeSave();}
 function busted(){const fine=Math.min(save.money,Math.round(save.money*.1));save.money-=fine;const d=loseDirty();exitCarNow();clearChaos();failMission('Bị bắt giữa nhiệm vụ');
   P.hp=maxHp();spawnAt(SP.police.x,SP.police.z,0);P.inv=3;banner('BỊ BẮT',`Nộp phạt ${fmt$(fine)}${d?` · tịch thu ${fmt$(d)} tiền nóng`:''}`,3.6);writeSave();}
 
@@ -3262,7 +3262,7 @@ $h('.nc-close').addEventListener('click',toggleMap);
 /* ---------- input ---------- */
 const keys=new Set();let active=false;const K=k=>keys.has(k);
 const joy={x:0,y:0,id:null},tb={jump:false,sprint:false,block:false};
-function onKey(e){if(!active)return;sfxInit();const k=e.key.toLowerCase();if([' ','arrowup','arrowdown','arrowleft','arrowright'].includes(k))e.preventDefault();if(e.repeat){keys.add(k);return;}
+function onKey(e){if(!active)return;sfxInit();const k=e.key.toLowerCase();if([' ','arrowup','arrowdown','arrowleft','arrowright'].includes(k))e.preventDefault();if(cinKey(k)){keys.clear();return;}if(e.repeat){keys.add(k);return;}
   if(shopOpen){if(k==='e'||k==='backspace')closeShop();else if(/^[1-9]$/.test(k)){const it=shopItems(shopOpen)[+k-1];if(it)buyItem(it);}return;}
   if(k==='m')toggleMap();else if(mapOpen)return;
   if(HP.on&&hpKey(k)){keys.add(k);return;}
@@ -3630,7 +3630,7 @@ const PP=(()=>{const gl2=renderer.capabilities.isWebGL2;const o={on:opt.gfx?opt.
    ch 0: buy a gun · ch 1-5: beat the boss of each town (1 key card each) · ch 6: Syndicate Tower rooftop, final boss + escape helicopter · ch 7: done.
    3 lives: dying wakes you in hospital with progress kept; losing all 3 sends you back to the first boss (key cards lost). */
 const STORY=opt.mode==='story';
-const ST_TOWNS=[['oldq','Lão Đèn Lồng','Phố Cổ Đèn Lồng'],['harbor','Cá Mập Cảng','Cảng Bắc'],['highland','Bóng Ma Đồi Mây','Đồi Mây'],['minetown','Vua Mỏ Bạc','Thị trấn Mỏ Bạc'],['westside','Rắn Sa Mạc','Nexus Tây']];
+const ST_TOWNS=[['oldq',L('Lão Đèn Lồng','The Lantern Elder'),L('Phố Cổ Đèn Lồng','Lantern Old Quarter')],['harbor',L('Cá Mập Cảng','The Harbor Shark'),L('Cảng Bắc','North Harbor')],['highland',L('Bóng Ma Đồi Mây','The Cloud Hill Ghost'),L('Đồi Mây','Cloud Hills')],['minetown',L('Vua Mỏ Bạc','The Silver Mine King'),L('Thị trấn Mỏ Bạc','Silver Mine Town')],['westside',L('Rắn Sa Mạc','The Desert Snake'),L('Nexus Tây','Nexus West')]];
 const ST_LOOKS=[{shirt:'#7a1020',pants:'#1a1a1a',jacket:'#c0392b',cap:null},{shirt:'#1d3557',pants:'#22313f',jacket:'#457b9d',cap:'#0b1a2a'},{shirt:'#eeeeee',pants:'#30343a',jacket:'#6c757d',cap:null},{shirt:'#3b2f2f',pants:'#4a3b2a',jacket:'#8d6e63',cap:'#5d4037'},{shirt:'#2d6a4f',pants:'#1b4332',jacket:'#1b1b1b',cap:'#2d6a4f'}];
 if(STORY){save.story=Object.assign({ch:0,keys:[0,0,0,0,0],lives:3,done:false,deaths:0,t0:Date.now()},save.story||{});}
 const SS=STORY?save.story:null;
@@ -3687,7 +3687,7 @@ function stClearGang(){if(stGang){for(const n of stGang.list)if(npcs.includes(n)
 function stSpawnGang(i){const p=stSpot(i),list=[];const lk=Object.assign(randomLook('guard'),ST_LOOKS[i]);
   const boss=newNPC('guard',p.x,p.z,{state:'fight',t:999,mission:true,story:true,boss:ST_TOWNS[i][1],look:lk});boss.hp=boss.maxHp=420+i*90;boss.H.root.scale.setScalar(1.12);list.push(boss);
   for(let k=0;k<3+Math.min(2,i);k++){const a=k/(3+i)*6.283,x=p.x+Math.cos(a)*7,z=p.z+Math.sin(a)*7,q=resolve(x,z,.6)?p:{x,z};const n=newNPC('guard',q.x,q.z,{state:'fight',t:999,mission:true,story:true,look:Object.assign(randomLook('guard'),{jacket:ST_LOOKS[i].jacket})});n.hp=n.maxHp=110+i*15;list.push(n);}
-  stGang={i,boss,list,said:false};banner(ST_TOWNS[i][1],L('Trùm khu '+ST_TOWNS[i][2]+' và đàn em · hạ hắn để lấy mảnh thẻ khoá','Boss of '+ST_TOWNS[i][2]+' and his crew · take him down for a key card'),3);}
+  stGang={i,boss,list,said:false,intro:false,half:false,hp0:0};cine({type:'title',hold:2.6,slow:.55,kick:L('Đang vào lãnh địa','Entering territory'),title:ST_TOWNS[i][2],c:ST_COL[i][0],c2:'#ffffff',snd:'slow',sub:L('Đàn em của '+ST_TOWNS[i][1]+' đã thấy bạn','The crew of '+ST_TOWNS[i][1]+' has spotted you')});}
 function stTarget(){if(!STORY||SS.done||P.inside)return null;
   if(SS.ch===0){const g=SP.shops.find(s=>s.id==='guns');return g?{x:g.x,z:g.z,col:'#ff3b3b',name:L('Cửa hàng súng','Gun shop')}:null;}
   if(SS.ch>=1&&SS.ch<=5){const p=stSpot(SS.ch-1);return{x:p.x,z:p.z,col:'#ff3b3b',name:ST_TOWNS[SS.ch-1][1]};}
@@ -3704,21 +3704,21 @@ function stEnterTower(){if(stars>0){showPrompt(L('Cắt đuôi cảnh sát trư�
 function stStartTower(){stTowerReset();const list=[];const lk=Object.assign(randomLook('guard'),{shirt:'#f5f5f5',pants:'#111111',jacket:'#111111',cap:null});
   const boss=newNPC('guard',TW.cx,TW.cz-8,{state:'fight',t:999,mission:true,story:true,boss:L('Ông Trùm Vương','Boss Vương'),look:lk});boss.hp=boss.maxHp=1100;boss.H.root.scale.setScalar(1.18);list.push(boss);
   for(let k=0;k<6;k++){const x=TW.cx+(k%3-1)*12,z=TW.cz-14+Math.floor(k/3)*14+(k%2?3:-3);const n=newNPC('guard',x,z,{state:'fight',t:999,mission:true,story:true,look:Object.assign(randomLook('guard'),{jacket:'#111111',shirt:'#222222'})});n.hp=n.maxHp=150;list.push(n);}
-  stTower={boss,list,phase:'fight'};banner(L('THÁP SYNDICATE','SYNDICATE TOWER'),L('Ông Trùm Vương đang chờ trên sân thượng · thùng đạn ở cạnh cửa','Boss Vương is waiting on the roof · ammo crate by the door'),3.2);}
+  stTower={boss,list,phase:'fight'};stTowerIntro();}
 function stTowerReset(){if(stTower){for(const n of stTower.list)if(npcs.includes(n))removeNPC(n);}stTower=null;if(stHeli){scene.remove(stHeli.g);stHeli=null;}}
 function stHeliHit(o,d,range,dmg){if(!stHeli||stHeli.dead)return false;const H=stHeli.g.position;_m.set(H.x-o.x,H.y-o.y,H.z-o.z);const t=_m.dot(d);if(t<0||t>range)return false;const q=_m.lengthSq()-t*t;if(q>3.2*3.2)return false;
-  stHeli.hp-=dmg;fx3(H.x+rnd(-1,1),H.y+rnd(-.5,.5),H.z+rnd(-1,1),false);sfx('ric');lastFoe={n:{boss:L('Trực thăng Ông Trùm','Boss helicopter'),hp:Math.max(0,stHeli.hp),maxHp:100,heli:true},t:time};return true;}
+  stHeli.hp-=dmg;if(!stHeli.half&&stHeli.hp<=50&&stHeli.hp>0){stHeli.half=true;cine({type:'title',hold:1.5,slow:.2,kick:L('Trực thăng','Helicopter'),title:L('Bốc khói rồi!','It is smoking!'),c:'#ff8a3d',c2:'#ffd166',snd:'slow'});}fx3(H.x+rnd(-1,1),H.y+rnd(-.5,.5),H.z+rnd(-1,1),false);sfx('ric');lastFoe={n:{boss:L('Trực thăng Ông Trùm','Boss helicopter'),hp:Math.max(0,stHeli.hp),maxHp:100,heli:true},t:time};return true;}
 function stDied(){if(!STORY||SS.done)return;SS.lives--;SS.deaths=(SS.deaths|0)+1;stClearGang();stTowerReset();
-  if(SS.lives<=0){SS.lives=3;SS.keys=[0,0,0,0,0];SS.ch=Math.min(SS.ch,1);if(SS.ch>0)SS.ch=1;setTimeout(()=>banner(L('HẾT MẠNG','OUT OF LIVES'),L('Mất hết mảnh thẻ khoá · làm lại từ trùm đầu tiên, bạn có lại 3 mạng','All key cards lost · start again from the first boss with 3 lives'),4.5),2900);}
-  else setTimeout(()=>banner(L('Tỉnh lại ở bệnh viện','You woke up in hospital'),L(`Còn ${SS.lives} mạng · tiến độ vẫn được giữ`,`${SS.lives} lives left · progress kept`),3.5),2900);
+  if(SS.lives<=0){SS.lives=3;SS.keys=[0,0,0,0,0];SS.ch=Math.min(SS.ch,1);if(SS.ch>0)SS.ch=1;stFail(true);}
+  else stFail(false);
   writeSave();}
 function stWinBoss(i){SS.keys[i]=1;SS.ch=Math.min(6,SS.ch+1);while(SS.ch<=5&&SS.keys[SS.ch-1])SS.ch++;sfx('cash');P.hp=maxHp();save.money+=2000;
-  banner(L('Mảnh thẻ khoá '+stKeys()+'/5','Key card '+stKeys()+'/5'),stKeys()>=5?L('Đủ 5 mảnh! Tháp Syndicate ở trung tâm đã mở · +$2.000','All 5! Syndicate Tower downtown is open · +$2,000'):L('Hạ '+ST_TOWNS[i][1]+' · +$2.000 · tới thị trấn tiếp theo','Beat '+ST_TOWNS[i][1]+' · +$2,000 · on to the next town'),4);writeSave();
+  writeSave();stKeyStamp(i);
   const g=stGang;stGang=null;setTimeout(()=>{if(g)for(const n of g.list)if(npcs.includes(n)&&n.state==='down')removeNPC(n);},6000);for(const n of g.list)if(n!==g.boss&&n.state!=='down'){n.state='leave';n.story=false;}}
 function stVictory(){if(stWin)return;SS.done=true;SS.ch=7;const mins=Math.round((Date.now()-(SS.t0||Date.now()))/60000);
   let lg={};try{lg=JSON.parse(localStorage.getItem('nexus-city2-legend')||'{}');}catch(_){}const first=!lg.done;
   if(first){lg={done:true,claimed:false,at:Date.now()};try{localStorage.setItem('nexus-city2-legend',JSON.stringify(lg));}catch(_){}}
-  writeSave();if(opt.onStory)opt.onStory(save);
+  writeSave();if(opt.onStory)opt.onStory(save);cinSfx('win');
   for(let k=0;k<14;k++)setTimeout(()=>burst(P.x+rnd(-25,25),rnd(18,32),P.z+rnd(-25,25),pick(['#ffd166','#ff5fd2','#7df9ff','#c1f354','#ff6b5d'])),k*450);
   stWin=document.createElement('div');stWin.className='nc-win';
   stWin.innerHTML=`<div class="nc-win-in"><small>${L('THE SYNDICATE ĐÃ SỤP ĐỔ','THE SYNDICATE HAS FALLEN')}</small><h2>${L('PHÁ ĐẢO NEXUS CITY','NEXUS CITY COMPLETE')}</h2><p class="nc-win-n">${L('Danh hiệu: Huyền Thoại Nexus','Title: Nexus Legend')}</p>
@@ -3730,29 +3730,223 @@ function stVictory(){if(stWin)return;SS.done=true;SS.ch=7;const mins=Math.round(
 function storyUpdate(dt){fwkUpdate(dt);if(!STORY)return;if(stTower&&P.inside!=='tower'&&P.koT<=0)stTowerReset();
   if(stDoorMk){const show=SS.ch===6&&!P.inside;stDoorMk.visible=show;if(show){const d=stDoorSpot();stDoorMk.position.set(d.x,.25,d.z);stDoorMk.children[0].rotation.z+=dt;}}
   if(SS.done)return;
-  if(SS.ch===0&&Object.keys(save.weapons).some(w=>save.weapons[w])){SS.ch=1;banner(L('Đã có vũ khí','Armed'),L('Giờ tới Phố Cổ Đèn Lồng hạ trùm đầu tiên','Now head to the Lantern Old Quarter for the first boss'),3.5);writeSave();}
+  if(SS.ch===0&&Object.keys(save.weapons).some(w=>save.weapons[w])){SS.ch=1;writeSave();stArmed();}
   if(SS.ch>=1&&SS.ch<=5&&!P.inside){const i=SS.ch-1,p=stSpot(i),t=P.car||P,d=hyp(t.x-p.x,t.z-p.z);
     if(!stGang&&d<85&&P.koT<=0)stSpawnGang(i);
     if(stGang){if(d>170){stClearGang();showPrompt(L('Bạn đã rời khỏi khu trùm','You left the boss area'),1.6);}
-      else{for(const n of stGang.list)if(n.state==='leave'&&n.story){n.state='fight';n.t=999;}const b=stGang.boss;if(!npcs.includes(b)||b.state==='down'||b.hp<=0)stWinBoss(i);}}}
-  if(SS.ch===6&&P.inside==='tower'&&stTower){const T2=stTower,b=T2.boss;for(const n of T2.list)if(n.state==='leave'&&npcs.includes(n)){n.state='fight';n.t=999;}
-    if(T2.phase==='fight'&&(b.hp<=b.maxHp*.25||b.state==='down')){T2.phase='escape';removeNPC(b);stHeli=stHeliMake();stHeli.hp=100;stHeli.t=0;stHeli.g.position.set(TW.cx,1.8,TW.cz-14);stHeli.a=0;banner(L('ÔNG TRÙM BỎ CHẠY!','THE BOSS IS ESCAPING!'),L('Hắn nhảy lên trực thăng · bắn rơi nó!','He jumped into his helicopter · shoot it down!'),3.2);sfx('horn');}
+      else{for(const n of stGang.list)if(n.state==='leave'&&n.story){n.state='fight';n.t=999;}const b=stGang.boss;
+        if(!stGang.intro&&d<42&&P.koT<=0){stGang.intro=true;stGang.hp0=P.hp;stIntro(i);}
+        else if(stGang.intro&&!stTips().fight&&(P.hp<stGang.hp0-1||stGang.list.some(n=>n.hp<n.maxHp)))stFightTip();
+        if(stGang&&!stGang.half&&b.hp>0&&b.hp<=b.maxHp*.5){stGang.half=true;stHalf(b);}
+        if(!npcs.includes(b)||b.state==='down'||b.hp<=0)stWinBoss(i);}}}
+  if(!SS.done&&P.koT<=0){if(stars>0)stWantedTip();else if(P.hp>0&&P.hp<maxHp()*.35)stLowTip();}
+  if(SS.ch===6&&P.inside==='tower'&&stTower){const T2=stTower,b=T2.boss;if(!T2.solo&&T2.phase==='fight'&&T2.list.every(n=>n===b||!npcs.includes(n)||n.state==='down'||n.hp<=0)){T2.solo=true;cine({type:'title',hold:2,slow:.2,kick:L('Vệ sĩ đã gục hết','All bodyguards down'),title:L('Chỉ còn Ông Trùm','Just the Boss now'),c:'#d4a017',c2:'#ffffff',snd:'slow'});}for(const n of T2.list)if(n.state==='leave'&&npcs.includes(n)){n.state='fight';n.t=999;}
+    if(T2.phase==='fight'&&(b.hp<=b.maxHp*.25||b.state==='down')){T2.phase='escape';removeNPC(b);stHeli=stHeliMake();stHeli.hp=100;stHeli.t=0;stHeli.g.position.set(TW.cx,1.8,TW.cz-14);stHeli.a=0;sfx('horn');stHeliTip();}
     if(stHeli){const H=stHeli;H.t+=dt;for(const r of H.rot)r.rotation.y+=dt*(r===H.rot[2]?0:28);H.rot[2].rotation.x+=dt*30;const g=H.g;
       if(!H.dead){if(H.t<3){g.position.y=1.8+H.t*5;}else{H.a+=dt*.35;const R=24,y=17+Math.sin(H.t*.7)*3;g.position.set(TW.cx+Math.sin(H.a)*R,y,TW.cz+Math.cos(H.a)*R);}
         g.rotation.y=Math.atan2(P.x-g.position.x,P.z-g.position.z);g.rotation.z=Math.sin(H.t)*.08;
         H.scd=(H.scd==null?2:H.scd)-dt;if(H.t>3&&H.scd<=0&&P.koT<=0){H.scd=rnd(.9,1.6);_o.copy(g.position);_o.y-=1;_d.set(P.x-_o.x,1.1-_o.y,P.z-_o.z).normalize();_d.x+=rnd(-.04,.04);_d.z+=rnd(-.04,.04);_d.normalize();const r=rayHit(_o,_d,90,null),end=_o.clone().addScaledVector(_d,r.t);addTracer(_o,end);sfx('smg');if(r.kind==='player')hurtPlayer(6,null);}
-        if(H.hp<=0){H.dead=true;H.vy=0;banner(L('TRÚNG RỒI!','DIRECT HIT!'),L('Trực thăng của Ông Trùm đang rơi','The boss helicopter is going down'),2.5);for(let k=0;k<6;k++)setTimeout(()=>{if(stHeli)fx3(g.position.x+rnd(-2,2),g.position.y+rnd(-1,1),g.position.z+rnd(-2,2),false);sfx('crash');},k*180);}}
+        if(H.hp<=0){H.dead=true;H.vy=0;stHeliDown();for(let k=0;k<6;k++)setTimeout(()=>{if(stHeli)fx3(g.position.x+rnd(-2,2),g.position.y+rnd(-1,1),g.position.z+rnd(-2,2),false);sfx('crash');},k*180);}}
       else{H.vy-=12*dt;g.position.y+=H.vy*dt;g.rotation.y+=dt*6;g.position.x+=(g.position.x-TW.cx)*dt*.4;g.position.z+=(g.position.z-TW.cz)*dt*.4;if(g.position.y<-70){scene.remove(g);stHeli=null;for(const n of T2.list)if(npcs.includes(n))n.state='leave';T2.phase='won';stVictory();}}}}}
+/* ---------- story cinematics: the game slows to a freeze-frame, big animated title cards, how-to panels and stingers ---------- */
+const CIN={ts:1,tgt:1,q:[],cur:null,el:null,leave:0,yaw:null,dist0:null,duck:null};
+const cnE=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const cinCss=document.createElement('style');cinCss.textContent=`
+.cn{position:absolute;inset:0;z-index:40;pointer-events:none;font-family:"Space Grotesk",Inter,system-ui,sans-serif;color:#fff;overflow:hidden}
+.cn.wait{pointer-events:auto;cursor:pointer}
+.cn-bar{position:absolute;left:0;right:0;height:12vh;background:#000;transition:transform .7s cubic-bezier(.2,.8,.2,1);z-index:1}
+.cn-bar.t{top:0;transform:translateY(-101%)}.cn-bar.b{bottom:0;transform:translateY(101%)}
+.cn.bars .cn-bar{transform:none}
+.cn-tint{position:absolute;inset:0;opacity:0;transition:opacity .8s;background:radial-gradient(ellipse at 50% 50%,rgba(0,0,0,0) 35%,rgba(0,0,0,.78) 100%)}
+.cn.on .cn-tint{opacity:1}
+.cn.k-tip .cn-tint{background:linear-gradient(90deg,rgba(0,0,0,.85) 0%,rgba(0,0,0,.55) 55%,rgba(0,0,0,.15) 100%)}
+.cn.k-title .cn-tint,.cn.k-stamp .cn-tint{background:radial-gradient(ellipse at 50% 50%,rgba(0,0,0,.55) 0%,rgba(0,0,0,.35) 45%,rgba(0,0,0,.8) 100%)}
+.cn.k-fail .cn-tint{background:radial-gradient(ellipse at 50% 50%,rgba(120,0,0,.15) 20%,rgba(60,0,0,.85) 100%)}
+.cn-flash{position:absolute;inset:0;background:#fff;opacity:0}
+.cn-flash.go{animation:cnFlash .55s ease-out}
+@keyframes cnFlash{0%{opacity:.85}100%{opacity:0}}
+.cn-ptr{position:absolute;left:0;top:0;opacity:0;transition:opacity .4s;z-index:2}
+.cn-ptr.on{opacity:1}
+.cn-ptr i{position:absolute;left:-46px;top:-46px;width:92px;height:92px;border-radius:50%;border:3px solid var(--c,#ff3b5c);box-shadow:0 0 24px var(--c,#ff3b5c);animation:cnRing 1.2s ease-in-out infinite}
+.cn-ptr b{position:absolute;left:56px;top:-62px;white-space:nowrap;font-size:15px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;background:var(--c,#ff3b5c);color:#fff;padding:4px 10px;transform:skewX(-10deg)}
+.cn-ptr b:before{content:"";position:absolute;left:-30px;bottom:-14px;width:34px;height:3px;background:var(--c,#ff3b5c);transform:rotate(-40deg);transform-origin:right}
+@keyframes cnRing{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+.cn-stage{position:absolute;inset:0;z-index:3}
+.cn-card{position:absolute}
+.cn-card.out{animation:cnOut .38s ease-in forwards}
+@keyframes cnOut{to{opacity:0;transform:translateY(-14px) scale(.97);filter:blur(6px)}}
+.cn-kick{display:inline-flex;align-items:center;gap:10px;font-size:clamp(13px,1.5vw,18px);font-weight:800;letter-spacing:.32em;text-transform:uppercase;color:var(--c,#ff5fa2);animation:cnKick .7s cubic-bezier(.2,.8,.2,1) both}
+.cn-kick:before{content:"";width:42px;height:3px;background:currentColor;box-shadow:0 0 12px currentColor}
+@keyframes cnKick{from{opacity:0;transform:translateX(-40px);letter-spacing:.8em}to{opacity:1;transform:none}}
+.cn-title{margin:.12em 0 0;font-size:clamp(46px,8.4vw,128px);line-height:.9;font-weight:900;font-style:italic;text-transform:uppercase;letter-spacing:-.01em;
+  background:linear-gradient(100deg,#fff 0%,#fff 38%,var(--c2,#ffb36b) 70%,var(--c,#ff5fa2) 100%);-webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 6px 0 rgba(0,0,0,.55)) drop-shadow(0 0 30px rgba(0,0,0,.5));animation:cnTitle .9s cubic-bezier(.16,.9,.2,1) .12s both}
+@keyframes cnTitle{0%{opacity:0;transform:scale(1.35) translateY(10px);letter-spacing:.3em;filter:blur(16px)}60%{opacity:1}100%{opacity:1;transform:none;filter:drop-shadow(0 6px 0 rgba(0,0,0,.55)) drop-shadow(0 0 30px rgba(0,0,0,.5))}}
+.cn-sub{margin:.7em 0 0;max-width:min(760px,86vw);font-family:Inter,system-ui,sans-serif;font-size:clamp(16px,1.7vw,22px);line-height:1.45;font-weight:600;color:rgba(255,255,255,.92);text-shadow:0 2px 10px rgba(0,0,0,.9);animation:cnUp .7s ease .55s both}
+@keyframes cnUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.cn-steps{list-style:none;margin:1.1em 0 0;padding:0;display:grid;gap:10px}
+.cn-steps li{display:flex;align-items:center;gap:14px;font-family:Inter,system-ui,sans-serif;font-size:clamp(15px,1.55vw,20px);font-weight:600;text-shadow:0 2px 8px rgba(0,0,0,.9);animation:cnStep .55s cubic-bezier(.2,.8,.2,1) var(--d,.6s) both}
+@keyframes cnStep{from{opacity:0;transform:translateX(-30px)}to{opacity:1;transform:none}}
+.cn kbd{display:inline-grid;place-items:center;min-width:44px;padding:6px 12px;border-radius:9px;background:rgba(255,255,255,.95);color:#111;font:800 clamp(13px,1.3vw,17px) Inter,system-ui,sans-serif;box-shadow:0 4px 0 rgba(0,0,0,.45),0 0 0 2px var(--c,#ff5fa2);white-space:nowrap}
+.cn-go{margin-top:1.4em;display:flex;align-items:center;gap:10px;font:700 15px Inter,system-ui,sans-serif;letter-spacing:.06em;color:rgba(255,255,255,.8);opacity:0;transition:opacity .4s}
+.cn.ready .cn-go{opacity:1;animation:cnPulse 1.4s ease-in-out infinite}
+@keyframes cnPulse{50%{opacity:.45}}
+/* tip panel: left side, like a director stepping in */
+.cn-tip{left:6vw;top:50%;transform:translateY(-50%);max-width:min(880px,88vw);padding-left:26px;border-left:5px solid var(--c,#ff5fa2)}
+.cn-tip:before{content:"";position:absolute;left:-5px;top:0;width:5px;height:0;background:#fff;animation:cnLine .8s ease .2s forwards}
+@keyframes cnLine{to{height:100%}}
+/* boss intro: freeze-frame name card */
+.cn-intro{left:0;bottom:15vh;width:100%;height:auto}
+.cn-slash{position:absolute;left:-5vw;bottom:-2vh;width:78vw;height:calc(100% + 4vh);background:linear-gradient(100deg,var(--c,#ff3b5c),var(--c2,#7a1020));clip-path:polygon(0 0,100% 0,88% 100%,0 100%);opacity:.92;animation:cnSlash .6s cubic-bezier(.2,.9,.2,1) both;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+@keyframes cnSlash{from{transform:translateX(-100%)}to{transform:none}}
+.cn-intro .cn-in{position:relative;padding:22px 0 22px 7vw}
+.cn-intro .cn-kick{color:#fff}
+.cn-intro .cn-title{background:none;color:#fff;-webkit-background-clip:initial;background-clip:initial}
+.cn-tag{margin:.5em 0 0;font:600 italic clamp(16px,1.8vw,24px) Inter,system-ui,sans-serif;color:rgba(255,255,255,.95);animation:cnUp .6s ease .6s both}
+.cn-stats{display:flex;gap:10px;margin-top:12px;animation:cnUp .6s ease .8s both}
+.cn-stats span{background:rgba(0,0,0,.55);padding:5px 12px;font:800 14px Inter,system-ui,sans-serif;letter-spacing:.08em}
+.cn-intro .cn-go{padding-left:7vw}
+/* centred cards */
+.cn-mid{left:50%;top:50%;transform:translate(-50%,-50%);width:min(1100px,92vw);text-align:center}
+.cn-mid .cn-kick:after{content:"";width:42px;height:3px;background:currentColor;box-shadow:0 0 12px currentColor}
+.cn-mid .cn-sub{margin-left:auto;margin-right:auto}
+.cn-mid .cn-go{justify-content:center}
+/* stamp: key card earned */
+.cn-stamp .cn-title{animation:cnSlam .62s cubic-bezier(.2,1.4,.3,1) .05s both}
+@keyframes cnSlam{0%{opacity:0;transform:scale(2.8) rotate(-7deg);filter:blur(10px)}55%{opacity:1;transform:scale(.94) rotate(1deg);filter:none}75%{transform:scale(1.04)}100%{opacity:1;transform:none}}
+.cn-cards{display:flex;justify-content:center;gap:clamp(8px,1.4vw,18px);margin-top:22px}
+.cn-cards i{width:clamp(38px,4.6vw,62px);aspect-ratio:3/4.2;border-radius:8px;border:2px solid rgba(255,255,255,.35);background:rgba(0,0,0,.45);position:relative;overflow:hidden}
+.cn-cards i.on{border-color:#ffd166;background:linear-gradient(150deg,#ffe9a3,#ffb703 55%,#d4860b);box-shadow:0 0 22px rgba(255,190,40,.75)}
+.cn-cards i.on:after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.8) 50%,transparent 70%);transform:translateX(-120%);animation:cnShine 1.1s ease var(--d,0s) both}
+.cn-cards i.new{animation:cnPop .55s cubic-bezier(.2,1.6,.3,1) .45s both}
+@keyframes cnPop{0%{transform:scale(0) rotate(-30deg)}100%{transform:none}}
+@keyframes cnShine{to{transform:translateX(120%)}}
+.cn-big{font:900 italic clamp(60px,10vw,150px) "Space Grotesk",Inter,sans-serif;line-height:.9;color:#ffd166;text-shadow:0 6px 0 rgba(0,0,0,.55),0 0 40px rgba(255,190,40,.6);animation:cnSlam .62s cubic-bezier(.2,1.4,.3,1) .3s both}
+/* fail */
+.cn-fail .cn-title{background:none;color:#ff3b47;-webkit-background-clip:initial;background-clip:initial;filter:drop-shadow(0 6px 0 rgba(0,0,0,.6));animation:cnGlitch .9s steps(2) both}
+@keyframes cnGlitch{0%{opacity:0;transform:scale(1.6)}20%{opacity:1;transform:translate(-8px,3px) scale(1.05)}35%{transform:translate(6px,-2px)}50%{transform:translate(-3px,1px)}100%{opacity:1;transform:none}}
+.cn-hearts{display:flex;justify-content:center;gap:16px;margin-top:18px;font-size:clamp(34px,4vw,54px)}
+.cn-hearts span{filter:drop-shadow(0 4px 0 rgba(0,0,0,.5))}
+.cn-hearts span.lost{animation:cnBreak .9s ease .7s both}
+.cn-hearts span.gone{opacity:.22;filter:grayscale(1)}
+@keyframes cnBreak{0%{transform:none}30%{transform:scale(1.35)}100%{transform:translateY(40px) rotate(25deg) scale(.6);opacity:.15;filter:grayscale(1)}}
+.cine-on .nc>*{transition:opacity .5s}.cine-on .nc>*:not(.nc-foe){opacity:.12}
+@media (max-width:700px){.cn-tip{left:5vw;top:auto;bottom:14vh;transform:none}.cn-intro{bottom:14vh}.cn-slash{width:100vw}}
+`;document.head.appendChild(cinCss);
+function cinEl(){if(CIN.el)return CIN.el;const d=document.createElement('div');d.className='cn';
+  d.innerHTML='<div class="cn-bar t"></div><div class="cn-bar b"></div><div class="cn-tint"></div><div class="cn-flash"></div><div class="cn-ptr"><i></i><b></b></div><div class="cn-stage"></div>';
+  root.appendChild(d);d.addEventListener('pointerdown',e=>{if(CIN.cur&&CIN.cur.wait){e.preventDefault();e.stopPropagation();cinNext();}});return CIN.el=d;}
+/* stingers, synthesised on the game's audio context */
+function cinSfx(k){try{sfxInit();}catch(_){}const a=sfxAC;if(!a)return;if(a.state==='suspended')a.resume();const t0=a.currentTime+.02;
+  if(!a.cin){a.cin=a.createGain();a.cin.gain.value=.6;a.cin.connect(a.destination);}const out=a.cin;
+  const osc=(type,f0,f1,at,dur,v,lp)=>{const o=a.createOscillator(),g=a.createGain();o.type=type;o.frequency.setValueAtTime(f0,t0+at);if(f1!==f0)o.frequency.exponentialRampToValueAtTime(f1,t0+at+dur);
+    g.gain.setValueAtTime(.0001,t0+at);g.gain.exponentialRampToValueAtTime(v,t0+at+.015);g.gain.exponentialRampToValueAtTime(.0001,t0+at+dur);let n=o;if(lp){const f=a.createBiquadFilter();f.type='lowpass';f.frequency.value=lp;o.connect(f);n=f;}n.connect(g);g.connect(out);o.start(t0+at);o.stop(t0+at+dur+.05);};
+  const nz=(at,dur,v,type,f0,f1)=>{const s=a.createBufferSource();s.buffer=a.nb;s.loop=true;const f=a.createBiquadFilter();f.type=type;f.frequency.setValueAtTime(f0,t0+at);f.frequency.exponentialRampToValueAtTime(f1,t0+at+dur);
+    const g=a.createGain();g.gain.setValueAtTime(.0001,t0+at);g.gain.exponentialRampToValueAtTime(v,t0+at+Math.min(.08,dur*.3));g.gain.exponentialRampToValueAtTime(.0001,t0+at+dur);s.connect(f);f.connect(g);g.connect(out);s.start(t0+at);s.stop(t0+at+dur+.05);};
+  const chord=(fs,at,dur,v,type,lp)=>fs.forEach(f=>{osc(type||'sawtooth',f,f,at,dur,v,lp||1800);osc(type||'sawtooth',f*1.006,f*1.006,at,dur,v*.7,lp||1800);});
+  if(k==='in'){nz(0,.75,.55,'lowpass',5000,160);osc('sine',120,36,.05,1.3,.95);osc('triangle',55,50,.05,1.6,.35);}
+  else if(k==='out'){nz(0,.38,.35,'bandpass',300,5200);osc('sine',70,150,0,.3,.3);}
+  else if(k==='boss'){for(const at of[0,.2,.4]){osc('sine',130,38,at,.4,.95);nz(at,.12,.5,'lowpass',2500,400);}chord([110,130.8,164.8],.55,1.6,.09,'sawtooth',900);osc('sine',55,40,.55,1.8,.7);}
+  else if(k==='stamp'){nz(0,.3,1,'lowpass',2000,300);osc('sine',95,30,0,1.2,1);osc('square',1318,1318,.02,.5,.06);osc('square',1760,1760,.05,.7,.05);chord([523.3,659.3,784],.22,1.3,.06,'sawtooth',2400);chord([659.3,784,1046.5],.5,1.4,.05,'triangle',3000);}
+  else if(k==='fail'){osc('sawtooth',220,48,0,1.7,.16,1100);osc('sine',75,28,0,1.6,.9);nz(0,1.1,.4,'lowpass',900,120);}
+  else if(k==='win'){[523.3,659.3,784,1046.5,1318.5].forEach((f,i)=>osc('square',f,f,i*.11,.45,.07,3000));chord([523.3,659.3,784,1046.5],.6,2.2,.05,'sawtooth',2600);osc('sine',65,40,.6,1.4,.8);}
+  else if(k==='slow'){nz(0,.9,.45,'lowpass',3000,200);osc('sine',90,32,0,1,.85);}}
+function cinDuck(on){const a=sfxAC;if(!a||!a.out)return;const g=a.out.gain,t=a.currentTime;if(on){if(CIN.duck==null)CIN.duck=g.value;g.cancelScheduledValues(t);g.setTargetAtTime(CIN.duck*.3,t,.15);}else if(CIN.duck!=null){g.cancelScheduledValues(t);g.setTargetAtTime(CIN.duck,t,.25);CIN.duck=null;}}
+/* o: {type:'tip'|'intro'|'stamp'|'title'|'fail'|'flash', kick,title,sub,steps:[[key,text]],tag,stats,c,c2,wait,hold,slow,snd,at(npc),onDone} */
+function cine(o){if(!STORY)return;CIN.q.push(o);if(!CIN.cur&&CIN.leave<=0)cinPlay();}
+function cinPlay(){const el=cinEl(),o=CIN.q.shift();if(!o){cinEnd();return;}CIN.cur=o;o.t=0;
+  const freeze=o.wait;CIN.tgt=freeze?0:(o.slow!=null?o.slow:1);
+  el.className='cn on k-'+o.type+(freeze||o.bars?' bars':'')+(o.wait?' wait':'');el.style.setProperty('--c',o.c||'#ff5fa2');el.style.setProperty('--c2',o.c2||'#ffb36b');
+  root.classList.add('cine-on');cinDuck(true);
+  view.style.transition='filter .8s ease';view.style.filter=o.type==='fail'?'grayscale(.9) contrast(1.15) brightness(.8)':freeze?'saturate(.35) contrast(1.12) brightness(.85)':'saturate(.7) contrast(1.08)';
+  if(o.flash){const f=el.querySelector('.cn-flash');f.classList.remove('go');void f.offsetWidth;f.classList.add('go');}
+  const go=o.wait?`<div class="cn-go"><kbd>Space</kbd><span>${L('hoặc bấm chuột để tiếp tục','or click to continue')}</span></div>`:'';
+  const steps=(o.steps||[]).map((s,i)=>`<li style="--d:${(.75+i*.14).toFixed(2)}s"><kbd>${cnE(s[0])}</kbd><span>${cnE(s[1])}</span></li>`).join('');
+  const kick=o.kick?`<div class="cn-kick">${cnE(o.kick)}</div>`:'';const sub=o.sub?`<p class="cn-sub">${cnE(o.sub)}</p>`:'';let h='';
+  if(o.type==='tip')h=`<div class="cn-card cn-tip">${kick}<h2 class="cn-title">${cnE(o.title)}</h2>${sub}${steps?`<ol class="cn-steps">${steps}</ol>`:''}${go}</div>`;
+  else if(o.type==='intro')h=`<div class="cn-card cn-intro"><div class="cn-slash"></div><div class="cn-in">${kick}<h2 class="cn-title">${cnE(o.title)}</h2>${o.tag?`<p class="cn-tag">“${cnE(o.tag)}”</p>`:''}${o.stats?`<div class="cn-stats">${o.stats.map(s=>`<span>${cnE(s)}</span>`).join('')}</div>`:''}${go}</div></div>`;
+  else if(o.type==='stamp')h=`<div class="cn-card cn-mid cn-stamp">${kick}<h2 class="cn-title">${cnE(o.title)}</h2>${o.big?`<div class="cn-big">${cnE(o.big)}</div>`:''}${o.cards?`<div class="cn-cards">${o.cards.map((v,i)=>`<i class="${v?'on':''}${v===2?' new':''}" style="--d:${(.5+i*.08).toFixed(2)}s"></i>`).join('')}</div>`:''}${sub}${go}</div>`;
+  else if(o.type==='fail')h=`<div class="cn-card cn-mid cn-fail">${kick}<h2 class="cn-title">${cnE(o.title)}</h2>${o.hearts?`<div class="cn-hearts">${o.hearts.map(v=>`<span class="${v===2?'lost':v?'':'gone'}">❤️</span>`).join('')}</div>`:''}${sub}${go}</div>`;
+  else h=`<div class="cn-card cn-mid">${kick}<h2 class="cn-title">${cnE(o.title)}</h2>${sub}${steps?`<ol class="cn-steps" style="justify-content:center">${steps}</ol>`:''}${go}</div>`;
+  el.querySelector('.cn-stage').innerHTML=h;
+  const ptr=el.querySelector('.cn-ptr');ptr.classList.toggle('on',!!o.at);ptr.style.opacity='0';if(o.at)ptr.querySelector('b').textContent=o.atName||o.title||'';
+  if(o.at){CIN.yaw=Math.atan2(o.at.x-P.x,o.at.z-P.z);if(CIN.dist0==null){CIN.dist0=cam.dist;}}
+  if(o.snd)cinSfx(o.snd);else if(freeze)cinSfx('in');}
+function cinNext(){const o=CIN.cur;if(!o||CIN.leave>0)return;if(o.wait&&o.t<.9)return;const el=cinEl();const card=el.querySelector('.cn-card');if(card)card.classList.add('out');
+  el.classList.remove('wait','ready');el.querySelector('.cn-ptr').classList.remove('on');if(o.wait&&!CIN.q.length)cinSfx('out');CIN.leave=.38;CIN.cur=null;CIN.yaw=null;
+  try{keys.clear();P.trigger=false;}catch(_){}if(o.onDone)try{o.onDone();}catch(e){console.warn(e);}}
+function cinEnd(){const el=CIN.el;CIN.tgt=1;if(el){el.className='cn';el.querySelector('.cn-stage').innerHTML='';}root.classList.remove('cine-on');view.style.filter='';cinDuck(false);if(CIN.dist0!=null){cam.dist=CIN.dist0;CIN.dist0=null;}}
+const _cv=new T.Vector3();
+function cinTick(dt){const k=CIN.tgt<CIN.ts?3:2.6;CIN.ts+=(CIN.tgt-CIN.ts)*(1-Math.exp(-k*dt));if(CIN.tgt===0&&CIN.ts<.02)CIN.ts=0;if(CIN.tgt===1&&CIN.ts>.995)CIN.ts=1;
+  if(CIN.leave>0){CIN.leave-=dt;if(CIN.leave<=0){CIN.leave=0;if(CIN.q.length)cinPlay();else cinEnd();}return;}
+  const o=CIN.cur;if(!o)return;o.t+=dt;const el=CIN.el;
+  if(o.wait&&o.t>.9&&!el.classList.contains('ready'))el.classList.add('ready');
+  if(!o.wait&&o.hold&&o.t>=o.hold)cinNext();
+  if(o.at&&el){const H=o.at.H&&o.at.H.root;if(H&&H.parent){H.getWorldPosition(_cv);_cv.y+=2.3;_cv.project(camera);const r=view.getBoundingClientRect(),rr=root.getBoundingClientRect();
+      const ptr=el.querySelector('.cn-ptr');const vis=_cv.z<1&&Math.abs(_cv.x)<1.1&&Math.abs(_cv.y)<1.1;ptr.style.opacity=vis?'':'0';ptr.style.transform=`translate(${(_cv.x*.5+.5)*r.width+r.left-rr.left}px,${(-_cv.y*.5+.5)*r.height+r.top-rr.top}px)`;}}
+  if(CIN.yaw!=null){cam.yaw=lerpA(cam.yaw,CIN.yaw,1-Math.exp(-2.2*dt));cam.lastDrag=performance.now();if(CIN.dist0!=null)cam.dist+=(CIN.dist0*.82-cam.dist)*(1-Math.exp(-1.5*dt));}}
+function cinKey(k){if(!CIN.cur&&CIN.leave<=0)return false;if(CIN.cur&&CIN.cur.wait){if(k===' '||k==='enter'||k==='e'||k==='j')cinNext();return true;}return false;}
+/* ---------- the story script ---------- */
+const ST_TAG=[[ 'Giữ Phố Cổ bằng nắm đấm và tiền bảo kê.','Rules the Old Quarter with fists and protection money.'],['Mọi chuyến hàng qua Cảng Bắc đều phải nộp phần cho hắn.','Every shipment through the North Harbor pays his cut.'],['Không ai thấy hắn tới. Chỉ thấy hắn đi.','Nobody sees him coming. Only leaving.'],['Ngồi trên núi bạc, nuôi cả một đội đầu gấu.','Sits on a mountain of silver and a crew of thugs.'],['Cắn một lần là đủ. Đừng để hắn áp sát.','One bite is enough. Do not let him close in.']];
+const ST_COL=[['#ff3b47','#7a1020'],['#2f8dff','#0d2a55'],['#b9c2cc','#3a4048'],['#c58a4a','#4a2c14'],['#2fd47a','#0e3d24']];
+function stTips(){return SS.tips||(SS.tips={});}
+function stOnce(id){const t=stTips();if(t[id])return false;t[id]=1;writeSave();return true;}
+function stOpening(){if(SS.done)return;
+  if(SS.ch===0&&stOnce('open')){
+    cine({type:'title',wait:true,kick:L('Nexus City · Story mode','Nexus City · Story mode'),title:L('Lật đổ Ông Trùm','Take down the Boss'),c:'#ff5fa2',c2:'#ffb36b',snd:'boss',
+      sub:L('Syndicate đã nuốt trọn 5 thị trấn. Trên đỉnh tháp ở trung tâm, Ông Trùm Vương nắm cả thành phố trong tay. Đến lúc lấy lại tất cả.','The Syndicate has swallowed five towns. From the top of the tower downtown, Boss Vương holds the whole city. Time to take it all back.')});
+    cine({type:'tip',wait:true,kick:L('Nhiệm vụ 1','Mission 1'),title:L('Kiếm một khẩu súng','Get a gun'),c:'#ffd166',c2:'#ff8a3d',
+      sub:L('Bạn có $1.500. Tới Súng Tầm Xa và mua vũ khí đầu tiên.','You have $1,500. Go to Long Range Guns and buy your first weapon.'),
+      steps:[['M',L('mở bản đồ · đường đỏ luôn chỉ chỗ cần tới','open the map · the red route always shows where to go')],['W A S D',L('đi · giữ Shift để chạy','move · hold Shift to run')],['F',L('lên xe gần nhất cho nhanh','jump into the nearest car to get there faster')],['E',L('vào cửa hàng · bấm số để mua','enter the shop · press a number to buy')]]});}
+  else if(SS.ch>=1&&SS.ch<=6){const i=SS.ch-1;
+    cine({type:'title',hold:3.4,slow:.35,kick:L('Story mode · tiếp tục','Story mode · continued'),title:SS.ch===6?L('Hồi cuối','Final act'):L('Chương ','Chapter ')+SS.ch,c:SS.ch===6?'#ffd166':ST_COL[i][0],c2:SS.ch===6?'#ff8a3d':'#ffffff',snd:'slow',
+      sub:SS.ch===6?L('Đủ 5 mảnh thẻ. Tháp Syndicate đang chờ ở trung tâm.','All 5 key cards. Syndicate Tower is waiting downtown.'):L(`Tìm ${ST_TOWNS[i][1]} ở ${ST_TOWNS[i][2]} · ❤ ${SS.lives} mạng · 🔑 ${stKeys()}/5`,`Find ${ST_TOWNS[i][1]} in ${ST_TOWNS[i][2]} · ❤ ${SS.lives} lives · 🔑 ${stKeys()}/5`)});}}
+function stArmed(){cine({type:'stamp',hold:2.6,slow:.25,kick:L('Mở khoá','Unlocked'),title:L('Vũ khí đầu tiên','First weapon'),c:'#ffd166',c2:'#ff8a3d',snd:'stamp',flash:true});
+  if(stOnce('gun'))cine({type:'tip',wait:true,kick:L('Hướng dẫn','How to'),title:L('Bắn súng','Shooting'),c:'#ffd166',c2:'#ff8a3d',
+    steps:[['1 – 4',L('đổi vũ khí · 1 là tay không','switch weapons · 1 is fists')],[L('Giữ chuột phải / K','Hold right click / K'),L('ngắm','aim')],['Click / J',L('bắn','shoot')],['!',L('bắn người ngoài phố là bị truy nã','shooting people on the street gets you wanted')]]});
+  cine({type:'tip',wait:true,kick:L('Chương 1','Chapter 1'),title:ST_TOWNS[0][2],c:ST_COL[0][0],c2:'#ffb36b',sub:L(`Trùm đầu tiên, ${ST_TOWNS[0][1]}, đang giữ khu này. Theo đường đỏ để tìm hắn.`,`The first boss, ${ST_TOWNS[0][1]}, runs this district. Follow the red route to find him.`)});}
+function stIntro(i){const g=stGang;if(!g)return;const b=g.boss;
+  cine({type:'intro',wait:true,at:b,atName:L('Trùm','Boss'),kick:L(`Chương ${i+1} · ${ST_TOWNS[i][2]}`,`Chapter ${i+1} · ${ST_TOWNS[i][2]}`),title:ST_TOWNS[i][1],tag:L(ST_TAG[i][0],ST_TAG[i][1]),
+    stats:[`❤ ${b.maxHp}`,L(`${g.list.length-1} đàn em`,`${g.list.length-1} henchmen`),'🔑 '+(stKeys()+1)+'/5'],c:ST_COL[i][0],c2:ST_COL[i][1],snd:'boss',flash:true});}
+function stFightTip(){if(!stOnce('fight'))return;
+  cine({type:'tip',wait:true,kick:L('Giữa trận · hướng dẫn','Mid-fight · how to'),title:L('Cách hạ trùm','How to beat a boss'),c:'#ff3b47',c2:'#ffb36b',snd:'slow',
+    steps:[['Click / J',L('đánh · bấm liền 3 lần ra combo đấm, đấm, đá','attack · tap 3 times for a punch, punch, kick combo')],[L('Giữ chuột phải / K','Hold right click / K'),L('đỡ đòn · đỡ đúng lúc hắn ra đòn sẽ làm hắn choáng','block · blocking right as he swings stuns him')],['2 – 4',L('rút súng nếu có · bắn từ xa an toàn hơn','pull a gun if you have one · range is safer')],['Shift',L('chạy vòng ra, hạ đàn em trước để không bị vây','circle away and drop the henchmen first so you are not surrounded')]]});}
+function stHalf(n){cine({type:'title',hold:1.5,slow:.18,kick:n.boss||'',title:L('Còn một nửa máu!','Half health!'),c:'#ff3b47',c2:'#ffd166',snd:'slow'});}
+function stKeyStamp(i){const k=stKeys();
+  cine({type:'stamp',hold:3.6,slow:.12,kick:L(`${ST_TOWNS[i][1]} đã gục`,`${ST_TOWNS[i][1]} is down`),title:L('Mảnh thẻ khoá','Key card'),big:k+'/5',cards:SS.keys.map((v,j)=>j===i?2:v?1:0),c:'#ffd166',c2:'#ff8a3d',snd:'stamp',flash:true,
+    sub:k>=5?L('+$2.000 · Đủ 5 mảnh!','+$2,000 · All five!'):L(`+$2.000 · tiếp theo: ${ST_TOWNS[SS.ch-1][2]}`,`+$2,000 · next: ${ST_TOWNS[SS.ch-1][2]}`)});
+  if(k>=5)cine({type:'title',wait:true,kick:L('Hồi cuối','Final act'),title:L('Tháp Syndicate đã mở','Syndicate Tower is open'),c:'#ffd166',c2:'#ff5fa2',snd:'boss',
+    sub:L('Ông Trùm Vương đang chờ trên sân thượng. Theo đường đỏ tới trung tâm. Cắt đuôi cảnh sát trước khi vào.','Boss Vương is waiting on the roof. Follow the red route downtown. Lose the police before you go in.')});
+  else if(stOnce('afterkey'))cine({type:'tip',wait:true,kick:L('Mẹo','Tip'),title:L('Hồi sức trước trận sau','Recover before the next fight'),c:'#2fd47a',c2:'#c1f354',
+    steps:[['E',L('ngủ ở nhà an toàn: lưu game, hồi đầy máu','sleep at your safehouse: save and full health')],['🍚',L('Cơm Tấm Cô Ba bán đồ ăn hồi máu','Cô Ba\'s Broken Rice sells healing food')],['🔫',L('mua thêm súng và áo giáp bằng tiền thưởng','spend the reward on guns and armor')]]});}
+function stTowerIntro(){cine({type:'intro',wait:true,at:stTower&&stTower.boss,atName:L('Ông Trùm','The Boss'),kick:L('Hồi cuối · Tháp Syndicate','Final act · Syndicate Tower'),title:L('Ông Trùm Vương','Boss Vương'),
+    tag:L('Kẻ đứng sau tất cả. Sáu vệ sĩ, một chiếc trực thăng chờ sẵn.','The man behind it all. Six bodyguards and a helicopter on standby.'),stats:['❤ 1100',L('6 vệ sĩ','6 bodyguards'),'🚁'],c:'#d4a017',c2:'#3a2a00',snd:'boss',flash:true});
+  if(stOnce('tower'))cine({type:'tip',wait:true,kick:L('Sân thượng','Rooftop'),title:L('Sống sót trên mái','Survive the roof'),c:'#ffd166',c2:'#ff8a3d',
+    steps:[['E',L('thùng đạn cạnh cửa: nạp đầy đạn bao nhiêu lần cũng được','ammo crate by the door: refill as often as you like')],['⬛',L('núp sau máy lạnh và lỗ thông gió','take cover behind AC units and vents')],['🎯',L('hạ vệ sĩ trước, rồi dồn Ông Trùm','drop the bodyguards first, then go for the Boss')]]});}
+function stHeliTip(){cine({type:'tip',wait:true,kick:L('Hắn đang bỏ chạy!','He is getting away!'),title:L('Bắn rơi trực thăng','Shoot down the helicopter'),c:'#ff3b47',c2:'#ffd166',snd:'boss',flash:true,
+    steps:[['2 – 4',L('chọn súng bắn nhanh nhất','pick your fastest-firing gun')],[L('Giữ chuột phải','Hold right click'),L('ngắm lên thân trực thăng','aim at the helicopter body')],['Click / J',L('xả đạn liên tục','keep firing')],['Shift',L('chạy liên tục · hắn bắn trả từ trên cao','keep moving · he shoots back from above')],['E',L('hết đạn thì ra thùng đạn cạnh cửa','out of ammo? hit the crate by the door')]]});}
+function stHeliDown(){cine({type:'stamp',hold:2.6,slow:.15,kick:L('Trúng rồi!','Direct hit!'),title:L('Trực thăng đang rơi','The helicopter is going down'),c:'#ffd166',c2:'#ff5fa2',snd:'stamp',flash:true});}
+function stFail(lost){const h=[0,1,2].map(j=>j<SS.lives?1:j===SS.lives&&!lost?2:0);
+  if(lost)cine({type:'fail',hold:4.4,slow:.15,kick:L('Hết mạng','Out of lives'),title:L('Nhiệm vụ thất bại','Mission failed'),hearts:[2,2,2],snd:'fail',c:'#ff3b47',
+    sub:L('Mất hết mảnh thẻ khoá. Làm lại từ trùm đầu tiên với 3 mạng mới.','All key cards are lost. Start again from the first boss with 3 new lives.')});
+  else cine({type:'fail',hold:3.4,slow:.15,kick:L('Story mode','Story mode'),title:L('Gục ngã','You went down'),hearts:h,snd:'fail',c:'#ff3b47',
+    sub:L(`Tỉnh lại ở bệnh viện · còn ${SS.lives} mạng · tiến độ vẫn được giữ`,`You wake up in hospital · ${SS.lives} lives left · progress kept`)});}
+function stWantedTip(){if(!stOnce('wanted'))return;cine({type:'tip',wait:true,kick:L('Cảnh báo','Warning'),title:L('Bị truy nã','Wanted'),c:'#2f8dff',c2:'#ff3b47',snd:'slow',
+    steps:[['★',L('càng nhiều sao, cảnh sát càng đông và càng mạnh tay','more stars means more police and heavier force')],['👁',L('chạy khỏi tầm nhìn của cảnh sát cho tới khi sao tắt','break line of sight until the stars fade')],['🚗',L('lên xe chạy cho nhanh','grab a car to get away faster')],['🏢',L('đang bị truy nã thì không vào được Tháp Syndicate','you cannot enter Syndicate Tower while wanted')]]});}
+function stLowTip(){if(!stOnce('lowhp'))return;cine({type:'tip',wait:true,kick:L('Nguy hiểm','Danger'),title:L('Máu thấp','Low health'),c:'#ff3b47',c2:'#ffd166',snd:'slow',
+    steps:[['Shift',L('rút lui khỏi trận ngay','back off from the fight now')],['🍚',L('Cơm Tấm Cô Ba bán đồ ăn hồi máu','Cô Ba\'s Broken Rice sells healing food')],['E',L('ngủ ở nhà để hồi đầy máu','sleep at home for full health')],['❤',L(`còn ${SS.lives} mạng · gục là mất 1 mạng`,`${SS.lives} lives left · going down costs one`)]]});}
+
 // free mode: collect the one-time reward of a finished story
 if(!STORY){let lg=null;try{lg=JSON.parse(localStorage.getItem('nexus-city2-legend')||'null');}catch(_){}
   if(lg&&lg.done&&!lg.claimed){lg.claimed=true;try{localStorage.setItem('nexus-city2-legend',JSON.stringify(lg));}catch(_){}
     if(!save.garage.some(o=>o.type==='legend')){save.money+=100000;save.garage.push({type:'legend',color:'#d4a017'});save.legend=true;writeSave();setTimeout(()=>banner(L('Phần thưởng phá đảo!','Story reward!'),L('+$100.000 và Siêu xe Huyền Thoại · lấy xe ở gara nhà bạn','+$100,000 and the Legend supercar · get it from your home garage'),5),2500);}}}
 
-function frame(now){raf=requestAnimationFrame(frame);const raw=(now-last)/1000||0;let dt=Math.max(0,Math.min(.05,raw));last=now;if(hitStop>0){hitStop-=dt;dt*=.12;}if(raw>0&&raw<1)adapt(raw);if(!paused&&!mapOpen&&!shopOpen)step(dt);camUpdate(dt);hudUpdate(dt);audioUpdate(dt);if(GRASS&&!P.inside)GRASS.update(P.car?P.car.x:P.x,P.car?P.car.z:P.z);PP.render();}
+function frame(now){raf=requestAnimationFrame(frame);const raw=(now-last)/1000||0;let dt=Math.max(0,Math.min(.05,raw));last=now;if(hitStop>0){hitStop-=dt;dt*=.12;}if(raw>0&&raw<1)adapt(raw);cinTick(dt);if(!paused&&!mapOpen&&!shopOpen&&CIN.ts>.003)step(dt*CIN.ts);camUpdate(dt);hudUpdate(dt);audioUpdate(dt);if(GRASS&&!P.inside)GRASS.update(P.car?P.car.x:P.x,P.car?P.car.z:P.z);PP.render();}
 function resize(){const w=view.clientWidth||innerWidth,h=view.clientHeight||innerHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();const pr=renderer.getPixelRatio();PP.setSize(Math.round(w*pr),Math.round(h*pr));}
 window.addEventListener('resize',()=>{if(!view.closest('[hidden]'))resize();});
 camera.position.set(P.x,4,P.z+7);
-if(tut.on)banner('Chào mừng tới Nexus City','Làm theo hướng dẫn ở góc trên bên trái, hoặc bấm Bỏ qua');
+if(STORY)setTimeout(stOpening,1100);
+else if(tut.on)banner('Chào mừng tới Nexus City','Làm theo hướng dẫn ở góc trên bên trái, hoặc bấm Bỏ qua');
 else banner('Nexus City','Bấm M để mở bản đồ và chọn nơi muốn tới. Cột xanh lá giữa trung tâm là ngân hàng.');
 const api={
   setGfx(v){PP.on=v!=='low';resize();},
@@ -3762,7 +3956,7 @@ const api={
   resume(){active=true;paused=false;keys.clear();cam.rmb=false;last=performance.now();cancelAnimationFrame(raf);raf=requestAnimationFrame(frame);resize();if(P.car&&radio.idx>=0)radioPlay();},
   resize,
   get save(){return save;},
-  _dbg:{BB,HP,hpEnter,hpExit,hpKey,hp1v1,bbShoot,bbNearHoop,COURTS,SP,story:{get SS(){return SS;},stSpot,stDoorSpot,get gang(){return stGang;},get tower(){return stTower;},get heli(){return stHeli;},stEnterTower,stStartTower,stVictory,stDied,storyUpdate,wasted,get win(){return stWin;}},heightAt,resolve,TOWNS,DIAS,PADS,inBld,AIR,PP,P,cars,newCar,buyVehicle,interactOption,sitDown,standUp,takeFood,GDOORS,SHOPS,save,bookTour,npcs,get stars(){return stars;},set stars(v){stars=v;},startHeist,startMission,interact,toggleCar,playerPunch,get heist(){return heist;},set heistProg(v){if(heist)heist.prog=v;},SP,tut,toggleMap,bag,time:()=>time,scene,renderer,sun,step,info:()=>renderer.info.render,keys,camUpdate,camera,weather,ROOMS,openShop,closeShop,enterInterior,exitInterior,selectWeapon,fireWeapon,get shopOpen(){return shopOpen;},tod,todApply,gps,setWaypoint,clearWaypoint,planRoute,poiList,radio,radioNext,playerHitBy,get lastFoe(){return lastFoe;},cam,tb,render:()=>renderer.render(scene,camera)}
+  _dbg:{BB,HP,hpEnter,hpExit,hpKey,hp1v1,bbShoot,bbNearHoop,COURTS,SP,cin:{CIN,cine,stOpening,stArmed,stIntro,stFightTip,stKeyStamp,stTowerIntro,stHeliTip,stFail,stWantedTip},story:{get SS(){return SS;},stSpot,stDoorSpot,get gang(){return stGang;},get tower(){return stTower;},get heli(){return stHeli;},stEnterTower,stStartTower,stVictory,stDied,storyUpdate,wasted,get win(){return stWin;}},heightAt,resolve,TOWNS,DIAS,PADS,inBld,AIR,PP,P,cars,newCar,buyVehicle,interactOption,sitDown,standUp,takeFood,GDOORS,SHOPS,save,bookTour,npcs,get stars(){return stars;},set stars(v){stars=v;},startHeist,startMission,interact,toggleCar,playerPunch,get heist(){return heist;},set heistProg(v){if(heist)heist.prog=v;},SP,tut,toggleMap,bag,time:()=>time,scene,renderer,sun,step,info:()=>renderer.info.render,keys,camUpdate,camera,weather,ROOMS,openShop,closeShop,enterInterior,exitInterior,selectWeapon,fireWeapon,get shopOpen(){return shopOpen;},tod,todApply,gps,setWaypoint,clearWaypoint,planRoute,poiList,radio,radioNext,playerHitBy,get lastFoe(){return lastFoe;},cam,tb,render:()=>renderer.render(scene,camera)}
 };
 return api;
 }
