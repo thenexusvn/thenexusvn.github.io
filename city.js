@@ -1488,13 +1488,13 @@ function lampUpdate(dt){for(let k=LDOWN.length-1;k>=0;k--){const L=LDOWN[k];
 
 /* ---------- day / night cycle: 1 game hour = 30 s, a full day = 12 min ---------- */
 // [hour, skyTop, skyMid, horizon, below, fog, sunColour, sunIntensity, hemiSky, hemiGround, hemiI, night, cloudLit, cloudDark]
-const NIGHT_K=['#05081a','#0d1430','#1a2240','#0c0f1c','#141a30','#8aa0ff',.3,'#4a5a90','#1a1424',.38,1,'#3a4260','#151a2c'];
+const NIGHT_K=['#0a1028','#16204a','#2a3660','#161c30','#26304e','#a8b8ff',.3,'#8a9cd0','#3a3650',.8,1,'#4a5478','#1e2440'];
 const TODK=[[0,...NIGHT_K],[5.3,'#1a2350','#6a5a8a','#e89a80','#6a5060','#a07a80','#ffb48a',.7,'#9a90b0','#3a3040',.45,.5,'#f0b0a0','#6a5070'],
   [7,'#3a6ab8','#9ac0e0','#f0d8c0','#b0a090','#d8d0c8','#ffe2c0',1.9,'#d0e0f0','#4b4a46',.6,0,'#ffffff','#b8c0d0'],
   [12,'#2f66c8','#7fb2e6','#cfe4f2','#a8b0b0','#c8dae6','#fff6e6',2.6,'#dceaff','#4f4a40',.65,0,'#ffffff','#c0c8d8'],
   [16,'#3466b8','#8ab4e0','#e6e0d0','#b0a898','#d8d4c8','#ffe8c8',2.4,'#e8e8f0','#4f4a46',.65,0,'#fffaf0','#c8c0c8'],
   [18.3,'#283a7a','#e58c8c','#ffc48c','#c89a86','#f3b48a','#ffcf9c',2.4,'#ffe0c6','#4b3c56',.7,0,'#fff0e0','#b08090'],
-  [19.6,'#141c48','#6a3a6a','#d86a5a','#5a3a4a','#7a4a5a','#ff8a5a',.9,'#8a7090','#2a2030',.5,.45,'#ff9a7a','#4a3050'],
+  [19.6,'#1c2658','#7a4a7a','#d86a5a','#6a4a5a','#8a5a6a','#ff8a5a',.9,'#a890b0','#3a3040',.68,.45,'#ff9a7a','#4a3050'],
   [21,...NIGHT_K],[24,...NIGHT_K]].map(k=>k.map(v=>typeof v==='string'?new T.Color(v):v));
 const _ca=new T.Color(),_cb=new T.Color(),SUN_AZ=new T.Vector2(.78,-.45).normalize();
 const tod={hour:+save.hour||17,day:1,lightDir:new T.Vector3()};
@@ -1506,9 +1506,9 @@ function todApply(){const h=((tod.hour%24)+24)%24;let a=0;while(a<TODK.length-2&
   const p=(h-5.4)/14.2,el=p>0&&p<1?Math.sin(Math.PI*p)*1.05:-.8*Math.sin(Math.PI*clamp((h<5.4?h+24-19.6:h-19.6)/9.8,0,1));
   sunDir.set(SUN_AZ.x*Math.cos(el),Math.sin(el),SUN_AZ.y*Math.cos(el)).normalize();
   const day=clamp(el*4+.15,0,1);tod.day=day;U.sunI.value=day;
-  if(day>.02){tod.lightDir.copy(sunDir);sun.intensity=F(7)*Math.max(.25,day);}else{tod.lightDir.copy(sunDir).negate();sun.color.set('#8aa0ff').convertSRGBToLinear();sun.intensity=.35;}
+  if(day>.02){tod.lightDir.copy(sunDir);sun.intensity=F(7)*Math.max(.25,day);}else{tod.lightDir.copy(sunDir).negate();sun.color.set('#b0c0ff').convertSRGBToLinear();sun.intensity=.75;}
   if(tod.lightDir.y<.12){tod.lightDir.y=.12;tod.lightDir.normalize();}
-  const nk=1-day;for(const m of NIGHTM){m.emissiveIntensity=m.userData.baseE*(.15+1.25*nk);if(m.userData.baseEnv!==undefined)m.envMapIntensity=m.userData.baseEnv*(.3+.7*day);}
+  const nk=1-day;renderer.toneMappingExposure=1+.3*nk;for(const m of NIGHTM){m.emissiveIntensity=m.userData.baseE*(.15+1.25*nk);if(m.userData.baseEnv!==undefined)m.envMapIntensity=m.userData.baseEnv*(.3+.7*day);}
   LAMPM.emissiveIntensity=.2+2.4*nk;FW.bulbs.emissiveIntensity=.4+2.2*nk;glowMat.opacity=nk*.85;poolMat.opacity=Math.max(0,nk-.15)*.9;glowMat.visible=nk>.03;
   hillMat.uniforms.haze.value.copy(U.hor.value);hillMat.uniforms.lk.value=.22+.78*day;}
 /* ---------- weather: clear / cloudy / rain with wet roads, rain streaks, thunder ---------- */
