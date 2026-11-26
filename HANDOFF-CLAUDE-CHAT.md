@@ -277,3 +277,11 @@ Python helper scripts used during development:
 - Cỏ: `GRASS` (instanced quanh người chơi trên đồi/rừng, chỉ máy tính).
 - Chất lượng tự hạ từng bước: độ phân giải → bloom → bóng. Texture anisotropy tối đa. Xe/người đi đường nhiều hơn (34 trên máy tính).
 - index.html nạp `city.js?v=20261125g`.
+
+## Nexus City — Story mode "Lật đổ Ông Trùm" (26/11/2026)
+- Menu: Tutorial · Vào thẳng thành phố · Story mode (panel `#cStoryP` có 4 bước, luật 3 mạng, phần thưởng). Đổi chế độ khi game đang chạy → `sessionStorage['nexus-city-boot']` + reload rồi tự vào.
+- city.js `opt.mode==='story'`: save riêng `nexus-city2-story` (không đồng bộ cloud), bắt đầu $1.500. Code ở khối STORY MODE (trước `function frame`).
+- Chương: 0 mua súng → 1-5 trùm ở oldq/harbor/highland/minetown/westside (boss + đàn em kiểu guard, mỗi trùm 1 mảnh thẻ, +$2.000) → 6 Tháp Syndicate (cửa ở vỉa hè downtown gần tâm, sân thượng dựng ở x=5600 kiểu "interior" mở, thành phố giả bên dưới) → trùm còn 25% máu thì lên trực thăng, bắn rơi → màn PHÁ ĐẢO + pháo hoa.
+- Chết: `wasted()` → `stDied()` trừ mạng, tỉnh ở bệnh viện giữ tiến độ; hết 3 mạng: mất thẻ, quay về trùm 1, hồi 3 mạng.
+- Phần thưởng lần đầu: `localStorage['nexus-city2-legend']={done,claimed}`; chế độ thường lúc tải sẽ cộng $100.000 + xe `legend` (CAR_T.legend, VEH.legend unique, không bán ở shop) vào gara. Chơi lại story không nhận thêm.
+- _dbg.story để test (SS, stSpot, stEnterTower, heli...).
