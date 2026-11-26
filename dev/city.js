@@ -2771,7 +2771,7 @@ const FENCETX=makeTex(128,128,(g,w,h)=>{g.clearRect(0,0,w,h);g.strokeStyle='#c9c
 const BBM={ball:new T.MeshStandardMaterial({map:BALLTX,roughness:.75}),rim:mat('#e0561b',.4,.6),net:new T.MeshStandardMaterial({map:NETTX,alphaTest:.4,side:T.DoubleSide,roughness:.9}),
   steel:mat('#9aa1a9',.35,.85),dark:mat('#1d2126',.6,.3),pad:mat('#1b3e7a',.85),white:mat('#f4f4f2',.5),
   glass:new T.MeshPhysicalMaterial({color:0xdfefff,roughness:.05,metalness:0,transmission:.85,transparent:true,opacity:.35,depthWrite:false}),
-  fence:new T.MeshStandardMaterial({map:FENCETX,alphaTest:.35,side:T.DoubleSide,metalness:.6,roughness:.4})};
+  fence:new T.MeshStandardMaterial({map:FENCETX,alphaTest:.35,side:T.DoubleSide,metalness:.6,roughness:.4})};FENCETX.repeat.set(14,17);
 const boardTex=(glass)=>makeTex(256,150,(g,w,h)=>{g.clearRect(0,0,w,h);if(!glass){g.fillStyle='#f6f6f4';g.fillRect(0,0,w,h);}const c=glass?'#ffffff':'#1a1a1a';g.strokeStyle=c;g.lineWidth=7;g.strokeRect(4,4,w-8,h-8);
   const iw=w*.59/1.8,ih=h*.45/1.05;g.lineWidth=6;g.strokeRect(w/2-iw/2,h-ih-h*.15/1.05,iw,ih);},{repeat:false});
 const BOARD_O=boardTex(false),BOARD_G=boardTex(true);
@@ -2784,10 +2784,10 @@ function buildHoop(par,bx,bz,s,indoor,y0){y0=y0||0;const g=new T.Group();par.add
     const baseX=bx-s*3.6;add(new T.BoxGeometry(1.6,1.05,1.2),BBM.pad,baseX,y0+.53,bz);add(new T.BoxGeometry(.25,2.9,.25),BBM.pad,baseX+s*.4,y0+2.1,bz);
     const arm=add(new T.BoxGeometry(2.9,.18,.18),BBM.steel,(baseX+boardX)/2+s*.2,y0+3.25,bz);arm.rotation.z=s*.18;add(new T.BoxGeometry(.5,.5,.5),BBM.dark,boardX-s*.3,y0+3.35,bz);
     addCol({t:'b',x0:Math.min(baseX-.8,baseX+.8),x1:Math.max(baseX-.8,baseX+.8),z0:bz-.6,z1:bz+.6});}
-  else{const bm=new T.Mesh(new T.BoxGeometry(.04,1.05,1.8),[BBM.white,BBM.white,BBM.white,BBM.white,new T.MeshStandardMaterial({map:BOARD_O,roughness:.5}),new T.MeshStandardMaterial({map:BOARD_O,roughness:.5})]);
-    bm.position.set(boardX,y0+3.425,bz);bm.rotation.y=s*Math.PI/2;bm.castShadow=true;g.add(bm);bm.rotation.y=Math.PI/2;
+  else{const BF=BBM.boardFace||(BBM.boardFace=new T.MeshStandardMaterial({map:BOARD_O,roughness:.45}));const bm=new T.Mesh(new T.BoxGeometry(.04,1.05,1.8),[BF,BF,BBM.white,BBM.white,BBM.white,BBM.white]);
+    bm.position.set(boardX,y0+3.425,bz);bm.castShadow=true;g.add(bm);
     const px=bx-s*1.75;add(new T.CylinderGeometry(.09,.1,3.55,14),BBM.steel,px,y0+1.78,bz);add(new T.CylinderGeometry(.06,.07,.9,10),BBM.steel,px+s*.42,y0+3.6,bz).rotation.z=-s*1.05;
-    add(new T.BoxGeometry(1.0,.08,.08),BBM.steel,(px+boardX)/2,y0+3.2,bz).rotation.z=0;add(new T.BoxGeometry(.4,.6,.6),BBM.steel,boardX-s*.22,y0+3.4,bz);add(new T.CylinderGeometry(.25,.25,.05,16),BBM.dark,px,y0+.03,bz);
+    add(new T.BoxGeometry(1.45,.08,.08),BBM.steel,(px+boardX)/2,y0+3.2,bz);add(new T.BoxGeometry(.4,.6,.6),BBM.steel,boardX-s*.22,y0+3.4,bz);add(new T.CylinderGeometry(.25,.25,.05,16),BBM.dark,px,y0+.03,bz);
     addCol({t:'c',x:px,z:bz,r:.18});}
   // rim, flange and net
   const rim=add(new T.TorusGeometry(.225,.011,8,36),BBM.rim,bx,rimY,bz);rim.rotation.x=Math.PI/2;add(new T.BoxGeometry(.16,.03,.14),BBM.rim,boardX+s*.08,rimY,bz);
@@ -2805,7 +2805,7 @@ function buildParkCourts(C){const g=new T.Group();scene.add(g);const{cx,cz}=C;co
   buildCourt(g,cx,z1,false,.27);buildCourt(g,cx,z2,false,.27);
   const fx0=cx-16.6,fx1=cx+16.6,fz0=cz-19.6,fz1=cz+19.6,H=3.6;
   const fenceSide=(ax,az,bx,bz,gap)=>{const L=hyp(bx-ax,bz-az),n=Math.max(1,Math.round(L/3));for(let k=0;k<n;k++){const t0=k/n,t1=(k+1)/n,mx=ax+(bx-ax)*(t0+t1)/2,mz=az+(bz-az)*(t0+t1)/2;
-      if(gap&&hyp(mx-gap.x,mz-gap.z)<2)continue;const seg=L/n,p=new T.Mesh(new T.PlaneGeometry(seg,H),BBM.fence);p.position.set(mx,.27+H/2,mz);p.rotation.y=Math.atan2(bx-ax,bz-az)-Math.PI/2;BBM.fence.map.repeat.set(1,1);g.add(p);
+      if(gap&&hyp(mx-gap.x,mz-gap.z)<2)continue;const seg=L/n,p=new T.Mesh(new T.PlaneGeometry(seg,H),BBM.fence);p.position.set(mx,.27+H/2,mz);p.rotation.y=Math.atan2(bx-ax,bz-az)-Math.PI/2;g.add(p);
       const x0=ax+(bx-ax)*t0,z0=az+(bz-az)*t0;const post=new T.Mesh(new T.CylinderGeometry(.035,.035,H+.1,6),BBM.steel);post.position.set(x0,.27+H/2,z0);g.add(post);
       const rail=new T.Mesh(new T.CylinderGeometry(.025,.025,seg,6),BBM.steel);rail.rotation.z=Math.PI/2;rail.rotation.y=Math.atan2(bx-ax,bz-az)+Math.PI/2;rail.position.set(mx,.27+H,mz);g.add(rail);
       const a=Math.min(x0,ax+(bx-ax)*t1),b2=Math.max(x0,ax+(bx-ax)*t1),c=Math.min(z0,az+(bz-az)*t1),d=Math.max(z0,az+(bz-az)*t1);addCol({t:'b',x0:a-.05,x1:b2+.05,z0:c-.05,z1:d+.05});}};

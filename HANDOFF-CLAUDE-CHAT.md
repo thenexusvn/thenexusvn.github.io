@@ -285,3 +285,8 @@ Python helper scripts used during development:
 - Chết: `wasted()` → `stDied()` trừ mạng, tỉnh ở bệnh viện giữ tiến độ; hết 3 mạng: mất thẻ, quay về trùm 1, hồi 3 mạng.
 - Phần thưởng lần đầu: `localStorage['nexus-city2-legend']={done,claimed}`; chế độ thường lúc tải sẽ cộng $100.000 + xe `legend` (CAR_T.legend, VEH.legend unique, không bán ở shop) vào gara. Chơi lại story không nhận thêm.
 - _dbg.story để test (SS, stSpot, stEnterTower, heli...).
+
+## Nexus City — Bóng rổ (26/11/2026)
+- Khối công viên (12,12) thành công viên thể thao: 2 sân ngoài trời 28x15 (FIBA) có rào lưới, 6 cột đèn, ghế, bảng tên. Giữ nguyên chuỗi random của thành phố (cây/ghế công viên được tạo vào mảng giả).
+- Nhà thi đấu trong nhà: room 'court' ở x=4900 (sàn gỗ maple vẽ canvas, bảng rổ kính, giá đỡ bọc đệm, khán đài 2 bên, bảng điểm LED cập nhật theo điểm ném, đèn trần). Cửa ở mặt trước sân vận động (gdoor 'court'), POI trên bản đồ.
+- Ném rổ: đứng trước rổ trong 10 m, bấm E (bbOption/bbShoot/bbUpdate). Tỉ lệ vào giảm theo khoảng cách, ngoài 6,75 m = 3 điểm; vào rổ +$10 / +$25.
