@@ -277,7 +277,7 @@ const GRASS=(()=>{if(MOBILE)return null;const CELL=1.05,RAD=30,NC=Math.ceil(RAD*
   const hsh=(a,b)=>{const s=Math.sin(a*127.1+b*311.7)*43758.5453;return s-Math.floor(s);};const dm=new T.Object3D();let lx=1e9,lz=1e9;
   return{update(px,pz){if(Math.abs(px-lx)<3&&Math.abs(pz-lz)<3)return;lx=px;lz=pz;let n=0;const ix0=Math.floor((px-RAD)/CELL),iz0=Math.floor((pz-RAD)/CELL);const RR=(HZ.road||[]).filter(p=>Math.abs(p[0]-px)<RAD+8&&Math.abs(p[1]-pz)<RAD+8);
       for(let a=0;a<NC;a++)for(let b=0;b<NC;b++){const ix=ix0+a,iz=iz0+b,r1=hsh(ix,iz),r2=hsh(iz,ix);const x=(ix+r1)*CELL,z=(iz+r2)*CELL;if((x-px)*(x-px)+(z-pz)*(z-pz)>RAD*RAD)continue;
-        if(!inHills(x,z)||PADS.some(p=>x>p.x0-1&&x<p.x1+1&&z>p.z0-1&&z<p.z1+1))continue;if(RR.length&&inHZ(x,z)&&RR.some(p=>(p[0]-x)*(p[0]-x)+(p[1]-z)*(p[1]-z)<20))continue;const y=heightAt(x,z);if(y<.35)continue;if(inWild(x,z)&&WGRID&&WGRID.RD){const G=WGRID,gx=Math.round((x-G.X0)/G.ST),gz=Math.round((z-G.Z0)/G.ST);if(gx>=0&&gz>=0&&gx<G.NX&&gz<G.NZ&&G.RD[gz*G.NX+gx]<7)continue;}
+        if(!inHills(x,z)||TOWNS.some(t=>hyp(x-t.x,z-t.z)<t.r*.6)||PADS.some(p=>x>p.x0-1&&x<p.x1+1&&z>p.z0-1&&z<p.z1+1))continue;if(RR.length&&inHZ(x,z)&&RR.some(p=>(p[0]-x)*(p[0]-x)+(p[1]-z)*(p[1]-z)<20))continue;const y=heightAt(x,z);if(y<.35)continue;if(inWild(x,z)&&WGRID&&WGRID.RD){const G=WGRID,gx=Math.round((x-G.X0)/G.ST),gz=Math.round((z-G.Z0)/G.ST);if(gx>=0&&gz>=0&&gx<G.NX&&gz<G.NZ&&G.RD[gz*G.NX+gx]<7)continue;}
         const s=.75+hsh(ix*3,iz*7)*.6;dm.position.set(x,y-.04,z);dm.rotation.set(0,r1*6.28,0);dm.scale.set(s,s*(.8+r2*.6),s);dm.updateMatrix();im.setMatrixAt(n++,dm.matrix);}
       im.count=n;im.instanceMatrix.needsUpdate=true;}};})();
 
@@ -3383,8 +3383,8 @@ if(STORY){const x0=TW.cx-TW.w/2,x1=TW.cx+TW.w/2,z0=TW.cz-TW.d/2,z1=TW.cz+TW.d/2,
   wall(x0-.4,x1+.4,z0-.4,z0,1.15);wall(x0-.4,x1+.4,z1,z1+.4,1.15);wall(x0-.4,x0,z0,z1,1.15);wall(x1,x1+.4,z0,z1,1.15);
   // cover: AC units, vents, a stair hut with the door back down
   for(const[ax,az,w,d,h]of[[-12,-4,3,2,1.6],[10,-2,2.4,2.4,1.4],[-6,8,4,1.6,1.3],[8,10,2,3,1.7],[-15,12,2.6,2.6,1.5],[15,-12,3,1.8,1.4],[0,2,2,2,1.2]]){const m=new T.Mesh(new T.BoxGeometry(w,h,d),mat('#9aa0a6',.6,.3));m.position.set(TW.cx+ax,h/2,TW.cz+az);m.castShadow=m.receiveShadow=true;g.add(m);addCol({t:'b',x0:TW.cx+ax-w/2,x1:TW.cx+ax+w/2,z0:TW.cz+az-d/2,z1:TW.cz+az+d/2});}
-  const hut=new T.Mesh(new T.BoxGeometry(6,3.2,4),mat('#4a4f55',.8));hut.position.set(TW.cx,1.6,z1-2.4);g.add(hut);addCol({t:'b',x0:TW.cx-3,x1:TW.cx+3,z0:z1-4.4,z1:z1-.4});
-  const dr=new T.Mesh(new T.BoxGeometry(1.4,2.4,.08),mat('#8a1c1c',.5));dr.position.set(TW.cx,1.2,z1-4.45);g.add(dr);
+  const hut=new T.Mesh(new T.BoxGeometry(6,3.2,2.6),mat('#4a4f55',.8));hut.position.set(TW.cx,1.6,z1-1.7);g.add(hut);addCol({t:'b',x0:TW.cx-3,x1:TW.cx+3,z0:z1-3,z1:z1-.4});
+  const dr=new T.Mesh(new T.BoxGeometry(1.4,2.4,.08),mat('#8a1c1c',.5));dr.position.set(TW.cx,1.2,z1-3.05);g.add(dr);
   // helipad
   const hp=makeTex(256,256,(c,w,h)=>{c.clearRect(0,0,w,h);c.strokeStyle='#ffd166';c.lineWidth=12;c.beginPath();c.arc(128,128,112,0,7);c.stroke();c.fillStyle='#ffd166';c.font='bold 150px Arial';c.textAlign='center';c.textBaseline='middle';c.fillText('H',128,136);},{repeat:false});
   const pad=new T.Mesh(new T.CircleGeometry(6,40),new T.MeshStandardMaterial({map:hp,transparent:true,roughness:.8}));pad.rotation.x=-Math.PI/2;pad.position.set(TW.cx,.03,TW.cz-14);g.add(pad);
@@ -3392,9 +3392,9 @@ if(STORY){const x0=TW.cx-TW.w/2,x1=TW.cx+TW.w/2,z0=TW.cz-TW.d/2,z1=TW.cz+TW.d/2,
   // the city far below: ground, streets of light and a ring of towers
   const gnd=new T.Mesh(new T.PlaneGeometry(1400,1400),mat('#2a2d33',.95));gnd.rotation.x=-Math.PI/2;gnd.position.set(TW.cx,-80,TW.cz);g.add(gnd);
   const keys=Object.keys(FAC);let rs=77;const rr=(a,b)=>{rs=(rs*16807)%2147483647;return a+(rs-1)/2147483646*(b-a);};const BG={};
-  for(let i=0;i<140;i++){const a=rr(0,6.283),d=rr(48,320),bx=TW.cx+Math.cos(a)*d,bz=TW.cz+Math.sin(a)*d,w=rr(14,34),dd=rr(14,34),top=-80+rr(30,d<90?72:115);const k=keys[i%keys.length];(BG[k]||(BG[k]=new GB())).box(bx-w/2,bx+w/2,-80,Math.min(top,-3),bz-dd/2,bz+dd/2,{});}
+  for(let i=0;i<140;i++){const a=rr(0,6.283),d=rr(48,320),bx=TW.cx+Math.cos(a)*d,bz=TW.cz+Math.sin(a)*d,w=rr(14,34),dd=rr(14,34),top=-80+rr(18,d<90?55:70);const k=keys[i%keys.length];(BG[k]||(BG[k]=new GB())).box(bx-w/2,bx+w/2,-80,Math.min(top,-12),bz-dd/2,bz+dd/2,{});}
   for(const k in BG)g.add(new T.Mesh(BG[k].geo(),FAC[k]));
-  ROOMS.tower={x0,x1,z0,z1,h:60,open:true,door:{x:TW.cx,z:z1-5.2},lights:[],acts:[{x:TW.cx-4,z:z1-6,r:2.2,txt:()=>L('Thùng đạn: nạp đầy đạn','Ammo crate: refill ammo'),fn:()=>{let any=false;for(const w in save.weapons)if(save.weapons[w]){save.ammo[w]=Math.max(save.ammo[w]|0,w==='pistol'?72:w==='smg'?240:120);any=true;}if(!any){save.weapons.pistol=1;save.ammo.pistol=72;}sfx('cash');showPrompt(L('Đã nạp đầy đạn','Ammo refilled'),1.4);}}]};}
+  ROOMS.tower={x0,x1,z0,z1,h:60,open:true,door:{x:TW.cx,z:z1-7.8},lights:[],acts:[{x:TW.cx-4,z:z1-6,r:2.2,txt:()=>L('Thùng đạn: nạp đầy đạn','Ammo crate: refill ammo'),fn:()=>{let any=false;for(const w in save.weapons)if(save.weapons[w]){save.ammo[w]=Math.max(save.ammo[w]|0,w==='pistol'?72:w==='smg'?240:120);any=true;}if(!any){save.weapons.pistol=1;save.ammo.pistol=72;}sfx('cash');showPrompt(L('Đã nạp đầy đạn','Ammo refilled'),1.4);}}]};}
 /* ---------- boss helicopter ---------- */
 function stHeliMake(){const g=new T.Group();const b=new T.Mesh(new T.SphereGeometry(1.6,18,14),mat('#111318',.35,.6));b.scale.set(1,.85,2);g.add(b);
   const gl=new T.Mesh(new T.SphereGeometry(1.1,14,10,0,6.3,0,1.4),new T.MeshStandardMaterial({color:0x223344,roughness:.1,metalness:.8}));gl.position.set(0,.35,1.6);gl.rotation.x=-.5;g.add(gl);
