@@ -149,7 +149,21 @@ sun.shadow.bias=-.0004;sun.shadow.normalBias=.04;scene.add(sun);scene.add(sun.ta
 const MC={};
 function mat(c,r,m,ex){r=r===undefined?.8:r;m=m||0;const k=c+'|'+r+'|'+m+(ex?'x':'');if(!MC[k])MC[k]=new T.MeshStandardMaterial(Object.assign({color:lin(c),roughness:r,metalness:m},ex||{}));return MC[k];}
 function emat(c,i){i=i===undefined?1:i;const k='e|'+c+'|'+i;if(!MC[k])MC[k]=new T.MeshStandardMaterial({color:lin('#202020'),emissive:lin(c),emissiveIntensity:i,roughness:.35});return MC[k];}
-const GLASS=new T.MeshStandardMaterial({color:lin(ENV_OK?'#0e141c':'#1d2733'),roughness:ENV_OK?.06:.12,metalness:ENV_OK?.9:.25,envMapIntensity:1.2});
+/* ---------- HDRI reflections: real sky photos (Poly Haven, CC0) reflected in car paint, glass, chrome and water.
+   Three HDRIs (day, golden hour, night) are swapped by time of day; the general scene lighting is unchanged. ---------- */
+const HDR={names:{day:'kloofendal_48d_partly_cloudy_puresky',gold:'venice_sunset',night:'satara_night'},tex:{},cur:'',mats:new Set(),t:0,on:!MOBILE&&opt.gfx!=='low'};
+function envProbe(E,min){try{const rt=new T.WebGLRenderTarget(8,8),ts=new T.Scene();ts.add(new T.Mesh(new T.SphereGeometry(1,16,12),new T.MeshStandardMaterial({color:0xffffff,metalness:1,roughness:.4,envMap:E})));
+  const tc=new T.PerspectiveCamera(40,1,.1,10);tc.position.z=3;renderer.setRenderTarget(rt);renderer.render(ts,tc);const px=new Uint8Array(256);renderer.readRenderTargetPixels(rt,0,0,8,8,px);renderer.setRenderTarget(null);rt.dispose();let sum=0;for(let i=0;i<px.length;i+=4)sum+=px[i]+px[i+1]+px[i+2];return sum>(min||300);}catch(_){return false;}}
+function hdrJs(src){return new Promise((res,rej)=>{if(T.RGBELoader)return res();const sc=document.createElement('script');sc.src=src;sc.onload=res;sc.onerror=rej;document.head.appendChild(sc);});}
+async function hdrLoad(k){if(HDR.tex[k]!==undefined)return HDR.tex[k];HDR.tex[k]=null;
+  try{await hdrJs('https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/RGBELoader.js');
+    const t=await new Promise((r,j)=>new T.RGBELoader().setDataType(T.UnsignedByteType).load('https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/'+HDR.names[k]+'_1k.hdr',r,null,j));
+    const pm=new T.PMREMGenerator(renderer);const e=pm.fromEquirectangular(t).texture;t.dispose();pm.dispose();const ok=envProbe(e,12);HDR.tex[k]=ok?e:false;if(!ok)console.warn('hdri probe failed',k);return HDR.tex[k];}catch(err){console.warn('hdri',err);HDR.tex[k]=false;return false;}}
+function hdrReg(m){if(m)HDR.mats.add(m);const e=HDR.cur&&HDR.tex[HDR.cur];if(e&&m){m.envMap=e;m.needsUpdate=true;}return m;}
+function hdrTick(dt){if(!HDR.on)return;HDR.t-=dt;if(HDR.t>0)return;HDR.t=1;const h=((tod.hour%24)+24)%24,k=h>=7.3&&h<17.2?'day':(h>=17.2&&h<19.9)||(h>=5&&h<7.3)?'gold':'night';
+  const inten=k==='night'?.55:k==='gold'?1.15:1;for(const m of HDR.mats)m.envMapIntensity=(m.userData.envBase||1)*inten;
+  if(k===HDR.cur)return;HDR.cur=k;hdrLoad(k).then(e=>{if(HDR.cur!==k)return;for(const m of HDR.mats){m.envMap=e||null;m.needsUpdate=true;}});}
+const GLASS=new T.MeshStandardMaterial({color:lin(ENV_OK?'#0e141c':'#1d2733'),roughness:ENV_OK?.06:.12,metalness:ENV_OK?.9:.25,envMapIntensity:1.2});GLASS.userData.envBase=1.2;hdrReg(GLASS);
 const S=Q.tex,C=S/4;
 const TX={
   asphalt:makeTex(1024,1024,(g,w,h)=>{speckle(g,w,h,'#3b3a40',26000,.2);for(let i=0;i<5;i++){const x=Math.random()*w,y=Math.random()*h,pw=rnd(90,220),ph=rnd(60,160);g.fillStyle=`rgba(${Math.random()<.5?'20,20,24':'80,80,86'},.22)`;g.fillRect(x,y,pw,ph);g.strokeStyle='rgba(15,15,18,.5)';g.lineWidth=2.5;g.strokeRect(x,y,pw,ph);}g.fillStyle='rgba(0,0,0,.09)';for(let i=0;i<26;i++){g.beginPath();g.ellipse(Math.random()*w,Math.random()*h,20+Math.random()*70,8+Math.random()*34,Math.random()*3,0,7);g.fill();}for(let i=0;i<9;i++){const gr=g.createRadialGradient(0,0,0,0,0,1);gr.addColorStop(0,'rgba(10,10,14,.35)');gr.addColorStop(1,'rgba(10,10,14,0)');g.save();g.translate(Math.random()*w,Math.random()*h);g.scale(rnd(14,38),rnd(8,20));g.fillStyle=gr;g.beginPath();g.arc(0,0,1,0,7);g.fill();g.restore();}g.strokeStyle='rgba(12,12,14,.6)';for(let i=0;i<22;i++){g.lineWidth=rnd(.8,2);g.beginPath();let x=Math.random()*w,y=Math.random()*h;g.moveTo(x,y);for(let k=0;k<rnd(4,9);k++){x+=rnd(-28,28);y+=rnd(-28,28);g.lineTo(x,y);}g.stroke();}}),
@@ -544,7 +558,7 @@ const waterG=new T.BufferGeometry();
   const wet=(x,z)=>x>WATER+88||z>HALF+148||beachH(x,z)<.05,sea=(x,z)=>(z>RZ0-2&&z<RZ1+2&&x>SAND0-1&&z<CZ1)||((x>SAND0+4||z>CZ1+4)&&(wet(x-WST/2,z-WST/2)||wet(x+WST/2,z-WST/2)||wet(x-WST/2,z+WST/2)||wet(x+WST/2,z+WST/2)));
   for(let iz=0;iz<WNZ-1;iz++)for(let ix=0;ix<WNX-1;ix++){const x=WX0+(ix+.5)*WST,z=WZ0+(iz+.5)*WST;if(!sea(x,z))continue;const a=iz*WNX+ix,b=a+1,c=a+WNX,d=c+1;idx.push(a,c,b,b,c,d);}
   waterG.setAttribute('position',new T.Float32BufferAttribute(pos,3));waterG.setIndex(idx);waterG.computeVertexNormals();waterG.computeBoundingSphere();}
-const water=new T.Mesh(waterG,new T.MeshStandardMaterial({color:lin('#1d7f99'),roughness:.12,metalness:.25,envMapIntensity:1.1,transparent:true,opacity:.95}));water.position.set(0,.02,0);water.receiveShadow=Q.shadows;water.frustumCulled=false;scene.add(water);
+const water=new T.Mesh(waterG,new T.MeshStandardMaterial({color:lin('#1d7f99'),roughness:.12,metalness:.25,envMapIntensity:1.1,transparent:true,opacity:.95}));water.position.set(0,.02,0);water.receiveShadow=Q.shadows;water.frustumCulled=false;scene.add(water);water.material.userData.envBase=1.1;hdrReg(water.material);
 const waterBase=Float32Array.from(waterG.attributes.position.array);
 /* beach mesh: east strip and south strip, wet sand darker near the waterline; the river mouth stays open */
 {const pos=[],uv=[],col=[],idx=[];const dry=new T.Color('#ffffff'),wet=new T.Color('#b39673'),cc=new T.Color();
@@ -1712,7 +1726,7 @@ const lightBox=new T.BoxGeometry(.36,.12,.06),grille=new T.BoxGeometry(1,.16,.08
 const BAR={r:new T.MeshStandardMaterial({color:0x220000,emissive:lin('#ff1a2a'),emissiveIntensity:3}),b:new T.MeshStandardMaterial({color:0x000022,emissive:lin('#1a5bff'),emissiveIntensity:3})};
 const copText=textTex('CẢNH SÁT',{fg:'#1b2a55',size:70,bg:'rgba(0,0,0,0)'}),taxiText=textTex('TAXI',{fg:'#111',size:90,bg:'#f5c518',w:256,h:128});
 const DETAILM=new T.MeshBasicMaterial({vertexColors:true,toneMapped:false}),WHEELM=new T.MeshStandardMaterial({vertexColors:true,roughness:.55,metalness:.4});
-const TRIMM=new T.MeshStandardMaterial({vertexColors:true,roughness:.35,metalness:.6});
+const TRIMM=hdrReg(new T.MeshStandardMaterial({vertexColors:true,roughness:.3,metalness:.75}));
 const CM={};
 function carMeshes(b){if(CM[b])return CM[b];const s=CAR_T[b],cg=carGeos(b),BL=cg.BL,tall=b==='van'||b==='bus';
   const fz=BL.zmax+.012,rz=BL.zmin-.012,belt=s.cabin[0][1];
@@ -1762,7 +1776,7 @@ function makeCar(type,color){
   const pl=carPool[type];if(pl&&pl.length){const m=pl.pop();m.g.visible=true;if(m.door){m.door.visible=m.hole.visible=false;m.door.rotation.y=0;m.drv.visible=false;}m.bg.rotation.set(0,0,0);m.bg.position.y=0;if(m.rider)m.rider.root.visible=false;if(type!=='police'&&type!=='taxi')m.paint.color.copy(lin(color));for(const w of m.wheels)w.rotation.x=0;return m;}
   if(type==='bike')return makeBike(color);
   const b=CAR_BODY[type],s=CAR_T[b],M=carMeshes(b),g=new T.Group(),bg=new T.Group();g.add(bg);
-  const pc={color:lin(type==='police'?'#14171d':type==='taxi'?'#f5c518':color),roughness:ENV_OK?.3:.35,metalness:ENV_OK?.5:.15};const paint=!MOBILE&&ENV_OK?new T.MeshPhysicalMaterial(Object.assign(pc,{clearcoat:1,clearcoatRoughness:.06,envMapIntensity:1.1})):new T.MeshStandardMaterial(pc);
+  const pc={color:lin(type==='police'?'#14171d':type==='taxi'?'#f5c518':color),roughness:ENV_OK?.3:.35,metalness:ENV_OK?.5:.15};const paint=!MOBILE&&(ENV_OK||HDR.on)?new T.MeshPhysicalMaterial(Object.assign(pc,{clearcoat:1,clearcoatRoughness:.03,envMapIntensity:.85,roughness:.38,metalness:.22})):new T.MeshStandardMaterial(pc);if(paint.isMeshPhysicalMaterial){paint.userData.envBase=.85;hdrReg(paint);}
   const body=new T.Mesh(M.paint,paint);body.castShadow=Q.shadows;bg.add(body);
   const gl=new T.Mesh(M.glass,GLASS);gl.castShadow=Q.shadows;bg.add(gl);bg.add(new T.Mesh(M.detail,DETAILM));if(M.trim)bg.add(new T.Mesh(M.trim,TRIMM));
   if(type==='police'){const door=new T.Mesh(new T.BoxGeometry(s.w+.03,.4,2.1),mat('#f4f5f7',.35,.2));door.position.set(0,.66,-.1);bg.add(door);
@@ -4291,7 +4305,7 @@ if(!STORY){let lg=null;try{lg=JSON.parse(localStorage.getItem('nexus-city2-legen
   if(lg&&lg.done&&!lg.claimed){lg.claimed=true;try{localStorage.setItem('nexus-city2-legend',JSON.stringify(lg));}catch(_){}
     if(!save.garage.some(o=>o.type==='legend')){save.money+=100000;save.garage.push({type:'legend',color:'#d4a017'});save.legend=true;writeSave();setTimeout(()=>banner(L('Phần thưởng phá đảo!','Story reward!'),L('+$100.000 và Siêu xe Huyền Thoại · lấy xe ở gara nhà bạn','+$100,000 and the Legend supercar · get it from your home garage'),5),2500);}}}
 
-function frame(now){raf=requestAnimationFrame(frame);const raw=(now-last)/1000||0;let dt=Math.max(0,Math.min(.05,raw));last=now;if(hitStop>0){hitStop-=dt;dt*=.12;}if(raw>0&&raw<1)adapt(raw);cinTick(dt);if(MOV.on)movTick(dt);else{if(!paused&&!mapOpen&&!shopOpen&&CIN.ts>.003)step(dt*CIN.ts);camUpdate(dt);}hudUpdate(dt);if(MP.on)mpTick(dt);audioUpdate(dt);if(GRASS&&!P.inside)GRASS.update(P.car?P.car.x:P.x,P.car?P.car.z:P.z);PP.render();}
+function frame(now){raf=requestAnimationFrame(frame);const raw=(now-last)/1000||0;let dt=Math.max(0,Math.min(.05,raw));last=now;if(hitStop>0){hitStop-=dt;dt*=.12;}if(raw>0&&raw<1)adapt(raw);cinTick(dt);if(MOV.on)movTick(dt);else{if(!paused&&!mapOpen&&!shopOpen&&CIN.ts>.003)step(dt*CIN.ts);camUpdate(dt);}hudUpdate(dt);hdrTick(dt);if(MP.on)mpTick(dt);audioUpdate(dt);if(GRASS&&!P.inside)GRASS.update(P.car?P.car.x:P.x,P.car?P.car.z:P.z);PP.render();}
 function resize(){const w=view.clientWidth||innerWidth,h=view.clientHeight||innerHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();const pr=renderer.getPixelRatio();PP.setSize(Math.round(w*pr),Math.round(h*pr));}
 window.addEventListener('resize',()=>{if(!view.closest('[hidden]'))resize();});
 camera.position.set(P.x,4,P.z+7);

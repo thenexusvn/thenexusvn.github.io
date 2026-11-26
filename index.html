@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="nexus-build" content="20261126192622">
+<meta name="nexus-build" content="20261126195936">
 <title>Nexus</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Crect%20width%3D%22100%22%20height%3D%22100%22%20rx%3D%2226%22%20fill%3D%22%23c1f354%22%2F%3E%3Cpath%20d%3D%22M28%2076V24L72%2076V24%22%20fill%3D%22none%22%20stroke%3D%22%2308090c%22%20stroke-width%3D%2213%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Ccircle%20cx%3D%2284%22%20cy%3D%2216%22%20r%3D%229%22%20fill%3D%22%23ad8dff%22%2F%3E%3C%2Fsvg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -2808,7 +2808,7 @@ const wrap=$('#city');let game=null,loading=false,char='joseph';
 function recText(sv){const r=$('#cityRec');if(r&&sv){r.textContent='Tiền của bạn: $'+Math.round(sv.money).toLocaleString('vi-VN')+(sv.heists?` · ${sv.heists} vụ cướp ngân hàng`:'');r.classList.remove('none');}}
 try{const sv=JSON.parse(localStorage.getItem('nexus-city2-save')||'null');if(sv){if(sv.char)char=sv.char;recText(sv);}}catch(_){}
 function load(src){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=()=>{s.remove();rej(new Error(src));};document.head.appendChild(s);});}
-async function ensure(){if(!window.THREE)await load('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js');if(!window.NexusCity2)await load('city.js?v=20261126n');}
+async function ensure(){if(!window.THREE)await load('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js');if(!window.NexusCity2)await load('city.js?v=20261126o4');}
 let gfx=localStorage.getItem('nexus-city-gfx')||(matchMedia('(pointer:coarse)').matches?'low':'high');
 function setGfx(v){gfx=v;try{localStorage.setItem('nexus-city-gfx',v);}catch(_){}document.querySelectorAll('[data-gfx]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.gfx===v)));if(game&&game.setGfx)game.setGfx(v);}
 document.querySelectorAll('[data-gfx]').forEach(b=>b.addEventListener('click',()=>setGfx(b.dataset.gfx)));setGfx(gfx);
