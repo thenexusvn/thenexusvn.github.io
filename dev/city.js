@@ -3944,7 +3944,7 @@ function stLowTip(){if(!stOnce('lowhp'))return;cine({type:'tip',wait:true,kick:L
 const isEN=()=>L('v','e')==='e';
 const CAST={
   minh:{n:['Minh','Minh'],look:CHARS.minh,col:'#7ec3ff',pitch:.9,rate:1.02,male:true},
-  linh:{n:['Linh','Linh'],look:{female:true,skin:'#ecc29f',hair:'#1b120c',hairStyle:'long',shirt:'#f4a3b4',pants:'#2b3a55',shoes:'#f5f5f3',sleeve:false},col:'#ff9fb8',pitch:1.2,rate:1.04},
+  linh:{n:['Linh','Linh'],look:{female:true,skin:'#ecc29f',hair:'#1b120c',hairStyle:'long',shirt:'#c2185b',pants:'#2b3a55',shoes:'#f5f5f3',sleeve:true},col:'#ff9fb8',pitch:1.2,rate:1.04},
   ba:{n:['Ba · ông Hải','Dad · Mr. Hải'],look:{female:false,skin:'#b77c58',hair:'#a8a8a8',hairStyle:'short',beard:true,shirt:'#5b6b4a',pants:'#3b3b3b',shoes:'#2a2522',sleeve:true,longSleeve:true},col:'#ffd166',pitch:.72,rate:.9,male:true},
   tu:{n:['Chú Tư','Uncle Tư'],look:{female:false,skin:'#c08a62',hair:'#222222',hairStyle:'bald',beard:true,glasses:true,shirt:'#d9d2c3',jacket:'#2b2b2b',pants:'#262a33',shoes:'#111111',sleeve:true},col:'#c1f354',pitch:.78,rate:.96,male:true},
   lao:{n:['Lão Đèn Lồng','The Lantern Elder'],look:{female:false,skin:'#c9956b',hair:'#dddddd',hairStyle:'buzz',beard:true,shirt:'#111111',jacket:'#9b1c1c',pants:'#111111',shoes:'#111111',sleeve:true},col:'#ff5a4a',pitch:.58,rate:.88,male:true},
@@ -3973,7 +3973,7 @@ const movCss=document.createElement('style');movCss.textContent=`
 .mv.flash .mv-grain{opacity:1;animation:mvFlick .18s steps(2) infinite}
 @keyframes mvFlick{50%{opacity:.6}}
 .mv.flash:after{content:"";position:absolute;inset:0;z-index:2;box-shadow:inset 0 0 160px 40px rgba(40,20,0,.75)}
-.mv-sub{position:absolute;left:50%;bottom:calc(12vh + 22px);transform:translateX(-50%);z-index:5;max-width:min(980px,90vw);text-align:center;font:600 clamp(17px,1.9vw,25px)/1.4 Inter,system-ui,sans-serif;text-shadow:0 2px 6px #000,0 0 2px #000;opacity:0;transition:opacity .25s}
+.mv-sub{position:absolute;left:50%;bottom:calc(12vh + 22px);transform:translateX(-50%);z-index:5;max-width:min(980px,90vw);background:rgba(0,0,0,.5);padding:6px 16px;border-radius:8px;text-align:center;font:600 clamp(17px,1.9vw,25px)/1.4 Inter,system-ui,sans-serif;text-shadow:0 2px 6px #000,0 0 2px #000;opacity:0;transition:opacity .25s}
 .mv-sub.on{opacity:1}
 .mv-sub b{font-family:"Space Grotesk",Inter,sans-serif;font-weight:800;margin-right:.45em}
 .mv-card{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(1100px,92vw);text-align:center;z-index:5}
@@ -4034,9 +4034,9 @@ function fireOn(pts,big){if(!FIRE){const cv=document.createElement('canvas');cv.
   FIRE.pts=pts;FIRE.on=true;FIRE.k=big?1:.15;FIRE.light.position.set(pts[0][0],2.5,pts[0][2]);}
 function fireOff(){if(!FIRE)return;FIRE.on=false;FIRE.light.intensity=0;for(const p of FIRE.P)p.s.visible=false;for(const p of FIRE.smk)p.s.visible=false;}
 function fireTick(dt){if(!FIRE||!FIRE.on)return;const F=FIRE;F.light.intensity=(2.2+Math.sin(MOV.t*23)*.5+Math.sin(MOV.t*7.3)*.6)*F.k*3;
-  const rate=Math.round(70*F.k*dt*10);for(let n=0;n<rate;n++){const p=F.P.find(p=>p.t<=0);if(!p)break;const o=F.pts[(Math.random()*F.pts.length)|0];p.t=p.life=.6+Math.random()*.7;p.x=o[0]+rnd(-1.2,1.2);p.y=o[1]+rnd(0,.6);p.z=o[2]+rnd(-.5,.5);p.vx=rnd(-.3,.3);p.vy=rnd(2,4.2);p.vz=rnd(-.3,.3);p.sz=rnd(.9,1.8)*(.6+F.k*.6);p.s.visible=true;}
+  const rate=Math.round(70*F.k*dt*10);for(let n=0;n<rate;n++){const p=F.P.find(p=>p.t<=0);if(!p)break;const o=F.pts[(Math.random()*F.pts.length)|0];p.t=p.life=.6+Math.random()*.7;p.x=o[0]+rnd(-1.2,1.2);p.y=o[1]+rnd(0,.6);p.z=o[2]+rnd(-.5,.5);p.vx=rnd(-.3,.3);p.vy=rnd(2,4.2);p.vz=rnd(-.3,.3);p.sz=rnd(.7,1.4)*(.6+F.k*.6);p.s.visible=true;}
   for(const p of F.P){if(p.t<=0)continue;p.t-=dt;if(p.t<=0){p.s.visible=false;continue;}const k=1-p.t/p.life;p.x+=p.vx*dt;p.y+=p.vy*dt;p.z+=p.vz*dt;p.s.position.set(p.x,p.y,p.z);p.s.scale.setScalar(p.sz*(1-k*.6));
-    p.s.material.color.setHSL(.03+.08*(1-k),1,.5+.2*(1-k));p.s.material.opacity=Math.min(1,(1-k)*1.6);}
+    p.s.material.color.setHSL(.02+.07*(1-k),1,.36+.14*(1-k));p.s.material.opacity=Math.min(.85,(1-k)*1.3);}
   if(Math.random()<dt*14*F.k){const p=F.smk.find(p=>p.t<=0);if(p){const o=F.pts[(Math.random()*F.pts.length)|0];p.t=p.life=3+Math.random()*2;p.x=o[0]+rnd(-1,1);p.y=o[1]+2.5;p.z=o[2];p.s.visible=true;}}
   for(const p of F.smk){if(p.t<=0)continue;p.t-=dt;if(p.t<=0){p.s.visible=false;continue;}const k=1-p.t/p.life;p.y+=1.6*dt;p.x+=.4*dt;p.s.position.set(p.x,p.y,p.z);p.s.scale.setScalar(2+k*6);p.s.material.opacity=.55*Math.sin(k*Math.PI);}}
 /* ---- score: slow synth pads and bells, different per mood ---- */
@@ -4064,7 +4064,7 @@ function movNext(){const el=MOV.el;MOV.si++;const s=MOV.film[MOV.si];movClear();
   view.style.transition='filter .6s';view.style.filter=s.flash?'sepia(.85) saturate(1.3) contrast(1.15) brightness(.92)':(s.grade||'');el.classList.toggle('flash',!!s.flash);
   if(s.music!==undefined&&(!MOV.music||MOV.music.mood!==s.music))movMusic(s.music);
   camera.fov=s.fov||48;camera.updateProjectionMatrix();
-  if(s.setup)s.setup();
+  if(gps.mesh)gps.mesh.visible=false;if(s.setup)s.setup();
   if(s.loc)el.querySelector('.mv-stage').insertAdjacentHTML('beforeend',`<div class="mv-loc">${cnE(s.loc[0])}<small>${cnE(s.loc[1]||'')}</small></div>`);
   if(s.card)setTimeout(()=>{if(MOV.s===s)el.querySelector('.mv-stage').insertAdjacentHTML('beforeend',`<div class="mv-card" style="--c:${s.card.c||'#ff5fa2'};--c2:${s.card.c2||'#ffb36b'}">${s.card.kick?`<div class="cn-kick">${cnE(s.card.kick)}</div>`:''}<h2 class="cn-title">${cnE(s.card.title)}</h2>${s.card.sub?`<p class="cn-sub">${cnE(s.card.sub)}</p>`:''}</div>`);if(s.card.snd)cinSfx(s.card.snd);},(s.card.at||.6)*1000);
   movCam(0);const b=el.querySelector('.mv-black');if(s.black)b.classList.remove('off');else requestAnimationFrame(()=>b.classList.add('off'));}
@@ -4080,7 +4080,7 @@ function movTick(dt){const s=MOV.s;if(!s)return;const el=MOV.el;
   if(paused){return;}
   MOV.t+=dt;keys.clear();
   try{step(dt);}catch(e){console.warn(e);}
-  P.H.root.visible=false;if(s.px!=null){P.x=s.px;P.z=s.pz;}
+  P.H.root.visible=false;if(gps.mesh)gps.mesh.visible=false;if(s.px!=null){P.x=s.px;P.z=s.pz;}
   if(s.tod!=null){tod.hour=s.tod;todApply();}
   for(const k in MOV.cast)actTick(MOV.cast[k],dt);fireTick(dt);musicTick();
   if(s.acts)for(const a of s.acts)if(!a.done&&MOV.t>=a[0]){a.done=true;try{a[1]();}catch(e){console.warn(e);}}
@@ -4098,7 +4098,7 @@ function movTick(dt){const s=MOV.s;if(!s)return;const el=MOV.el;
   // end of shot
   if(MOV.end>0){MOV.end-=dt;if(MOV.end<=0)movNext();return;}
   if(MOV.doneT>=0&&MOV.t>=Math.max(s.dur||0,MOV.doneT+(s.tail!=null?s.tail:1))){if(s.cut){movNext();}else{el.querySelector('.mv-black').classList.remove('off');const cd=el.querySelector('.mv-card');if(cd)cd.classList.add('out');MOV.end=.75;}}}
-function movEnd(){voStop();movClear();movMusic(null);const el=MOV.el;MOV.on=false;MOV.s=null;el.style.display='none';root.classList.remove('mov-on');view.style.filter='';subOff();
+function movEnd(){voStop();if(gps.mesh)gps.mesh.visible=true;movClear();movMusic(null);const el=MOV.el;MOV.on=false;MOV.s=null;el.style.display='none';root.classList.remove('mov-on');view.style.filter='';subOff();
   const K=MOV.keep;if(K){tod.hour=K.hour;todApply();camera.fov=K.fov;camera.updateProjectionMatrix();P.inside=K.inside;P.x=K.x;P.z=K.z;P.h=K.h;cam.yaw=K.h;P.H.root.visible=true;}
   cinDuck(false);keys.clear();const cb=MOV.cb;MOV.cb=null;if(cb)setTimeout(cb,60);}
 function movKey(k){if(!MOV.on)return false;if(k===' ')MOV.skipHeld=true;return true;}
@@ -4114,16 +4114,16 @@ function phNext(){const c=PH.q.shift();if(!c){PH.cur=null;if(PH.el)PH.el.classLi
     const ln=c.lines[i++],who=ln[0],txt=L(ln[1],ln[2]),cc=CAST[who];p.innerHTML=`<b style="color:${cc.col}">${cnE(L(cc.n[0],cc.n[1]))}:</b>${cnE(txt)}`;say(who,txt,()=>setTimeout(next,300));};
   setTimeout(()=>{PH.el.classList.remove('ring');sm.textContent=L('Đang nghe máy','On the line');wv.hidden=false;sfx('door');next();},2100);}
 /* ---- the script ---- */
-function filmAnchors(){const G=SP.shops.find(s=>s.id==='garage')||{x:SP.house.door.x,z:SP.house.door.z},HD=SP.hospitalDoor,R=ROOMS.hospital,B=SP.bank.door;return{G,HD,R,B,bed:R.x0+2.6+2.6};}
-function filmOpening(){const{G,HD,R,B,bed}=filmAnchors();const gx=G.x,gz=G.z;return[
+function filmAnchors(){const G=SP.shops.find(s=>s.id==='garage')||{x:SP.house.door.x,z:SP.house.door.z},HD=SP.hospitalDoor,R=ROOMS.hospital,B=SP.bank.door;return{G,HD,R,B,bed:R.x0+2.6+3*2.6};}
+function filmOpening(){const{G,HD,R,B,bed}=filmAnchors();const gx=G.x,gz=G.z-1.25;return[
   {black:true,dur:3.6,tod:18.2,px:gx,pz:gz,music:'sad',cam:[{p:[0,300,0],l:[0,0,1]}],card:{kick:L('Nexus City','Nexus City'),title:L('Năm năm sau','Five years later'),c:'#ffd166',c2:'#ffffff',at:.3},tail:0},
   {dur:9,tod:18.3,px:B.x,pz:B.z,camT:11,cam:[{p:[B.x-170,120,B.z+190],l:[B.x,10,B.z]},{p:[B.x-80,70,B.z+120],l:[B.x+10,20,B.z-20]}],linear:true,
     lines:[['minh','Năm năm. Con đi làm xa, gửi từng đồng về để ba mở rộng cái tiệm sửa xe.','Five years. I worked far away and sent every cent home so Dad could grow his repair shop.',.9],['minh','Hôm nay con về. Con muốn làm ba bất ngờ.','Today I am back. I wanted to surprise him.']]},
   {dur:7,tod:18.5,px:gx,pz:gz,loc:[L('Garage của ông Hải','Mr. Hải\'s Garage'),L('Khu phố phía tây','West side')],
-    setup(){const m=actor('m','minh',gx-14,gz+2.2,Math.PI/2);walk(m,[[gx-2.2,gz+2.2]],1.45);fireOn([[gx-3,0,gz-1.5],[gx+2,0,gz-1.5]],false);},
+    setup(){const m=actor('m','minh',gx-14,gz+2.2,Math.PI/2);walk(m,[[gx-2.2,gz+2.2]],1.45);fireOn([[gx-3,0,gz-.2],[gx+2,0,gz-.2]],false);},
     cam:[{p:[-6,1.4,4.2],l:[0,1.5,0]},{p:[-3,1.5,3.6],l:[1,1.4,0]}],follow:'m',hand:true,
     lines:[['minh','…Gì thế này?','…What is this?',4.6]]},
-  {dur:3,tod:18.5,px:gx,pz:gz,cut:true,setup(){const m=actor('m','minh',gx-2.2,gz+2.2,Math.PI*.9);m.face=Math.PI;fireOn([[gx-3,0,gz-1.5],[gx+2,0,gz-1.5],[gx,0,gz-1.8]],false);},
+  {dur:3,tod:18.5,px:gx,pz:gz,cut:true,setup(){const m=actor('m','minh',gx-2.2,gz+2.2,Math.PI*.9);m.face=Math.PI;fireOn([[gx-3,0,gz-.2],[gx+2,0,gz-.2],[gx,0,gz-.3]],false);},
     cam:[{p:[gx-1.5,1.6,gz+6.5],l:[gx,3.5,gz-3]},{p:[gx-1.6,1.4,gz+5.5],l:[gx,4.5,gz-4]}],tail:.2},
   {dur:5,tod:18.5,px:gx,pz:gz,setup(){const m=actor('m','minh',gx-2.2,gz+2.2,Math.PI);m.face=Math.PI/2;const l=actor('l','linh',gx+11,gz+2.6,-Math.PI/2);walk(l,[[gx-.9,gz+2.3]],4.2);},
     acts:[[3,()=>{MOV.cast.l.face=-Math.PI/2;MOV.cast.l.pose='hug';MOV.cast.m.pose='hug';}]],
@@ -4140,10 +4140,10 @@ function filmOpening(){const{G,HD,R,B,bed}=filmAnchors();const gx=G.x,gz=G.z;ret
   {dur:7,tod:23.2,px:gx,pz:gz,flash:true,cut:true,
     setup(){actor('b','ba',gx,gz+.9,0,{pose:'wrench'});const L1=actor('lao','lao',gx+.2,gz+3.2,Math.PI);actor('t1','thug',gx+1.8,gz+3.9,Math.PI);actor('t2','thug',gx-1.3,gz+3.7,Math.PI);},
     acts:[[3.6,()=>{const t=MOV.cast.t1;t.path=[{x:gx+.5,z:gz+1.9}];t.v=3;}],[4.3,()=>{const t=MOV.cast.t1;t.H.side=1;t.H.punchT=.32;cinSfx('stamp');}],[4.45,()=>{const b=MOV.cast.b;b.H.hitT=.4;b.H.hitSide=1;b.pose=null;}],[4.9,()=>{MOV.cast.b.H.ko=1;}],
-      [5.6,()=>{fireOn([[gx-3,0,gz-1.5],[gx+2,0,gz-1.5],[gx,0,gz-1.2]],true);cinSfx('in');movMusic('fire');}]],
+      [5.6,()=>{fireOn([[gx-3,0,gz-.2],[gx+2,0,gz-.2],[gx,0,gz-.1]],true);cinSfx('in');movMusic('fire');}]],
     cam:[{p:[gx+4.5,1.5,gz+4],l:[gx,1.3,gz+1.6]},{p:[gx+5.5,2.2,gz+6],l:[gx,1.5,gz+.5]}],
     lines:[['lao','Vậy thì để lửa nói chuyện với ông.','Then let the fire talk to you.',.8]],tail:1.6},
-  {dur:5,tod:23.2,px:gx,pz:gz,flash:true,cut:true,setup(){const b=actor('b','ba',gx-.3,gz+1.9,0);b.H.ko=1;b.H.koK=1;fireOn([[gx-3,0,gz-1.5],[gx+2,0,gz-1.5],[gx,0,gz-1.2]],true);const L1=actor('lao','lao',gx+.2,gz+3.2,0);walk(L1,[[gx+1,gz+11]],1.2);},
+  {dur:5,tod:23.2,px:gx,pz:gz,flash:true,cut:true,setup(){const b=actor('b','ba',gx-.3,gz+1.9,0);b.H.ko=1;b.H.koK=1;fireOn([[gx-3,0,gz-.2],[gx+2,0,gz-.2],[gx,0,gz-.1]],true);const L1=actor('lao','lao',gx+.2,gz+3.2,0);walk(L1,[[gx+1,gz+11]],1.2);},
     cam:[{p:[gx-6,4,gz+9],l:[gx,2,gz]},{p:[gx-9,7,gz+14],l:[gx,3,gz]}],tail:.8},
   /* hospital */
   {dur:6,tod:20.5,inside:'hospital',px:bed+1,pz:R.z0+4,music:'sad',loc:[L('Bệnh viện Nexus','Nexus Hospital'),L('Phòng hồi sức','Recovery ward')],
@@ -4166,7 +4166,7 @@ function filmOpening(){const{G,HD,R,B,bed}=filmAnchors();const gx=G.x,gz=G.z;ret
       ['tu','Ghé tiệm Súng Tầm Xa. Chú lấy giá anh em cho con.','Come by Long Range Guns. I will give you the family price.'],['minh','Cảm ơn chú.','Thank you, Uncle.']]},
   {dur:7,tod:21,px:gx,pz:gz,music:'title',camT:8,cam:[{p:[gx+6,3,gz+10],l:[gx,3,gz]},{p:[gx+30,40,gz+70],l:[gx,10,gz]}],linear:true,
     card:{kick:L('Nexus City · Story mode','Nexus City · Story mode'),title:L('Món nợ của Cha','A Debt to My Father'),sub:L('Lấy lại năm khu phố. Đưa Ông Trùm Vương ra trả giá.','Take back five districts. Make Boss Vương pay.'),c:'#ffd166',c2:'#ff5fa2',at:.4,snd:'boss'},tail:0}];}
-function filmEnding(){const{G,HD,R,B,bed}=filmAnchors();const gx=G.x,gz=G.z,bx=road(N-1)+1.8;return[
+function filmEnding(){const{G,HD,R,B,bed}=filmAnchors();const gx=G.x,gz=G.z-1.25,bx=road(N-1)+1.8;return[
   {black:true,dur:3,tod:9,px:gx,pz:gz,music:'hope',cam:[{p:[0,300,0],l:[0,0,1]}],card:{kick:'',title:L('Sáng hôm sau','The next morning'),c:'#ffd166',c2:'#ffffff',at:.3},tail:0},
   {dur:7,tod:9,inside:'hospital',px:bed+1,pz:R.z0+4,loc:[L('Bệnh viện Nexus','Nexus Hospital'),''],
     setup(){const b=actor('b','ba',bed,R.z0+1.75,0,{inside:true,y:.86,pose:'recline'});const l=actor('l','linh',bed-.9,R.z0+1.6,Math.PI/2,{inside:true});const m=actor('m','minh',R.x0+11,R.z1-2,Math.PI,{inside:true});walk(m,[[bed+1,R.z0+2.6]],1.3);},
