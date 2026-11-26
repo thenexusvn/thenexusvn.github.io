@@ -1776,7 +1776,7 @@ function makeCar(type,color){
   const pl=carPool[type];if(pl&&pl.length){const m=pl.pop();m.g.visible=true;if(m.door){m.door.visible=m.hole.visible=false;m.door.rotation.y=0;m.drv.visible=false;}m.bg.rotation.set(0,0,0);m.bg.position.y=0;if(m.rider)m.rider.root.visible=false;if(type!=='police'&&type!=='taxi')m.paint.color.copy(lin(color));for(const w of m.wheels)w.rotation.x=0;return m;}
   if(type==='bike')return makeBike(color);
   const b=CAR_BODY[type],s=CAR_T[b],M=carMeshes(b),g=new T.Group(),bg=new T.Group();g.add(bg);
-  const pc={color:lin(type==='police'?'#14171d':type==='taxi'?'#f5c518':color),roughness:ENV_OK?.3:.35,metalness:ENV_OK?.5:.15};const paint=!MOBILE&&(ENV_OK||HDR.on)?new T.MeshPhysicalMaterial(Object.assign(pc,{clearcoat:1,clearcoatRoughness:.04,envMapIntensity:1.1,roughness:.24,metalness:.55})):new T.MeshStandardMaterial(pc);if(paint.isMeshPhysicalMaterial){paint.userData.envBase=1.1;hdrReg(paint);}
+  const pc={color:lin(type==='police'?'#14171d':type==='taxi'?'#f5c518':color),roughness:ENV_OK?.3:.35,metalness:ENV_OK?.5:.15};const paint=!MOBILE&&(ENV_OK||HDR.on)?new T.MeshPhysicalMaterial(Object.assign(pc,{clearcoat:1,clearcoatRoughness:.03,envMapIntensity:.85,roughness:.38,metalness:.22})):new T.MeshStandardMaterial(pc);if(paint.isMeshPhysicalMaterial){paint.userData.envBase=.85;hdrReg(paint);}
   const body=new T.Mesh(M.paint,paint);body.castShadow=Q.shadows;bg.add(body);
   const gl=new T.Mesh(M.glass,GLASS);gl.castShadow=Q.shadows;bg.add(gl);bg.add(new T.Mesh(M.detail,DETAILM));if(M.trim)bg.add(new T.Mesh(M.trim,TRIMM));
   if(type==='police'){const door=new T.Mesh(new T.BoxGeometry(s.w+.03,.4,2.1),mat('#f4f5f7',.35,.2));door.position.set(0,.66,-.1);bg.add(door);
