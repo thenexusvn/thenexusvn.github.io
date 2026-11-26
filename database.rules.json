@@ -1,0 +1,16 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "mp": {
+      "players": {
+        ".read": "auth != null",
+        "$uid": {
+          ".write": "auth != null && auth.uid === $uid",
+          ".validate": "!newData.exists() || (newData.hasChildren(['x', 'z', 't']) && newData.child('x').isNumber() && newData.child('z').isNumber())",
+          "n": { ".validate": "newData.isString() && newData.val().length <= 24" }
+        }
+      }
+    }
+  }
+}

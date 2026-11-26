@@ -1816,7 +1816,7 @@ function rideBikePose(H){H.hips.position.y=.88;H.legL.rotation.x=H.legR.rotation
 /* ---------- entities ---------- */
 const cars=[],npcs=[];
 let time=0;
-function newCar(type,x,z,h,kind,color){if(!color)color=type==='limo'?pick(['#111418','#111418','#f4f4f2']):type==='bus'?pick(['#f2b705','#2a9d8f','#d62828','#3a86ff']):pick(CARC);const m=makeCar(type,color);if(m.rider)m.rider.root.visible=kind==='traffic';const c={type,x,z,h,vx:0,vz:0,vf:0,steer:0,kind,m,mesh:m.g,wheels:m.wheels,steerW:m.steer,spec:m.spec,mass:m.spec.mass,driver:kind==='traffic'||kind==='police',ai:null,stuck:0,hp:100,doorA:0,doorT:0};cars.push(c);if(c.driver&&m.drv){c.look=randomLook(kind==='police'?'cop':'ped');setDriverLook(c,c.look);}syncCar(c);return c;}
+function newCar(type,x,z,h,kind,color){if(!color)color=type==='limo'?pick(['#111418','#111418','#f4f4f2']):type==='bus'?pick(['#f2b705','#2a9d8f','#d62828','#3a86ff']):pick(CARC);const m=makeCar(type,color);if(m.rider)m.rider.root.visible=kind==='traffic';const c={type,x,z,h,color,vx:0,vz:0,vf:0,steer:0,kind,m,mesh:m.g,wheels:m.wheels,steerW:m.steer,spec:m.spec,mass:m.spec.mass,driver:kind==='traffic'||kind==='police',ai:null,stuck:0,hp:100,doorA:0,doorT:0};cars.push(c);if(c.driver&&m.drv){c.look=randomLook(kind==='police'?'cop':'ped');setDriverLook(c,c.look);}syncCar(c);return c;}
 function syncCar(c){if(!inHills(c.x,c.z)){c.mesh.position.set(c.x,0,c.z);c.mesh.rotation.set(0,c.h,0);return;}const fx=Math.sin(c.h),fz=Math.cos(c.h);
   const hf=heightAt(c.x+fx*1.4,c.z+fz*1.4),hb=heightAt(c.x-fx*1.4,c.z-fz*1.4),hr=heightAt(c.x+fz*.9,c.z-fx*.9),hl=heightAt(c.x-fz*.9,c.z+fx*.9);
   c.mesh.rotation.order='YXZ';c.mesh.position.set(c.x,(hf+hb+hr+hl)/4+.08,c.z);c.mesh.rotation.set(Math.atan2(hb-hf,2.8),c.h,Math.atan2(hr-hl,1.8));}
@@ -1945,7 +1945,7 @@ function hurtPlayer(d,src){if(P.koT>0||P.inv>0)return;if(save.armor>0){const a=M
 const ATK=[{dmg:[13,17],t:.11,cd:.24,kind:'jab',side:-1,reach:1.75},{dmg:[18,23],t:.12,cd:.28,kind:'cross',side:1,reach:1.8},{dmg:[30,38],t:.19,cd:.55,kind:'kick',reach:2.1,knock:true}];
 let hitStop=0,lastFoe=null;
 function nearestFoe(r,cone){let best=null,bd=r;for(const n of npcs){if(n.state==='down')continue;const d=hyp(n.x-P.x,n.z-P.z);if(d<bd&&(cone===undefined||Math.abs(angD(Math.atan2(n.x-P.x,n.z-P.z),P.h))<cone)){bd=d;best=n;}}return best;}
-function playerPunch(){
+function playerPunch(){mpPunch=1;
   if(P.car||P.koT>0||P.punchCD>0||P.blocking)return;
   const step=time-P.lastPunch<.8?(P.combo+1)%3:0;P.combo=step;const A=ATK[step];P.punchCD=A.cd;P.lastPunch=time;const H=P.H;
   if(A.kind==='kick')H.kickT=.5;else{H.side=A.side;H.punchT=.32;}
@@ -4252,23 +4252,58 @@ function stCall(k){if(k===1)phoneCall('linh',[['linh','Anh ơi! Bác sĩ nói ti
       ['tu','Desert Han biết con tới. Đi đường phía nam. Đó là điều cuối cùng chú làm được cho con.','Desert Han knows you are coming. Take the south road. That is the last thing I can do for you.']]);}
   else if(k===5)phoneCall('linh',[['linh','Anh ơi… ba tỉnh rồi! Ba muốn nói chuyện với anh.','Joseph… Father is awake! He wants to talk to you.'],['ba','Joseph… đừng để thù hận nuốt mất con. Về với ba.','Joseph… do not let hatred swallow you. Come home.'],['minh','Con sẽ về, ba. Sau khi chuyện này kết thúc.','I will, Father. As soon as this is over.']]);}
 
+/* ======== MULTIPLAYER: one shared city for everyone on the site (Firebase Realtime Database).
+   Each player writes a small state record ~5 times a second to /mp/players/{uid}; everyone else's are drawn as
+   ghosts (walking people or their car) with a name tag. NPCs, traffic and police stay local to each player. ======== */
+const MP={on:opt.mode==='multi'&&!!(opt.mp&&opt.mp.db),db:opt.mp&&opt.mp.db,uid:opt.mp&&opt.mp.uid,name:(opt.mp&&opt.mp.name)||'Player',others:{},t:0,n:0,el:null,ref:null,list:null,last:''};
+function lookFor(k,o,cap){const b=Object.assign({},CHARS[k]||CHARS.minh),of=OUTFITS[o]||{};for(const q of['shirt','pants','shoes','sleeve','longSleeve','skirt'])if(of[q]!==undefined)b[q]=of[q];if(of.shirt!==undefined){b.jacket=null;if(of.longSleeve===undefined)b.longSleeve=false;}b.cap=cap?'#1d1d1d':null;return b;}
+function mpTag(name){const cv=document.createElement('canvas');cv.width=512;cv.height=112;const g=cv.getContext('2d');g.font='800 54px Inter,system-ui,sans-serif';const w=Math.min(500,g.measureText(name).width+56);
+  g.fillStyle='rgba(10,12,20,.72)';const x=(512-w)/2;g.beginPath();g.moveTo(x+28,14);g.arcTo(x+w,14,x+w,98,28);g.arcTo(x+w,98,x,98,28);g.arcTo(x,98,x,14,28);g.arcTo(x,14,x+w,14,28);g.fill();
+  g.fillStyle='#c1f354';g.textAlign='center';g.textBaseline='middle';g.fillText(name,256,58);const tx=new T.CanvasTexture(cv);tx.encoding=T.sRGBEncoding;
+  const s=new T.Sprite(new T.SpriteMaterial({map:tx,depthTest:false,transparent:true}));s.scale.set(2.6,.57,1);s.renderOrder=5;scene.add(s);return s;}
+function mpDrop(id){const o=MP.others[id];if(!o)return;scene.remove(o.H.root);if(o.tag){scene.remove(o.tag);o.tag.material.map.dispose();o.tag.material.dispose();}if(o.car){o.car.g.visible=false;(carPool[o.ct]=carPool[o.ct]||[]).push(o.car);}delete MP.others[id];}
+function mpSet(id,d){if(!d||id===MP.uid)return;let o=MP.others[id];
+  if(!o){o=MP.others[id]={d,x:d.x,z:d.z,y:d.y||0,h:d.h||0,spd:0,H:makeHuman(lookFor(d.k,d.o,d.cap)),tag:mpTag(String(d.n||'Player').slice(0,18)),car:null,ct:'',name:d.n};resetHuman(o.H);}
+  else{if(d.n!==o.name){scene.remove(o.tag);o.tag=mpTag(String(d.n||'Player').slice(0,18));o.name=d.n;}if(d.k!==o.d.k||d.o!==o.d.o||d.cap!==o.d.cap){scene.remove(o.H.root);o.H=makeHuman(lookFor(d.k,d.o,d.cap));resetHuman(o.H);}o.d=d;}
+  if(d.p&&o.H)o.H.punchT=.32;}
+function mpStart(){if(!MP.on)return;try{MP.ref=MP.db.ref('mp/players/'+MP.uid);MP.ref.onDisconnect().remove();MP.list=MP.db.ref('mp/players');
+    MP.list.on('child_added',s=>mpSet(s.key,s.val()));MP.list.on('child_changed',s=>mpSet(s.key,s.val()));MP.list.on('child_removed',s=>mpDrop(s.key));}catch(e){console.warn('mp',e);MP.on=false;return;}
+  MP.el=document.createElement('div');MP.el.className='nc-mp';MP.el.style.cssText='position:absolute;left:50%;top:12px;transform:translateX(-50%);z-index:30;background:rgba(10,12,20,.72);color:#c1f354;font:800 13px Inter,system-ui,sans-serif;padding:6px 14px;border-radius:999px;border:1px solid rgba(193,243,84,.4);pointer-events:none';
+  root.appendChild(MP.el);window.addEventListener('beforeunload',mpStop);}
+function mpStop(){if(!MP.ref)return;try{MP.ref.remove();}catch(_){}}
+let mpPunch=0;
+function mpTick(dt){if(!MP.on||!MP.ref)return;MP.t-=dt;const now=Date.now();
+  if(MP.t<=0){MP.t=.2;const c=P.car,src=c||P;const d={n:MP.name,k:save.char||'joseph',o:save.outfit||'base',cap:save.cap?1:0,x:Math.round(src.x*100)/100,z:Math.round(src.z*100)/100,y:Math.round((c?0:P.y)*100)/100,h:Math.round((c?c.h:P.h)*100)/100,
+      s:Math.round((c?Math.abs(c.vf||0):Math.min(9,hyp(P.x-(MP.lx??P.x),P.z-(MP.lz??P.z))/.2))*10)/10,c:c?c.type:0,cc:c?(c.color||'#888888'):0,i:P.inside||0,p:mpPunch>0?1:0,t:firebase.database.ServerValue.TIMESTAMP};
+    MP.lx=P.x;MP.lz=P.z;mpPunch=0;const sig=JSON.stringify([d.x,d.z,d.h,d.c,d.i,d.p,d.s,d.k,d.o]);if(sig!==MP.last||!MP.keep||now-MP.keep>4000){MP.last=sig;MP.keep=now;MP.ref.set(d).catch(()=>{});}}
+  let n=1;for(const id in MP.others){const o=MP.others[id],d=o.d;if(d.t&&now-d.t>45000){mpDrop(id);continue;}n++;
+    const k=1-Math.exp(-10*dt);o.x+=(d.x-o.x)*k;o.z+=(d.z-o.z)*k;o.y+=((d.y||0)-o.y)*k;o.h=lerpA(o.h,d.h||0,k);
+    const vis=(d.i||null)===(P.inside||null);
+    if(d.c){if(!o.car||o.ct!==d.c){if(o.car){o.car.g.visible=false;(carPool[o.ct]=carPool[o.ct]||[]).push(o.car);}o.car=makeCar(d.c,d.cc||'#888888');o.ct=d.c;}
+      o.car.g.visible=vis;syncCar({x:o.x,z:o.z,h:o.h,mesh:o.car.g});o.H.root.visible=false;o.tag.position.set(o.x,heightAt(o.x,o.z)+3,o.z);}
+    else{if(o.car){o.car.g.visible=false;(carPool[o.ct]=carPool[o.ct]||[]).push(o.car);o.car=null;o.ct='';}
+      o.H.root.visible=vis;o.H.root.position.set(o.x,(d.i?0:groundY(o.x,o.z))+o.y,o.z);o.H.root.rotation.y=o.h;o.spd+=((d.s||0)-o.spd)*k;animHuman(o.H,dt,o.spd,time);o.tag.position.set(o.x,o.H.root.position.y+2.35,o.z);}
+    o.tag.visible=vis&&hyp(o.x-P.x,o.z-P.z)<160;}
+  if(MP.el&&MP.n!==n){MP.n=n;MP.el.textContent='🌐 '+L('Đang online: ','Online: ')+n;}}
+
 // free mode: collect the one-time reward of a finished story
 if(!STORY){let lg=null;try{lg=JSON.parse(localStorage.getItem('nexus-city2-legend')||'null');}catch(_){}
   if(lg&&lg.done&&!lg.claimed){lg.claimed=true;try{localStorage.setItem('nexus-city2-legend',JSON.stringify(lg));}catch(_){}
     if(!save.garage.some(o=>o.type==='legend')){save.money+=100000;save.garage.push({type:'legend',color:'#d4a017'});save.legend=true;writeSave();setTimeout(()=>banner(L('Phần thưởng phá đảo!','Story reward!'),L('+$100.000 và Siêu xe Huyền Thoại · lấy xe ở gara nhà bạn','+$100,000 and the Legend supercar · get it from your home garage'),5),2500);}}}
 
-function frame(now){raf=requestAnimationFrame(frame);const raw=(now-last)/1000||0;let dt=Math.max(0,Math.min(.05,raw));last=now;if(hitStop>0){hitStop-=dt;dt*=.12;}if(raw>0&&raw<1)adapt(raw);cinTick(dt);if(MOV.on)movTick(dt);else{if(!paused&&!mapOpen&&!shopOpen&&CIN.ts>.003)step(dt*CIN.ts);camUpdate(dt);}hudUpdate(dt);audioUpdate(dt);if(GRASS&&!P.inside)GRASS.update(P.car?P.car.x:P.x,P.car?P.car.z:P.z);PP.render();}
+function frame(now){raf=requestAnimationFrame(frame);const raw=(now-last)/1000||0;let dt=Math.max(0,Math.min(.05,raw));last=now;if(hitStop>0){hitStop-=dt;dt*=.12;}if(raw>0&&raw<1)adapt(raw);cinTick(dt);if(MOV.on)movTick(dt);else{if(!paused&&!mapOpen&&!shopOpen&&CIN.ts>.003)step(dt*CIN.ts);camUpdate(dt);}hudUpdate(dt);if(MP.on)mpTick(dt);audioUpdate(dt);if(GRASS&&!P.inside)GRASS.update(P.car?P.car.x:P.x,P.car?P.car.z:P.z);PP.render();}
 function resize(){const w=view.clientWidth||innerWidth,h=view.clientHeight||innerHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();const pr=renderer.getPixelRatio();PP.setSize(Math.round(w*pr),Math.round(h*pr));}
 window.addEventListener('resize',()=>{if(!view.closest('[hidden]'))resize();});
 camera.position.set(P.x,4,P.z+7);
 if(STORY)setTimeout(stOpening,1100);
 else if(tut.on)banner('Chào mừng tới Nexus City','Làm theo hướng dẫn ở góc trên bên trái, hoặc bấm Bỏ qua');
 else banner('Nexus City','Bấm M để mở bản đồ và chọn nơi muốn tới. Cột xanh lá giữa trung tâm là ngân hàng.');
+mpStart();
 const api={
   setGfx(v){PP.on=v!=='low';resize();},
   start(){paused=false;active=true;keys.clear();try{if(sfxAC&&sfxAC.state==='suspended')sfxAC.resume();}catch(_){}last=performance.now();cancelAnimationFrame(raf);raf=requestAnimationFrame(frame);resize();},
   setPaused(p){paused=p;active=!p;keys.clear();cam.rmb=false;tb.block=false;if(p)radioStop();else{last=performance.now();if(P.car&&radio.idx>=0)radioPlay();}},
-  stop(){cancelAnimationFrame(raf);active=false;paused=true;keys.clear();radioStop();try{if(sfxAC&&sfxAC.state==='running')sfxAC.suspend();}catch(_){}writeSave();},
+  stop(){mpStop();MP.keep=0;cancelAnimationFrame(raf);active=false;paused=true;keys.clear();radioStop();try{if(sfxAC&&sfxAC.state==='running')sfxAC.suspend();}catch(_){}writeSave();},
   resume(){active=true;paused=false;keys.clear();cam.rmb=false;last=performance.now();cancelAnimationFrame(raf);raf=requestAnimationFrame(frame);resize();if(P.car&&radio.idx>=0)radioPlay();},
   resize,
   get save(){return save;},

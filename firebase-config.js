@@ -6,7 +6,8 @@ window.NEXUS_FIREBASE_CONFIG = {
   projectId: "nexus-4012e",
   storageBucket: "nexus-4012e.firebasestorage.app",
   messagingSenderId: "240483465870",
-  appId: "1:240483465870:web:15559312f4d6f68344e7df"
+  appId: "1:240483465870:web:15559312f4d6f68344e7df",
+  databaseURL: "https://nexus-4012e-default-rtdb.asia-southeast1.firebasedatabase.app"   // Realtime Database cho Nexus City Multiplayer (Singapore)
 };
 /* Tài khoản quản trị: đọc được đánh giá ở trang #admin. Nhớ sửa cả danh sách trong firestore.rules (hàm isAdmin). */
 window.NEXUS_ADMIN_EMAILS = ["nguyenphucvy08@gmail.com"];

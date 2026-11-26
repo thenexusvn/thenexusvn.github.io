@@ -322,3 +322,7 @@ Python helper scripts used during development:
 
 ## Loopy game filters
 - loopyfx.js (window.LoopyFX): 15 canvas effects. In the studio camera mode the camera is drawn to #stCv (720x1280) with the colour filter and the effect, and the canvas stream (+ mic mixed with effect sounds) is what MediaRecorder records. Pick a filter, then record (recording starts the game); "Chơi thử" previews it.
+
+## Nexus City Multiplayer (mode 'multi')
+- Start menu button "🌐 Multiplayer · Chơi chung" → begin(false,'multi'); uses the free-mode save. Needs Firebase Realtime Database: databaseURL in firebase-config.js (asia-southeast1), rules in database.rules.json (paste into RTDB → Rules).
+- city.js MP block: each client writes /mp/players/{uid} every 0.2 s when something changed (pos, heading, speed, car type/colour, interior, punch, look) with onDisconnect().remove(); others are rendered as humans (makeHuman + animHuman) or cars (makeCar + syncCar) with name-tag sprites; "Online: N" pill. NPCs/traffic/police stay local.
