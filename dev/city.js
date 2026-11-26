@@ -3090,7 +3090,7 @@ function gpsUpdate(dt){arrowTex.offset.x-=dt*1.4;gps.t-=dt;const tg=gpsTarget(),
 function setWaypoint(x,z,name){gps.wp={x,z,name:name||'Điểm đánh dấu'};gps.t=0;gps.key='';showPrompt('Đã đặt điểm đến: '+gps.wp.name+' · G để huỷ',2);}
 function clearWaypoint(say){if(!gps.wp)return;gps.wp=null;gps.t=0;gps.key='';if(say)showPrompt('Đã huỷ chỉ đường',1.2);}
 function poiList(){const L=[{n:'Nhà an toàn',x:SP.house.door.x,z:SP.house.door.z,i:'house'},{n:'Ngân hàng Nexus',x:SP.bank.door.x,z:SP.bank.door.z,i:'bank'},{n:'Bệnh viện',x:SP.hospital.x,z:SP.hospital.z,i:'hosp'},{n:'Đồn cảnh sát',x:SP.police.x,z:SP.police.z,i:'police'},
-  {n:'Công viên trung tâm',x:SP.parkMain.x,z:SP.parkMain.z,i:'#5fbf5a'},...(SP.courts?[{n:'Sân bóng rổ ngoài trời',x:SP.courts.x,z:SP.courts.z,i:'#2c5f9e'}]:[]),...(SP.arena?[{n:'Nhà thi đấu bóng rổ',x:SP.arena.x,z:SP.arena.z,i:'#e0561b'}]:[]),{n:'Vòng quay bãi biển',x:FW.x-10,z:FW.z,i:'#ff7ad9'},{n:'Cầu tàu',x:FW.pier.x0-2,z:FW.pier.z,i:'#3ef0e0'}];
+  {n:'Công viên trung tâm',x:SP.parkMain.x,z:SP.parkMain.z,i:'#5fbf5a'},...(SP.courts?[{n:L('Sân bóng rổ ngoài trời','Outdoor courts'),x:SP.courts.x,z:SP.courts.z,i:'#2c5f9e'}]:[]),...(SP.arena?[{n:L('Nhà thi đấu bóng rổ','Basketball arena'),x:SP.arena.x,z:SP.arena.z,i:'#e0561b'}]:[]),{n:'Vòng quay bãi biển',x:FW.x-10,z:FW.z,i:'#ff7ad9'},{n:'Cầu tàu',x:FW.pier.x0-2,z:FW.pier.z,i:'#3ef0e0'}];
   const SC={food:'#ffb703',mart:'#e63946',clothes:'#ad8dff',guns:'#8f1a20',cars:'#c1f354',gym:'#2d6a4f',garage:'#ffd166'};const seen={};for(const sh of SP.shops){if(sh.id==='mart'&&seen.mart)continue;seen[sh.id]=1;L.push({n:SHOPS[sh.id].n,x:sh.x,z:sh.z,i:SC[sh.id]||'#fff'});}
   if(SP.school)L.push({n:'Trường THPT Nexus',x:SP.school.x,z:SP.school.z,i:'#f1faee'});if(SP.stadium)L.push({n:'Sân vận động',x:SP.stadium.x,z:SP.stadium.z,i:'#9aa3ad'});if(SP.apt)L.push({n:save.apt?'Căn hộ của bạn':'Căn hộ ven biển (bán)',x:SP.apt.x,z:SP.apt.z,i:'#2a9d8f'});if(SP.bigBridge)L.push({n:'Cầu dây văng',x:SP.bigBridge.x,z:SP.bigBridge.z-40,i:'#e9edf2'});
   if(!mis)for(const k in GIVERS)if(giverPos[k])L.push({n:GIVERS[k].name,x:giverPos[k].x,z:giverPos[k].z,i:GIVERS[k].css});
@@ -3271,6 +3271,7 @@ function drawMini(){const g=mm,Wd=hud.mini.width,Hd=hud.mini.height,k=1.6;g.save
   icon(g,...tr(SP.bank.door.x,SP.bank.door.z),'bank');icon(g,...tr(SP.house.door.x,SP.house.door.z),'house');icon(g,...tr(SP.hospital.x,SP.hospital.z),'hosp',.8);icon(g,...tr(SP.police.x,SP.police.z),'police',.8);
   if(!mis&&!(heist&&heist.stage==='vault'))for(const kk in GIVERS)icon(g,...tr(giverPos[kk].x,giverPos[kk].z),GIVERS[kk].css,.8);
   if(MK.target.visible)icon(g,...tr(MK.target.position.x,MK.target.position.z),'#ffd166',1.1);
+  if(MP.on)for(const id in MP.others){const o=MP.others[id];if((o.d.i||null)!==(P.inside||null))continue;const p=tr(o.x,o.z);g.fillStyle='#c1f354';g.strokeStyle='#0a0c14';g.lineWidth=2;g.beginPath();g.arc(p[0],p[1],5,0,7);g.fill();g.stroke();}
   for(const c of cars)if(c.kind==='police'&&stars>0){const p=tr(c.x,c.z);g.fillStyle=Math.floor(time*6)%2?'#ff3b3b':'#3b7bff';g.beginPath();g.arc(p[0],p[1],4,0,7);g.fill();}
   const h=(P.car?P.car.h:P.h);g.save();g.translate(Wd/2,Hd*.62);g.rotate(cam.yaw-h);g.fillStyle='#fff';g.strokeStyle='#000';g.lineWidth=2;g.beginPath();g.moveTo(0,-10);g.lineTo(7,8);g.lineTo(0,4);g.lineTo(-7,8);g.closePath();g.fill();g.stroke();g.restore();}
 function pin(g,x,y,s){g.save();g.translate(x,y);g.scale(s,s);g.fillStyle='#ff5fd2';g.strokeStyle='#000';g.lineWidth=2;g.beginPath();g.moveTo(0,0);g.bezierCurveTo(-3,-6,-9,-9,-9,-15);g.arc(0,-15,9,Math.PI,0);g.bezierCurveTo(9,-9,3,-6,0,0);g.fill();g.stroke();g.fillStyle='#fff';g.beginPath();g.arc(0,-15,3.5,0,7);g.fill();g.restore();}
@@ -3278,14 +3279,28 @@ const mapS=()=>hud.mapC.width/Math.max(mapBg.width,mapBg.height),mapOY=()=>(hud.
 function drawBigMap(){const c=hud.mapC,g=c.getContext('2d'),s=mapS();g.fillStyle='#111';g.fillRect(0,0,c.width,c.height);const oy=mapOY();g.drawImage(mapBg,0,oy,mapBg.width*s,mapBg.height*s);
   const tr=(x,z)=>[(x-MAPX0)*MK1*s,(z-MAPZ0)*MK1*s+oy];
   if(gps.pts){g.lineJoin='round';g.lineCap='round';const path=()=>{g.beginPath();gps.pts.forEach((p,k)=>{const q=tr(p[0],p[1]);k?g.lineTo(q[0],q[1]):g.moveTo(q[0],q[1]);});};path();g.lineWidth=7;g.strokeStyle='rgba(0,0,0,.6)';g.stroke();path();g.lineWidth=4;g.strokeStyle=gps.col;g.stroke();}
-  g.font='700 21px Inter';g.textAlign='left';
-  for(const p of poiList()){const q=tr(p.x,p.z);icon(g,q[0],q[1],p.i,p.i.length>6?1.5:1.9);g.lineWidth=5;g.strokeStyle='rgba(0,0,0,.8)';g.strokeText(p.n,q[0]+17,q[1]+7);g.fillStyle='#fff';g.fillText(p.n,q[0]+17,q[1]+7);}
+  // labels never overlap: icons first, then each name tries right, left, above, below; names that do not fit appear when you hover the dot
+  const items=poiList().map(p=>({p,q:tr(p.x,p.z)})),boxes=[],hit=b=>b.x0<2||b.x1>c.width-2||b.y0<oy+70||boxes.some(o=>b.x0<o.x1&&b.x1>o.x0&&b.y0<o.y1&&b.y1>o.y0);
+  for(const it of items){icon(g,it.q[0],it.q[1],it.p.i,it.p.i.length>6?1.3:1.6);boxes.push({x0:it.q[0]-10,x1:it.q[0]+10,y0:it.q[1]-10,y1:it.q[1]+10});}
+  g.font='700 17px Inter';g.lineJoin='round';MAPLAB=[];
+  const drawLab=(t,x,y,al,col)=>{g.textAlign=al;g.lineWidth=4;g.strokeStyle='rgba(0,0,0,.85)';g.strokeText(t,x,y);g.fillStyle=col||'#fff';g.fillText(t,x,y);};
+  for(const it of items){const t=it.p.n,w=g.measureText(t).width,[x,y]=it.q;let done=false;
+    for(const[cx,cy,al]of[[x+13,y+6,'left'],[x-13,y+6,'right'],[x,y-15,'center'],[x,y+28,'center']]){const x0=al==='left'?cx:al==='right'?cx-w:cx-w/2,b={x0:x0-2,x1:x0+w+2,y0:cy-15,y1:cy+5};if(hit(b))continue;boxes.push(b);drawLab(t,cx,cy,al);done=true;break;}
+    MAPLAB.push({x,y,t,shown:done});}
+  if(MAPHOV&&!MAPHOV.shown){g.font='800 18px Inter';const w=g.measureText(MAPHOV.t).width;g.fillStyle='rgba(10,12,20,.88)';g.fillRect(MAPHOV.x+12,MAPHOV.y-14,w+16,26);g.strokeStyle='#c1f354';g.lineWidth=1.5;g.strokeRect(MAPHOV.x+12,MAPHOV.y-14,w+16,26);g.textAlign='left';g.fillStyle='#fff';g.fillText(MAPHOV.t,MAPHOV.x+20,MAPHOV.y+5);}
+  // other players in multiplayer, always on top
+  let mpOn=false;try{mpOn=MP.on;}catch(_){}
+  if(mpOn)for(const id in MP.others){const o=MP.others[id];if((o.d.i||null)!==null)continue;const q=tr(o.x,o.z);g.fillStyle='#c1f354';g.strokeStyle='#0a0c14';g.lineWidth=3;g.beginPath();g.arc(q[0],q[1],8,0,7);g.fill();g.stroke();
+    g.font='800 16px Inter';const nm=String(o.name||'Player').slice(0,18),w=g.measureText(nm).width;g.fillStyle='rgba(10,12,20,.85)';g.fillRect(q[0]-w/2-7,q[1]-34,w+14,22);g.fillStyle='#c1f354';g.textAlign='center';g.fillText(nm,q[0],q[1]-18);}
+  g.textAlign='left';
   if(MK.target.visible)icon(g,...tr(MK.target.position.x,MK.target.position.z),'#ffd166',1.6);
   if(gps.wp){const q=tr(gps.wp.x,gps.wp.z);pin(g,q[0],q[1],1.6);}
   const t=P.car||P,p=tr(t.x,t.z),h=P.car?P.car.h:P.h;g.save();g.translate(p[0],p[1]);g.rotate(Math.PI-h);g.fillStyle='#fff';g.strokeStyle='#000';g.lineWidth=2;g.beginPath();g.moveTo(0,-13);g.lineTo(9,10);g.lineTo(0,5);g.lineTo(-9,10);g.closePath();g.fill();g.stroke();g.restore();
   g.fillStyle='#fff';g.font='700 26px "Space Grotesk",Inter';g.textAlign='left';g.fillText('NEXUS CITY',16,mapOY()+34);
   if(WILD.places){g.font='600 19px Inter';g.fillStyle='#d6f5ff';g.fillText(L('Khám phá ','Explored ')+WILD.places.filter(p=>save.disc[p.id]).length+'/'+WILD.places.length+'   ·   '+L('Kim cương ','Diamonds ')+(save.dia||[]).length+'/'+DIAS.length+'   ·   '+L('Ngọc Nexus ','Nexus gems ')+save.gems.length+'/'+WILD.gems.length,16,mapOY()+62);}}
 function renderPOI(){hud.poi.innerHTML='';for(const p of poiList()){const b=document.createElement('button');b.type='button';const col=p.i==='bank'?'#4ade80':p.i==='house'?'#ffffff':p.i==='hosp'?'#d62828':p.i==='police'?'#3d6fd6':p.i;b.innerHTML='<i style="background:'+col+'"></i>';b.appendChild(document.createTextNode(p.n));b.addEventListener('click',()=>{setWaypoint(p.x,p.z,p.n);gpsUpdate(0);drawBigMap();});hud.poi.appendChild(b);}}
+let MAPLAB=[],MAPHOV=null,mapT=0;
+hud.mapC.addEventListener('mousemove',e=>{const c=hud.mapC,r=c.getBoundingClientRect(),px=(e.clientX-r.left)*c.width/r.width,py=(e.clientY-r.top)*c.height/r.height;let best=null,bd=16;for(const l of MAPLAB){const d=Math.hypot(l.x-px,l.y-py);if(d<bd){bd=d;best=l;}}if(best!==MAPHOV){MAPHOV=best;hud.mapC.style.cursor=best?'pointer':'';drawBigMap();}});
 let mapOpen=false;function toggleMap(){mapOpen=!mapOpen;hud.map.hidden=!mapOpen;if(mapOpen){gps.t=0;gpsUpdate(0);drawBigMap();renderPOI();tutEvent('map');}}
 hud.mapC.addEventListener('click',e=>{const c=hud.mapC,r=c.getBoundingClientRect(),px=(e.clientX-r.left)*c.width/r.width,py=(e.clientY-r.top)*c.height/r.height,s=mapS();
   const x=px/(MK1*s)+MAPX0,z=(py-mapOY())/(MK1*s)+MAPZ0;
@@ -4328,7 +4343,7 @@ if(!STORY){let lg=null;try{lg=JSON.parse(localStorage.getItem('nexus-city2-legen
   if(lg&&lg.done&&!lg.claimed){lg.claimed=true;try{localStorage.setItem('nexus-city2-legend',JSON.stringify(lg));}catch(_){}
     if(!save.garage.some(o=>o.type==='legend')){save.money+=100000;save.garage.push({type:'legend',color:'#d4a017'});save.legend=true;writeSave();setTimeout(()=>banner(L('Phần thưởng phá đảo!','Story reward!'),L('+$100.000 và Siêu xe Huyền Thoại · lấy xe ở gara nhà bạn','+$100,000 and the Legend supercar · get it from your home garage'),5),2500);}}}
 
-function frame(now){raf=requestAnimationFrame(frame);const raw=(now-last)/1000||0;let dt=Math.max(0,Math.min(.05,raw));last=now;if(hitStop>0){hitStop-=dt;dt*=.12;}if(raw>0&&raw<1)adapt(raw);cinTick(dt);if(MOV.on)movTick(dt);else{if(!paused&&!mapOpen&&!shopOpen&&CIN.ts>.003)step(dt*CIN.ts);camUpdate(dt);}hudUpdate(dt);hdrTick(dt);if(MP.on)mpTick(dt);audioUpdate(dt);if(GRASS&&!P.inside)GRASS.update(P.car?P.car.x:P.x,P.car?P.car.z:P.z);PP.render();}
+function frame(now){raf=requestAnimationFrame(frame);const raw=(now-last)/1000||0;let dt=Math.max(0,Math.min(.05,raw));last=now;if(hitStop>0){hitStop-=dt;dt*=.12;}if(raw>0&&raw<1)adapt(raw);cinTick(dt);if(MOV.on)movTick(dt);else{if(!paused&&!mapOpen&&!shopOpen&&CIN.ts>.003)step(dt*CIN.ts);camUpdate(dt);}hudUpdate(dt);hdrTick(dt);if(MP.on){mpTick(dt);if(mapOpen){mapT-=dt;if(mapT<=0){mapT=.25;drawBigMap();}}}audioUpdate(dt);if(GRASS&&!P.inside)GRASS.update(P.car?P.car.x:P.x,P.car?P.car.z:P.z);PP.render();}
 function resize(){const w=view.clientWidth||innerWidth,h=view.clientHeight||innerHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();const pr=renderer.getPixelRatio();PP.setSize(Math.round(w*pr),Math.round(h*pr));}
 window.addEventListener('resize',()=>{if(!view.closest('[hidden]'))resize();});
 camera.position.set(P.x,4,P.z+7);
