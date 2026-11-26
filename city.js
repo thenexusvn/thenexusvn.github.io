@@ -3262,7 +3262,7 @@ $h('.nc-close').addEventListener('click',toggleMap);
 /* ---------- input ---------- */
 const keys=new Set();let active=false;const K=k=>keys.has(k);
 const joy={x:0,y:0,id:null},tb={jump:false,sprint:false,block:false};
-function onKey(e){if(!active)return;sfxInit();const k=e.key.toLowerCase();if([' ','arrowup','arrowdown','arrowleft','arrowright'].includes(k))e.preventDefault();if(cinKey(k)){keys.clear();return;}if(e.repeat){keys.add(k);return;}
+function onKey(e){if(!active)return;sfxInit();const k=e.key.toLowerCase();if([' ','arrowup','arrowdown','arrowleft','arrowright'].includes(k))e.preventDefault();if(movKey(k)||cinKey(k)){keys.clear();return;}if(e.repeat){keys.add(k);return;}
   if(shopOpen){if(k==='e'||k==='backspace')closeShop();else if(/^[1-9]$/.test(k)){const it=shopItems(shopOpen)[+k-1];if(it)buyItem(it);}return;}
   if(k==='m')toggleMap();else if(mapOpen)return;
   if(HP.on&&hpKey(k)){keys.add(k);return;}
@@ -3715,7 +3715,9 @@ function stDied(){if(!STORY||SS.done)return;SS.lives--;SS.deaths=(SS.deaths|0)+1
 function stWinBoss(i){SS.keys[i]=1;SS.ch=Math.min(6,SS.ch+1);while(SS.ch<=5&&SS.keys[SS.ch-1])SS.ch++;sfx('cash');P.hp=maxHp();save.money+=2000;
   writeSave();stKeyStamp(i);
   const g=stGang;stGang=null;setTimeout(()=>{if(g)for(const n of g.list)if(npcs.includes(n)&&n.state==='down')removeNPC(n);},6000);for(const n of g.list)if(n!==g.boss&&n.state!=='down'){n.state='leave';n.story=false;}}
-function stVictory(){if(stWin)return;SS.done=true;SS.ch=7;const mins=Math.round((Date.now()-(SS.t0||Date.now()))/60000);
+let stEnding=false;
+function stVictory(){if(stWin||stEnding)return;stEnding=true;setTimeout(()=>playFilm(filmEnding(),()=>{stEnding=false;stVictoryCard();}),2600);}
+function stVictoryCard(){if(stWin)return;SS.done=true;SS.ch=7;const mins=Math.round((Date.now()-(SS.t0||Date.now()))/60000);
   let lg={};try{lg=JSON.parse(localStorage.getItem('nexus-city2-legend')||'{}');}catch(_){}const first=!lg.done;
   if(first){lg={done:true,claimed:false,at:Date.now()};try{localStorage.setItem('nexus-city2-legend',JSON.stringify(lg));}catch(_){}}
   writeSave();if(opt.onStory)opt.onStory(save);cinSfx('win');
@@ -3727,7 +3729,7 @@ function stVictory(){if(stWin)return;SS.done=true;SS.ch=7;const mins=Math.round(
       :`<div class="nc-win-r"><b>${L('Bạn đã phá đảo trước đó','You already beat the game')}</b><em>${L('Chơi lại Story mode không nhận thêm xe hay tiền','Replaying Story mode gives no extra car or money')}</em></div>`}
     <button type="button" class="nc-win-b">${L('Về menu','Back to menu')}</button></div>`;
   root.appendChild(stWin);stWin.querySelector('button').addEventListener('click',()=>{stWin.remove();stWin=null;if(opt.onMenu)opt.onMenu();});}
-function storyUpdate(dt){fwkUpdate(dt);if(!STORY)return;if(stTower&&P.inside!=='tower'&&P.koT<=0)stTowerReset();
+function storyUpdate(dt){fwkUpdate(dt);if(!STORY||MOV.on)return;if(stTower&&P.inside!=='tower'&&P.koT<=0)stTowerReset();
   if(stDoorMk){const show=SS.ch===6&&!P.inside;stDoorMk.visible=show;if(show){const d=stDoorSpot();stDoorMk.position.set(d.x,.25,d.z);stDoorMk.children[0].rotation.z+=dt;}}
   if(SS.done)return;
   if(SS.ch===0&&Object.keys(save.weapons).some(w=>save.weapons[w])){SS.ch=1;writeSave();stArmed();}
@@ -3850,6 +3852,7 @@ function cinSfx(k){try{sfxInit();}catch(_){}const a=sfxAC;if(!a)return;if(a.stat
   else if(k==='stamp'){nz(0,.3,1,'lowpass',2000,300);osc('sine',95,30,0,1.2,1);osc('square',1318,1318,.02,.5,.06);osc('square',1760,1760,.05,.7,.05);chord([523.3,659.3,784],.22,1.3,.06,'sawtooth',2400);chord([659.3,784,1046.5],.5,1.4,.05,'triangle',3000);}
   else if(k==='fail'){osc('sawtooth',220,48,0,1.7,.16,1100);osc('sine',75,28,0,1.6,.9);nz(0,1.1,.4,'lowpass',900,120);}
   else if(k==='win'){[523.3,659.3,784,1046.5,1318.5].forEach((f,i)=>osc('square',f,f,i*.11,.45,.07,3000));chord([523.3,659.3,784,1046.5],.6,2.2,.05,'sawtooth',2600);osc('sine',65,40,.6,1.4,.8);}
+  else if(k==='ring'){osc('sine',880,880,0,.35,.18);osc('sine',1320,1320,0,.35,.12);osc('sine',880,880,.42,.35,.18);osc('sine',1320,1320,.42,.35,.12);}
   else if(k==='slow'){nz(0,.9,.45,'lowpass',3000,200);osc('sine',90,32,0,1,.85);}}
 function cinDuck(on){const a=sfxAC;if(!a||!a.out)return;const g=a.out.gain,t=a.currentTime;if(on){if(CIN.duck==null)CIN.duck=g.value;g.cancelScheduledValues(t);g.setTargetAtTime(CIN.duck*.3,t,.15);}else if(CIN.duck!=null){g.cancelScheduledValues(t);g.setTargetAtTime(CIN.duck,t,.25);CIN.duck=null;}}
 /* o: {type:'tip'|'intro'|'stamp'|'title'|'fail'|'flash', kick,title,sub,steps:[[key,text]],tag,stats,c,c2,wait,hold,slow,snd,at(npc),onDone} */
@@ -3871,7 +3874,7 @@ function cinPlay(){const el=cinEl(),o=CIN.q.shift();if(!o){cinEnd();return;}CIN.
   el.querySelector('.cn-stage').innerHTML=h;
   const ptr=el.querySelector('.cn-ptr');ptr.classList.toggle('on',!!o.at);ptr.style.opacity='0';if(o.at)ptr.querySelector('b').textContent=o.atName||o.title||'';
   if(o.at){CIN.yaw=Math.atan2(o.at.x-P.x,o.at.z-P.z);if(CIN.dist0==null){CIN.dist0=cam.dist;}}
-  if(o.snd)cinSfx(o.snd);else if(freeze)cinSfx('in');}
+  if(o.snd)cinSfx(o.snd);else if(freeze)cinSfx('in');if(o.say)setTimeout(()=>{if(CIN.cur===o)say(o.say[0],L(o.say[1],o.say[2]));},700);}
 function cinNext(){const o=CIN.cur;if(!o||CIN.leave>0)return;if(o.wait&&o.t<.9)return;const el=cinEl();const card=el.querySelector('.cn-card');if(card)card.classList.add('out');
   el.classList.remove('wait','ready');el.querySelector('.cn-ptr').classList.remove('on');if(o.wait&&!CIN.q.length)cinSfx('out');CIN.leave=.38;CIN.cur=null;CIN.yaw=null;
   try{keys.clear();P.trigger=false;}catch(_){}if(o.onDone)try{o.onDone();}catch(e){console.warn(e);}}
@@ -3892,15 +3895,14 @@ const ST_COL=[['#ff3b47','#7a1020'],['#2f8dff','#0d2a55'],['#b9c2cc','#3a4048'],
 function stTips(){return SS.tips||(SS.tips={});}
 function stOnce(id){const t=stTips();if(t[id])return false;t[id]=1;writeSave();return true;}
 function stOpening(){if(SS.done)return;
-  if(SS.ch===0&&stOnce('open')){
-    cine({type:'title',wait:true,kick:L('Nexus City · Story mode','Nexus City · Story mode'),title:L('Lật đổ Ông Trùm','Take down the Boss'),c:'#ff5fa2',c2:'#ffb36b',snd:'boss',
-      sub:L('Syndicate đã nuốt trọn 5 thị trấn. Trên đỉnh tháp ở trung tâm, Ông Trùm Vương nắm cả thành phố trong tay. Đến lúc lấy lại tất cả.','The Syndicate has swallowed five towns. From the top of the tower downtown, Boss Vương holds the whole city. Time to take it all back.')});
-    cine({type:'tip',wait:true,kick:L('Nhiệm vụ 1','Mission 1'),title:L('Kiếm một khẩu súng','Get a gun'),c:'#ffd166',c2:'#ff8a3d',
-      sub:L('Bạn có $1.500. Tới Súng Tầm Xa và mua vũ khí đầu tiên.','You have $1,500. Go to Long Range Guns and buy your first weapon.'),
-      steps:[['M',L('mở bản đồ · đường đỏ luôn chỉ chỗ cần tới','open the map · the red route always shows where to go')],['W A S D',L('đi · giữ Shift để chạy','move · hold Shift to run')],['F',L('lên xe gần nhất cho nhanh','jump into the nearest car to get there faster')],['E',L('vào cửa hàng · bấm số để mua','enter the shop · press a number to buy')]]});}
+  if(SS.ch===0&&stOnce('open')){playFilm(filmOpening(),stMission1);}
+  else if(SS.ch===0)stMission1();
   else if(SS.ch>=1&&SS.ch<=6){const i=SS.ch-1;
     cine({type:'title',hold:3.4,slow:.35,kick:L('Story mode · tiếp tục','Story mode · continued'),title:SS.ch===6?L('Hồi cuối','Final act'):L('Chương ','Chapter ')+SS.ch,c:SS.ch===6?'#ffd166':ST_COL[i][0],c2:SS.ch===6?'#ff8a3d':'#ffffff',snd:'slow',
       sub:SS.ch===6?L('Đủ 5 mảnh thẻ. Tháp Syndicate đang chờ ở trung tâm.','All 5 key cards. Syndicate Tower is waiting downtown.'):L(`Tìm ${ST_TOWNS[i][1]} ở ${ST_TOWNS[i][2]} · ❤ ${SS.lives} mạng · 🔑 ${stKeys()}/5`,`Find ${ST_TOWNS[i][1]} in ${ST_TOWNS[i][2]} · ❤ ${SS.lives} lives · 🔑 ${stKeys()}/5`)});}}
+function stMission1(){cine({type:'tip',wait:true,kick:L('Nhiệm vụ 1','Mission 1'),title:L('Gặp Chú Tư','Meet Uncle Tư'),c:'#c1f354',c2:'#ffd166',snd:'boss',
+    sub:L('Chú Tư chờ ở Súng Tầm Xa. Theo đường đỏ, vào tiệm và mua vũ khí đầu tiên. Bạn có $1.500.','Uncle Tư is waiting at Long Range Guns. Follow the red route, go in and buy your first weapon. You have $1,500.'),
+    steps:[['M',L('mở bản đồ · đường đỏ luôn chỉ chỗ cần tới','open the map · the red route always shows where to go')],['W A S D',L('đi · giữ Shift để chạy','move · hold Shift to run')],['F',L('lên xe gần nhất cho nhanh','jump into the nearest car to get there faster')],['E',L('vào tiệm · bấm số để mua','enter the shop · press a number to buy')]]});}
 function stArmed(){cine({type:'stamp',hold:2.6,slow:.25,kick:L('Mở khoá','Unlocked'),title:L('Vũ khí đầu tiên','First weapon'),c:'#ffd166',c2:'#ff8a3d',snd:'stamp',flash:true});
   if(stOnce('gun'))cine({type:'tip',wait:true,kick:L('Hướng dẫn','How to'),title:L('Bắn súng','Shooting'),c:'#ffd166',c2:'#ff8a3d',
     steps:[['1 – 4',L('đổi vũ khí · 1 là tay không','switch weapons · 1 is fists')],[L('Giữ chuột phải / K','Hold right click / K'),L('ngắm','aim')],['Click / J',L('bắn','shoot')],['!',L('bắn người ngoài phố là bị truy nã','shooting people on the street gets you wanted')]]});
@@ -3912,7 +3914,8 @@ function stFightTip(){if(!stOnce('fight'))return;
   cine({type:'tip',wait:true,kick:L('Giữa trận · hướng dẫn','Mid-fight · how to'),title:L('Cách hạ trùm','How to beat a boss'),c:'#ff3b47',c2:'#ffb36b',snd:'slow',
     steps:[['Click / J',L('đánh · bấm liền 3 lần ra combo đấm, đấm, đá','attack · tap 3 times for a punch, punch, kick combo')],[L('Giữ chuột phải / K','Hold right click / K'),L('đỡ đòn · đỡ đúng lúc hắn ra đòn sẽ làm hắn choáng','block · blocking right as he swings stuns him')],['2 – 4',L('rút súng nếu có · bắn từ xa an toàn hơn','pull a gun if you have one · range is safer')],['Shift',L('chạy vòng ra, hạ đàn em trước để không bị vây','circle away and drop the henchmen first so you are not surrounded')]]});}
 function stHalf(n){cine({type:'title',hold:1.5,slow:.18,kick:n.boss||'',title:L('Còn một nửa máu!','Half health!'),c:'#ff3b47',c2:'#ffd166',snd:'slow'});}
-function stKeyStamp(i){const k=stKeys();
+function stWhenFree(fn,d){const t=setInterval(()=>{if(!CIN.cur&&!CIN.q.length&&CIN.leave<=0&&!MOV.on){clearInterval(t);setTimeout(fn,d||1200);}},400);}
+function stKeyStamp(i){const k=stKeys();stWhenFree(()=>stCall(k),1500);
   cine({type:'stamp',hold:3.6,slow:.12,kick:L(`${ST_TOWNS[i][1]} đã gục`,`${ST_TOWNS[i][1]} is down`),title:L('Mảnh thẻ khoá','Key card'),big:k+'/5',cards:SS.keys.map((v,j)=>j===i?2:v?1:0),c:'#ffd166',c2:'#ff8a3d',snd:'stamp',flash:true,
     sub:k>=5?L('+$2.000 · Đủ 5 mảnh!','+$2,000 · All five!'):L(`+$2.000 · tiếp theo: ${ST_TOWNS[SS.ch-1][2]}`,`+$2,000 · next: ${ST_TOWNS[SS.ch-1][2]}`)});
   if(k>=5)cine({type:'title',wait:true,kick:L('Hồi cuối','Final act'),title:L('Tháp Syndicate đã mở','Syndicate Tower is open'),c:'#ffd166',c2:'#ff5fa2',snd:'boss',
@@ -3920,7 +3923,7 @@ function stKeyStamp(i){const k=stKeys();
   else if(stOnce('afterkey'))cine({type:'tip',wait:true,kick:L('Mẹo','Tip'),title:L('Hồi sức trước trận sau','Recover before the next fight'),c:'#2fd47a',c2:'#c1f354',
     steps:[['E',L('ngủ ở nhà an toàn: lưu game, hồi đầy máu','sleep at your safehouse: save and full health')],['🍚',L('Cơm Tấm Cô Ba bán đồ ăn hồi máu','Cô Ba\'s Broken Rice sells healing food')],['🔫',L('mua thêm súng và áo giáp bằng tiền thưởng','spend the reward on guns and armor')]]});}
 function stTowerIntro(){cine({type:'intro',wait:true,at:stTower&&stTower.boss,atName:L('Ông Trùm','The Boss'),kick:L('Hồi cuối · Tháp Syndicate','Final act · Syndicate Tower'),title:L('Ông Trùm Vương','Boss Vương'),
-    tag:L('Kẻ đứng sau tất cả. Sáu vệ sĩ, một chiếc trực thăng chờ sẵn.','The man behind it all. Six bodyguards and a helicopter on standby.'),stats:['❤ 1100',L('6 vệ sĩ','6 bodyguards'),'🚁'],c:'#d4a017',c2:'#3a2a00',snd:'boss',flash:true});
+    tag:L('Con trai của Hải. Mày không biết ba mày từng là người của tao à?','Hải\'s boy. Did you know your father used to work for me?'),say:['vuong','Con trai của Hải. Mày không biết ba mày từng là người của tao à?','Hải\'s boy. Did you know your father used to work for me?'],stats:['❤ 1100',L('6 vệ sĩ','6 bodyguards'),'🚁'],c:'#d4a017',c2:'#3a2a00',snd:'boss',flash:true});
   if(stOnce('tower'))cine({type:'tip',wait:true,kick:L('Sân thượng','Rooftop'),title:L('Sống sót trên mái','Survive the roof'),c:'#ffd166',c2:'#ff8a3d',
     steps:[['E',L('thùng đạn cạnh cửa: nạp đầy đạn bao nhiêu lần cũng được','ammo crate by the door: refill as often as you like')],['⬛',L('núp sau máy lạnh và lỗ thông gió','take cover behind AC units and vents')],['🎯',L('hạ vệ sĩ trước, rồi dồn Ông Trùm','drop the bodyguards first, then go for the Boss')]]});}
 function stHeliTip(){cine({type:'tip',wait:true,kick:L('Hắn đang bỏ chạy!','He is getting away!'),title:L('Bắn rơi trực thăng','Shoot down the helicopter'),c:'#ff3b47',c2:'#ffd166',snd:'boss',flash:true,
@@ -3936,12 +3939,269 @@ function stWantedTip(){if(!stOnce('wanted'))return;cine({type:'tip',wait:true,ki
 function stLowTip(){if(!stOnce('lowhp'))return;cine({type:'tip',wait:true,kick:L('Nguy hiểm','Danger'),title:L('Máu thấp','Low health'),c:'#ff3b47',c2:'#ffd166',snd:'slow',
     steps:[['Shift',L('rút lui khỏi trận ngay','back off from the fight now')],['🍚',L('Cơm Tấm Cô Ba bán đồ ăn hồi máu','Cô Ba\'s Broken Rice sells healing food')],['E',L('ngủ ở nhà để hồi đầy máu','sleep at home for full health')],['❤',L(`còn ${SS.lives} mạng · gục là mất 1 mạng`,`${SS.lives} lives left · going down costs one`)]]});}
 
+/* ======== STORY FILM "Món nợ của Cha": in-engine cutscenes with voiced dialogue (speech synthesis), subtitles,
+   scripted actors, camera moves, flashback grade, fire, music, and phone calls during play ======== */
+const isEN=()=>L('v','e')==='e';
+const CAST={
+  minh:{n:['Minh','Minh'],look:CHARS.minh,col:'#7ec3ff',pitch:.9,rate:1.02,male:true},
+  linh:{n:['Linh','Linh'],look:{female:true,skin:'#ecc29f',hair:'#1b120c',hairStyle:'long',shirt:'#c2185b',pants:'#2b3a55',shoes:'#f5f5f3',sleeve:true},col:'#ff9fb8',pitch:1.2,rate:1.04},
+  ba:{n:['Ba · ông Hải','Dad · Mr. Hải'],look:{female:false,skin:'#b77c58',hair:'#a8a8a8',hairStyle:'short',beard:true,shirt:'#5b6b4a',pants:'#3b3b3b',shoes:'#2a2522',sleeve:true,longSleeve:true},col:'#ffd166',pitch:.72,rate:.9,male:true},
+  tu:{n:['Chú Tư','Uncle Tư'],look:{female:false,skin:'#c08a62',hair:'#222222',hairStyle:'bald',beard:true,glasses:true,shirt:'#d9d2c3',jacket:'#2b2b2b',pants:'#262a33',shoes:'#111111',sleeve:true},col:'#c1f354',pitch:.78,rate:.96,male:true},
+  lao:{n:['Lão Đèn Lồng','The Lantern Elder'],look:{female:false,skin:'#c9956b',hair:'#dddddd',hairStyle:'buzz',beard:true,shirt:'#111111',jacket:'#9b1c1c',pants:'#111111',shoes:'#111111',sleeve:true},col:'#ff5a4a',pitch:.58,rate:.88,male:true},
+  thug:{n:['Đàn em','Henchman'],look:{female:false,skin:'#b98260',hair:'#111111',hairStyle:'buzz',shirt:'#1a1a1a',jacket:'#7a1f2b',pants:'#141414',shoes:'#111111'},col:'#ff5a4a',pitch:.66,rate:1,male:true},
+  vuong:{n:['Ông Trùm Vương','Boss Vương'],col:'#d4a017',pitch:.55,rate:.86,male:true},
+  nurse:{n:['Y tá','Nurse'],look:{female:true,skin:'#e9bf9b',hair:'#2a1a12',hairStyle:'bun',shirt:'#9fd3e6',pants:'#9fd3e6',shoes:'#f5f5f3',sleeve:false},col:'#9fd3e6',pitch:1.15,rate:1.05}};
+/* ---- voices ---- */
+const VO={ok:!!(window.speechSynthesis&&window.SpeechSynthesisUtterance),gen:0};
+if(VO.ok)try{speechSynthesis.getVoices();speechSynthesis.addEventListener&&speechSynthesis.addEventListener('voiceschanged',()=>{});}catch(_){VO.ok=false;}
+function voVoice(male){if(!VO.ok)return null;const lg=isEN()?'en':'vi';let vs=[];try{vs=speechSynthesis.getVoices().filter(v=>(v.lang||'').toLowerCase().replace('_','-').startsWith(lg));}catch(_){}
+  if(!vs.length)return null;const M=/\bmale\b|daniel|alex|fred|david|james|thomas|aaron|arthur|rishi|guy|mark|oliver|nam\b|minh|an\b/i,F=/female|samantha|karen|victoria|zira|moira|tessa|susan|linh|hoai|my\b|nữ/i;
+  const pref=vs.filter(v=>male?M.test(v.name)&&!/female/i.test(v.name):F.test(v.name));const loc=vs.filter(v=>v.localService);return(pref[0]||loc[0]||vs[0]);}
+/* speak one line; cb fires once when it ends (or after a safe estimate if speech is unavailable) */
+function say(who,text,cb){const c=CAST[who]||{},est=1+String(text).length*(isEN()?.062:.07);let done=false,g=++VO.gen;const fin=()=>{if(done)return;done=true;cb&&cb();};
+  if(!VO.ok){setTimeout(fin,est*1000);return;}
+  try{const u=new SpeechSynthesisUtterance(text);u.lang=isEN()?'en-US':'vi-VN';const v=voVoice(!!c.male);if(v)u.voice=v;u.pitch=c.pitch||1;u.rate=c.rate||1;u.volume=1;
+    u.onend=fin;u.onerror=()=>setTimeout(fin,600);speechSynthesis.speak(u);setTimeout(fin,(est*2.2+2.5)*1000);}catch(_){setTimeout(fin,est*1000);}}
+function voStop(){VO.gen++;try{VO.ok&&speechSynthesis.cancel();}catch(_){}}
+/* ---- overlay ---- */
+const movCss=document.createElement('style');movCss.textContent=`
+.mv{position:absolute;inset:0;z-index:45;pointer-events:none;font-family:"Space Grotesk",Inter,system-ui,sans-serif;color:#fff;overflow:hidden}
+.mv .cn-bar{transform:none}
+.mv-black{position:absolute;inset:0;background:#000;opacity:1;transition:opacity .7s ease;z-index:4}
+.mv-black.off{opacity:0}
+.mv-grain{position:absolute;inset:0;z-index:2;opacity:0;transition:opacity .6s;background:repeating-linear-gradient(0deg,rgba(255,240,200,.05) 0 1px,transparent 1px 3px);mix-blend-mode:overlay}
+.mv.flash .mv-grain{opacity:1;animation:mvFlick .18s steps(2) infinite}
+@keyframes mvFlick{50%{opacity:.6}}
+.mv.flash:after{content:"";position:absolute;inset:0;z-index:2;box-shadow:inset 0 0 160px 40px rgba(40,20,0,.75)}
+.mv-sub{position:absolute;left:50%;bottom:calc(12vh + 22px);transform:translateX(-50%);z-index:5;max-width:min(980px,90vw);background:rgba(0,0,0,.5);padding:6px 16px;border-radius:8px;text-align:center;font:600 clamp(17px,1.9vw,25px)/1.4 Inter,system-ui,sans-serif;text-shadow:0 2px 6px #000,0 0 2px #000;opacity:0;transition:opacity .25s}
+.mv-sub.on{opacity:1}
+.mv-sub b{font-family:"Space Grotesk",Inter,sans-serif;font-weight:800;margin-right:.45em}
+.mv-card{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(1100px,92vw);text-align:center;z-index:5}
+.mv-card .cn-kick:after{content:"";width:42px;height:3px;background:currentColor;box-shadow:0 0 12px currentColor}
+.mv-card .cn-sub{margin-left:auto;margin-right:auto}
+.mv-card.out{animation:cnOut .6s ease-in forwards}
+.mv-loc{position:absolute;left:6vw;bottom:calc(12vh + 26px);z-index:5;font:800 clamp(14px,1.5vw,19px) Inter,system-ui,sans-serif;letter-spacing:.24em;text-transform:uppercase;animation:cnKick .8s ease both}
+.mv-loc small{display:block;font-weight:600;letter-spacing:.08em;opacity:.75;text-transform:none;margin-top:4px}
+.mv-skip{position:absolute;right:24px;top:calc(12vh + 14px);z-index:6;display:flex;align-items:center;gap:10px;font:700 13px Inter,system-ui,sans-serif;color:rgba(255,255,255,.75);pointer-events:auto;cursor:pointer}
+.mv-skip i{width:70px;height:4px;border-radius:2px;background:rgba(255,255,255,.25);overflow:hidden}.mv-skip i:before{content:"";display:block;height:100%;width:var(--p,0%);background:#fff}
+.mov-on .nc{display:none}
+.mv-roll{position:absolute;left:50%;top:100%;transform:translateX(-50%);z-index:5;text-align:center;width:min(700px,90vw);font:600 18px/1.8 Inter,system-ui,sans-serif}
+.mv-roll h3{font:900 italic 54px "Space Grotesk",Inter,sans-serif;margin:0 0 .3em;background:linear-gradient(100deg,#fff,#ffd166,#ff5fa2);-webkit-background-clip:text;background-clip:text;color:transparent}
+.mv-roll em{display:block;font-style:normal;font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:#ffd166;margin-top:1.6em}
+/* phone calls during play */
+.mv-phone{position:absolute;right:18px;top:26%;z-index:44;width:min(330px,80vw);background:linear-gradient(160deg,rgba(18,20,30,.94),rgba(8,9,14,.94));border:1px solid rgba(255,255,255,.14);border-radius:22px;padding:14px 16px;color:#fff;font-family:Inter,system-ui,sans-serif;box-shadow:0 20px 50px rgba(0,0,0,.55);transform:translateX(120%);transition:transform .45s cubic-bezier(.2,.9,.2,1)}
+.mv-phone.on{transform:none}
+.mv-phone header{display:flex;align-items:center;gap:12px}
+.mv-av{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font:900 20px "Space Grotesk",Inter,sans-serif;color:#111;flex:none}
+.mv-phone header b{display:block;font:800 16px "Space Grotesk",Inter,sans-serif}.mv-phone header small{color:rgba(255,255,255,.6);font-size:12px}
+.mv-phone.ring .mv-av{animation:mvRing .5s ease-in-out infinite}
+@keyframes mvRing{0%,100%{transform:rotate(0)}25%{transform:rotate(-12deg)}75%{transform:rotate(12deg)}}
+.mv-phone p{margin:12px 0 0;font-size:15px;line-height:1.45;min-height:2.9em}
+.mv-phone p b{font-weight:800;margin-right:6px}
+.mv-wave{display:flex;gap:3px;height:14px;align-items:end;margin-left:auto}.mv-wave i{width:3px;background:#7df9a0;border-radius:2px;animation:mvWave .7s ease-in-out infinite}
+.mv-wave i:nth-child(2){animation-delay:.15s}.mv-wave i:nth-child(3){animation-delay:.3s}.mv-wave i:nth-child(4){animation-delay:.45s}
+@keyframes mvWave{0%,100%{height:3px}50%{height:14px}}
+`;document.head.appendChild(movCss);
+const MOV={on:false,film:null,si:-1,s:null,t:0,li:0,lt:0,speaking:false,doneT:-1,end:0,cast:{},fx:null,cars:[],music:null,skip:0,skipHeld:false,el:null,keep:null,cb:null};
+function movEl(){if(MOV.el)return MOV.el;const d=document.createElement('div');d.className='mv';
+  d.innerHTML='<div class="cn-bar t"></div><div class="cn-bar b"></div><div class="mv-grain"></div><div class="mv-stage"></div><div class="mv-sub"></div><div class="mv-skip"><span></span><i></i></div><div class="mv-black"></div>';
+  root.appendChild(d);d.querySelector('.mv-skip').addEventListener('pointerdown',e=>{e.preventDefault();MOV.skipHeld=true;});window.addEventListener('pointerup',()=>{MOV.skipHeld=false;});
+  window.addEventListener('keyup',e=>{if(e.key===' ')MOV.skipHeld=false;});return MOV.el=d;}
+/* ---- actors ---- */
+function actor(id,who,x,z,h,o){const c=CAST[who];const look=Object.assign({},c.look,o&&o.look||{});const H=makeHuman(look);resetHuman(H);
+  const a={id,who,H,x,z,h:h||0,spd:0,path:null,v:0,pose:o&&o.pose||null,talk:0,y:o&&o.y,inside:o&&o.inside};MOV.cast[id]=a;return a;}
+function walk(a,pts,v){a.path=pts.map(p=>({x:p[0],z:p[1]}));a.v=v||1.5;}
+function actTick(a,dt){let spd=0;if(a.path&&a.path.length){const p=a.path[0],dx=p.x-a.x,dz=p.z-a.z,d=Math.hypot(dx,dz);if(d<.12){a.path.shift();if(!a.path.length)a.path=null;}else{const s=Math.min(d,a.v*dt);a.x+=dx/d*s;a.z+=dz/d*s;a.h=lerpA(a.h,Math.atan2(dx,dz),1-Math.exp(-10*dt));spd=a.v;}}
+  if(a.face!=null&&!a.path)a.h=lerpA(a.h,a.face,1-Math.exp(-6*dt));
+  a.spd+=(spd-a.spd)*Math.min(1,dt*8);const H=a.H;const y=a.y!=null?a.y:a.inside?0:groundY(a.x,a.z);
+  H.root.position.set(a.x,y,a.z);H.root.rotation.y=a.h;H.root.rotation.x=0;animHuman(H,dt,a.spd,time+MOV.t);
+  const T0=MOV.t;
+  if(a.pose==='cross'){H.armL.rotation.x=-.75;H.armR.rotation.x=-.75;H.elL.rotation.x=-1.75;H.elR.rotation.x=-1.75;H.armL.rotation.z=.5;H.armR.rotation.z=-.5;}
+  else if(a.pose==='reach'){H.armR.rotation.x=-.95;H.elR.rotation.x=-.35;}
+  else if(a.pose==='hug'){H.armL.rotation.x=-1.25;H.armR.rotation.x=-1.25;H.elL.rotation.x=-1.1;H.elR.rotation.x=-1.1;}
+  else if(a.pose==='wrench'){H.armR.rotation.x=-.45;H.elR.rotation.x=-.9;}
+  else if(a.pose==='cry'){H.head.rotation.x=.35;H.armL.rotation.x=-1.3;H.elL.rotation.x=-2.3;H.armR.rotation.x=-1.25;H.elR.rotation.x=-2.3;}
+  else if(a.pose==='recline'){H.root.rotation.x=-1.05;H.legL.rotation.x=-1.4;H.legR.rotation.x=-1.4;H.knL.rotation.x=.15;H.knR.rotation.x=.15;}
+  else{H.armL.rotation.z=0;H.armR.rotation.z=0;}
+  if(a.talk>0&&!H.ko){a.talk-=dt;H.head.rotation.x+=Math.sin(T0*9.5)*.05;H.head.rotation.y+=Math.sin(T0*3.1)*.09;if(!a.pose&&a.spd<.3){H.armR.rotation.x+=-.35-Math.sin(T0*4.2)*.22;H.elR.rotation.x=-1.1+Math.sin(T0*3)*.2;}}}
+function movClear(){for(const k in MOV.cast){const a=MOV.cast[k];scene.remove(a.H.root);}MOV.cast={};for(const c of MOV.cars)removeCar(c);MOV.cars=[];fireOff();}
+/* ---- fire and smoke for the flashback ---- */
+let FIRE=null;
+function fireOn(pts,big){if(!FIRE){const cv=document.createElement('canvas');cv.width=cv.height=64;const g=cv.getContext('2d'),gr=g.createRadialGradient(32,32,0,32,32,32);gr.addColorStop(0,'rgba(255,255,255,1)');gr.addColorStop(.35,'rgba(255,255,255,.6)');gr.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=gr;g.fillRect(0,0,64,64);
+    const tex=new T.CanvasTexture(cv),P2=[];for(let i=0;i<90;i++){const m=new T.SpriteMaterial({map:tex,color:'#ff8a2a',transparent:true,depthWrite:false,blending:T.AdditiveBlending});const s=new T.Sprite(m);s.visible=false;scene.add(s);P2.push({s,t:0,life:1,vx:0,vy:0,vz:0,smoke:false});}
+    const light=new T.PointLight('#ff7a2a',0,26,1.6);scene.add(light);FIRE={tex,P:P2,light,pts:[],on:false,k:0,smk:[]};
+    for(let i=0;i<40;i++){const m=new T.SpriteMaterial({map:tex,color:'#1b1714',transparent:true,depthWrite:false,opacity:0});const s=new T.Sprite(m);s.visible=false;scene.add(s);FIRE.smk.push({s,t:0,life:1});}}
+  FIRE.pts=pts;FIRE.on=true;FIRE.k=big?1:.15;FIRE.light.position.set(pts[0][0],2.5,pts[0][2]);}
+function fireOff(){if(!FIRE)return;FIRE.on=false;FIRE.light.intensity=0;for(const p of FIRE.P)p.s.visible=false;for(const p of FIRE.smk)p.s.visible=false;}
+function fireTick(dt){if(!FIRE||!FIRE.on)return;const F=FIRE;F.light.intensity=(2.2+Math.sin(MOV.t*23)*.5+Math.sin(MOV.t*7.3)*.6)*F.k*3;
+  const rate=Math.round(70*F.k*dt*10);for(let n=0;n<rate;n++){const p=F.P.find(p=>p.t<=0);if(!p)break;const o=F.pts[(Math.random()*F.pts.length)|0];p.t=p.life=.6+Math.random()*.7;p.x=o[0]+rnd(-1.2,1.2);p.y=o[1]+rnd(0,.6);p.z=o[2]+rnd(-.5,.5);p.vx=rnd(-.3,.3);p.vy=rnd(2,4.2);p.vz=rnd(-.3,.3);p.sz=rnd(.7,1.4)*(.6+F.k*.6);p.s.visible=true;}
+  for(const p of F.P){if(p.t<=0)continue;p.t-=dt;if(p.t<=0){p.s.visible=false;continue;}const k=1-p.t/p.life;p.x+=p.vx*dt;p.y+=p.vy*dt;p.z+=p.vz*dt;p.s.position.set(p.x,p.y,p.z);p.s.scale.setScalar(p.sz*(1-k*.6));
+    p.s.material.color.setHSL(.02+.07*(1-k),1,.36+.14*(1-k));p.s.material.opacity=Math.min(.85,(1-k)*1.3);}
+  if(Math.random()<dt*14*F.k){const p=F.smk.find(p=>p.t<=0);if(p){const o=F.pts[(Math.random()*F.pts.length)|0];p.t=p.life=3+Math.random()*2;p.x=o[0]+rnd(-1,1);p.y=o[1]+2.5;p.z=o[2];p.s.visible=true;}}
+  for(const p of F.smk){if(p.t<=0)continue;p.t-=dt;if(p.t<=0){p.s.visible=false;continue;}const k=1-p.t/p.life;p.y+=1.6*dt;p.x+=.4*dt;p.s.position.set(p.x,p.y,p.z);p.s.scale.setScalar(2+k*6);p.s.material.opacity=.55*Math.sin(k*Math.PI);}}
+/* ---- score: slow synth pads and bells, different per mood ---- */
+function movMusic(mood){const a=sfxAC;if(MOV.music){const m=MOV.music;try{m.g.gain.setTargetAtTime(0,a.currentTime,.5);setTimeout(()=>{try{m.g.disconnect();}catch(_){}},3000);}catch(_){}MOV.music=null;}
+  if(!mood||!a)return;const g=a.createGain();g.gain.value=0;g.gain.setTargetAtTime(mood==='fire'?.13:.1,a.currentTime,1);g.connect(a.destination);
+  const P2={sad:[[220,261.6,329.6],[174.6,220,261.6],[130.8,196,261.6],[196,246.9,293.7]],hope:[[261.6,329.6,392],[196,246.9,293.7],[220,261.6,329.6],[174.6,220,261.6]],
+    tense:[[146.8,174.6,220],[138.6,174.6,207.7]],fire:[[110,130.8,164.8],[103.8,130.8,155.6]],title:[[130.8,196,261.6],[146.8,220,293.7]]}[mood];
+  MOV.music={g,prog:P2,i:0,next:a.currentTime+.05,mood};}
+function musicTick(){const m=MOV.music,a=sfxAC;if(!m||!a)return;while(m.next<a.currentTime+.25){const ch=m.prog[m.i%m.prog.length],t=m.next,len=m.mood==='tense'||m.mood==='fire'?2.4:4;
+    for(const f of ch)for(const det of[-4,4]){const o=a.createOscillator(),gg=a.createGain(),fl=a.createBiquadFilter();o.type='sawtooth';o.frequency.value=f;o.detune.value=det;fl.type='lowpass';fl.frequency.value=m.mood==='fire'?500:900;
+      gg.gain.setValueAtTime(0,t);gg.gain.linearRampToValueAtTime(.05,t+len*.35);gg.gain.linearRampToValueAtTime(0,t+len+.6);o.connect(fl);fl.connect(gg);gg.connect(m.g);o.start(t);o.stop(t+len+.7);}
+    {const o=a.createOscillator(),gg=a.createGain();o.type='sine';o.frequency.value=ch[0]/2;gg.gain.setValueAtTime(0,t);gg.gain.linearRampToValueAtTime(.16,t+.4);gg.gain.linearRampToValueAtTime(0,t+len+.4);o.connect(gg);gg.connect(m.g);o.start(t);o.stop(t+len+.5);}
+    if(m.mood==='sad'||m.mood==='hope'){const arp=[ch[0]*2,ch[1]*2,ch[2]*2,ch[1]*2];arp.forEach((f,j)=>{const tt=t+j*len/4,o=a.createOscillator(),gg=a.createGain();o.type='triangle';o.frequency.value=f;gg.gain.setValueAtTime(.0001,tt);gg.gain.exponentialRampToValueAtTime(.09,tt+.01);gg.gain.exponentialRampToValueAtTime(.0001,tt+1.6);o.connect(gg);gg.connect(m.g);o.start(tt);o.stop(tt+1.7);});}
+    if(m.mood==='tense'){for(let j=0;j<8;j++){const tt=t+j*len/8,o=a.createOscillator(),gg=a.createGain();o.type='square';o.frequency.value=ch[0]/2;gg.gain.setValueAtTime(.0001,tt);gg.gain.exponentialRampToValueAtTime(.05,tt+.01);gg.gain.exponentialRampToValueAtTime(.0001,tt+.18);o.connect(gg);gg.connect(m.g);o.start(tt);o.stop(tt+.2);}}
+    if(m.mood==='fire'&&a.nb){const s=a.createBufferSource();s.buffer=a.nb;s.loop=true;const f=a.createBiquadFilter();f.type='bandpass';f.frequency.value=1800;f.Q.value=.7;const gg=a.createGain();gg.gain.setValueAtTime(0,t);gg.gain.linearRampToValueAtTime(.35,t+.3);gg.gain.linearRampToValueAtTime(0,t+len+.2);s.connect(f);f.connect(gg);gg.connect(m.g);s.start(t);s.stop(t+len+.3);}
+    m.i++;m.next+=len;}}
+/* ---- player ---- */
+function playFilm(shots,cb){if(MOV.on){cb&&cb();return;}try{sfxInit();}catch(_){}const el=movEl();MOV.on=true;MOV.film=shots;MOV.si=-1;MOV.cb=cb;MOV.skip=0;MOV.skipHeld=false;
+  MOV.keep={x:P.x,z:P.z,h:P.h,inside:P.inside,hour:tod.hour,fov:camera.fov,car:P.car};if(P.car)toggleCar&&toggleCar();
+  el.className='mv';el.style.display='';el.querySelector('.mv-black').classList.remove('off');el.querySelector('.mv-skip span').textContent=L('Giữ Space để bỏ qua','Hold Space to skip');
+  root.classList.add('mov-on');keys.clear();cinDuck(true);movNext();}
+function movNext(){const el=MOV.el;MOV.si++;const s=MOV.film[MOV.si];movClear();el.querySelector('.mv-stage').innerHTML='';subOff();
+  if(!s){movEnd();return;}MOV.s=s;MOV.t=0;MOV.li=0;MOV.lt=s.lines&&s.lines[0]&&s.lines[0][3]!=null?s.lines[0][3]:.8;MOV.speaking=false;MOV.doneT=-1;MOV.end=0;
+  P.inside=s.inside||null;if(s.px!=null){P.x=s.px;P.z=s.pz;}P.vy=0;P.y=0;
+  view.style.transition='filter .6s';view.style.filter=s.flash?'sepia(.85) saturate(1.3) contrast(1.15) brightness(.92)':(s.grade||'');el.classList.toggle('flash',!!s.flash);
+  if(s.music!==undefined&&(!MOV.music||MOV.music.mood!==s.music))movMusic(s.music);
+  camera.fov=s.fov||48;camera.updateProjectionMatrix();
+  if(gps.mesh)gps.mesh.visible=false;if(s.setup)s.setup();
+  if(s.loc)el.querySelector('.mv-stage').insertAdjacentHTML('beforeend',`<div class="mv-loc">${cnE(s.loc[0])}<small>${cnE(s.loc[1]||'')}</small></div>`);
+  if(s.card)setTimeout(()=>{if(MOV.s===s)el.querySelector('.mv-stage').insertAdjacentHTML('beforeend',`<div class="mv-card" style="--c:${s.card.c||'#ff5fa2'};--c2:${s.card.c2||'#ffb36b'}">${s.card.kick?`<div class="cn-kick">${cnE(s.card.kick)}</div>`:''}<h2 class="cn-title">${cnE(s.card.title)}</h2>${s.card.sub?`<p class="cn-sub">${cnE(s.card.sub)}</p>`:''}</div>`);if(s.card.snd)cinSfx(s.card.snd);},(s.card.at||.6)*1000);
+  movCam(0);const b=el.querySelector('.mv-black');if(s.black)b.classList.remove('off');else requestAnimationFrame(()=>b.classList.add('off'));}
+function subOn(who,text){const el=MOV.el.querySelector('.mv-sub'),c=CAST[who]||{};el.innerHTML=`<b style="color:${c.col||'#fff'}">${cnE(c.n?L(c.n[0],c.n[1]):'')}</b>${cnE(text)}`;el.classList.add('on');}
+function subOff(){if(MOV.el)MOV.el.querySelector('.mv-sub').classList.remove('on');}
+const _ma=new T.Vector3(),_mb=new T.Vector3();
+function movCam(dt){const s=MOV.s;if(!s||!s.cam)return;const C=s.cam,dur=s.camT||s.dur||6;let k=clamp(MOV.t/dur,0,1);k=s.linear?k:k*k*(3-2*k);
+  const A=C[0],B=C[1]||C[0];const p=[0,1,2].map(i=>A.p[i]+(B.p[i]-A.p[i])*k),l=[0,1,2].map(i=>A.l[i]+(B.l[i]-A.l[i])*k);
+  let fx=0,fy=0;if(s.follow){const a=MOV.cast[s.follow];if(a){fx=a.x;fy=a.z;}}
+  const hand=s.hand?Math.sin(MOV.t*1.3)*.03:0;camera.position.set(p[0]+fx,p[1]+hand,p[2]+fy);camera.lookAt(l[0]+fx,l[1]+hand*.5,l[2]+fy);
+  sky.position.copy(camera.position);const Ld=tod.lightDir;sun.position.set(l[0]+fx+Ld.x*220,Ld.y*220,l[2]+fy+Ld.z*220);sun.target.position.set(l[0]+fx,0,l[2]+fy);sun.target.updateMatrixWorld();}
+function movTick(dt){const s=MOV.s;if(!s)return;const el=MOV.el;
+  if(paused){return;}
+  MOV.t+=dt;keys.clear();
+  try{step(dt);}catch(e){console.warn(e);}
+  P.H.root.visible=false;if(gps.mesh)gps.mesh.visible=false;if(s.px!=null){P.x=s.px;P.z=s.pz;}
+  if(s.tod!=null){tod.hour=s.tod;todApply();}
+  for(const k in MOV.cast)actTick(MOV.cast[k],dt);fireTick(dt);musicTick();
+  if(s.acts)for(const a of s.acts)if(!a.done&&MOV.t>=a[0]){a.done=true;try{a[1]();}catch(e){console.warn(e);}}
+  if(s.tick)s.tick(dt,MOV.t);
+  movCam(dt);
+  // dialogue
+  const lines=s.lines||[];
+  if(MOV.li<lines.length&&!MOV.speaking&&MOV.t>=MOV.lt){const ln=lines[MOV.li],txt=L(ln[1],ln[2]),who=ln[0];MOV.speaking=true;subOn(who,txt);
+    for(const k in MOV.cast){const a=MOV.cast[k];if(a.who===who&&!(ln[4]&&ln[4]!==k))a.talk=99;}const myLi=MOV.li;
+    say(who,txt,()=>{if(MOV.s!==s||MOV.li!==myLi)return;MOV.speaking=false;MOV.li++;for(const k in MOV.cast)MOV.cast[k].talk=0;subOff();const nx=lines[MOV.li];MOV.lt=MOV.t+(nx&&nx[3]!=null?nx[3]:.35);});}
+  if(MOV.li>=lines.length&&!MOV.speaking&&MOV.doneT<0)MOV.doneT=MOV.t;
+  // skip
+  if(MOV.skipHeld){MOV.skip+=dt;if(MOV.skip>1){MOV.skip=0;MOV.skipHeld=false;voStop();movEnd();return;}}else MOV.skip=Math.max(0,MOV.skip-dt*2);
+  el.querySelector('.mv-skip i').style.setProperty('--p',Math.round(MOV.skip*100)+'%');
+  // end of shot
+  if(MOV.end>0){MOV.end-=dt;if(MOV.end<=0)movNext();return;}
+  if(MOV.doneT>=0&&MOV.t>=Math.max(s.dur||0,MOV.doneT+(s.tail!=null?s.tail:1))){if(s.cut){movNext();}else{el.querySelector('.mv-black').classList.remove('off');const cd=el.querySelector('.mv-card');if(cd)cd.classList.add('out');MOV.end=.75;}}}
+function movEnd(){voStop();if(gps.mesh)gps.mesh.visible=true;movClear();movMusic(null);const el=MOV.el;MOV.on=false;MOV.s=null;el.style.display='none';root.classList.remove('mov-on');view.style.filter='';subOff();
+  const K=MOV.keep;if(K){tod.hour=K.hour;todApply();camera.fov=K.fov;camera.updateProjectionMatrix();P.inside=K.inside;P.x=K.x;P.z=K.z;P.h=K.h;cam.yaw=K.h;P.H.root.visible=true;}
+  cinDuck(false);keys.clear();const cb=MOV.cb;MOV.cb=null;if(cb)setTimeout(cb,60);}
+function movKey(k){if(!MOV.on)return false;if(k===' ')MOV.skipHeld=true;return true;}
+/* ---- phone calls while you play ---- */
+const PH={q:[],cur:null,el:null};
+function phoneCall(who,lines){if(!STORY)return;PH.q.push({who,lines});if(!PH.cur)phNext();}
+function phNext(){const c=PH.q.shift();if(!c){PH.cur=null;if(PH.el)PH.el.classList.remove('on');return;}PH.cur=c;
+  if(!PH.el){PH.el=document.createElement('div');PH.el.className='mv-phone';root.appendChild(PH.el);}const ca=CAST[c.who];
+  PH.el.innerHTML=`<header><div class="mv-av" style="background:${ca.col}">${cnE(L(ca.n[0],ca.n[1]).trim()[0])}</div><div><b>${cnE(L(ca.n[0],ca.n[1]))}</b><small>${L('Cuộc gọi đến…','Incoming call…')}</small></div><div class="mv-wave" hidden><i></i><i></i><i></i><i></i></div></header><p></p>`;
+  PH.el.classList.add('on','ring');let i=0;const p=PH.el.querySelector('p'),sm=PH.el.querySelector('small'),wv=PH.el.querySelector('.mv-wave');
+  cinSfx('ring');setTimeout(()=>cinSfx('ring'),900);
+  const next=()=>{if(i>=c.lines.length){sm.textContent=L('Đã kết thúc','Call ended');wv.hidden=true;setTimeout(()=>{PH.el.classList.remove('on');setTimeout(phNext,600);},1600);return;}
+    const ln=c.lines[i++],who=ln[0],txt=L(ln[1],ln[2]),cc=CAST[who];p.innerHTML=`<b style="color:${cc.col}">${cnE(L(cc.n[0],cc.n[1]))}:</b>${cnE(txt)}`;say(who,txt,()=>setTimeout(next,300));};
+  setTimeout(()=>{PH.el.classList.remove('ring');sm.textContent=L('Đang nghe máy','On the line');wv.hidden=false;sfx('door');next();},2100);}
+/* ---- the script ---- */
+function filmAnchors(){const G=SP.shops.find(s=>s.id==='garage')||{x:SP.house.door.x,z:SP.house.door.z},HD=SP.hospitalDoor,R=ROOMS.hospital,B=SP.bank.door;return{G,HD,R,B,bed:R.x0+2.6+3*2.6};}
+function filmOpening(){const{G,HD,R,B,bed}=filmAnchors();const gx=G.x,gz=G.z-1.25;return[
+  {black:true,dur:3.6,tod:18.2,px:gx,pz:gz,music:'sad',cam:[{p:[0,300,0],l:[0,0,1]}],card:{kick:L('Nexus City','Nexus City'),title:L('Năm năm sau','Five years later'),c:'#ffd166',c2:'#ffffff',at:.3},tail:0},
+  {dur:9,tod:18.3,px:B.x,pz:B.z,camT:11,cam:[{p:[B.x-170,120,B.z+190],l:[B.x,10,B.z]},{p:[B.x-80,70,B.z+120],l:[B.x+10,20,B.z-20]}],linear:true,
+    lines:[['minh','Năm năm. Con đi làm xa, gửi từng đồng về để ba mở rộng cái tiệm sửa xe.','Five years. I worked far away and sent every cent home so Dad could grow his repair shop.',.9],['minh','Hôm nay con về. Con muốn làm ba bất ngờ.','Today I am back. I wanted to surprise him.']]},
+  {dur:7,tod:18.5,px:gx,pz:gz,loc:[L('Garage của ông Hải','Mr. Hải\'s Garage'),L('Khu phố phía tây','West side')],
+    setup(){const m=actor('m','minh',gx-14,gz+2.2,Math.PI/2);walk(m,[[gx-2.2,gz+2.2]],1.45);fireOn([[gx-3,0,gz-.2],[gx+2,0,gz-.2]],false);},
+    cam:[{p:[-6,1.4,4.2],l:[0,1.5,0]},{p:[-3,1.5,3.6],l:[1,1.4,0]}],follow:'m',hand:true,
+    lines:[['minh','…Gì thế này?','…What is this?',4.6]]},
+  {dur:3,tod:18.5,px:gx,pz:gz,cut:true,setup(){const m=actor('m','minh',gx-2.2,gz+2.2,Math.PI*.9);m.face=Math.PI;fireOn([[gx-3,0,gz-.2],[gx+2,0,gz-.2],[gx,0,gz-.3]],false);},
+    cam:[{p:[gx-1.5,1.6,gz+6.5],l:[gx,3.5,gz-3]},{p:[gx-1.6,1.4,gz+5.5],l:[gx,4.5,gz-4]}],tail:.2},
+  {dur:5,tod:18.5,px:gx,pz:gz,setup(){const m=actor('m','minh',gx-2.2,gz+2.2,Math.PI);m.face=Math.PI/2;const l=actor('l','linh',gx+11,gz+2.6,-Math.PI/2);walk(l,[[gx-.9,gz+2.3]],4.2);},
+    acts:[[3,()=>{MOV.cast.l.face=-Math.PI/2;MOV.cast.l.pose='hug';MOV.cast.m.pose='hug';}]],
+    cam:[{p:[gx-5,1.7,gz+6],l:[gx+2,1.4,gz+2]},{p:[gx-4.4,1.6,gz+5],l:[gx-1.4,1.4,gz+2.2]}],
+    lines:[['linh','Anh Minh!','Minh!',1.6],['minh','Linh? Tiệm của ba sao thế này? Ba đâu?','Linh? What happened to Dad\'s shop? Where is he?'],['linh','Đêm qua… người của Syndicate tới. Ba không chịu nộp tiền bảo kê…','Last night… the Syndicate came. Dad refused to pay them…']]},
+  /* flashback */
+  {dur:4,tod:23.2,px:gx,pz:gz,flash:true,music:'tense',card:{kick:L('Đêm hôm trước','The night before'),title:'',at:.2},
+    setup(){const b=actor('b','ba',gx,gz+.9,0,{pose:'wrench'});},cam:[{p:[gx+3,1.3,gz+5],l:[gx,1.4,gz+.5]},{p:[gx+1.8,1.5,gz+3.8],l:[gx,1.5,gz+.8]}],
+    lines:[['ba','Muộn rồi, tiệm đóng cửa.','It is late. The shop is closed.',1.8]]},
+  {dur:6,tod:23.2,px:gx,pz:gz,flash:true,cut:true,
+    setup(){actor('b','ba',gx,gz+.9,0,{pose:'wrench'});const L1=actor('lao','lao',gx+1,gz+10,Math.PI);walk(L1,[[gx+.2,gz+3.2]],1.3);const t1=actor('t1','thug',gx+2.6,gz+10.5,Math.PI);walk(t1,[[gx+1.8,gz+3.9]],1.3);const t2=actor('t2','thug',gx-1.4,gz+10.8,Math.PI);walk(t2,[[gx-1.3,gz+3.7]],1.3);},
+    cam:[{p:[gx-.6,1.7,gz-1],l:[gx+.5,1.4,gz+6]},{p:[gx-.4,1.6,gz-.4],l:[gx+.3,1.5,gz+4.5]}],
+    lines:[['lao','Ông Hải. Tháng này ông lại quên nộp tiền cho Ông Trùm.','Mr. Hải. You forgot to pay the Boss again this month.',4.2],['ba','Tiệm này tôi gầy dựng bằng hai bàn tay. Không đưa đồng nào cho tụi bây hết.','I built this shop with my own two hands. You get nothing from me.']]},
+  {dur:7,tod:23.2,px:gx,pz:gz,flash:true,cut:true,
+    setup(){actor('b','ba',gx,gz+.9,0,{pose:'wrench'});const L1=actor('lao','lao',gx+.2,gz+3.2,Math.PI);actor('t1','thug',gx+1.8,gz+3.9,Math.PI);actor('t2','thug',gx-1.3,gz+3.7,Math.PI);},
+    acts:[[3.6,()=>{const t=MOV.cast.t1;t.path=[{x:gx+.5,z:gz+1.9}];t.v=3;}],[4.3,()=>{const t=MOV.cast.t1;t.H.side=1;t.H.punchT=.32;cinSfx('stamp');}],[4.45,()=>{const b=MOV.cast.b;b.H.hitT=.4;b.H.hitSide=1;b.pose=null;}],[4.9,()=>{MOV.cast.b.H.ko=1;}],
+      [5.6,()=>{fireOn([[gx-3,0,gz-.2],[gx+2,0,gz-.2],[gx,0,gz-.1]],true);cinSfx('in');movMusic('fire');}]],
+    cam:[{p:[gx+4.5,1.5,gz+4],l:[gx,1.3,gz+1.6]},{p:[gx+5.5,2.2,gz+6],l:[gx,1.5,gz+.5]}],
+    lines:[['lao','Vậy thì để lửa nói chuyện với ông.','Then let the fire talk to you.',.8]],tail:1.6},
+  {dur:5,tod:23.2,px:gx,pz:gz,flash:true,cut:true,setup(){const b=actor('b','ba',gx-.3,gz+1.9,0);b.H.ko=1;b.H.koK=1;fireOn([[gx-3,0,gz-.2],[gx+2,0,gz-.2],[gx,0,gz-.1]],true);const L1=actor('lao','lao',gx+.2,gz+3.2,0);walk(L1,[[gx+1,gz+11]],1.2);},
+    cam:[{p:[gx-6,4,gz+9],l:[gx,2,gz]},{p:[gx-9,7,gz+14],l:[gx,3,gz]}],tail:.8},
+  /* hospital */
+  {dur:6,tod:20.5,inside:'hospital',px:bed+1,pz:R.z0+4,music:'sad',loc:[L('Bệnh viện Nexus','Nexus Hospital'),L('Phòng hồi sức','Recovery ward')],
+    setup(){const b=actor('b','ba',bed,R.z0+2.15,0,{inside:true,y:.66});b.H.ko=1;b.H.koK=1;const m=actor('m','minh',bed+.95,R.z0+1.5,-Math.PI/2,{inside:true,pose:'reach'});const l=actor('l','linh',bed-.2,R.z0+3.3,Math.PI,{inside:true,pose:'cry'});},
+    cam:[{p:[bed+3.4,1.9,R.z0+5],l:[bed,.9,R.z0+1.2]},{p:[bed+2.4,1.6,R.z0+3.6],l:[bed+.2,1,R.z0+1.4]}],
+    lines:[['linh','Bác sĩ nói ba bị chấn thương đầu. Chưa biết khi nào mới tỉnh…','The doctor says Dad has a head injury. They do not know when he will wake up…',1],['minh','Ba ơi… con về rồi đây.','Dad… I am home.']]},
+  {dur:6,tod:20.5,inside:'hospital',px:bed+1,pz:R.z0+4,cut:true,
+    setup(){const b=actor('b','ba',bed,R.z0+2.15,0,{inside:true,y:.66});b.H.ko=1;b.H.koK=1;const m=actor('m','minh',bed+.95,R.z0+1.5,-Math.PI/2,{inside:true});const l=actor('l','linh',bed-.2,R.z0+3.3,Math.PI,{inside:true});
+      m.face=Math.PI*.75;},
+    cam:[{p:[bed+.2,1.55,R.z0+3.2],l:[bed+.95,1.55,R.z0+1.5]},{p:[bed+.35,1.6,R.z0+2.9],l:[bed+.95,1.6,R.z0+1.5]}],
+    lines:[['minh','Ai làm chuyện này?','Who did this?',.6],['linh','Lão Đèn Lồng ở Phố Cổ. Nhưng hắn chỉ là chó săn. Cả năm khu phố đều nộp tiền cho Ông Trùm Vương.','The Lantern Elder from the Old Quarter. But he is just a dog on a leash. All five districts pay Boss Vương.'],
+      ['minh','Vậy anh sẽ lấy lại từng khu một. Bắt đầu từ Lão Đèn Lồng.','Then I will take them back one by one. Starting with the Lantern Elder.']]},
+  /* uncle Tư */
+  {dur:6,tod:21,px:HD.x,pz:HD.z+4,music:'tense',
+    setup(){const c=newCar('muscle',HD.x+5,HD.z+5.5,Math.PI/2,'movie','#2b2b2b');MOV.cars.push(c);const t=actor('t','tu',HD.x+4.6,HD.z+3.7,-Math.PI*.8,{pose:'cross'});const m=actor('m','minh',HD.x,HD.z+.4,0);walk(m,[[HD.x+2.6,HD.z+2.6]],1.4);},
+    acts:[[2.4,()=>{MOV.cast.m.face=Math.atan2(2,1.1);}]],
+    cam:[{p:[HD.x-2,1.6,HD.z+8],l:[HD.x+3.5,1.4,HD.z+3]},{p:[HD.x+.5,1.6,HD.z+7.2],l:[HD.x+3.6,1.5,HD.z+3.2]}],
+    lines:[['tu','Thằng Minh đó hả? Lớn quá rồi.','Is that you, Minh? Look how you have grown.',2.6],['minh','Chú Tư.','Uncle Tư.'],
+      ['tu','Ba con với chú là anh em ba chục năm. Muốn đụng Syndicate thì tay không không được đâu con.','Your dad and I have been brothers for thirty years. You cannot take on the Syndicate empty-handed.'],
+      ['tu','Ghé tiệm Súng Tầm Xa. Chú lấy giá anh em cho con.','Come by Long Range Guns. I will give you the family price.'],['minh','Cảm ơn chú.','Thank you, Uncle.']]},
+  {dur:7,tod:21,px:gx,pz:gz,music:'title',camT:8,cam:[{p:[gx+6,3,gz+10],l:[gx,3,gz]},{p:[gx+30,40,gz+70],l:[gx,10,gz]}],linear:true,
+    card:{kick:L('Nexus City · Story mode','Nexus City · Story mode'),title:L('Món nợ của Cha','A Debt to My Father'),sub:L('Lấy lại năm khu phố. Đưa Ông Trùm Vương ra trả giá.','Take back five districts. Make Boss Vương pay.'),c:'#ffd166',c2:'#ff5fa2',at:.4,snd:'boss'},tail:0}];}
+function filmEnding(){const{G,HD,R,B,bed}=filmAnchors();const gx=G.x,gz=G.z-1.25,bx=road(N-1)+1.8;return[
+  {black:true,dur:3,tod:9,px:gx,pz:gz,music:'hope',cam:[{p:[0,300,0],l:[0,0,1]}],card:{kick:'',title:L('Sáng hôm sau','The next morning'),c:'#ffd166',c2:'#ffffff',at:.3},tail:0},
+  {dur:7,tod:9,inside:'hospital',px:bed+1,pz:R.z0+4,loc:[L('Bệnh viện Nexus','Nexus Hospital'),''],
+    setup(){const b=actor('b','ba',bed,R.z0+1.75,0,{inside:true,y:.86,pose:'recline'});const l=actor('l','linh',bed-.9,R.z0+1.6,Math.PI/2,{inside:true});const m=actor('m','minh',R.x0+11,R.z1-2,Math.PI,{inside:true});walk(m,[[bed+1,R.z0+2.6]],1.3);},
+    acts:[[4.5,()=>{MOV.cast.m.face=-Math.PI*.8;}]],
+    cam:[{p:[bed+3,1.7,R.z0+5.5],l:[bed+.5,1.1,R.z0+1.6]},{p:[bed+2.2,1.5,R.z0+4.4],l:[bed+.3,1.1,R.z0+1.6]}],
+    lines:[['ba','Minh… con về rồi.','Minh… you came home.',4.8],['minh','Con về rồi, ba.','I am home, Dad.']]},
+  {dur:6,tod:9,inside:'hospital',px:bed+1,pz:R.z0+4,cut:true,
+    setup(){actor('b','ba',bed,R.z0+1.75,0,{inside:true,y:.86,pose:'recline'});actor('l','linh',bed-.9,R.z0+1.6,Math.PI/2,{inside:true,pose:'hug'});const m=actor('m','minh',bed+1,R.z0+2.6,-Math.PI*.8,{inside:true});},
+    cam:[{p:[bed+.6,1.35,R.z0+3.4],l:[bed,1.2,R.z0+1.2]},{p:[bed+.5,1.3,R.z0+3.1],l:[bed,1.2,R.z0+1.2]}],
+    lines:[['ba','Ông Trùm nói đúng. Hồi trẻ ba từng chạy việc cho hắn. Ba bỏ đi để mở tiệm, để hai đứa được sống đàng hoàng.','The Boss told you the truth. When I was young I ran jobs for him. I walked away to open the shop, so you two could live clean.',.6],
+      ['ba','Đó là món nợ ba chưa bao giờ trả xong.','That was the debt I never finished paying.'],['minh','Món nợ đó, con trả rồi.','That debt is paid now, Dad.']]},
+  {dur:9,tod:18.3,px:bx,pz:-20,music:'hope',loc:[L('Ba tháng sau','Three months later'),L('Đường ven biển','Coast road')],
+    setup(){const c=newCar('legend',bx,-60,0,'movie','#e8b730');MOV.cars.push(c);MOV.drive=c;},
+    tick(dt,t){const c=MOV.drive;if(!c)return;c.z=-60+t*14;P.x=c.x;P.z=c.z;c.x=bx;c.h=0;syncCar(c);if(c.wheels)for(const w of c.wheels)w.rotation.x+=dt*14/.37;},
+    cam:[{p:[bx+7,1.2,-62],l:[bx,1,-52]},{p:[bx+9,3,-48],l:[bx,1,-58+9*14]}],
+    lines:[['linh','Ba tháng sau, Garage ông Hải mở cửa lại. Lần này không ai dám tới thu tiền nữa.','Three months later, Mr. Hải\'s Garage opened again. This time, nobody came to collect.',1.6],
+      ['ba','Chạy chậm thôi con. Xe này chỉ có một chiếc trên đời.','Easy, son. There is only one of these in the world.'],['minh','Con biết mà, ba.','I know, Dad.']]},
+  {dur:12,tod:18.6,px:bx,pz:40,cam:[{p:[bx+30,25,40],l:[bx,0,60]},{p:[bx+60,60,10],l:[bx,0,90]}],linear:true,
+    setup(){const c=newCar('legend',bx,40,0,'movie','#e8b730');MOV.cars.push(c);MOV.drive=c;MOV.el.querySelector('.mv-stage').insertAdjacentHTML('beforeend',`<div class="mv-roll"><h3>${L('Món nợ của Cha','A Debt to My Father')}</h3>${L('Một câu chuyện ở Nexus City','A Nexus City story')}<em>${L('Nhân vật','Cast')}</em>Minh · Linh · ${L('Ông Hải','Mr. Hải')} · ${L('Chú Tư','Uncle Tư')}<em>${L('Phản diện','Villains')}</em>${ST_TOWNS.map(t=>t[1]).join(' · ')} · ${L('Ông Trùm Vương','Boss Vương')}<em>${L('Làm bởi','Made by')}</em>The Nexus · TheArena<em>${L('Cảm ơn bạn đã chơi','Thank you for playing')}</em></div>`);},
+    tick(dt,t){const c=MOV.drive;if(c){c.z=40+t*14;syncCar(c);P.x=c.x;P.z=c.z;}const r=MOV.el.querySelector('.mv-roll');if(r)r.style.transform=`translateX(-50%) translateY(${-t*95}px)`;},tail:0}];}
+/* story beats in play: phone calls between chapters */
+function stCall(k){if(k===1)phoneCall('linh',[['linh','Anh ơi! Bác sĩ nói tim ba đập đều hơn rồi.','Minh! The doctor says Dad\'s heartbeat is steadier.'],['minh','Tốt. Còn bốn thằng nữa.','Good. Four more to go.'],['linh','Anh cẩn thận. Cá Mập Cảng ở Cảng Bắc ác hơn nhiều.','Be careful. The Harbor Shark up at North Harbor is much worse.']]);
+  else if(k===2)phoneCall('tu',[['tu','Con làm Syndicate loạn hết rồi đó Minh.','You have the whole Syndicate rattled, Minh.'],['tu','Bóng Ma ở Đồi Mây đang săn con. Đừng để hắn áp sát.','The Ghost up in Cloud Hills is hunting you. Do not let him get close.'],['minh','Sao chú biết rõ vậy?','How do you know all this?'],['tu','…Chú quen nhiều người. Thôi, đi đi.','…I know people. Go on.']]);
+  else if(k===3)phoneCall('linh',[['linh','Anh… ba mấp máy môi. Hình như ba gọi tên anh.','Minh… Dad\'s lips moved. I think he said your name.'],['minh','Nói với ba là anh sắp về.','Tell him I am coming home soon.']]);
+  else if(k===4){phoneCall('linh',[['linh','Anh! Em thấy Chú Tư ngồi với người của Ông Trùm ở bến cảng. Chú đưa họ một phong bì.','Minh! I saw Uncle Tư at the docks with the Boss\'s men. He handed them an envelope.'],['minh','…Chú Tư?','…Uncle Tư?']]);
+    phoneCall('tu',[['tu','Minh… chú xin lỗi. Năm đó chú nợ Ông Trùm. Chính chú chỉ chỗ tiệm của ba con.','Minh… I am sorry. I owed the Boss. I was the one who told them where your dad\'s shop was.'],['minh','Ba coi chú như anh ruột.','Dad treated you like a brother.'],
+      ['tu','Rắn Sa Mạc biết con tới. Đi đường phía nam. Đó là điều cuối cùng chú làm được cho con.','The Desert Snake knows you are coming. Take the south road. That is the last thing I can do for you.']]);}
+  else if(k===5)phoneCall('linh',[['linh','Anh ơi… ba tỉnh rồi! Ba muốn nói chuyện với anh.','Minh… Dad is awake! He wants to talk to you.'],['ba','Minh… đừng để thù hận nuốt mất con. Về với ba.','Minh… do not let hatred swallow you. Come home.'],['minh','Con sẽ về, ba. Sau khi chuyện này kết thúc.','I will, Dad. As soon as this is over.']]);}
+
 // free mode: collect the one-time reward of a finished story
 if(!STORY){let lg=null;try{lg=JSON.parse(localStorage.getItem('nexus-city2-legend')||'null');}catch(_){}
   if(lg&&lg.done&&!lg.claimed){lg.claimed=true;try{localStorage.setItem('nexus-city2-legend',JSON.stringify(lg));}catch(_){}
     if(!save.garage.some(o=>o.type==='legend')){save.money+=100000;save.garage.push({type:'legend',color:'#d4a017'});save.legend=true;writeSave();setTimeout(()=>banner(L('Phần thưởng phá đảo!','Story reward!'),L('+$100.000 và Siêu xe Huyền Thoại · lấy xe ở gara nhà bạn','+$100,000 and the Legend supercar · get it from your home garage'),5),2500);}}}
 
-function frame(now){raf=requestAnimationFrame(frame);const raw=(now-last)/1000||0;let dt=Math.max(0,Math.min(.05,raw));last=now;if(hitStop>0){hitStop-=dt;dt*=.12;}if(raw>0&&raw<1)adapt(raw);cinTick(dt);if(!paused&&!mapOpen&&!shopOpen&&CIN.ts>.003)step(dt*CIN.ts);camUpdate(dt);hudUpdate(dt);audioUpdate(dt);if(GRASS&&!P.inside)GRASS.update(P.car?P.car.x:P.x,P.car?P.car.z:P.z);PP.render();}
+function frame(now){raf=requestAnimationFrame(frame);const raw=(now-last)/1000||0;let dt=Math.max(0,Math.min(.05,raw));last=now;if(hitStop>0){hitStop-=dt;dt*=.12;}if(raw>0&&raw<1)adapt(raw);cinTick(dt);if(MOV.on)movTick(dt);else{if(!paused&&!mapOpen&&!shopOpen&&CIN.ts>.003)step(dt*CIN.ts);camUpdate(dt);}hudUpdate(dt);audioUpdate(dt);if(GRASS&&!P.inside)GRASS.update(P.car?P.car.x:P.x,P.car?P.car.z:P.z);PP.render();}
 function resize(){const w=view.clientWidth||innerWidth,h=view.clientHeight||innerHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();const pr=renderer.getPixelRatio();PP.setSize(Math.round(w*pr),Math.round(h*pr));}
 window.addEventListener('resize',()=>{if(!view.closest('[hidden]'))resize();});
 camera.position.set(P.x,4,P.z+7);
@@ -3956,7 +4216,7 @@ const api={
   resume(){active=true;paused=false;keys.clear();cam.rmb=false;last=performance.now();cancelAnimationFrame(raf);raf=requestAnimationFrame(frame);resize();if(P.car&&radio.idx>=0)radioPlay();},
   resize,
   get save(){return save;},
-  _dbg:{BB,HP,hpEnter,hpExit,hpKey,hp1v1,bbShoot,bbNearHoop,COURTS,SP,cin:{CIN,cine,stOpening,stArmed,stIntro,stFightTip,stKeyStamp,stTowerIntro,stHeliTip,stFail,stWantedTip},story:{get SS(){return SS;},stSpot,stDoorSpot,get gang(){return stGang;},get tower(){return stTower;},get heli(){return stHeli;},stEnterTower,stStartTower,stVictory,stDied,storyUpdate,wasted,get win(){return stWin;}},heightAt,resolve,TOWNS,DIAS,PADS,inBld,AIR,PP,P,cars,newCar,buyVehicle,interactOption,sitDown,standUp,takeFood,GDOORS,SHOPS,save,bookTour,npcs,get stars(){return stars;},set stars(v){stars=v;},startHeist,startMission,interact,toggleCar,playerPunch,get heist(){return heist;},set heistProg(v){if(heist)heist.prog=v;},SP,tut,toggleMap,bag,time:()=>time,scene,renderer,sun,step,info:()=>renderer.info.render,keys,camUpdate,camera,weather,ROOMS,openShop,closeShop,enterInterior,exitInterior,selectWeapon,fireWeapon,get shopOpen(){return shopOpen;},tod,todApply,gps,setWaypoint,clearWaypoint,planRoute,poiList,radio,radioNext,playerHitBy,get lastFoe(){return lastFoe;},cam,tb,render:()=>renderer.render(scene,camera)}
+  _dbg:{BB,HP,hpEnter,hpExit,hpKey,hp1v1,bbShoot,bbNearHoop,COURTS,SP,film:{run(n,d){for(let i=0;i<n;i++){if(MOV.on)movTick(d||1/30);}PP.render();return MOV.si+':'+MOV.t.toFixed(1);},go(i){MOV.si=i-1;movNext();PP.render();},MOV,playFilm,filmOpening,filmEnding,phoneCall,stCall,say},cin:{CIN,cine,stOpening,stArmed,stIntro,stFightTip,stKeyStamp,stTowerIntro,stHeliTip,stFail,stWantedTip},story:{get SS(){return SS;},stSpot,stDoorSpot,get gang(){return stGang;},get tower(){return stTower;},get heli(){return stHeli;},stEnterTower,stStartTower,stVictory,stDied,storyUpdate,wasted,get win(){return stWin;}},heightAt,resolve,TOWNS,DIAS,PADS,inBld,AIR,PP,P,cars,newCar,buyVehicle,interactOption,sitDown,standUp,takeFood,GDOORS,SHOPS,save,bookTour,npcs,get stars(){return stars;},set stars(v){stars=v;},startHeist,startMission,interact,toggleCar,playerPunch,get heist(){return heist;},set heistProg(v){if(heist)heist.prog=v;},SP,tut,toggleMap,bag,time:()=>time,scene,renderer,sun,step,info:()=>renderer.info.render,keys,camUpdate,camera,weather,ROOMS,openShop,closeShop,enterInterior,exitInterior,selectWeapon,fireWeapon,get shopOpen(){return shopOpen;},tod,todApply,gps,setWaypoint,clearWaypoint,planRoute,poiList,radio,radioNext,playerHitBy,get lastFoe(){return lastFoe;},cam,tb,render:()=>renderer.render(scene,camera)}
 };
 return api;
 }

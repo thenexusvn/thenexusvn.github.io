@@ -309,3 +309,11 @@ Python helper scripts used during development:
 - Stingers synthesised in cinSfx ('in','out','boss','stamp','fail','win','slow'); game audio ducks while a card is up.
 - Script: stOpening (title + mission 1), stArmed, territory title in stSpawnGang, stIntro (boss freeze-frame, camera turns to him, pointer ring), stFightTip (first exchange), stHalf, stKeyStamp (k/5 cards), Syndicate Tower open, stTowerIntro, bodyguards-down, stHeliTip, heli smoking, stHeliDown, stFail, stWantedTip, stLowTip. One-time tips are stored in save.story.tips.
 - Boss/town names are bilingual via L() in ST_TOWNS. Debug: game._dbg.cin.
+
+## Story film "Món nợ của Cha" (city.js, block "STORY FILM" before "free mode: collect")
+- playFilm(shots,cb): in-engine cutscenes. Each shot: {tod,px,pz,inside,cam:[{p,l},{p,l}],follow,setup(),acts:[[t,fn]],tick(),lines:[[who,vi,en,delay]],card,loc,flash,music,cut,dur,tail}. The world keeps simulating (step) with the player hidden; frame() runs movTick instead of step/camUpdate while MOV.on. Hold Space (or press the skip bar) to skip.
+- Voices: Web Speech API (speechSynthesis), vi-VN or en-US by language, pitch/rate per CAST member; falls back to timed subtitles.
+- Actors via makeHuman + animHuman with poses (cross, reach, hug, wrench, cry, recline, KO). Fire/smoke sprites + point light for the flashback. Synth score per mood (sad, hope, tense, fire, title).
+- filmOpening (homecoming, burned garage, flashback with the Lantern Elder, hospital, Uncle Tư, title), filmEnding (hospital, coast drive in the Legend car, credits). stVictory plays the ending, then the reward card (stVictoryCard).
+- phoneCall(who,lines) HUD calls while playing; stCall(k) after each key card (k=4 is the Uncle Tư betrayal). Boss Vương says his line in the tower intro (cine o.say).
+- Debug: game._dbg.film.go(i) / run(frames).
