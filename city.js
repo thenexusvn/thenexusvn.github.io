@@ -4108,9 +4108,9 @@ const WHO={joseph:()=>['Joseph',L('Nhân vật chính','The hero'),L('Về Nexus
 function movWho(ak,id){const el=MOV.el,w=WHO[id]();const st=el.querySelector('.mv-stage'),old=st.querySelector('.mv-who');if(old)old.remove();
   st.insertAdjacentHTML('beforeend',`<div class="mv-who" style="--c:${w[3]}"><i></i><div><small>${cnE(w[1])}</small><b>${cnE(w[0])}</b><span>${cnE(w[2])}</span></div></div>`);
   const f=el.querySelector('.mv-flash');f.classList.remove('go');void f.offsetWidth;f.classList.add('go');
-  MOV.frz=2.3;MOV.ring=MOV.cast[ak]||null;const rg=el.querySelector('.mv-ring');rg.style.setProperty('--c',w[3]);rg.classList.toggle('on',!!MOV.ring);
+  MOV.frz=3;MOV.ring=MOV.cast[ak]||null;const rg=el.querySelector('.mv-ring');rg.style.setProperty('--c',w[3]);rg.classList.toggle('on',!!MOV.ring);
   view.style.filter='saturate(.15) contrast(1.25) brightness(1.05)';cinSfx('slow');const s=MOV.s;
-  setTimeout(()=>{if(MOV.s!==s)return;const c=st.querySelector('.mv-who');if(c)c.classList.add('out');rg.classList.remove('on');MOV.ring=null;setTimeout(()=>{if(c)c.remove();},500);},6500);}
+  setTimeout(()=>{if(MOV.s!==s)return;const c=st.querySelector('.mv-who');if(c)c.classList.add('out');rg.classList.remove('on');MOV.ring=null;setTimeout(()=>{if(c)c.remove();},500);},8500);}
 function movRing(){const a=MOV.ring,rg=MOV.el.querySelector('.mv-ring');if(!a||!a.H.root.parent){return;}a.H.head.getWorldPosition(_ma);_ma.y+=.15;_ma.project(camera);
   const r=view.getBoundingClientRect(),rr=root.getBoundingClientRect();rg.style.opacity=_ma.z<1?'':'0';rg.style.transform=`translate(${(_ma.x*.5+.5)*r.width+r.left-rr.left}px,${(-_ma.y*.5+.5)*r.height+r.top-rr.top}px)`;}
 function movTick(dt){const s=MOV.s;if(!s)return;const el=MOV.el;
@@ -4198,9 +4198,8 @@ function filmOpening(){const{G,HD,R,B,bed}=filmAnchors();const gx=G.x,gz=G.z-1.2
   /* the Syndicate on the tower roof */
   {dur:3,tod:19.4,inside:'tower',px:TW.cx,pz:TW.cz+4,music:'tense',loc:[L('Cùng lúc đó · Tháp Syndicate','Meanwhile · Syndicate Tower'),L('Sân thượng','The roof')],
     setup(){filmGang(false);},cam:[{p:[TW.cx+14,9,TW.cz+12],l:[TW.cx,1.5,TW.cz-8]},{p:[TW.cx+9,6,TW.cz+6],l:[TW.cx,1.5,TW.cz-8]}],tail:.3},
-  {dur:10.5,tod:19.4,inside:'tower',px:TW.cx,pz:TW.cz+4,cut:true,camT:10.5,linear:true,
-    setup(){filmGang(false);},who:[[.6,'h0','mike'],[2.6,'h1','henry'],[4.6,'h2','rio'],[6.6,'h3','michael'],[8.6,'h4','han']],
-    cam:[{p:[TW.cx-8.8,1.95,TW.cz-7.9],l:[TW.cx-8.8,1.75,TW.cz-4]},{p:[TW.cx+8.8,1.95,TW.cz-7.9],l:[TW.cx+8.8,1.75,TW.cz-4]}],tail:.6},
+  ...['mike','henry','rio','michael','han'].map((id,i)=>{const hx=TW.cx-8+i*4;return{dur:6,tod:19.4,inside:'tower',px:TW.cx,pz:TW.cz+4,cut:i>0,setup(){filmGang(false);},who:[[.5,'h'+i,id]],
+    cam:[{p:[hx-.2,1.9,TW.cz-8.4],l:[hx+1.3,1.75,TW.cz-4]},{p:[hx-.1,1.85,TW.cz-7.2],l:[hx+1.1,1.8,TW.cz-4]}],tail:.4};}),
   {dur:6,tod:19.4,inside:'tower',px:TW.cx,pz:TW.cz+4,cut:true,setup(){filmGang(false);},who:[[.7,'v','vuong']],
     cam:[{p:[TW.cx+2.6,2.2,TW.cz-2.4],l:[TW.cx,2.1,TW.cz-12]},{p:[TW.cx+1.6,2.1,TW.cz-6.8],l:[TW.cx,2.2,TW.cz-12]}],
     lines:[['vuong','Đêm qua tiệm của lão Jonathan đã thành tro. Kẻ nào không nộp tiền, kết cục cũng như thế.','Last night Jonathan\'s shop burned to ash. Anyone who does not pay ends up the same way.',3.4],
