@@ -292,3 +292,7 @@ Python helper scripts used during development:
 - Ném rổ: đứng trước rổ trong 10 m, bấm E (bbOption/bbShoot/bbUpdate). Tỉ lệ vào giảm theo khoảng cách, ngoài 6,75 m = 3 điểm; vào rổ +$10 / +$25.
 - Chế độ chơi bóng (HP): E ở sân → cầm bóng. Tấn công: J ném (tư thế gom-bật-ra tay-giữ tay), K layup (2 bước, bật 1 chân), L úp rổ (dưới 3,8 m, treo vành), Space đảo bóng (crossover, có thể "bẻ cổ chân" bot). Phòng thủ: J cướp, K/Space chắn. Nút bấm trên màn hình (.nc-hp) cho cả PC lẫn điện thoại.
 - Solo 1v1 với bot (hp1v1): nửa sân, tới 11 điểm (2/3 điểm), đổi bóng sau khi ghi điểm, bắt bóng bật bảng của đối phương phải đưa ra ngoài vạch 3 điểm. Thắng +$500. Bảng điểm trong nhà thi đấu hiện tỉ số.
+
+## Báo cập nhật + chặn từ bậy (26/11/2026)
+- MỖI LẦN publish: chạy `python3 tools/bump.py "ghi chú"` trước khi commit. Nó đổi `<meta name="nexus-build">` trong index.html (+dev) và ghi `version.json`. Trang đang mở kiểm tra /version.json mỗi 60 giây (và khi quay lại tab): khác build → màn hình "Có bản cập nhật mới / There's an update" với nút Tải lại (tạm dừng game đang chơi).
+- `window.NexusMod` (script trước firebase-config): `guard(...texts)` chặn từ bậy tiếng Việt (có/không dấu, từ mơ hồ khi bỏ dấu chỉ bắt khi có dấu — đánh dấu '!') và tiếng Anh (leetspeak, f.u.c.k, kéo dài chữ). 3 lần → cấm viết 1 tiếng (localStorage 'nexus-mod' theo uid). Gắn vào: setProfile, addDoc, createMatch, sendMessage, addFeedback, addSong, makeGroup, sendRoom, postVideo, addComment.

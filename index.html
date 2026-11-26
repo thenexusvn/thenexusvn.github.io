@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="nexus-build" content="20261126143245">
 <title>Nexus</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Crect%20width%3D%22100%22%20height%3D%22100%22%20rx%3D%2226%22%20fill%3D%22%23c1f354%22%2F%3E%3Cpath%20d%3D%22M28%2076V24L72%2076V24%22%20fill%3D%22none%22%20stroke%3D%22%2308090c%22%20stroke-width%3D%2213%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Ccircle%20cx%3D%2284%22%20cy%3D%2216%22%20r%3D%229%22%20fill%3D%22%23ad8dff%22%2F%3E%3C%2Fsvg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -379,6 +380,8 @@ select.input{appearance:none;background-image:linear-gradient(45deg,transparent 
 /* toast + modal */
 #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);opacity:0;pointer-events:none;background:var(--raise);border:1px solid var(--line);padding:12px 16px;border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.5);transition:.2s;max-width:min(92vw,460px);z-index:50;display:flex;gap:10px;align-items:center}
 #toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.upd{position:fixed;inset:0;z-index:100000;display:grid;place-items:center;padding:20px;background:radial-gradient(120% 90% at 50% 20%,rgba(193,243,84,.16),rgba(6,8,12,.96) 60%);backdrop-filter:blur(8px);animation:updIn .35s ease}.upd-card{text-align:center;max-width:420px;display:grid;gap:10px;justify-items:center}.upd-ic{font-size:54px;line-height:1}.upd-card h2{font-size:clamp(28px,6vw,40px);margin:0}.upd-en{margin:0;color:var(--lime,#c1f354);font-weight:700;letter-spacing:.04em}.upd-note{margin:0;color:var(--mfg,#aab);}.upd-go{font-size:17px;padding:14px 30px;margin-top:8px}.upd-s{margin:0;font-size:13px;color:var(--mfg,#99a)}@keyframes updIn{from{opacity:0}to{opacity:1}}.mod-note{position:fixed;inset:0;z-index:99999;display:grid;place-items:center;background:rgba(0,0,0,.55);padding:20px}.mod-note[hidden]{display:none}.mod-card{background:var(--card,#15171c);border:1px solid rgba(255,90,90,.5);border-radius:18px;padding:22px;max-width:380px;text-align:center;display:grid;gap:10px;box-shadow:0 18px 50px rgba(0,0,0,.5)}.mod-card b{font-size:19px;color:#ff7b72}.mod-card p{margin:0;color:var(--fg,#eee)}.mod-ic{font-size:40px}
+
 #toast svg{color:var(--lime)}
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:grid;place-items:center;padding:20px;z-index:40}
 .modal[hidden]{display:none}
@@ -1420,6 +1423,47 @@ return{t,setLang,get lang(){return lang;},D};
   <symbol id="i-storm" viewBox="0 0 24 24"><path d="M7 16a5 5 0 1 1 1.6-9.7A6 6 0 0 1 20 9a4 4 0 0 1-1 7.9"/><path d="m13 12-3 5h4l-3 5"/></symbol>
 </svg>
 
+<script>
+/* ===== NexusMod: blocks swear words (Vietnamese and English) in everything people write.
+   3 warnings = no writing for 1 hour. Stored per account on this device. ===== */
+window.NexusMod=(function(){
+  const KEY='nexus-mod',BAN_MS=3600000,MAX=3;
+  // whole words (checked on the text with and without Vietnamese accents)
+  // '!' = only with Vietnamese accents (without them the word means something harmless, e.g. đĩ/di, lồn/lon, đeo/đéo)
+  const WORDS=['!đm','đmm','dmm','đcm','dcm','đcmm','dcmm','đkm','dkm','đcmn','dcmn','vcl','vkl','vcđ','clm','cmm','cmn','!cc','!cl','!lồn','!buồi','!cặc','!đĩ','địt','đjt','djt','!đụ','!đéo','đếch','!cứt',
+    '!đù má','!đụ má','!đụ mẹ','!đ m','!đ c m','!d m m','địt mẹ','dit me','ditme','đitme','đm mày','mẹ kiếp','me kiep','óc chó','thằng chó','thang cho','súc vật','suc vat','chó chết','cho chet','!con đĩ','vãi lồn','vãi cả lồn','vai ca lon','vãi l','vãi cứt','!đồ chó','ăn cứt','ngu như chó','ngu nhu cho','thằng ngu','thang ngu','con ngu','óc lợn','!đần độn','khốn nạn','khon nan','!mất dạy','láo chó','đéo mẹ','deo me',
+    'fuck','fck','fuk','fuq','fucking','fucker','fucked','motherfucker','mf','wtf','stfu','shit','shitty','bullshit','bitch','bitches','asshole','ass','dick','dickhead','pussy','cunt','bastard','slut','whore','nigga','nigger','retard','damn','dumbass','jackass','porn','boobs','tits','cock','horny','idiot','moron','kys'];
+  // long English words also caught inside other text and with letters spaced out (f u c k, f.u.c.k)
+  const SQUEEZE=['fuck','motherfuck','bitch','asshole','pussy','nigger','nigga','whore','bullshit','dickhead','dumbass'];
+  const strip=s=>s.normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/đ/g,'d').replace(/Đ/g,'D');
+  const leet=s=>s.replace(/0/g,'o').replace(/[1|]/g,'i').replace(/3/g,'e').replace(/4|@/g,'a').replace(/5|\$/g,'s').replace(/7/g,'t').replace(/\*/g,'u');
+  const norm=s=>leet(String(s||'').toLowerCase().normalize('NFC')).replace(/(.)\1{2,}/g,'$1$1');
+  const tok=s=>s.split(/[^a-z0-9À-ɏḀ-ỿ]+/).filter(Boolean);
+  const list=WORDS.map(w=>({w:w.replace(/^!/,''),acc:w[0]==='!'}));
+  const Wa=new Set(list.filter(x=>!x.w.includes(' ')).map(x=>x.w)),Ws=new Set(list.filter(x=>!x.w.includes(' ')&&!x.acc).map(x=>strip(x.w)));
+  const Pa=list.filter(x=>x.w.includes(' ')).map(x=>x.w),Ps=list.filter(x=>x.w.includes(' ')&&!x.acc).map(x=>strip(x.w));
+  const SQ=SQUEEZE;
+  function bad(text){const a=norm(text),b=strip(a);
+    for(const[s,W,PH]of[[a,Wa,Pa],[b,Ws,Ps]]){const t=tok(s);for(const w of t){if(W.has(w)||W.has(w.replace(/(.)\1+/g,'$1')))return w;}const j=' '+t.join(' ')+' ';for(const p of PH)if(j.includes(' '+p+' '))return p;}
+    const sq=b.replace(/[^a-z]/g,'').replace(/(.)\1+/g,'$1');for(const w of SQ)if(sq.includes(w.replace(/(.)\1+/g,'$1')))return w;
+    return null;}
+  const who=()=>{try{const u=window.NexusData&&window.NexusData.user;return u&&u.uid||'guest';}catch(_){return'guest';}};
+  const all=()=>{try{return JSON.parse(localStorage.getItem(KEY)||'{}');}catch(_){return{};}};
+  const get=()=>{const a=all(),r=a[who()]||{strikes:0,until:0};if(r.until&&Date.now()>r.until){r.strikes=0;r.until=0;}return r;};
+  const put=r=>{const a=all();a[who()]=r;try{localStorage.setItem(KEY,JSON.stringify(a));}catch(_){}};
+  function notice(title,msg){let d=document.getElementById('modNote');if(!d){d=document.createElement('div');d.id='modNote';d.className='mod-note';d.setAttribute('role','alertdialog');document.body.appendChild(d);}
+    d.innerHTML=`<div class="mod-card"><div class="mod-ic">⚠️</div><b></b><p></p><button type="button" class="btn btn-lime">OK</button></div>`;d.querySelector('b').textContent=title;d.querySelector('p').textContent=msg;d.hidden=false;
+    d.querySelector('button').onclick=()=>{d.hidden=true;};d.querySelector('button').focus();}
+  const mins=ms=>Math.max(1,Math.ceil(ms/60000));
+  function banned(){const r=get();return r.until&&Date.now()<r.until?r.until-Date.now():0;}
+  function guard(...texts){const left=banned();if(left){const m=`Bạn đang bị cấm viết vì dùng từ bậy. Còn ${mins(left)} phút.`;notice('Đang bị cấm viết',m);throw Object.assign(new Error(m),{code:'mod-ban'});}
+    for(const t of texts){if(!t)continue;const w=bad(t);if(!w)continue;const r=get();r.strikes++;
+      if(r.strikes>=MAX){r.until=Date.now()+BAN_MS;put(r);const m='Bạn đã dùng từ bậy 3 lần. Bạn bị cấm viết chat, bình luận và đăng bài trong 1 tiếng.';notice('Bị cấm viết 1 tiếng',m);throw Object.assign(new Error(m),{code:'mod-ban'});}
+      put(r);const m=`Không được dùng từ bậy (tiếng Việt hay tiếng Anh đều không được). Cảnh cáo ${r.strikes}/${MAX}: tới lần thứ ${MAX} bạn sẽ bị cấm viết 1 tiếng.`;notice('Từ ngữ không phù hợp',m);throw Object.assign(new Error(m),{code:'mod-word'});}
+    return true;}
+  return{guard,bad,banned,get state(){return get();}};
+})();
+</script>
 <script src="firebase-config.js?v=20261125-2"></script>
 <script>
 /* ===== NexusData: real shared data through Firebase (Auth + Firestore).
@@ -1497,17 +1541,17 @@ return{
   async signInGoogle(){if(mode!=='cloud')throw err('offline','Đăng nhập Google chưa bật trên bản web này.');const gp=new firebase.auth.GoogleAuthProvider();gp.setCustomParameters({prompt:'select_account'});try{await auth.signInWithPopup(gp);}catch(e){if(e&&e.code==='auth/popup-blocked'){await auth.signInWithRedirect(gp);return;}throw e;}},
   async signOut(){if(mode==='cloud'){await flushSaves();const had=!!syncedUid;await auth.signOut();if(had){for(const lk of Object.values(SAVEKEYS))rawSet(lk,null);rawSet(META,null);emit('sync',{changed:Object.keys(SAVEKEYS),signedOut:true});}}else{LS.set('name','');user=Object.assign({},user,{name:'',anon:true});emit('user',user);}},
   setLocalName(n){LS.set('name',n);user=Object.assign({},user,{name:n,anon:!n});emit('user',user);},
-  async setProfile(n,av){const photo=av?'https://thenexusvn.github.io/#av='+av:'';if(mode==='cloud'&&auth&&auth.currentUser&&!auth.currentUser.isAnonymous){await auth.currentUser.updateProfile({displayName:n,photoURL:photo||null});user=Object.assign({},user,{name:n,photo});emit('user',user);return;}
+  async setProfile(n,av){window.NexusMod.guard(n);const photo=av?'https://thenexusvn.github.io/#av='+av:'';if(mode==='cloud'&&auth&&auth.currentUser&&!auth.currentUser.isAnonymous){await auth.currentUser.updateProfile({displayName:n,photoURL:photo||null});user=Object.assign({},user,{name:n,photo});emit('user',user);return;}
     LS.set('name',n);LS.set('avatar',photo);user=Object.assign({},user,{name:n,anon:!n,photo});emit('user',user);},
   /* vault */
-  async addDoc(meta,dataUrl,file){needUser();const d=Object.assign({},meta,{uid:user.uid,author:user.name,views:0,fileName:file.name,fileType:file.type,size:file.size});
+  async addDoc(meta,dataUrl,file){needUser();window.NexusMod.guard(meta&&meta.t,meta&&meta.sub,meta&&meta.desc);const d=Object.assign({},meta,{uid:user.uid,author:user.name,views:0,fileName:file.name,fileType:file.type,size:file.size});
     if(mode==='cloud'){const ref=db.collection('docs').doc();await db.collection('docFiles').doc(ref.id).set({uid:user.uid,data:dataUrl});await ref.set(Object.assign(d,{createdAt:FV.serverTimestamp()}));return ref.id;}
     const id='d'+Date.now();const files=LS.get('files',{});files[id]=dataUrl;if(!LS.set('files',files))throw err('quota','Bộ nhớ trình duyệt đã đầy');state.docs.unshift(Object.assign(d,{id,createdAt:Date.now()}));lsave('docs');return id;},
   async getDocFile(id){if(mode==='cloud'){const s=await db.collection('docFiles').doc(id).get();return s.exists?s.data().data:null;}return LS.get('files',{})[id]||null;},
   async viewDoc(id){if(mode==='cloud'){db.collection('docs').doc(id).update({views:FV.increment(1)}).catch(()=>{});return;}const d=state.docs.find(x=>x.id===id);if(d){d.views=(d.views||0)+1;lsave('docs');}},
   async deleteDoc(id){needUser();if(mode==='cloud'){await db.collection('docs').doc(id).delete();await db.collection('docFiles').doc(id).delete().catch(()=>{});return;}state.docs=state.docs.filter(d=>d.id!==id);const f=LS.get('files',{});delete f[id];LS.set('files',f);lsave('docs');},
   /* courtdraft */
-  async createMatch(m){needUser();const me={uid:user.uid,name:user.name};const d=Object.assign({},m,{hostUid:user.uid,hostName:user.name,A:[me],B:[]});
+  async createMatch(m){needUser();window.NexusMod.guard(m&&m.name,m&&m.time);const me={uid:user.uid,name:user.name};const d=Object.assign({},m,{hostUid:user.uid,hostName:user.name,A:[me],B:[]});
     if(mode==='cloud'){await db.collection('matches').add(Object.assign(d,{createdAt:FV.serverTimestamp()}));return;}state.matches.unshift(Object.assign(d,{id:'m'+Date.now(),createdAt:Date.now()}));lsave('matches');},
   async setTeam(id,team){needUser();const me={uid:user.uid,name:user.name};const edit=m=>{const A=(m.A||[]).filter(p=>p.uid!==me.uid),B=(m.B||[]).filter(p=>p.uid!==me.uid);if(team==='A'){if(A.length>=m.n)throw err('full','Đội đã đủ người');A.push(me);}if(team==='B'){if(B.length>=m.n)throw err('full','Đội đã đủ người');B.push(me);}return{A,B};};
     if(mode==='cloud'){const ref=db.collection('matches').doc(id);await db.runTransaction(async tx=>{const s=await tx.get(ref);if(!s.exists)throw err('gone','Trận không còn');tx.update(ref,edit(s.data()));});return;}
@@ -1519,7 +1563,7 @@ return{
   /* commshub */
   watchMessages(ch,cb){if(mode==='cloud'){return db.collection('channels').doc(ch).collection('messages').orderBy('createdAt','desc').limit(80).onSnapshot(s=>cb(s.docs.map(d=>Object.assign({id:d.id},d.data())).reverse()),e=>{console.warn(e);cb([]);});}
     const k='msg-'+ch,push=()=>cb(LS.get(k,[]));push();return on(k,push);},
-  async sendMessage(ch,text){needUser();text=String(text).slice(0,500);if(mode==='cloud'){await db.collection('channels').doc(ch).collection('messages').add(Object.assign({text,uid:user.uid,name:String(user.name||'Ẩn danh').slice(0,40),createdAt:FV.serverTimestamp()},this.admin?{admin:true}:{}));return;}
+  async sendMessage(ch,text){needUser();window.NexusMod.guard(text);text=String(text).slice(0,500);if(mode==='cloud'){await db.collection('channels').doc(ch).collection('messages').add(Object.assign({text,uid:user.uid,name:String(user.name||'Ẩn danh').slice(0,40),createdAt:FV.serverTimestamp()},this.admin?{admin:true}:{}));return;}
     const k='msg-'+ch,a=LS.get(k,[]);a.push({id:'x'+Date.now(),text,uid:user.uid,name:user.name,createdAt:Date.now()});LS.set(k,a.slice(-200));emit(k);},
   async deleteMessage(ch,id){needUser();if(mode==='cloud'){await db.collection('channels').doc(ch).collection('messages').doc(id).delete();return;}const k='msg-'+ch;LS.set(k,LS.get(k,[]).filter(m=>m.id!==id));emit(k);},
   /* admin tools: ban list and a site-wide announcement (Firestore rules let only admins write them) */
@@ -1528,7 +1572,7 @@ return{
   async setAnnounce(text){if(!this.admin)throw err('perm','Chỉ quản trị viên');text=String(text||'').trim().slice(0,300);if(!text){await db.collection('config').doc('announce').delete();return;}await db.collection('config').doc('announce').set({text,at:FV.serverTimestamp()});},
   /* feedback (anyone may send; only admins read) */
   isAdmin(){if(mode!=='cloud')return true;const L=(window.NEXUS_ADMIN_EMAILS||[]).map(x=>String(x).toLowerCase());return !!(user&&!user.anon&&user.email&&L.includes(user.email.toLowerCase()));},
-  async addFeedback(f){const d={stars:Math.max(1,Math.min(5,f.stars|0)),text:String(f.text||'').slice(0,1000),area:String(f.area||'').slice(0,30),name:user&&!user.anon?String(user.name||'').slice(0,40):'',uid:user?user.uid:'',lang:String(f.lang||'vi').slice(0,5),page:String(f.page||'').slice(0,30)};
+  async addFeedback(f){window.NexusMod.guard(f&&f.text,f&&f.name);const d={stars:Math.max(1,Math.min(5,f.stars|0)),text:String(f.text||'').slice(0,1000),area:String(f.area||'').slice(0,30),name:user&&!user.anon?String(user.name||'').slice(0,40):'',uid:user?user.uid:'',lang:String(f.lang||'vi').slice(0,5),page:String(f.page||'').slice(0,30)};
     if(mode==='cloud'){if(!user)throw err('auth','Đang kết nối máy chủ, thử lại sau vài giây.');d.createdAt=FV.serverTimestamp();await db.collection('feedback').add(d);return;}
     d.id='f'+Date.now();d.createdAt=Date.now();const a=LS.get('feedback',[]);a.push(d);LS.set('feedback',a.slice(-500));emit('feedback');},
   watchFeedback(cb,onErr){if(mode==='cloud'){return db.collection('feedback').orderBy('createdAt','desc').limit(500).onSnapshot(x=>cb(x.docs.map(d=>Object.assign({id:d.id},d.data()))),e=>{if(onErr)onErr(e);});}
@@ -1536,7 +1580,7 @@ return{
   async deleteFeedback(id){if(mode==='cloud'){await db.collection('feedback').doc(id).delete();return;}LS.set('feedback',LS.get('feedback',[]).filter(x=>x.id!==id));emit('feedback');},
   /* sonicdeck community songs */
   watchSongs(cb){if(mode!=='cloud'){cb([]);return()=>{};}return db.collection('songs').orderBy('createdAt','desc').limit(300).onSnapshot(x=>cb(x.docs.map(d=>Object.assign({id:d.id},d.data()))),e=>{console.warn('songs',e);cb([]);});},
-  async addSong(m){needUser();if(mode!=='cloud')throw err('offline','Chưa kết nối máy chủ');const d={uid:user.uid,name:(user.name||'').slice(0,40),title:m.title,artist:m.artist||'',genre:m.genre||'',kind:m.kind,dur:Math.round(m.dur||0),plays:0,createdAt:FV.serverTimestamp()};if(m.kind==='yt')d.yt=m.yt;else d.url=m.url;await db.collection('songs').add(d);},
+  async addSong(m){needUser();window.NexusMod.guard(m&&m.title,m&&m.artist);if(mode!=='cloud')throw err('offline','Chưa kết nối máy chủ');const d={uid:user.uid,name:(user.name||'').slice(0,40),title:m.title,artist:m.artist||'',genre:m.genre||'',kind:m.kind,dur:Math.round(m.dur||0),plays:0,createdAt:FV.serverTimestamp()};if(m.kind==='yt')d.yt=m.yt;else d.url=m.url;await db.collection('songs').add(d);},
   async deleteSong(id){needUser();await db.collection('songs').doc(id).delete();},
   /* sonicdeck plays */
   countPlay(i){const f=typeof i==='number'?'p'+i:String(i).replace(/[^A-Za-z0-9_-]/g,'_').slice(0,60);if(mode==='cloud'){if(user)db.collection('stats').doc('tracks').set({[f]:FV.increment(1)},{merge:true}).catch(()=>{});return;}state.plays[f]=(state.plays[f]||0)+1;LS.set('plays',state.plays);emit('plays',state.plays);}
@@ -2137,7 +2181,7 @@ async function openDM(uid){const db=ND._db,FV=ND._FV,id='dm_'+pairId(HUB.uid,uid
   if(!HUB.rooms[id]){try{const p=HUB.people[uid]||{},mine=me();await db.collection('rooms').doc(id).set({type:'dm',members:[HUB.uid,uid].sort(),owner:HUB.uid,name:'',names:{[HUB.uid]:String(mine.name||'').slice(0,40),[uid]:String(p.name||'').slice(0,40)},createdAt:FV.serverTimestamp(),lastAt:FV.serverTimestamp(),last:'',lastBy:''});}
     catch(err){try{const s=await db.collection('rooms').doc(id).get();if(!s.exists){toast(permMsg(err));return;}}catch(_){toast(permMsg(err));return;}}}
   $('#pplModal').hidden=true;openRoom(id);}
-async function makeGroup(){const name=$('#pplGName').value.trim().slice(0,40)||'Nhóm của '+(me().name||'bạn');const members=[HUB.uid,...pplPick];if(members.length>50){toast('Nhóm tối đa 50 người');return;}
+async function makeGroup(){const name=$('#pplGName').value.trim().slice(0,40)||'Nhóm của '+(me().name||'bạn');try{window.NexusMod.guard(name);}catch(_){return;}const members=[HUB.uid,...pplPick];if(members.length>50){toast('Nhóm tối đa 50 người');return;}
   const db=ND._db,FV=ND._FV;try{const ref=db.collection('rooms').doc();const names={};members.forEach(u=>names[u]=String((HUB.people[u]||{}).name||'').slice(0,40));
     await ref.set({type:'group',name,members,owner:HUB.uid,names,createdAt:FV.serverTimestamp(),lastAt:FV.serverTimestamp(),last:'',lastBy:''});$('#pplModal').hidden=true;HUB.rooms[ref.id]=HUB.rooms[ref.id]||{id:ref.id,type:'group',name,members};openRoom(ref.id);toast('Đã tạo nhóm “'+name+'”');}
   catch(err){toast(permMsg(err));}}
@@ -2159,7 +2203,7 @@ renderChat=function(){if(!HUB.roomCur){$('#chLeave').hidden=true;$('#chIcon').in
   box.innerHTML=HUB.roomMsgs.length?HUB.roomMsgs.map(m=>{const mine=u&&m.uid===u.uid,p=HUB.people[m.uid];return `<div class="msg${mine?' me':''}" data-u="${esc(m.uid)}">${avHTML(p,m.name)}<div><div class="who">${esc((p&&p.name)||m.name||'Ẩn danh')}<time>${hhmm(ND.tsMs(m.createdAt))}</time>${mine?`<button class="del" data-delmsg="${esc(m.id)}" aria-label="Xoá tin nhắn">Xoá</button>`:''}</div><div class="txt">${esc(m.text)}</div></div></div>`;}).join('')
     :`<div class="empty muted" style="padding:24px;text-align:center">Chưa có tin nhắn. Gửi lời chào đầu tiên đi 👋</div>`;
   if(atBottom||!box.dataset.init){box.scrollTop=box.scrollHeight;box.dataset.init=1;}};
-async function sendRoom(text){const db=ND._db,FV=ND._FV,u=me(),id=HUB.roomCur;text=String(text).slice(0,500);
+async function sendRoom(text){window.NexusMod.guard(text);const db=ND._db,FV=ND._FV,u=me(),id=HUB.roomCur;text=String(text).slice(0,500);
   await db.collection('rooms').doc(id).collection('messages').add({text,uid:u.uid,name:String(u.name||'Ẩn danh').slice(0,40),createdAt:FV.serverTimestamp()});
   db.collection('rooms').doc(id).update({last:text.slice(0,80),lastBy:u.uid,lastAt:FV.serverTimestamp()}).catch(()=>{});}
 
@@ -2352,7 +2396,7 @@ function canPost(){const u=me();if(!signedIn())return{ok:false,why:ND.mode==='cl
 function uploadCloudinary(blob,onP){return new Promise((res,rej)=>{const fd=new FormData();fd.append('file',blob);fd.append('upload_preset',VCFG.uploadPreset);if(VCFG.folder)fd.append('folder',VCFG.folder);
   const x=new XMLHttpRequest();x.open('POST','https://api.cloudinary.com/v1_1/'+encodeURIComponent(VCFG.cloudName)+'/video/upload');x.upload.onprogress=e=>{if(e.lengthComputable)onP(e.loaded/e.total);};
   x.onload=()=>{try{const r=JSON.parse(x.responseText);if(x.status<300&&r.secure_url)res(r);else rej(new Error((r.error&&r.error.message)||'Tải video lên thất bại'));}catch(e){rej(e);}};x.onerror=()=>rej(new Error('Mất kết nối khi tải video lên'));x.send(fd);});}
-async function postVideo(blob,meta,onP){const u=me();const base=Object.assign({},meta,{uid:u.uid,author:u.name,likes:0,views:0,comments:0});
+async function postVideo(blob,meta,onP){window.NexusMod.guard(meta&&meta.title,meta&&meta.desc,meta&&meta.sticker&&meta.sticker.text);const u=me();const base=Object.assign({},meta,{uid:u.uid,author:u.name,likes:0,views:0,comments:0});
   if(cloud()){const r=await uploadCloudinary(blob,onP);const db=ND._db,FV=ND._FV;const ref=db.collection('videos').doc();
     await ref.set(Object.assign(base,{url:r.secure_url,createdAt:FV.serverTimestamp()}));db.collection('users').doc(u.uid).set({videos:FV.increment(1)},{merge:true}).catch(()=>{});return ref.id;}
   const id='v'+Date.now();onP(.3);await IDB.put(id,blob);onP(1);S.videos.unshift(Object.assign(base,{id,createdAt:Date.now()}));if(!LSS('videos',S.videos)){S.videos.shift();await IDB.del(id);throw new Error('Bộ nhớ trình duyệt đã đầy');}emitAll();return id;}
@@ -2371,7 +2415,7 @@ async function toggleFollow(uid){if(!signedIn()){need('theo dõi');return;}const
   catch(e){toast('Không theo dõi được. Thử lại.');}}
 function watchComments(v,cb){if(cloud())return ND._db.collection('videos').doc(v.id).collection('comments').orderBy('createdAt','asc').limit(200).onSnapshot(s=>cb(s.docs.map(d=>Object.assign({id:d.id},d.data()))),()=>cb([]));
   cb(LSG('c-'+v.id,[]));return()=>{};}
-async function addComment(v,text){const u=me();text=text.slice(0,300);if(cloud()){const db=ND._db,FV=ND._FV,b=db.batch();b.set(db.collection('videos').doc(v.id).collection('comments').doc(),{uid:u.uid,name:u.name,text,createdAt:FV.serverTimestamp()});b.update(db.collection('videos').doc(v.id),{comments:FV.increment(1)});await b.commit();return;}
+async function addComment(v,text){window.NexusMod.guard(text);const u=me();text=text.slice(0,300);if(cloud()){const db=ND._db,FV=ND._FV,b=db.batch();b.set(db.collection('videos').doc(v.id).collection('comments').doc(),{uid:u.uid,name:u.name,text,createdAt:FV.serverTimestamp()});b.update(db.collection('videos').doc(v.id),{comments:FV.increment(1)});await b.commit();return;}
   const a=LSG('c-'+v.id,[]);a.push({id:'c'+Date.now(),uid:u.uid,name:u.name,text,createdAt:Date.now()});LSS('c-'+v.id,a);v.comments=a.length;LSS('videos',S.videos);}
 async function delComment(v,c){if(cloud()){const db=ND._db,b=db.batch();b.delete(db.collection('videos').doc(v.id).collection('comments').doc(c.id));b.update(db.collection('videos').doc(v.id),{comments:ND._FV.increment(-1)});await b.commit();return;}
   const a=LSG('c-'+v.id,[]).filter(x=>x.id!==c.id);LSS('c-'+v.id,a);v.comments=a.length;LSS('videos',S.videos);}
@@ -2872,5 +2916,17 @@ render();
 })();
 </script>
 
+<script>
+/* ===== update notice: when a new version is published, a full-screen card asks to reload ===== */
+(function(){const meta=document.querySelector('meta[name="nexus-build"]'),BUILD=meta?meta.content:'';let shown=false;
+async function check(){if(shown||!BUILD)return;try{const r=await fetch('/version.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(j.build&&j.build!==BUILD)show(j);}catch(_){}}
+function show(j){shown=true;const d=document.createElement('div');d.className='upd';d.setAttribute('role','alertdialog');d.setAttribute('aria-modal','true');
+  d.innerHTML=`<div class="upd-card"><div class="upd-ic">✨</div><h2>Có bản cập nhật mới</h2><p class="upd-en">There's an update</p><p class="upd-note"></p><button type="button" class="btn btn-lime upd-go">Tải lại ngay</button><p class="upd-s">Tải lại để dùng bản mới nhất của Nexus.</p></div>`;
+  if(j.note)d.querySelector('.upd-note').textContent=j.note;else d.querySelector('.upd-note').remove();document.body.appendChild(d);
+  try{for(const k of['NexusCity','NexusLastZone','NexusMobaUI']){const g=window[k];if(g&&g.game&&g.game.setPaused)g.game.setPaused(true);}}catch(_){}
+  const b=d.querySelector('.upd-go');b.focus();b.addEventListener('click',async()=>{b.disabled=true;b.textContent='Đang tải lại...';try{await fetch('/index.html',{cache:'reload'});await fetch(location.pathname,{cache:'reload'});}catch(_){}location.reload();});}
+setTimeout(check,6000);setInterval(check,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)check();});addEventListener('focus',check);
+window.NexusUpdate={check,get build(){return BUILD;}};})();
+</script>
 </body>
 </html>
