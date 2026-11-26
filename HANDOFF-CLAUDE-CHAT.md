@@ -317,3 +317,5 @@ Python helper scripts used during development:
 - filmOpening (homecoming, burned garage, flashback with the Lantern Elder, hospital, Uncle Tư, title), filmEnding (hospital, coast drive in the Legend car, credits). stVictory plays the ending, then the reward card (stVictoryCard).
 - phoneCall(who,lines) HUD calls while playing; stCall(k) after each key card (k=4 is the Uncle Tư betrayal). Boss Vương says his line in the tower intro (cine o.say).
 - Debug: game._dbg.film.go(i) / run(frames).
+- Names (Nov 26): Joseph (hero), Oscar (sister), Jonathan (father, "Father"), Uncle Philip, bosses Lantern Mike / Shark Henry / Cloud Rio / Silver Michael / Desert Han, Boss Vương. Fixed bodies in ST_BODY / VUONG_LOOK used by both films and fights.
+- Opening film has a Syndicate scene on the tower roof (filmGang): five henchmen intro cards (movWho), Boss Vương card, orders, "Yes, Boss!" salute. movWho = freeze-frame name card + ring on the actor.

@@ -4200,7 +4200,7 @@ function filmOpening(){const{G,HD,R,B,bed}=filmAnchors();const gx=G.x,gz=G.z-1.2
     setup(){filmGang(false);},cam:[{p:[TW.cx+14,9,TW.cz+12],l:[TW.cx,1.5,TW.cz-8]},{p:[TW.cx+9,6,TW.cz+6],l:[TW.cx,1.5,TW.cz-8]}],tail:.3},
   {dur:10.5,tod:19.4,inside:'tower',px:TW.cx,pz:TW.cz+4,cut:true,camT:10.5,linear:true,
     setup(){filmGang(false);},who:[[.6,'h0','mike'],[2.6,'h1','henry'],[4.6,'h2','rio'],[6.6,'h3','michael'],[8.6,'h4','han']],
-    cam:[{p:[TW.cx-8.8,1.75,TW.cz-6.7],l:[TW.cx-8.8,1.6,TW.cz-4]},{p:[TW.cx+8.8,1.75,TW.cz-6.7],l:[TW.cx+8.8,1.6,TW.cz-4]}],tail:.6},
+    cam:[{p:[TW.cx-8.8,1.95,TW.cz-7.9],l:[TW.cx-8.8,1.75,TW.cz-4]},{p:[TW.cx+8.8,1.95,TW.cz-7.9],l:[TW.cx+8.8,1.75,TW.cz-4]}],tail:.6},
   {dur:6,tod:19.4,inside:'tower',px:TW.cx,pz:TW.cz+4,cut:true,setup(){filmGang(false);},who:[[.7,'v','vuong']],
     cam:[{p:[TW.cx+2.6,2.2,TW.cz-2.4],l:[TW.cx,2.1,TW.cz-12]},{p:[TW.cx+1.6,2.1,TW.cz-6.8],l:[TW.cx,2.2,TW.cz-12]}],
     lines:[['vuong','Đêm qua tiệm của lão Jonathan đã thành tro. Kẻ nào không nộp tiền, kết cục cũng như thế.','Last night Jonathan\'s shop burned to ash. Anyone who does not pay ends up the same way.',3.4],
@@ -4208,7 +4208,7 @@ function filmOpening(){const{G,HD,R,B,bed}=filmAnchors();const gx=G.x,gz=G.z-1.2
       ['lao','Để tôi lo nó, thưa Ông Trùm.','Leave him to me, Boss.',.4,'h0'],
       ['vuong','Không. Năm đứa bây giữ chặt khu của mình. Nó bước vào khu nào, khu đó xử nó.','No. All five of you hold your districts. Whatever district he walks into, that district finishes him.',.4]]},
   {dur:5,tod:19.4,inside:'tower',px:TW.cx,pz:TW.cz+4,cut:true,setup(){filmGang(true);},
-    cam:[{p:[TW.cx,7,TW.cz-21],l:[TW.cx,1.2,TW.cz-2]},{p:[TW.cx,9,TW.cz-24],l:[TW.cx,1,TW.cz]}],
+    cam:[{p:[TW.cx+1.5,3.6,TW.cz-16.5],l:[TW.cx,1.4,TW.cz-3]},{p:[TW.cx+.8,4.6,TW.cz-18.5],l:[TW.cx,1.3,TW.cz-3]}],
     lines:[['gang','Vâng, thưa Ông Trùm!','Yes, Boss!',.8],['vuong','Đi đi.','Go.',.5]],tail:1.2},
   /* uncle Tư */
   {dur:6,tod:21,px:HD.x,pz:HD.z+4,music:'tense',
