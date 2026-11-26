@@ -41,7 +41,7 @@ service cloud.firestore {
       allow create: if poster()
         && request.resource.data.hostUid == request.auth.uid
         && str(request.resource.data.name, 60) && request.resource.data.name.size() > 0
-        && request.resource.data.n in [3, 4, 5];
+        && request.resource.data.n in [1, 2, 3, 4, 5];
       allow update: if member()
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['A', 'B'])
         && request.resource.data.A.size() <= resource.data.n

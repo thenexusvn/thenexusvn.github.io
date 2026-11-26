@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="nexus-build" content="20261126191106">
+<meta name="nexus-build" content="20261126191346">
 <title>Nexus</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Crect%20width%3D%22100%22%20height%3D%22100%22%20rx%3D%2226%22%20fill%3D%22%23c1f354%22%2F%3E%3Cpath%20d%3D%22M28%2076V24L72%2076V24%22%20fill%3D%22none%22%20stroke%3D%22%2308090c%22%20stroke-width%3D%2213%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Ccircle%20cx%3D%2284%22%20cy%3D%2216%22%20r%3D%229%22%20fill%3D%22%23ad8dff%22%2F%3E%3C%2Fsvg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -997,8 +997,8 @@ return{t,setLang,get lang(){return lang;},D};
         <h3><svg class="i"><use href="#i-plus"/></svg>Tạo trận mới</h3>
         <div class="field"><label for="mName">Tên trận</label><input class="input" id="mName" placeholder="Ví dụ: 3v3 giờ ra chơi, Bóng rổ chiều thứ 6"></div>
         <div class="field"><label for="mTime">Thời gian</label><input class="input" id="mTime" placeholder="VD: Mai · 16:30"><small class="muted">Ghi ngày và giờ để mọi người biết khi nào ra sân.</small></div>
-        <div class="field"><label for="mCourt">Sân</label><select class="input" id="mCourt"><option>Sân chính</option><option>Sân A — gần nhà thể chất</option><option>Sân B</option></select></div>
-        <div class="field"><label id="mSizeL">Số người mỗi đội</label><div class="sizes" id="mSize" role="group" aria-labelledby="mSizeL"><button type="button" data-n="3" aria-pressed="true">3v3</button><button type="button" data-n="4" aria-pressed="false">4v4</button><button type="button" data-n="5" aria-pressed="false">5v5</button></div><small class="muted">3v3 = mỗi đội 3 người, tổng 6 người.</small></div>
+        <div class="field"><label for="mCourt">Sân</label><select class="input" id="mCourt"><option value="Gym">Gym</option><option value="Outdoor">Outdoor</option></select></div>
+        <div class="field"><label id="mSizeL">Số người mỗi đội</label><div class="sizes" id="mSize" role="group" aria-labelledby="mSizeL" style="grid-template-columns:repeat(4,1fr)"><button type="button" data-n="1" aria-pressed="false">1v1</button><button type="button" data-n="2" aria-pressed="false">2v2</button><button type="button" data-n="3" aria-pressed="true">3v3</button><button type="button" data-n="4" aria-pressed="false">4v4</button></div><small class="muted">3v3 = mỗi đội 3 người, tổng 6 người.</small></div>
         <p class="err" id="mErr" hidden>Đặt tên trận trước khi đăng.</p>
         <button class="btn btn-lime" type="submit">Đăng trận</button>
       </form>
