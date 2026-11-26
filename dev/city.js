@@ -1609,15 +1609,15 @@ function makeHuman(o){
     if(style==='bun')hd.push({geo:G.bun,color:o.hair,pos:[0,.1,-.09]});}
   if(o.cap)hd.push({geo:G.cap,color:o.cap,pos:[0,.1,0]},{geo:G.brim,color:o.cap,pos:[0,.07,.13]});
   mk(hd,head);
-  const arm={},el={},sleeve=o.sleeve===false?o.skin:top,fore=o.longSleeve||o.jacket?top:o.skin;
+  const arm={},el={},wrs={},ank={},sleeve=o.sleeve===false?o.skin:top,fore=o.longSleeve||o.jacket?top:o.skin;
   for(const s of[-1,1]){const sh=new T.Group();sh.position.set(s*(F?.2:.222),.5,0);sh.rotation.z=s*.07;spine.add(sh);mk([{geo:G.upper,color:sleeve,scale:F?[.9,1,.9]:[1,1,1]}],sh);const e=new T.Group();e.position.y=-.3;sh.add(e);
-    mk([{geo:G.fore,color:fore,scale:F?[.9,1,.9]:[1,1,1]},{geo:G.hand,color:o.skin,pos:[0,-.3,.005],scale:[.72,1,.42]},{geo:G.thumb,color:o.skin,pos:[-s*.03,-.28,.018]}],e);arm[s]=sh;el[s]=e;}
+    mk([{geo:G.fore,color:fore,scale:F?[.9,1,.9]:[1,1,1]}],e);const wr=new T.Group();wr.position.y=-.285;e.add(wr);mk([{geo:G.hand,color:o.skin,pos:[0,-.015,.005],scale:[.72,1,.42]},{geo:G.thumb,color:o.skin,pos:[-s*.03,.005,.018]}],wr);arm[s]=sh;el[s]=e;wrs[s]=wr;}
   const leg={},kn={},legC=o.skirt?o.skin:o.pants;
   for(const s of[-1,1]){const hpG=new T.Group();hpG.position.set(s*(F?.095:.09),-.04,0);hips.add(hpG);mk([{geo:G.thigh,color:legC,scale:F?[1.04,1,1]:[1,1,1]}],hpG);const k=new T.Group();k.position.y=-.46;hpG.add(k);
-    mk([{geo:G.shin,color:legC},{geo:G.shoe,color:o.shoes,pos:[0,-.43,.055],scale:[.85,.62,1.9]},{geo:G.sole,color:'#e9e7e2',pos:[0,-.465,.05]}],k);leg[s]=hpG;kn[s]=k;}
+    mk([{geo:G.shin,color:legC}],k);const an=new T.Group();an.position.y=-.42;k.add(an);mk([{geo:G.shoe,color:o.shoes,pos:[0,-.01,.055],scale:[.85,.62,1.9]},{geo:G.sole,color:'#e9e7e2',pos:[0,-.045,.05]}],an);leg[s]=hpG;kn[s]=k;ank[s]=an;}
   if(!Q.shadows){const sh=new T.Mesh(G.shadow,shadowMat);sh.position.y=.03;root.add(sh);}
   scene.add(root);
-  return{root,hips,spine,head,armL:arm[-1],armR:arm[1],elL:el[-1],elR:el[1],legL:leg[-1],legR:leg[1],knL:kn[-1],knR:kn[1],ph:Math.random()*6,punchT:0,side:1,guard:0,ko:0,koK:0,hitT:0};
+  return{root,hips,spine,head,armL:arm[-1],armR:arm[1],elL:el[-1],elR:el[1],legL:leg[-1],legR:leg[1],knL:kn[-1],knR:kn[1],anL:ank[-1],anR:ank[1],wrL:wrs[-1],wrR:wrs[1],ph:Math.random()*6,punchT:0,side:1,guard:0,ko:0,koK:0,hitT:0};
 }
 function resetHuman(H){H.ko=0;H.koK=0;H.guard=0;H.punchT=0;H.hitT=0;H.kickT=0;H.windT=0;H.block=0;H.blockHold=false;H.root.rotation.set(0,0,0);H.root.visible=true;}
 function randomLook(kind){const f=Math.random()<.45;const o={female:f,skin:pick(SKIN),hair:pick(HAIR),shirt:pick(SHIRT),pants:pick(PANTS),shoes:pick(SHOES),hairStyle:f?pick(['long','long','pony','bun']):pick(['short','short','buzz','bald']),beard:!f&&Math.random()<.3,glasses:Math.random()<.15,jacket:Math.random()<.25?pick(['#3d5677','#2b2b2b','#6b4a32','#4a5d3a','#7a1f2b']):null,skirt:f&&Math.random()<.3,sleeve:Math.random()<.6};
@@ -1648,6 +1648,14 @@ function animHuman(H,dt,spd,t){
   H.spine.rotation.y=twist;H.spine.rotation.x=lean!==null?lean:run?.2:H.guard>0?.12:.04*amp+(amp<.05?Math.sin(t*2)*.012:0);
   H.hips.position.y=.95+Math.abs(c)*.045*amp-(run?.04:0)-hipDrop-(H.guard>0&&amp<.2?.05:0);
   H.head.rotation.x=0;H.head.rotation.y=0;
+  // natural motion: hip sway and counter-rotating shoulders, feet that roll heel-to-toe, wrists, breathing and weight shift when idle
+  if(H.anL){const sp=amp*(run?1.15:1);H.hips.rotation.y=s*.11*sp;H.hips.rotation.z=c*.035*sp;H.spine.rotation.y+=-s*.17*sp;H.head.rotation.y=s*.08*sp;
+    const footL=-(H.legL.rotation.x+H.knL.rotation.x),footR=-(H.legR.rotation.x+H.knR.rotation.x);
+    H.anL.rotation.x=footL*.85+(H.legL.rotation.x<-.15?.35*amp:0);H.anR.rotation.x=footR*.85+(H.legR.rotation.x<-.15?.35*amp:0);
+    if(run&&!(H.aim>0)&&!(H.punchT>0)&&!(H.guard>0)&&!(H.block>0)){H.elL.rotation.x=Math.min(H.elL.rotation.x,-1.45);H.elR.rotation.x=Math.min(H.elR.rotation.x,-1.45);H.knL.rotation.x+=Math.max(0,-s)*.35;H.knR.rotation.x+=Math.max(0,s)*.35;}
+    H.wrL.rotation.x=-.12-Math.max(0,-s)*.2*amp;H.wrR.rotation.x=-.12-Math.max(0,s)*.2*amp;
+    if(amp<.05&&!(H.guard>0)&&!(H.aim>0)){const b=Math.sin(t*1.6+H.ph);H.spine.scale.y=1+b*.008;H.hips.rotation.z=Math.sin(t*.45+H.ph)*.025;H.head.rotation.y=Math.sin(t*.37+H.ph*2)*.18;H.head.rotation.x=Math.sin(t*.29+H.ph)*.05;H.armL.rotation.z=-.07-b*.012;H.armR.rotation.z=.07+b*.012;}
+    else{H.spine.scale.y=1;H.armL.rotation.z=-.07;H.armR.rotation.z=.07;}}
   if(H.hitT>0){H.hitT-=dt;const k=Math.min(1,H.hitT*4);H.spine.rotation.x=-.42*k;H.spine.rotation.y+=(H.hitSide||1)*.35*k;H.head.rotation.x=-.35*k;H.head.rotation.y=(H.hitSide||1)*.4*k;}
 }
 
@@ -1720,7 +1728,8 @@ function carGeos(b){if(CG[b])return CG[b];const s=CAR_T[b];
   const tire=new T.LatheGeometry(tp,26).rotateZ(Math.PI/2);
   const rimParts=[{geo:new T.CylinderGeometry(wr*.64,wr*.64,.22,22).rotateZ(Math.PI/2),color:'#24272b'},{geo:new T.CylinderGeometry(wr*.46,wr*.46,.235,20).rotateZ(Math.PI/2),color:'#3a3d42'}];
   for(const sx of[-1,1]){rimParts.push({geo:new T.TorusGeometry(wr*.62,.016,6,26).rotateY(Math.PI/2),pos:[sx*.112,0,0],color:'#d8dde2'},{geo:new T.CylinderGeometry(wr*.13,wr*.13,.02,10).rotateZ(Math.PI/2),pos:[sx*.118,0,0],color:'#c4c9cf'});
-    for(let k=0;k<5;k++){const a=k/5*Math.PI*2,sp=new T.BoxGeometry(.02,wr*.5,.055).translate(0,wr*.33,0).rotateX(a);rimParts.push({geo:sp,pos:[sx*.112,0,0],color:'#cfd4da'});}}
+    rimParts.push({geo:new T.CylinderGeometry(wr*.4,wr*.4,.012,20).rotateZ(Math.PI/2),pos:[sx*.1,0,0],color:'#7b8087'});
+    for(let k=0;k<10;k++){const a=k/10*Math.PI*2+(k%2?.13:-.13),sp=new T.BoxGeometry(.016,wr*.5,.04).translate(0,wr*.34,0).rotateX(a);rimParts.push({geo:sp,pos:[sx*.114,0,0],color:'#d6dbe0'});}}
   return CG[b]={BL,CL,lower:loftGeo(BL),cabin:glass,roof,tire,rimParts};}
 const lightBox=new T.BoxGeometry(.36,.12,.06),grille=new T.BoxGeometry(1,.16,.08),plate=new T.BoxGeometry(.42,.13,.03),mirror=new T.BoxGeometry(.18,.1,.12),barG=new T.BoxGeometry(.5,.12,.28);
 const BAR={r:new T.MeshStandardMaterial({color:0x220000,emissive:lin('#ff1a2a'),emissiveIntensity:3}),b:new T.MeshStandardMaterial({color:0x000022,emissive:lin('#1a5bff'),emissiveIntensity:3})};
@@ -1752,6 +1761,20 @@ function carMeshes(b){if(CM[b])return CM[b];const s=CAR_T[b],cg=carGeos(b),BL=cg
   add(new T.CylinderGeometry(.045,.045,.16,10).rotateX(Math.PI/2),[-rw*.55,s.yb+.08,rz-.05],'#9aa0a6',trim);
   // dark wheel housings so you cannot see through the arches
   for(const z of[s.wz,-s.wz])add(new T.BoxGeometry(s.w-.62,s.wr*1.5,(s.wr+.07)*2-.05),[0,s.wr+.05,z],'#0a0a0b');
+  // lighting details: LED daytime strips over the headlights, projector lenses, a light bar across the tail on sporty cars
+  const sporty=['sports','super','hyper','legend','coupe','muscle'].includes(b),exotic=['super','hyper','legend'].includes(b);
+  for(const x of[-1,1]){add(new T.BoxGeometry(.38,.018,.02),[x*(fw-.3),s.hl+.078,fz+.028],'#eaf6ff');
+    for(const o of[-.09,.09])add(new T.CylinderGeometry(.04,.04,.02,12).rotateX(Math.PI/2),[x*(fw-.3)+o,s.hl,fz+.035],'#fffdf4');}
+  if(sporty){add(new T.BoxGeometry(rw*1.5,.022,.02),[0,s.tl+.06,rz-.035],'#ff2424');
+    // body kit: front splitter, side skirts, diffuser fins, exhaust tips
+    add(new T.BoxGeometry(fw*1.7,.03,.2),[0,s.yb+.03,fz-.02],'#121315',trim);
+    for(const x of[-1,1])add(new T.BoxGeometry(.06,.07,Math.max(.6,s.wz*2-(s.wr+.1)*2)),[x*(sideX(0,s.yb+.05)+.02),s.yb+.035,0],'#121315',trim);
+    for(let k=-2;k<=2;k++)add(new T.BoxGeometry(.02,.1,.2),[k*rw*.28,s.yb+.06,rz+.05],'#0c0c0d');
+    const pipes=exotic?[-.3,-.18,.18,.3]:b==='muscle'?[-.55,.55]:[-.22,.22];for(const px of pipes)add(new T.CylinderGeometry(.05,.055,.18,14).rotateX(Math.PI/2),[px*rw,s.yb+.1,rz-.06],'#b9bec4',trim);
+    // rear wing on the fast ones, hood vents on exotics
+    if(exotic||b==='sports'){const wz=rz+.32,top=BL.span(wz)[1];for(const x of[-1,1])add(new T.BoxGeometry(.035,.2,.1),[x*rw*.55,top+.09,wz],'#151618',trim);
+      add(new T.BoxGeometry(rw*1.75,.035,.34),[0,top+.2,wz-.02],'#17181b',trim);for(const x of[-1,1])add(new T.BoxGeometry(.03,.12,.38),[x*rw*.875,top+.19,wz-.02],'#17181b',trim);}
+    if(exotic){const vz=BL.zmax-.75,top=BL.span(vz)[1];for(const x of[-1,1])for(let k=0;k<4;k++)add(new T.BoxGeometry(.2,.012,.025),[x*fw*.35,top+.004,vz+k*.06],'#0a0a0b');}}
   const wheel=buildVC([{geo:cg.tire,color:'#121314'}].concat(cg.rimParts));
   return CM[b]={paint,glass:cg.cabin,detail:buildVC(det),trim:trim.length?buildVC(trim):null,wheel,fz,rz};}
 /* driver-side front door (local +x) that can swing open, the dark opening behind it, and a seated driver */
@@ -4054,7 +4077,7 @@ function actTick(a,dt){let spd=0;if(a.path&&a.path.length){const p=a.path[0],dx=
   else if(a.pose==='wrench'){H.armR.rotation.x=-.45;H.elR.rotation.x=-.9;}
   else if(a.pose==='cry'){H.head.rotation.x=.35;H.armL.rotation.x=-1.3;H.elL.rotation.x=-2.3;H.armR.rotation.x=-1.25;H.elR.rotation.x=-2.3;}
   else if(a.pose==='recline'){H.root.rotation.x=-1.05;H.legL.rotation.x=-1.4;H.legR.rotation.x=-1.4;H.knL.rotation.x=.15;H.knR.rotation.x=.15;}
-  else{H.armL.rotation.z=0;H.armR.rotation.z=0;}
+  else{H.armL.rotation.z=-.07;H.armR.rotation.z=.07;}
   if(a.talk>0&&!H.ko){a.talk-=dt;H.head.rotation.x+=Math.sin(T0*9.5)*.05;H.head.rotation.y+=Math.sin(T0*3.1)*.09;if(!a.pose&&a.spd<.3){H.armR.rotation.x+=-.35-Math.sin(T0*4.2)*.22;H.elR.rotation.x=-1.1+Math.sin(T0*3)*.2;}}}
 function movClear(){if(MOV.lights){for(const l of MOV.lights)scene.remove(l);MOV.lights=[];}for(const k in MOV.cast){const a=MOV.cast[k];scene.remove(a.H.root);}MOV.cast={};for(const c of MOV.cars)removeCar(c);MOV.cars=[];fireOff();}
 /* ---- fire and smoke for the flashback ---- */
