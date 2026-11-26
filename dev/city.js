@@ -4042,7 +4042,7 @@ function actTick(a,dt){let spd=0;if(a.path&&a.path.length){const p=a.path[0],dx=
   else if(a.pose==='recline'){H.root.rotation.x=-1.05;H.legL.rotation.x=-1.4;H.legR.rotation.x=-1.4;H.knL.rotation.x=.15;H.knR.rotation.x=.15;}
   else{H.armL.rotation.z=0;H.armR.rotation.z=0;}
   if(a.talk>0&&!H.ko){a.talk-=dt;H.head.rotation.x+=Math.sin(T0*9.5)*.05;H.head.rotation.y+=Math.sin(T0*3.1)*.09;if(!a.pose&&a.spd<.3){H.armR.rotation.x+=-.35-Math.sin(T0*4.2)*.22;H.elR.rotation.x=-1.1+Math.sin(T0*3)*.2;}}}
-function movClear(){for(const k in MOV.cast){const a=MOV.cast[k];scene.remove(a.H.root);}MOV.cast={};for(const c of MOV.cars)removeCar(c);MOV.cars=[];fireOff();}
+function movClear(){if(MOV.lights){for(const l of MOV.lights)scene.remove(l);MOV.lights=[];}for(const k in MOV.cast){const a=MOV.cast[k];scene.remove(a.H.root);}MOV.cast={};for(const c of MOV.cars)removeCar(c);MOV.cars=[];fireOff();}
 /* ---- fire and smoke for the flashback ---- */
 let FIRE=null;
 function fireOn(pts,big){if(!FIRE){const cv=document.createElement('canvas');cv.width=cv.height=64;const g=cv.getContext('2d'),gr=g.createRadialGradient(32,32,0,32,32,32);gr.addColorStop(0,'rgba(255,255,255,1)');gr.addColorStop(.35,'rgba(255,255,255,.6)');gr.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=gr;g.fillRect(0,0,64,64);
@@ -4196,18 +4196,18 @@ function filmOpening(){const{G,HD,R,B,bed}=filmAnchors();const gx=G.x,gz=G.z-1.2
     lines:[['minh','Ai làm chuyện này?','Who did this?',.6],['linh','Lantern Mike ở Phố Cổ. Nhưng hắn chỉ là chó săn. Cả năm khu phố đều nộp tiền cho Ông Trùm Vương.','Lantern Mike from the Old Quarter. But he is just a dog on a leash. All five districts pay Boss Vương.'],
       ['minh','Vậy anh sẽ lấy lại từng khu một. Bắt đầu từ Lantern Mike.','Then I will take them back one by one. Starting with Lantern Mike.']]},
   /* the Syndicate on the tower roof */
-  {dur:3,tod:20.3,inside:'tower',px:TW.cx,pz:TW.cz+4,music:'tense',loc:[L('Cùng lúc đó · Tháp Syndicate','Meanwhile · Syndicate Tower'),L('Sân thượng','The roof')],
+  {dur:3,tod:19.4,inside:'tower',px:TW.cx,pz:TW.cz+4,music:'tense',loc:[L('Cùng lúc đó · Tháp Syndicate','Meanwhile · Syndicate Tower'),L('Sân thượng','The roof')],
     setup(){filmGang(false);},cam:[{p:[TW.cx+14,9,TW.cz+12],l:[TW.cx,1.5,TW.cz-8]},{p:[TW.cx+9,6,TW.cz+6],l:[TW.cx,1.5,TW.cz-8]}],tail:.3},
-  {dur:10.5,tod:20.3,inside:'tower',px:TW.cx,pz:TW.cz+4,cut:true,camT:10.5,linear:true,
+  {dur:10.5,tod:19.4,inside:'tower',px:TW.cx,pz:TW.cz+4,cut:true,camT:10.5,linear:true,
     setup(){filmGang(false);},who:[[.6,'h0','mike'],[2.6,'h1','henry'],[4.6,'h2','rio'],[6.6,'h3','michael'],[8.6,'h4','han']],
     cam:[{p:[TW.cx-8.8,1.75,TW.cz-6.7],l:[TW.cx-8.8,1.6,TW.cz-4]},{p:[TW.cx+8.8,1.75,TW.cz-6.7],l:[TW.cx+8.8,1.6,TW.cz-4]}],tail:.6},
-  {dur:6,tod:20.3,inside:'tower',px:TW.cx,pz:TW.cz+4,cut:true,setup(){filmGang(false);},who:[[.7,'v','vuong']],
+  {dur:6,tod:19.4,inside:'tower',px:TW.cx,pz:TW.cz+4,cut:true,setup(){filmGang(false);},who:[[.7,'v','vuong']],
     cam:[{p:[TW.cx+2.6,2.2,TW.cz-2.4],l:[TW.cx,2.1,TW.cz-12]},{p:[TW.cx+1.6,2.1,TW.cz-6.8],l:[TW.cx,2.2,TW.cz-12]}],
     lines:[['vuong','Đêm qua tiệm của lão Jonathan đã thành tro. Kẻ nào không nộp tiền, kết cục cũng như thế.','Last night Jonathan\'s shop burned to ash. Anyone who does not pay ends up the same way.',3.4],
       ['vuong','Nghe nói thằng con trai của lão vừa về thành phố.','I hear his son just came back to town.'],
       ['lao','Để tôi lo nó, thưa Ông Trùm.','Leave him to me, Boss.',.4,'h0'],
       ['vuong','Không. Năm đứa bây giữ chặt khu của mình. Nó bước vào khu nào, khu đó xử nó.','No. All five of you hold your districts. Whatever district he walks into, that district finishes him.',.4]]},
-  {dur:5,tod:20.3,inside:'tower',px:TW.cx,pz:TW.cz+4,cut:true,setup(){filmGang(true);},
+  {dur:5,tod:19.4,inside:'tower',px:TW.cx,pz:TW.cz+4,cut:true,setup(){filmGang(true);},
     cam:[{p:[TW.cx,7,TW.cz-21],l:[TW.cx,1.2,TW.cz-2]},{p:[TW.cx,9,TW.cz-24],l:[TW.cx,1,TW.cz]}],
     lines:[['gang','Vâng, thưa Ông Trùm!','Yes, Boss!',.8],['vuong','Đi đi.','Go.',.5]],tail:1.2},
   /* uncle Tư */
@@ -4220,7 +4220,8 @@ function filmOpening(){const{G,HD,R,B,bed}=filmAnchors();const gx=G.x,gz=G.z-1.2
       ['tu','Ghé tiệm Súng Tầm Xa. Chú lấy giá anh em cho con.','Come by Long Range Guns. I will give you the family price.'],['minh','Cảm ơn chú.','Thank you, Uncle.']]},
   {dur:7,tod:21,px:gx,pz:gz,music:'title',camT:8,cam:[{p:[gx+6,3,gz+10],l:[gx,3,gz]},{p:[gx+30,40,gz+70],l:[gx,10,gz]}],linear:true,
     card:{kick:L('Nexus City · Story mode','Nexus City · Story mode'),title:L('Món nợ của Cha','A Debt to My Father'),sub:L('Lấy lại năm khu phố. Đưa Ông Trùm Vương ra trả giá.','Take back five districts. Make Boss Vương pay.'),c:'#ffd166',c2:'#ff5fa2',at:.4,snd:'boss'},tail:0}];}
-function filmGang(salute){const v=actor('v','vuong',TW.cx,TW.cz-12,0,{inside:true,scale:1.18});v.pose='cross';
+function filmLight(x,y,z,col,int,dist){const l=new T.PointLight(col,int,dist||30,1.4);l.position.set(x,y,z);scene.add(l);(MOV.lights||(MOV.lights=[])).push(l);return l;}
+function filmGang(salute){filmLight(TW.cx,5,TW.cz-8,'#ffd9a8',2.2,34);filmLight(TW.cx-6,3,TW.cz-2,'#9fc3ff',1.2,22);filmLight(TW.cx+6,3,TW.cz-2,'#ff9a6a',1.2,22);const v=actor('v','vuong',TW.cx,TW.cz-12,0,{inside:true,scale:1.18});v.pose='cross';
   for(let i=0;i<5;i++){const a=actor('h'+i,'gang',TW.cx-8+i*4,TW.cz-4,Math.PI,{inside:true,scale:1.08,look:ST_BODY[i]});if(salute)a.pose='salute';}}
 function filmEnding(){const{G,HD,R,B,bed}=filmAnchors();const gx=G.x,gz=G.z-1.25,bx=road(N-1)+1.8;return[
   {black:true,dur:3,tod:9,px:gx,pz:gz,music:'hope',cam:[{p:[0,300,0],l:[0,0,1]}],card:{kick:'',title:L('Sáng hôm sau','The next morning'),c:'#ffd166',c2:'#ffffff',at:.3},tail:0},
