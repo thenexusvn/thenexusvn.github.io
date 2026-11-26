@@ -4159,7 +4159,7 @@ function filmOpening(){const{G,HD,R,B,bed}=filmAnchors();const gx=G.x,gz=G.z-1.2
     cam:[{p:[gx-5,1.7,gz+6],l:[gx+2,1.4,gz+2]},{p:[gx-4.4,1.6,gz+5],l:[gx-1.4,1.4,gz+2.2]}],
     lines:[['linh','Anh Joseph!','Joseph!',3.1],['minh','Oscar? Tiệm của ba sao thế này? Ba đâu?','Oscar? What happened to Father\'s shop? Where is he?'],['linh','Đêm qua… người của Syndicate tới. Ba không chịu nộp tiền bảo kê…','Last night… the Syndicate came. Father refused to pay them…']]},
   /* flashback */
-  {dur:4,tod:23.2,px:gx,pz:gz,flash:true,music:'tense',card:{kick:L('Đêm hôm trước','The night before'),title:'',at:.2},
+  {dur:4,tod:23.2,px:gx,pz:gz,flash:true,music:'tense',loc:[L('Đêm hôm trước','The night before'),L('Hồi tưởng','Flashback')],
     who:[[1,'b','jonathan']],setup(){const b=actor('b','ba',gx,gz+.9,0,{pose:'wrench'});},cam:[{p:[gx+3,1.3,gz+5],l:[gx,1.4,gz+.5]},{p:[gx+1.8,1.5,gz+3.8],l:[gx,1.5,gz+.8]}],
     lines:[['ba','Muộn rồi, tiệm đóng cửa.','It is late. The shop is closed.',1.8]]},
   {dur:6,tod:23.2,px:gx,pz:gz,flash:true,cut:true,
