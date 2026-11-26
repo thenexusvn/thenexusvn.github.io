@@ -4080,7 +4080,7 @@ function movNext(){const el=MOV.el;MOV.si++;const s=MOV.film[MOV.si];movClear();
   if(gps.mesh)gps.mesh.visible=false;if(s.setup)s.setup();
   if(s.loc)el.querySelector('.mv-stage').insertAdjacentHTML('beforeend',`<div class="mv-loc">${cnE(s.loc[0])}<small>${cnE(s.loc[1]||'')}</small></div>`);
   if(s.card)setTimeout(()=>{if(MOV.s===s)el.querySelector('.mv-stage').insertAdjacentHTML('beforeend',`<div class="mv-card" style="--c:${s.card.c||'#ff5fa2'};--c2:${s.card.c2||'#ffb36b'}">${s.card.kick?`<div class="cn-kick">${cnE(s.card.kick)}</div>`:''}<h2 class="cn-title">${cnE(s.card.title)}</h2>${s.card.sub?`<p class="cn-sub">${cnE(s.card.sub)}</p>`:''}</div>`);if(s.card.snd)cinSfx(s.card.snd);},(s.card.at||.6)*1000);
-  movCam(0);const b=el.querySelector('.mv-black');if(s.black)b.classList.remove('off');else requestAnimationFrame(()=>b.classList.add('off'));}
+  movCam(0);const b=el.querySelector('.mv-black');if(s.black)b.classList.remove('off');else setTimeout(()=>b.classList.add('off'),30);}
 function subOn(who,text){const el=MOV.el.querySelector('.mv-sub'),c=CAST[who]||{};el.innerHTML=`<b style="color:${c.col||'#fff'}">${cnE(c.n?L(c.n[0],c.n[1]):'')}</b>${cnE(text)}`;el.classList.add('on');}
 function subOff(){if(MOV.el)MOV.el.querySelector('.mv-sub').classList.remove('on');}
 const _ma=new T.Vector3(),_mb=new T.Vector3();
