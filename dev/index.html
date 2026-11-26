@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="nexus-build" content="20261126175548">
+<meta name="nexus-build" content="20261126180359">
 <title>Nexus</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Crect%20width%3D%22100%22%20height%3D%22100%22%20rx%3D%2226%22%20fill%3D%22%23c1f354%22%2F%3E%3Cpath%20d%3D%22M28%2076V24L72%2076V24%22%20fill%3D%22none%22%20stroke%3D%22%2308090c%22%20stroke-width%3D%2213%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Ccircle%20cx%3D%2284%22%20cy%3D%2216%22%20r%3D%229%22%20fill%3D%22%23ad8dff%22%2F%3E%3C%2Fsvg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -2777,10 +2777,10 @@ function setChar(c){if(c==='minh')c='joseph';if(c==='vy')c='oscar';char=c;docume
 document.querySelectorAll('.c-char').forEach(b=>b.addEventListener('click',()=>setChar(b.dataset.char)));setChar(char);
 let curMode=null;
 function storyInfo(){let s=null,lg=null;try{s=JSON.parse(localStorage.getItem('nexus-city2-story')||'null');lg=JSON.parse(localStorage.getItem('nexus-city2-legend')||'null');}catch(_){}return{st:s&&s.story,beat:!!(lg&&lg.done)};}
-function storyLine(){const{st,beat}=storyInfo();const k=st?st.keys.reduce((a,b)=>a+(b?1:0),0):0;const SL=(v,e)=>(window.NexusI18n&&window.NexusI18n.lang==='en')?e:v;
-  const line=st&&!st.done&&st.ch>0?SL(`Story mode đang chơi: 🔑 ${k}/5 mảnh thẻ · ❤ ${st.lives} mạng`,`Story mode in progress: 🔑 ${k}/5 key cards · ❤ ${st.lives} lives`):beat?SL('✓ Bạn đã phá đảo Story mode · siêu xe Huyền Thoại đang ở gara','✓ You beat Story mode · the Legend supercar is in your garage'):SL('Story mode: lật đổ Ông Trùm của Nexus City để nhận siêu xe Huyền Thoại.','Story mode: take down the Boss of Nexus City to win the Legend supercar.');
-  const l=$('#cStoryLine');if(l)l.textContent=line;const n=$('#cStoryNote');if(n)n.textContent=(beat?SL('Bạn đã phá đảo rồi. Chơi lại vẫn vui, nhưng không nhận thêm xe hay tiền. ','You already beat it. Replaying is still fun, but gives no extra car or money. '):'')+(st&&!st.done&&st.ch>0?SL(`Tiến độ: ${k}/5 mảnh thẻ, còn ${st.lives} mạng.`,`Progress: ${k}/5 key cards, ${st.lives} lives left.`):'');
-  const go=$('#cStoryGo');if(go)go.textContent=st&&!st.done&&st.ch>0?SL('Tiếp tục story','Continue story'):SL('Bắt đầu','Start');const nw=$('#cStoryNew');if(nw)nw.hidden=!(st&&(st.ch>0||st.done));}
+function storyLine(){const{st,beat}=storyInfo();const prog=!!(st&&!st.done&&(st.ch>0||(st.tips&&st.tips.open)||st.t0));const k=st?st.keys.reduce((a,b)=>a+(b?1:0),0):0;const SL=(v,e)=>(window.NexusI18n&&window.NexusI18n.lang==='en')?e:v;
+  const line=prog?SL(`Story mode đang chơi: 🔑 ${k}/5 mảnh thẻ · ❤ ${st.lives} mạng`,`Story mode in progress: 🔑 ${k}/5 key cards · ❤ ${st.lives} lives`):beat?SL('✓ Bạn đã phá đảo Story mode · siêu xe Huyền Thoại đang ở gara','✓ You beat Story mode · the Legend supercar is in your garage'):SL('Story mode: lật đổ Ông Trùm của Nexus City để nhận siêu xe Huyền Thoại.','Story mode: take down the Boss of Nexus City to win the Legend supercar.');
+  const l=$('#cStoryLine');if(l)l.textContent=line;const n=$('#cStoryNote');if(n)n.textContent=(beat?SL('Bạn đã phá đảo rồi. Chơi lại vẫn vui, nhưng không nhận thêm xe hay tiền. ','You already beat it. Replaying is still fun, but gives no extra car or money. '):'')+(prog?SL(`Tiến độ: ${k}/5 mảnh thẻ, còn ${st.lives} mạng.`,`Progress: ${k}/5 key cards, ${st.lives} lives left.`):'');
+  const go=$('#cStoryGo');if(go)go.textContent=prog?SL('Tiếp tục','Continue'):SL('Bắt đầu','Start');const nw=$('#cStoryNew');if(nw){nw.hidden=!(prog||(st&&st.done));nw.textContent=SL('Chơi lại từ đầu','Restart from the beginning');}const bk=$('#cStoryBack');if(bk)bk.textContent=SL('Quay lại','Back');}
 function showStart(mode){$('#cStart').hidden=false;$('#cNew').hidden=mode!=='new';$('#cResume').hidden=mode!=='resume';$('#cStoryP').hidden=mode!=='story';storyLine();const f=mode==='new'?$('#cStoryBtn'):mode==='story'?$('#cStoryGo'):$('#cResumeBtn');if(f)f.focus();}
 async function begin(tutorial,mode){mode=mode||'free';if(game){if(curMode===mode&&!tutorial){resume();return;}try{sessionStorage.setItem('nexus-city-boot',JSON.stringify({tutorial,mode}));}catch(_){}location.reload();return;}if(loading)return;curMode=mode;loading=true;$('#cGoTut').disabled=$('#cGo').disabled=true;$('#cStatus').textContent='Đang dựng thành phố, chờ vài giây...';
   try{await ensure();}catch(_){$('#cStatus').textContent='Chưa tải được thư viện 3D. Kiểm tra mạng rồi thử lại.';loading=false;$('#cGoTut').disabled=$('#cGo').disabled=false;return;}
@@ -2791,7 +2791,7 @@ async function begin(tutorial,mode){mode=mode||'free';if(game){if(curMode===mode
 $('#cGoTut').addEventListener('click',()=>begin(true,'free'));$('#cGo').addEventListener('click',()=>begin(false,'free'));
 $('#cStoryBtn').addEventListener('click',()=>showStart('story'));$('#cStoryBack').addEventListener('click',()=>showStart(game?'resume':'new'));
 $('#cStoryGo').addEventListener('click',()=>begin(false,'story'));
-$('#cStoryNew').addEventListener('click',()=>{if(!confirm('Chơi lại Story mode từ đầu? Tiến độ story hiện tại sẽ mất.'))return;try{localStorage.removeItem('nexus-city2-story');}catch(_){}if(game){try{sessionStorage.setItem('nexus-city-boot',JSON.stringify({tutorial:false,mode:'story'}));}catch(_){}location.reload();}else begin(false,'story');});
+$('#cStoryNew').addEventListener('click',()=>{if(!confirm((window.NexusI18n&&window.NexusI18n.lang==='en')?'Restart Story mode from the beginning? Your current story progress will be lost.':'Chơi lại Story mode từ đầu? Tiến độ story hiện tại sẽ mất.'))return;try{localStorage.removeItem('nexus-city2-story');}catch(_){}if(game){try{sessionStorage.setItem('nexus-city-boot',JSON.stringify({tutorial:false,mode:'story'}));}catch(_){}location.reload();}else begin(false,'story');});
 $('#cModes').addEventListener('click',()=>showStart('new'));
 try{const b=JSON.parse(sessionStorage.getItem('nexus-city-boot')||'null');if(b){sessionStorage.removeItem('nexus-city-boot');setTimeout(()=>{location.hash='#city';setTimeout(()=>{open();begin(b.tutorial,b.mode);},200);},300);}}catch(_){}
 function pause(){if(!game)return;game.setPaused(true);$('#cPause').textContent='Tiếp tục';showStart('resume');}
