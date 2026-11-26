@@ -152,13 +152,13 @@ function emat(c,i){i=i===undefined?1:i;const k='e|'+c+'|'+i;if(!MC[k])MC[k]=new 
 /* ---------- HDRI reflections: real sky photos (Poly Haven, CC0) reflected in car paint, glass, chrome and water.
    Three HDRIs (day, golden hour, night) are swapped by time of day; the general scene lighting is unchanged. ---------- */
 const HDR={names:{day:'kloofendal_48d_partly_cloudy_puresky',gold:'venice_sunset',night:'satara_night'},tex:{},cur:'',mats:new Set(),t:0,on:!MOBILE&&opt.gfx!=='low'};
-function envProbe(E){try{const rt=new T.WebGLRenderTarget(8,8),ts=new T.Scene();ts.add(new T.Mesh(new T.SphereGeometry(1,16,12),new T.MeshStandardMaterial({color:0xffffff,metalness:1,roughness:.4,envMap:E})));
-  const tc=new T.PerspectiveCamera(40,1,.1,10);tc.position.z=3;renderer.setRenderTarget(rt);renderer.render(ts,tc);const px=new Uint8Array(256);renderer.readRenderTargetPixels(rt,0,0,8,8,px);renderer.setRenderTarget(null);rt.dispose();let sum=0;for(let i=0;i<px.length;i+=4)sum+=px[i]+px[i+1]+px[i+2];return sum>300;}catch(_){return false;}}
+function envProbe(E,min){try{const rt=new T.WebGLRenderTarget(8,8),ts=new T.Scene();ts.add(new T.Mesh(new T.SphereGeometry(1,16,12),new T.MeshStandardMaterial({color:0xffffff,metalness:1,roughness:.4,envMap:E})));
+  const tc=new T.PerspectiveCamera(40,1,.1,10);tc.position.z=3;renderer.setRenderTarget(rt);renderer.render(ts,tc);const px=new Uint8Array(256);renderer.readRenderTargetPixels(rt,0,0,8,8,px);renderer.setRenderTarget(null);rt.dispose();let sum=0;for(let i=0;i<px.length;i+=4)sum+=px[i]+px[i+1]+px[i+2];return sum>(min||300);}catch(_){return false;}}
 function hdrJs(src){return new Promise((res,rej)=>{if(T.RGBELoader)return res();const sc=document.createElement('script');sc.src=src;sc.onload=res;sc.onerror=rej;document.head.appendChild(sc);});}
 async function hdrLoad(k){if(HDR.tex[k]!==undefined)return HDR.tex[k];HDR.tex[k]=null;
   try{await hdrJs('https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/RGBELoader.js');
     const t=await new Promise((r,j)=>new T.RGBELoader().setDataType(T.UnsignedByteType).load('https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/'+HDR.names[k]+'_1k.hdr',r,null,j));
-    const pm=new T.PMREMGenerator(renderer);const e=pm.fromEquirectangular(t).texture;t.dispose();pm.dispose();const ok=envProbe(e);HDR.tex[k]=ok?e:false;if(!ok)console.warn('hdri probe failed',k);return HDR.tex[k];}catch(err){console.warn('hdri',err);HDR.tex[k]=false;return false;}}
+    const pm=new T.PMREMGenerator(renderer);const e=pm.fromEquirectangular(t).texture;t.dispose();pm.dispose();const ok=envProbe(e,12);HDR.tex[k]=ok?e:false;if(!ok)console.warn('hdri probe failed',k);return HDR.tex[k];}catch(err){console.warn('hdri',err);HDR.tex[k]=false;return false;}}
 function hdrReg(m){if(m)HDR.mats.add(m);const e=HDR.cur&&HDR.tex[HDR.cur];if(e&&m){m.envMap=e;m.needsUpdate=true;}return m;}
 function hdrTick(dt){if(!HDR.on)return;HDR.t-=dt;if(HDR.t>0)return;HDR.t=1;const h=((tod.hour%24)+24)%24,k=h>=7.3&&h<17.2?'day':(h>=17.2&&h<19.9)||(h>=5&&h<7.3)?'gold':'night';
   const inten=k==='night'?.55:k==='gold'?1.15:1;for(const m of HDR.mats)m.envMapIntensity=(m.userData.envBase||1)*inten;
