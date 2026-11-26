@@ -3630,7 +3630,7 @@ const PP=(()=>{const gl2=renderer.capabilities.isWebGL2;const o={on:opt.gfx?opt.
    ch 0: buy a gun · ch 1-5: beat the boss of each town (1 key card each) · ch 6: Syndicate Tower rooftop, final boss + escape helicopter · ch 7: done.
    3 lives: dying wakes you in hospital with progress kept; losing all 3 sends you back to the first boss (key cards lost). */
 const STORY=opt.mode==='story';
-const ST_TOWNS=[['oldq',L('Lão Đèn Lồng','The Lantern Elder'),L('Phố Cổ Đèn Lồng','Lantern Old Quarter')],['harbor',L('Cá Mập Cảng','The Harbor Shark'),L('Cảng Bắc','North Harbor')],['highland',L('Bóng Ma Đồi Mây','The Cloud Hill Ghost'),L('Đồi Mây','Cloud Hills')],['minetown',L('Vua Mỏ Bạc','The Silver Mine King'),L('Thị trấn Mỏ Bạc','Silver Mine Town')],['westside',L('Rắn Sa Mạc','The Desert Snake'),L('Nexus Tây','Nexus West')]];
+const ST_TOWNS=[['oldq',L('Lantern Mike','Lantern Mike'),L('Phố Cổ Đèn Lồng','Lantern Old Quarter')],['harbor',L('Shark Henry','Shark Henry'),L('Cảng Bắc','North Harbor')],['highland',L('Cloud Rio','Cloud Rio'),L('Đồi Mây','Cloud Hills')],['minetown',L('Silver Michael','Silver Michael'),L('Thị trấn Mỏ Bạc','Silver Mine Town')],['westside',L('Desert Han','Desert Han'),L('Nexus Tây','Nexus West')]];
 const ST_LOOKS=[{shirt:'#7a1020',pants:'#1a1a1a',jacket:'#c0392b',cap:null},{shirt:'#1d3557',pants:'#22313f',jacket:'#457b9d',cap:'#0b1a2a'},{shirt:'#eeeeee',pants:'#30343a',jacket:'#6c757d',cap:null},{shirt:'#3b2f2f',pants:'#4a3b2a',jacket:'#8d6e63',cap:'#5d4037'},{shirt:'#2d6a4f',pants:'#1b4332',jacket:'#1b1b1b',cap:'#2d6a4f'}];
 if(STORY){save.story=Object.assign({ch:0,keys:[0,0,0,0,0],lives:3,done:false,deaths:0,t0:Date.now()},save.story||{});}
 const SS=STORY?save.story:null;
@@ -3900,8 +3900,8 @@ function stOpening(){if(SS.done)return;
   else if(SS.ch>=1&&SS.ch<=6){const i=SS.ch-1;
     cine({type:'title',hold:3.4,slow:.35,kick:L('Story mode · tiếp tục','Story mode · continued'),title:SS.ch===6?L('Hồi cuối','Final act'):L('Chương ','Chapter ')+SS.ch,c:SS.ch===6?'#ffd166':ST_COL[i][0],c2:SS.ch===6?'#ff8a3d':'#ffffff',snd:'slow',
       sub:SS.ch===6?L('Đủ 5 mảnh thẻ. Tháp Syndicate đang chờ ở trung tâm.','All 5 key cards. Syndicate Tower is waiting downtown.'):L(`Tìm ${ST_TOWNS[i][1]} ở ${ST_TOWNS[i][2]} · ❤ ${SS.lives} mạng · 🔑 ${stKeys()}/5`,`Find ${ST_TOWNS[i][1]} in ${ST_TOWNS[i][2]} · ❤ ${SS.lives} lives · 🔑 ${stKeys()}/5`)});}}
-function stMission1(){cine({type:'tip',wait:true,kick:L('Nhiệm vụ 1','Mission 1'),title:L('Gặp Chú Tư','Meet Uncle Tư'),c:'#c1f354',c2:'#ffd166',snd:'boss',
-    sub:L('Chú Tư chờ ở Súng Tầm Xa. Theo đường đỏ, vào tiệm và mua vũ khí đầu tiên. Bạn có $1.500.','Uncle Tư is waiting at Long Range Guns. Follow the red route, go in and buy your first weapon. You have $1,500.'),
+function stMission1(){cine({type:'tip',wait:true,kick:L('Nhiệm vụ 1','Mission 1'),title:L('Gặp Chú Philip','Meet Uncle Philip'),c:'#c1f354',c2:'#ffd166',snd:'boss',
+    sub:L('Chú Philip chờ ở Súng Tầm Xa. Theo đường đỏ, vào tiệm và mua vũ khí đầu tiên. Bạn có $1.500.','Uncle Philip is waiting at Long Range Guns. Follow the red route, go in and buy your first weapon. You have $1,500.'),
     steps:[['M',L('mở bản đồ · đường đỏ luôn chỉ chỗ cần tới','open the map · the red route always shows where to go')],['W A S D',L('đi · giữ Shift để chạy','move · hold Shift to run')],['F',L('lên xe gần nhất cho nhanh','jump into the nearest car to get there faster')],['E',L('vào tiệm · bấm số để mua','enter the shop · press a number to buy')]]});}
 function stArmed(){cine({type:'stamp',hold:2.6,slow:.25,kick:L('Mở khoá','Unlocked'),title:L('Vũ khí đầu tiên','First weapon'),c:'#ffd166',c2:'#ff8a3d',snd:'stamp',flash:true});
   if(stOnce('gun'))cine({type:'tip',wait:true,kick:L('Hướng dẫn','How to'),title:L('Bắn súng','Shooting'),c:'#ffd166',c2:'#ff8a3d',
@@ -3909,7 +3909,7 @@ function stArmed(){cine({type:'stamp',hold:2.6,slow:.25,kick:L('Mở khoá','Unl
   cine({type:'tip',wait:true,kick:L('Chương 1','Chapter 1'),title:ST_TOWNS[0][2],c:ST_COL[0][0],c2:'#ffb36b',sub:L(`Trùm đầu tiên, ${ST_TOWNS[0][1]}, đang giữ khu này. Theo đường đỏ để tìm hắn.`,`The first boss, ${ST_TOWNS[0][1]}, runs this district. Follow the red route to find him.`)});}
 function stIntro(i){const g=stGang;if(!g)return;const b=g.boss;
   cine({type:'intro',wait:true,at:b,atName:L('Trùm','Boss'),kick:L(`Chương ${i+1} · ${ST_TOWNS[i][2]}`,`Chapter ${i+1} · ${ST_TOWNS[i][2]}`),title:ST_TOWNS[i][1],tag:L(ST_TAG[i][0],ST_TAG[i][1]),
-    stats:[`❤ ${b.maxHp}`,L(`${g.list.length-1} đàn em`,`${g.list.length-1} henchmen`),'🔑 '+(stKeys()+1)+'/5'],c:ST_COL[i][0],c2:ST_COL[i][1],snd:'boss',flash:true});}
+    stats:[L('Đàn em Syndicate','Syndicate henchman'),`❤ ${b.maxHp}`,L(`${g.list.length-1} đàn em`,`${g.list.length-1} henchmen`),'🔑 '+(stKeys()+1)+'/5'],c:ST_COL[i][0],c2:ST_COL[i][1],snd:'boss',flash:true});}
 function stFightTip(){if(!stOnce('fight'))return;
   cine({type:'tip',wait:true,kick:L('Giữa trận · hướng dẫn','Mid-fight · how to'),title:L('Cách hạ trùm','How to beat a boss'),c:'#ff3b47',c2:'#ffb36b',snd:'slow',
     steps:[['Click / J',L('đánh · bấm liền 3 lần ra combo đấm, đấm, đá','attack · tap 3 times for a punch, punch, kick combo')],[L('Giữ chuột phải / K','Hold right click / K'),L('đỡ đòn · đỡ đúng lúc hắn ra đòn sẽ làm hắn choáng','block · blocking right as he swings stuns him')],['2 – 4',L('rút súng nếu có · bắn từ xa an toàn hơn','pull a gun if you have one · range is safer')],['Shift',L('chạy vòng ra, hạ đàn em trước để không bị vây','circle away and drop the henchmen first so you are not surrounded')]]});}
@@ -3922,8 +3922,8 @@ function stKeyStamp(i){const k=stKeys();stWhenFree(()=>stCall(k),1500);
     sub:L('Ông Trùm Vương đang chờ trên sân thượng. Theo đường đỏ tới trung tâm. Cắt đuôi cảnh sát trước khi vào.','Boss Vương is waiting on the roof. Follow the red route downtown. Lose the police before you go in.')});
   else if(stOnce('afterkey'))cine({type:'tip',wait:true,kick:L('Mẹo','Tip'),title:L('Hồi sức trước trận sau','Recover before the next fight'),c:'#2fd47a',c2:'#c1f354',
     steps:[['E',L('ngủ ở nhà an toàn: lưu game, hồi đầy máu','sleep at your safehouse: save and full health')],['🍚',L('Cơm Tấm Cô Ba bán đồ ăn hồi máu','Cô Ba\'s Broken Rice sells healing food')],['🔫',L('mua thêm súng và áo giáp bằng tiền thưởng','spend the reward on guns and armor')]]});}
-function stTowerIntro(){cine({type:'intro',wait:true,at:stTower&&stTower.boss,atName:L('Ông Trùm','The Boss'),kick:L('Hồi cuối · Tháp Syndicate','Final act · Syndicate Tower'),title:L('Ông Trùm Vương','Boss Vương'),
-    tag:L('Con trai của Hải. Mày không biết ba mày từng là người của tao à?','Hải\'s boy. Did you know your father used to work for me?'),say:['vuong','Con trai của Hải. Mày không biết ba mày từng là người của tao à?','Hải\'s boy. Did you know your father used to work for me?'],stats:['❤ 1100',L('6 vệ sĩ','6 bodyguards'),'🚁'],c:'#d4a017',c2:'#3a2a00',snd:'boss',flash:true});
+function stTowerIntro(){cine({type:'intro',wait:true,at:stTower&&stTower.boss,atName:L('Ông Trùm','The Boss'),kick:L('Thủ lĩnh Syndicate · Hồi cuối','Leader of the Syndicate · Final act'),title:L('Ông Trùm Vương','Boss Vương'),
+    tag:L('Con trai của Jonathan. Mày không biết ba mày từng là người của tao à?','Jonathan\'s boy. Did you know your father used to work for me?'),say:['vuong','Con trai của Jonathan. Mày không biết ba mày từng là người của tao à?','Jonathan\'s boy. Did you know your father used to work for me?'],stats:['❤ 1100',L('6 vệ sĩ','6 bodyguards'),'🚁'],c:'#d4a017',c2:'#3a2a00',snd:'boss',flash:true});
   if(stOnce('tower'))cine({type:'tip',wait:true,kick:L('Sân thượng','Rooftop'),title:L('Sống sót trên mái','Survive the roof'),c:'#ffd166',c2:'#ff8a3d',
     steps:[['E',L('thùng đạn cạnh cửa: nạp đầy đạn bao nhiêu lần cũng được','ammo crate by the door: refill as often as you like')],['⬛',L('núp sau máy lạnh và lỗ thông gió','take cover behind AC units and vents')],['🎯',L('hạ vệ sĩ trước, rồi dồn Ông Trùm','drop the bodyguards first, then go for the Boss')]]});}
 function stHeliTip(){cine({type:'tip',wait:true,kick:L('Hắn đang bỏ chạy!','He is getting away!'),title:L('Bắn rơi trực thăng','Shoot down the helicopter'),c:'#ff3b47',c2:'#ffd166',snd:'boss',flash:true,
@@ -3943,11 +3943,11 @@ function stLowTip(){if(!stOnce('lowhp'))return;cine({type:'tip',wait:true,kick:L
    scripted actors, camera moves, flashback grade, fire, music, and phone calls during play ======== */
 const isEN=()=>L('v','e')==='e';
 const CAST={
-  minh:{n:['Minh','Minh'],look:CHARS.minh,col:'#7ec3ff',pitch:.9,rate:1.02,male:true},
-  linh:{n:['Linh','Linh'],look:{female:true,skin:'#ecc29f',hair:'#1b120c',hairStyle:'long',shirt:'#c2185b',pants:'#2b3a55',shoes:'#f5f5f3',sleeve:true},col:'#ff9fb8',pitch:1.2,rate:1.04},
-  ba:{n:['Ba · ông Hải','Dad · Mr. Hải'],look:{female:false,skin:'#b77c58',hair:'#a8a8a8',hairStyle:'short',beard:true,shirt:'#5b6b4a',pants:'#3b3b3b',shoes:'#2a2522',sleeve:true,longSleeve:true},col:'#ffd166',pitch:.72,rate:.9,male:true},
-  tu:{n:['Chú Tư','Uncle Tư'],look:{female:false,skin:'#c08a62',hair:'#222222',hairStyle:'bald',beard:true,glasses:true,shirt:'#d9d2c3',jacket:'#2b2b2b',pants:'#262a33',shoes:'#111111',sleeve:true},col:'#c1f354',pitch:.78,rate:.96,male:true},
-  lao:{n:['Lão Đèn Lồng','The Lantern Elder'],look:{female:false,skin:'#c9956b',hair:'#dddddd',hairStyle:'buzz',beard:true,shirt:'#111111',jacket:'#9b1c1c',pants:'#111111',shoes:'#111111',sleeve:true},col:'#ff5a4a',pitch:.58,rate:.88,male:true},
+  minh:{n:['Joseph','Joseph'],look:CHARS.minh,col:'#7ec3ff',pitch:.9,rate:1.02,male:true},
+  linh:{n:['Oscar','Oscar'],look:CHARS.oscar,col:'#ff9fb8',pitch:1.2,rate:1.04},
+  ba:{n:['Jonathan · Ba','Jonathan · Father'],look:{female:false,skin:'#b77c58',hair:'#a8a8a8',hairStyle:'short',beard:true,shirt:'#5b6b4a',pants:'#3b3b3b',shoes:'#2a2522',sleeve:true,longSleeve:true},col:'#ffd166',pitch:.72,rate:.9,male:true},
+  tu:{n:['Chú Philip','Uncle Philip'],look:{female:false,skin:'#c08a62',hair:'#222222',hairStyle:'bald',beard:true,glasses:true,shirt:'#d9d2c3',jacket:'#2b2b2b',pants:'#262a33',shoes:'#111111',sleeve:true},col:'#c1f354',pitch:.78,rate:.96,male:true},
+  lao:{n:['Lantern Mike','Lantern Mike'],look:{female:false,skin:'#c9956b',hair:'#dddddd',hairStyle:'buzz',beard:true,shirt:'#111111',jacket:'#9b1c1c',pants:'#111111',shoes:'#111111',sleeve:true},col:'#ff5a4a',pitch:.58,rate:.88,male:true},
   thug:{n:['Đàn em','Henchman'],look:{female:false,skin:'#b98260',hair:'#111111',hairStyle:'buzz',shirt:'#1a1a1a',jacket:'#7a1f2b',pants:'#141414',shoes:'#111111'},col:'#ff5a4a',pitch:.66,rate:1,male:true},
   vuong:{n:['Ông Trùm Vương','Boss Vương'],col:'#d4a017',pitch:.55,rate:.86,male:true},
   nurse:{n:['Y tá','Nurse'],look:{female:true,skin:'#e9bf9b',hair:'#2a1a12',hairStyle:'bun',shirt:'#9fd3e6',pants:'#9fd3e6',shoes:'#f5f5f3',sleeve:false},col:'#9fd3e6',pitch:1.15,rate:1.05}};
@@ -3984,6 +3984,19 @@ const movCss=document.createElement('style');movCss.textContent=`
 .mv-loc small{display:block;font-weight:600;letter-spacing:.08em;opacity:.75;text-transform:none;margin-top:4px}
 .mv-skip{position:absolute;right:24px;top:calc(12vh + 14px);z-index:6;display:flex;align-items:center;gap:10px;font:700 13px Inter,system-ui,sans-serif;color:rgba(255,255,255,.75);pointer-events:auto;cursor:pointer}
 .mv-skip i{width:70px;height:4px;border-radius:2px;background:rgba(255,255,255,.25);overflow:hidden}.mv-skip i:before{content:"";display:block;height:100%;width:var(--p,0%);background:#fff}
+.mv-who{position:absolute;left:5vw;top:30%;z-index:5;display:flex;align-items:stretch;gap:0;animation:mvWhoIn .55s cubic-bezier(.2,.9,.2,1) both}
+.mv-who.out{animation:mvWhoOut .45s ease-in forwards}
+.mv-who i{width:10px;background:var(--c);box-shadow:0 0 24px var(--c)}
+.mv-who div{padding:14px 26px 16px 20px;background:linear-gradient(100deg,rgba(0,0,0,.82),rgba(0,0,0,.55) 75%,rgba(0,0,0,0));clip-path:polygon(0 0,100% 0,92% 100%,0 100%)}
+.mv-who small{display:block;font:800 13px Inter,system-ui,sans-serif;letter-spacing:.28em;text-transform:uppercase;color:var(--c);animation:cnKick .6s ease .15s both}
+.mv-who b{display:block;font:900 italic clamp(46px,6.4vw,92px)/.95 "Space Grotesk",Inter,sans-serif;text-transform:uppercase;letter-spacing:-.01em;margin:.08em 0 .1em;text-shadow:0 5px 0 rgba(0,0,0,.5);animation:cnSlam .6s cubic-bezier(.2,1.4,.3,1) .1s both}
+.mv-who span{display:block;font:600 clamp(15px,1.5vw,20px) Inter,system-ui,sans-serif;color:rgba(255,255,255,.92);animation:cnUp .6s ease .45s both}
+@keyframes mvWhoIn{from{opacity:0;transform:translateX(-80px) skewX(-8deg)}to{opacity:1;transform:none}}
+@keyframes mvWhoOut{to{opacity:0;transform:translateX(-60px)}}
+.mv-ring{position:absolute;left:0;top:0;z-index:4;width:0;height:0;opacity:0;transition:opacity .3s}
+.mv-ring.on{opacity:1}
+.mv-ring:before{content:"";position:absolute;left:-40px;top:-40px;width:80px;height:80px;border-radius:50%;border:3px solid var(--c);box-shadow:0 0 20px var(--c);animation:cnRing 1.1s ease-in-out infinite}
+.mv-flash{position:absolute;inset:0;z-index:3;background:#fff;opacity:0;pointer-events:none}.mv-flash.go{animation:cnFlash .5s ease-out}
 .mov-on .nc{display:none}
 .mv-roll{position:absolute;left:50%;top:100%;transform:translateX(-50%);z-index:5;text-align:center;width:min(700px,90vw);font:600 18px/1.8 Inter,system-ui,sans-serif}
 .mv-roll h3{font:900 italic 54px "Space Grotesk",Inter,sans-serif;margin:0 0 .3em;background:linear-gradient(100deg,#fff,#ffd166,#ff5fa2);-webkit-background-clip:text;background-clip:text;color:transparent}
@@ -4004,7 +4017,7 @@ const movCss=document.createElement('style');movCss.textContent=`
 `;document.head.appendChild(movCss);
 const MOV={on:false,film:null,si:-1,s:null,t:0,li:0,lt:0,speaking:false,doneT:-1,end:0,cast:{},fx:null,cars:[],music:null,skip:0,skipHeld:false,el:null,keep:null,cb:null};
 function movEl(){if(MOV.el)return MOV.el;const d=document.createElement('div');d.className='mv';
-  d.innerHTML='<div class="cn-bar t"></div><div class="cn-bar b"></div><div class="mv-grain"></div><div class="mv-stage"></div><div class="mv-sub"></div><div class="mv-skip"><span></span><i></i></div><div class="mv-black"></div>';
+  d.innerHTML='<div class="cn-bar t"></div><div class="cn-bar b"></div><div class="mv-grain"></div><div class="mv-flash"></div><div class="mv-ring"></div><div class="mv-stage"></div><div class="mv-sub"></div><div class="mv-skip"><span></span><i></i></div><div class="mv-black"></div>';
   root.appendChild(d);d.querySelector('.mv-skip').addEventListener('pointerdown',e=>{e.preventDefault();MOV.skipHeld=true;});window.addEventListener('pointerup',()=>{MOV.skipHeld=false;});
   window.addEventListener('keyup',e=>{if(e.key===' ')MOV.skipHeld=false;});return MOV.el=d;}
 /* ---- actors ---- */
@@ -4059,7 +4072,7 @@ function playFilm(shots,cb){if(MOV.on){cb&&cb();return;}try{sfxInit();}catch(_){
   el.className='mv';el.style.display='';el.querySelector('.mv-black').classList.remove('off');el.querySelector('.mv-skip span').textContent=L('Giữ Space để bỏ qua','Hold Space to skip');
   root.classList.add('mov-on');keys.clear();cinDuck(true);movNext();}
 function movNext(){const el=MOV.el;MOV.si++;const s=MOV.film[MOV.si];movClear();el.querySelector('.mv-stage').innerHTML='';subOff();
-  if(!s){movEnd();return;}MOV.s=s;MOV.t=0;MOV.li=0;MOV.lt=s.lines&&s.lines[0]&&s.lines[0][3]!=null?s.lines[0][3]:.8;MOV.speaking=false;MOV.doneT=-1;MOV.end=0;
+  if(!s){movEnd();return;}MOV.s=s;MOV.t=0;MOV.frz=0;MOV.ring=null;if(MOV.el)MOV.el.querySelector('.mv-ring').classList.remove('on');MOV.li=0;MOV.lt=s.lines&&s.lines[0]&&s.lines[0][3]!=null?s.lines[0][3]:.8;MOV.speaking=false;MOV.doneT=-1;MOV.end=0;
   P.inside=s.inside||null;if(s.px!=null){P.x=s.px;P.z=s.pz;}P.vy=0;P.y=0;
   view.style.transition='filter .6s';view.style.filter=s.flash?'sepia(.85) saturate(1.3) contrast(1.15) brightness(.92)':(s.grade||'');el.classList.toggle('flash',!!s.flash);
   if(s.music!==undefined&&(!MOV.music||MOV.music.mood!==s.music))movMusic(s.music);
@@ -4076,13 +4089,29 @@ function movCam(dt){const s=MOV.s;if(!s||!s.cam)return;const C=s.cam,dur=s.camT|
   let fx=0,fy=0;if(s.follow){const a=MOV.cast[s.follow];if(a){fx=a.x;fy=a.z;}}
   const hand=s.hand?Math.sin(MOV.t*1.3)*.03:0;camera.position.set(p[0]+fx,p[1]+hand,p[2]+fy);camera.lookAt(l[0]+fx,l[1]+hand*.5,l[2]+fy);
   sky.position.copy(camera.position);const Ld=tod.lightDir;sun.position.set(l[0]+fx+Ld.x*220,Ld.y*220,l[2]+fy+Ld.z*220);sun.target.position.set(l[0]+fx,0,l[2]+fy);sun.target.updateMatrixWorld();}
+/* character intro: freeze-frame, name card slams in, a ring marks who it is */
+const WHO={joseph:()=>['Joseph',L('Nhân vật chính','The hero'),L('Về Nexus City sau 5 năm làm ăn xa','Back in Nexus City after five years away'),'#7ec3ff'],
+  oscar:()=>['Oscar',L('Em gái của Joseph','Joseph\'s little sister'),L('Ở nhà chăm Father suốt 5 năm','Stayed home with Father for five years'),'#ff9fb8'],
+  jonathan:()=>['Jonathan',L('Bố của Joseph và Oscar','Father of Joseph and Oscar'),L('Joseph gọi ông là “Father” · chủ garage','Joseph calls him “Father” · owns the garage'),'#ffd166'],
+  philip:()=>['Philip',L('Bạn thân 30 năm của Jonathan','Jonathan\'s friend of 30 years'),L('Joseph gọi là “Uncle Philip” · bán súng','Joseph calls him “Uncle Philip” · sells guns'),'#c1f354'],
+  mike:()=>['Lantern Mike',L('Đàn em Syndicate · trùm số 1','Syndicate henchman · boss no. 1'),L('Giữ Phố Cổ Đèn Lồng cho Ông Trùm Vương','Runs the Lantern Old Quarter for Boss Vương'),'#ff5a4a']};
+function movWho(ak,id){const el=MOV.el,w=WHO[id]();const st=el.querySelector('.mv-stage'),old=st.querySelector('.mv-who');if(old)old.remove();
+  st.insertAdjacentHTML('beforeend',`<div class="mv-who" style="--c:${w[3]}"><i></i><div><small>${cnE(w[1])}</small><b>${cnE(w[0])}</b><span>${cnE(w[2])}</span></div></div>`);
+  const f=el.querySelector('.mv-flash');f.classList.remove('go');void f.offsetWidth;f.classList.add('go');
+  MOV.frz=1.5;MOV.ring=MOV.cast[ak]||null;const rg=el.querySelector('.mv-ring');rg.style.setProperty('--c',w[3]);rg.classList.toggle('on',!!MOV.ring);
+  view.style.filter='saturate(.15) contrast(1.25) brightness(1.05)';cinSfx('slow');const s=MOV.s;
+  setTimeout(()=>{if(MOV.s!==s)return;const c=st.querySelector('.mv-who');if(c)c.classList.add('out');rg.classList.remove('on');MOV.ring=null;setTimeout(()=>{if(c)c.remove();},500);},3800);}
+function movRing(){const a=MOV.ring,rg=MOV.el.querySelector('.mv-ring');if(!a||!a.H.root.parent){return;}a.H.head.getWorldPosition(_ma);_ma.y+=.15;_ma.project(camera);
+  const r=view.getBoundingClientRect(),rr=root.getBoundingClientRect();rg.style.opacity=_ma.z<1?'':'0';rg.style.transform=`translate(${(_ma.x*.5+.5)*r.width+r.left-rr.left}px,${(-_ma.y*.5+.5)*r.height+r.top-rr.top}px)`;}
 function movTick(dt){const s=MOV.s;if(!s)return;const el=MOV.el;
   if(paused){return;}
+  movRing();if(MOV.frz>0){MOV.frz-=dt;if(MOV.frz<=0)view.style.filter=s.flash?'sepia(.85) saturate(1.3) contrast(1.15) brightness(.92)':(s.grade||'');return;}
   MOV.t+=dt;keys.clear();
   try{step(dt);}catch(e){console.warn(e);}
   P.H.root.visible=false;if(gps.mesh)gps.mesh.visible=false;if(s.px!=null){P.x=s.px;P.z=s.pz;}
   if(s.tod!=null){tod.hour=s.tod;todApply();}
   for(const k in MOV.cast)actTick(MOV.cast[k],dt);fireTick(dt);musicTick();
+  if(s.who)for(const w of s.who)if(!w.done&&MOV.t>=w[0]){w.done=true;movWho(w[1],w[2]);}
   if(s.acts)for(const a of s.acts)if(!a.done&&MOV.t>=a[0]){a.done=true;try{a[1]();}catch(e){console.warn(e);}}
   if(s.tick)s.tick(dt,MOV.t);
   movCam(dt);
@@ -4118,25 +4147,25 @@ function filmAnchors(){const G=SP.shops.find(s=>s.id==='garage')||{x:SP.house.do
 function filmOpening(){const{G,HD,R,B,bed}=filmAnchors();const gx=G.x,gz=G.z-1.25;return[
   {black:true,dur:3.6,tod:18.2,px:gx,pz:gz,music:'sad',cam:[{p:[0,300,0],l:[0,0,1]}],card:{kick:L('Nexus City','Nexus City'),title:L('Năm năm sau','Five years later'),c:'#ffd166',c2:'#ffffff',at:.3},tail:0},
   {dur:9,tod:18.3,px:B.x,pz:B.z,camT:11,cam:[{p:[B.x-170,120,B.z+190],l:[B.x,10,B.z]},{p:[B.x-80,70,B.z+120],l:[B.x+10,20,B.z-20]}],linear:true,
-    lines:[['minh','Năm năm. Con đi làm xa, gửi từng đồng về để ba mở rộng cái tiệm sửa xe.','Five years. I worked far away and sent every cent home so Dad could grow his repair shop.',.9],['minh','Hôm nay con về. Con muốn làm ba bất ngờ.','Today I am back. I wanted to surprise him.']]},
-  {dur:7,tod:18.5,px:gx,pz:gz,loc:[L('Garage của ông Hải','Mr. Hải\'s Garage'),L('Khu phố phía tây','West side')],
+    lines:[['minh','Năm năm. Con đi làm xa, gửi từng đồng về để ba mở rộng cái tiệm sửa xe.','Five years. I worked far away and sent every cent home so Father could grow his repair shop.',.9],['minh','Hôm nay con về. Con muốn làm ba bất ngờ.','Today I am back. I wanted to surprise him.']]},
+  {dur:7,tod:18.5,px:gx,pz:gz,loc:[L('Garage của ông Jonathan','Jonathan\'s Garage'),L('Khu phố phía tây','West side')],
     setup(){const m=actor('m','minh',gx-14,gz+2.2,Math.PI/2);walk(m,[[gx-2.2,gz+2.2]],1.45);fireOn([[gx-3,0,gz-.2],[gx+2,0,gz-.2]],false);},
-    cam:[{p:[-6,1.4,4.2],l:[0,1.5,0]},{p:[-3,1.5,3.6],l:[1,1.4,0]}],follow:'m',hand:true,
+    cam:[{p:[-6,1.4,4.2],l:[0,1.5,0]},{p:[-3,1.5,3.6],l:[1,1.4,0]}],follow:'m',hand:true,who:[[1.4,'m','joseph']],
     lines:[['minh','…Gì thế này?','…What is this?',4.6]]},
   {dur:3,tod:18.5,px:gx,pz:gz,cut:true,setup(){const m=actor('m','minh',gx-2.2,gz+2.2,Math.PI*.9);m.face=Math.PI;fireOn([[gx-3,0,gz-.2],[gx+2,0,gz-.2],[gx,0,gz-.3]],false);},
     cam:[{p:[gx-1.5,1.6,gz+6.5],l:[gx,3.5,gz-3]},{p:[gx-1.6,1.4,gz+5.5],l:[gx,4.5,gz-4]}],tail:.2},
   {dur:5,tod:18.5,px:gx,pz:gz,setup(){const m=actor('m','minh',gx-2.2,gz+2.2,Math.PI);m.face=Math.PI/2;const l=actor('l','linh',gx+11,gz+2.6,-Math.PI/2);walk(l,[[gx-.9,gz+2.3]],4.2);},
-    acts:[[3,()=>{MOV.cast.l.face=-Math.PI/2;MOV.cast.l.pose='hug';MOV.cast.m.pose='hug';}]],
+    who:[[2.9,'l','oscar']],acts:[[3.4,()=>{MOV.cast.l.face=-Math.PI/2;MOV.cast.l.pose='hug';MOV.cast.m.pose='hug';}]],
     cam:[{p:[gx-5,1.7,gz+6],l:[gx+2,1.4,gz+2]},{p:[gx-4.4,1.6,gz+5],l:[gx-1.4,1.4,gz+2.2]}],
-    lines:[['linh','Anh Minh!','Minh!',1.6],['minh','Linh? Tiệm của ba sao thế này? Ba đâu?','Linh? What happened to Dad\'s shop? Where is he?'],['linh','Đêm qua… người của Syndicate tới. Ba không chịu nộp tiền bảo kê…','Last night… the Syndicate came. Dad refused to pay them…']]},
+    lines:[['linh','Anh Joseph!','Joseph!',3.1],['minh','Oscar? Tiệm của ba sao thế này? Ba đâu?','Oscar? What happened to Father\'s shop? Where is he?'],['linh','Đêm qua… người của Syndicate tới. Ba không chịu nộp tiền bảo kê…','Last night… the Syndicate came. Father refused to pay them…']]},
   /* flashback */
   {dur:4,tod:23.2,px:gx,pz:gz,flash:true,music:'tense',card:{kick:L('Đêm hôm trước','The night before'),title:'',at:.2},
-    setup(){const b=actor('b','ba',gx,gz+.9,0,{pose:'wrench'});},cam:[{p:[gx+3,1.3,gz+5],l:[gx,1.4,gz+.5]},{p:[gx+1.8,1.5,gz+3.8],l:[gx,1.5,gz+.8]}],
+    who:[[1,'b','jonathan']],setup(){const b=actor('b','ba',gx,gz+.9,0,{pose:'wrench'});},cam:[{p:[gx+3,1.3,gz+5],l:[gx,1.4,gz+.5]},{p:[gx+1.8,1.5,gz+3.8],l:[gx,1.5,gz+.8]}],
     lines:[['ba','Muộn rồi, tiệm đóng cửa.','It is late. The shop is closed.',1.8]]},
   {dur:6,tod:23.2,px:gx,pz:gz,flash:true,cut:true,
     setup(){actor('b','ba',gx,gz+.9,0,{pose:'wrench'});const L1=actor('lao','lao',gx+1,gz+10,Math.PI);walk(L1,[[gx+.2,gz+3.2]],1.3);const t1=actor('t1','thug',gx+2.6,gz+10.5,Math.PI);walk(t1,[[gx+1.8,gz+3.9]],1.3);const t2=actor('t2','thug',gx-1.4,gz+10.8,Math.PI);walk(t2,[[gx-1.3,gz+3.7]],1.3);},
-    cam:[{p:[gx-.6,1.7,gz-1],l:[gx+.5,1.4,gz+6]},{p:[gx-.4,1.6,gz-.4],l:[gx+.3,1.5,gz+4.5]}],
-    lines:[['lao','Ông Hải. Tháng này ông lại quên nộp tiền cho Ông Trùm.','Mr. Hải. You forgot to pay the Boss again this month.',4.2],['ba','Tiệm này tôi gầy dựng bằng hai bàn tay. Không đưa đồng nào cho tụi bây hết.','I built this shop with my own two hands. You get nothing from me.']]},
+    who:[[5.4,'lao','mike']],cam:[{p:[gx-.6,1.7,gz-1],l:[gx+.5,1.4,gz+6]},{p:[gx-.4,1.6,gz-.4],l:[gx+.3,1.5,gz+4.5]}],
+    lines:[['lao','Ông Jonathan. Tháng này ông lại quên nộp tiền cho Ông Trùm.','Jonathan. You forgot to pay the Boss again this month.',5.6],['ba','Tiệm này tôi gầy dựng bằng hai bàn tay. Không đưa đồng nào cho tụi bây hết.','I built this shop with my own two hands. You get nothing from me.']]},
   {dur:7,tod:23.2,px:gx,pz:gz,flash:true,cut:true,
     setup(){actor('b','ba',gx,gz+.9,0,{pose:'wrench'});const L1=actor('lao','lao',gx+.2,gz+3.2,Math.PI);actor('t1','thug',gx+1.8,gz+3.9,Math.PI);actor('t2','thug',gx-1.3,gz+3.7,Math.PI);},
     acts:[[3.6,()=>{const t=MOV.cast.t1;t.path=[{x:gx+.5,z:gz+1.9}];t.v=3;}],[4.3,()=>{const t=MOV.cast.t1;t.H.side=1;t.H.punchT=.32;cinSfx('stamp');}],[4.45,()=>{const b=MOV.cast.b;b.H.hitT=.4;b.H.hitSide=1;b.pose=null;}],[4.9,()=>{MOV.cast.b.H.ko=1;}],
@@ -4149,19 +4178,19 @@ function filmOpening(){const{G,HD,R,B,bed}=filmAnchors();const gx=G.x,gz=G.z-1.2
   {dur:6,tod:20.5,inside:'hospital',px:bed+1,pz:R.z0+4,music:'sad',loc:[L('Bệnh viện Nexus','Nexus Hospital'),L('Phòng hồi sức','Recovery ward')],
     setup(){const b=actor('b','ba',bed,R.z0+2.15,0,{inside:true,y:.66});b.H.ko=1;b.H.koK=1;const m=actor('m','minh',bed+.95,R.z0+1.5,-Math.PI/2,{inside:true,pose:'reach'});const l=actor('l','linh',bed-.2,R.z0+3.3,Math.PI,{inside:true,pose:'cry'});},
     cam:[{p:[bed+3.4,1.9,R.z0+5],l:[bed,.9,R.z0+1.2]},{p:[bed+2.4,1.6,R.z0+3.6],l:[bed+.2,1,R.z0+1.4]}],
-    lines:[['linh','Bác sĩ nói ba bị chấn thương đầu. Chưa biết khi nào mới tỉnh…','The doctor says Dad has a head injury. They do not know when he will wake up…',1],['minh','Ba ơi… con về rồi đây.','Dad… I am home.']]},
+    lines:[['linh','Bác sĩ nói ba bị chấn thương đầu. Chưa biết khi nào mới tỉnh…','The doctor says Father has a head injury. They do not know when he will wake up…',1],['minh','Ba ơi… con về rồi đây.','Father… I am home.']]},
   {dur:6,tod:20.5,inside:'hospital',px:bed+1,pz:R.z0+4,cut:true,
     setup(){const b=actor('b','ba',bed,R.z0+2.15,0,{inside:true,y:.66});b.H.ko=1;b.H.koK=1;const m=actor('m','minh',bed+.95,R.z0+1.5,-Math.PI/2,{inside:true});const l=actor('l','linh',bed-.2,R.z0+3.3,Math.PI,{inside:true});
       m.face=Math.PI*.75;},
     cam:[{p:[bed+.2,1.55,R.z0+3.2],l:[bed+.95,1.55,R.z0+1.5]},{p:[bed+.35,1.6,R.z0+2.9],l:[bed+.95,1.6,R.z0+1.5]}],
-    lines:[['minh','Ai làm chuyện này?','Who did this?',.6],['linh','Lão Đèn Lồng ở Phố Cổ. Nhưng hắn chỉ là chó săn. Cả năm khu phố đều nộp tiền cho Ông Trùm Vương.','The Lantern Elder from the Old Quarter. But he is just a dog on a leash. All five districts pay Boss Vương.'],
-      ['minh','Vậy anh sẽ lấy lại từng khu một. Bắt đầu từ Lão Đèn Lồng.','Then I will take them back one by one. Starting with the Lantern Elder.']]},
+    lines:[['minh','Ai làm chuyện này?','Who did this?',.6],['linh','Lantern Mike ở Phố Cổ. Nhưng hắn chỉ là chó săn. Cả năm khu phố đều nộp tiền cho Ông Trùm Vương.','Lantern Mike from the Old Quarter. But he is just a dog on a leash. All five districts pay Boss Vương.'],
+      ['minh','Vậy anh sẽ lấy lại từng khu một. Bắt đầu từ Lantern Mike.','Then I will take them back one by one. Starting with Lantern Mike.']]},
   /* uncle Tư */
   {dur:6,tod:21,px:HD.x,pz:HD.z+4,music:'tense',
     setup(){const c=newCar('muscle',HD.x+5,HD.z+5.5,Math.PI/2,'movie','#2b2b2b');MOV.cars.push(c);const t=actor('t','tu',HD.x+4.6,HD.z+3.7,-Math.PI*.8,{pose:'cross'});const m=actor('m','minh',HD.x,HD.z+.4,0);walk(m,[[HD.x+2.6,HD.z+2.6]],1.4);},
-    acts:[[2.4,()=>{MOV.cast.m.face=Math.atan2(2,1.1);}]],
+    who:[[1.2,'t','philip']],acts:[[2.4,()=>{MOV.cast.m.face=Math.atan2(2,1.1);}]],
     cam:[{p:[HD.x-2,1.6,HD.z+8],l:[HD.x+3.5,1.4,HD.z+3]},{p:[HD.x+.5,1.6,HD.z+7.2],l:[HD.x+3.6,1.5,HD.z+3.2]}],
-    lines:[['tu','Thằng Minh đó hả? Lớn quá rồi.','Is that you, Minh? Look how you have grown.',2.6],['minh','Chú Tư.','Uncle Tư.'],
+    lines:[['tu','Thằng Joseph đó hả? Lớn quá rồi.','Is that you, Joseph? Look how you have grown.',2.6],['minh','Chú Philip.','Uncle Philip.'],
       ['tu','Ba con với chú là anh em ba chục năm. Muốn đụng Syndicate thì tay không không được đâu con.','Your dad and I have been brothers for thirty years. You cannot take on the Syndicate empty-handed.'],
       ['tu','Ghé tiệm Súng Tầm Xa. Chú lấy giá anh em cho con.','Come by Long Range Guns. I will give you the family price.'],['minh','Cảm ơn chú.','Thank you, Uncle.']]},
   {dur:7,tod:21,px:gx,pz:gz,music:'title',camT:8,cam:[{p:[gx+6,3,gz+10],l:[gx,3,gz]},{p:[gx+30,40,gz+70],l:[gx,10,gz]}],linear:true,
@@ -4172,29 +4201,29 @@ function filmEnding(){const{G,HD,R,B,bed}=filmAnchors();const gx=G.x,gz=G.z-1.25
     setup(){const b=actor('b','ba',bed,R.z0+1.75,0,{inside:true,y:.86,pose:'recline'});const l=actor('l','linh',bed-.9,R.z0+1.6,Math.PI/2,{inside:true});const m=actor('m','minh',R.x0+11,R.z1-2,Math.PI,{inside:true});walk(m,[[bed+1,R.z0+2.6]],1.3);},
     acts:[[4.5,()=>{MOV.cast.m.face=-Math.PI*.8;}]],
     cam:[{p:[bed+3,1.7,R.z0+5.5],l:[bed+.5,1.1,R.z0+1.6]},{p:[bed+2.2,1.5,R.z0+4.4],l:[bed+.3,1.1,R.z0+1.6]}],
-    lines:[['ba','Minh… con về rồi.','Minh… you came home.',4.8],['minh','Con về rồi, ba.','I am home, Dad.']]},
+    lines:[['ba','Joseph… con về rồi.','Joseph… you came home.',4.8],['minh','Con về rồi, ba.','I am home, Father.']]},
   {dur:6,tod:9,inside:'hospital',px:bed+1,pz:R.z0+4,cut:true,
     setup(){actor('b','ba',bed,R.z0+1.75,0,{inside:true,y:.86,pose:'recline'});actor('l','linh',bed-.9,R.z0+1.6,Math.PI/2,{inside:true,pose:'hug'});const m=actor('m','minh',bed+1,R.z0+2.6,-Math.PI*.8,{inside:true});},
     cam:[{p:[bed+.6,1.35,R.z0+3.4],l:[bed,1.2,R.z0+1.2]},{p:[bed+.5,1.3,R.z0+3.1],l:[bed,1.2,R.z0+1.2]}],
     lines:[['ba','Ông Trùm nói đúng. Hồi trẻ ba từng chạy việc cho hắn. Ba bỏ đi để mở tiệm, để hai đứa được sống đàng hoàng.','The Boss told you the truth. When I was young I ran jobs for him. I walked away to open the shop, so you two could live clean.',.6],
-      ['ba','Đó là món nợ ba chưa bao giờ trả xong.','That was the debt I never finished paying.'],['minh','Món nợ đó, con trả rồi.','That debt is paid now, Dad.']]},
+      ['ba','Đó là món nợ ba chưa bao giờ trả xong.','That was the debt I never finished paying.'],['minh','Món nợ đó, con trả rồi.','That debt is paid now, Father.']]},
   {dur:9,tod:18.3,px:bx,pz:-20,music:'hope',loc:[L('Ba tháng sau','Three months later'),L('Đường ven biển','Coast road')],
     setup(){const c=newCar('legend',bx,-60,0,'movie','#e8b730');MOV.cars.push(c);MOV.drive=c;},
     tick(dt,t){const c=MOV.drive;if(!c)return;c.z=-60+t*14;P.x=c.x;P.z=c.z;c.x=bx;c.h=0;syncCar(c);if(c.wheels)for(const w of c.wheels)w.rotation.x+=dt*14/.37;},
     cam:[{p:[bx+7,1.2,-62],l:[bx,1,-52]},{p:[bx+9,3,-48],l:[bx,1,-58+9*14]}],
-    lines:[['linh','Ba tháng sau, Garage ông Hải mở cửa lại. Lần này không ai dám tới thu tiền nữa.','Three months later, Mr. Hải\'s Garage opened again. This time, nobody came to collect.',1.6],
-      ['ba','Chạy chậm thôi con. Xe này chỉ có một chiếc trên đời.','Easy, son. There is only one of these in the world.'],['minh','Con biết mà, ba.','I know, Dad.']]},
+    lines:[['linh','Ba tháng sau, Garage ông Jonathan mở cửa lại. Lần này không ai dám tới thu tiền nữa.','Three months later, Jonathan\'s Garage opened again. This time, nobody came to collect.',1.6],
+      ['ba','Chạy chậm thôi con. Xe này chỉ có một chiếc trên đời.','Easy, son. There is only one of these in the world.'],['minh','Con biết mà, ba.','I know, Father.']]},
   {dur:12,tod:18.6,px:bx,pz:40,cam:[{p:[bx+30,25,40],l:[bx,0,60]},{p:[bx+60,60,10],l:[bx,0,90]}],linear:true,
-    setup(){const c=newCar('legend',bx,40,0,'movie','#e8b730');MOV.cars.push(c);MOV.drive=c;MOV.el.querySelector('.mv-stage').insertAdjacentHTML('beforeend',`<div class="mv-roll"><h3>${L('Món nợ của Cha','A Debt to My Father')}</h3>${L('Một câu chuyện ở Nexus City','A Nexus City story')}<em>${L('Nhân vật','Cast')}</em>Minh · Linh · ${L('Ông Hải','Mr. Hải')} · ${L('Chú Tư','Uncle Tư')}<em>${L('Phản diện','Villains')}</em>${ST_TOWNS.map(t=>t[1]).join(' · ')} · ${L('Ông Trùm Vương','Boss Vương')}<em>${L('Làm bởi','Made by')}</em>The Nexus · TheArena<em>${L('Cảm ơn bạn đã chơi','Thank you for playing')}</em></div>`);},
+    setup(){const c=newCar('legend',bx,40,0,'movie','#e8b730');MOV.cars.push(c);MOV.drive=c;MOV.el.querySelector('.mv-stage').insertAdjacentHTML('beforeend',`<div class="mv-roll"><h3>${L('Món nợ của Cha','A Debt to My Father')}</h3>${L('Một câu chuyện ở Nexus City','A Nexus City story')}<em>${L('Nhân vật','Cast')}</em>Joseph · Oscar · ${L('Ông Jonathan','Jonathan')} · ${L('Chú Philip','Uncle Philip')}<em>${L('Phản diện','Villains')}</em>${ST_TOWNS.map(t=>t[1]).join(' · ')} · ${L('Ông Trùm Vương','Boss Vương')}<em>${L('Làm bởi','Made by')}</em>The Nexus · TheArena<em>${L('Cảm ơn bạn đã chơi','Thank you for playing')}</em></div>`);},
     tick(dt,t){const c=MOV.drive;if(c){c.z=40+t*14;syncCar(c);P.x=c.x;P.z=c.z;}const r=MOV.el.querySelector('.mv-roll');if(r)r.style.transform=`translateX(-50%) translateY(${-t*95}px)`;},tail:0}];}
 /* story beats in play: phone calls between chapters */
-function stCall(k){if(k===1)phoneCall('linh',[['linh','Anh ơi! Bác sĩ nói tim ba đập đều hơn rồi.','Minh! The doctor says Dad\'s heartbeat is steadier.'],['minh','Tốt. Còn bốn thằng nữa.','Good. Four more to go.'],['linh','Anh cẩn thận. Cá Mập Cảng ở Cảng Bắc ác hơn nhiều.','Be careful. The Harbor Shark up at North Harbor is much worse.']]);
-  else if(k===2)phoneCall('tu',[['tu','Con làm Syndicate loạn hết rồi đó Minh.','You have the whole Syndicate rattled, Minh.'],['tu','Bóng Ma ở Đồi Mây đang săn con. Đừng để hắn áp sát.','The Ghost up in Cloud Hills is hunting you. Do not let him get close.'],['minh','Sao chú biết rõ vậy?','How do you know all this?'],['tu','…Chú quen nhiều người. Thôi, đi đi.','…I know people. Go on.']]);
-  else if(k===3)phoneCall('linh',[['linh','Anh… ba mấp máy môi. Hình như ba gọi tên anh.','Minh… Dad\'s lips moved. I think he said your name.'],['minh','Nói với ba là anh sắp về.','Tell him I am coming home soon.']]);
-  else if(k===4){phoneCall('linh',[['linh','Anh! Em thấy Chú Tư ngồi với người của Ông Trùm ở bến cảng. Chú đưa họ một phong bì.','Minh! I saw Uncle Tư at the docks with the Boss\'s men. He handed them an envelope.'],['minh','…Chú Tư?','…Uncle Tư?']]);
-    phoneCall('tu',[['tu','Minh… chú xin lỗi. Năm đó chú nợ Ông Trùm. Chính chú chỉ chỗ tiệm của ba con.','Minh… I am sorry. I owed the Boss. I was the one who told them where your dad\'s shop was.'],['minh','Ba coi chú như anh ruột.','Dad treated you like a brother.'],
-      ['tu','Rắn Sa Mạc biết con tới. Đi đường phía nam. Đó là điều cuối cùng chú làm được cho con.','The Desert Snake knows you are coming. Take the south road. That is the last thing I can do for you.']]);}
-  else if(k===5)phoneCall('linh',[['linh','Anh ơi… ba tỉnh rồi! Ba muốn nói chuyện với anh.','Minh… Dad is awake! He wants to talk to you.'],['ba','Minh… đừng để thù hận nuốt mất con. Về với ba.','Minh… do not let hatred swallow you. Come home.'],['minh','Con sẽ về, ba. Sau khi chuyện này kết thúc.','I will, Dad. As soon as this is over.']]);}
+function stCall(k){if(k===1)phoneCall('linh',[['linh','Anh ơi! Bác sĩ nói tim ba đập đều hơn rồi.','Joseph! The doctor says Father\'s heartbeat is steadier.'],['minh','Tốt. Còn bốn thằng nữa.','Good. Four more to go.'],['linh','Anh cẩn thận. Shark Henry ở Cảng Bắc ác hơn nhiều.','Be careful. Shark Henry up at North Harbor is much worse.']]);
+  else if(k===2)phoneCall('tu',[['tu','Con làm Syndicate loạn hết rồi đó Joseph.','You have the whole Syndicate rattled, Joseph.'],['tu','Cloud Rio ở Đồi Mây đang săn con. Đừng để hắn áp sát.','Cloud Rio up in Cloud Hills is hunting you. Do not let him get close.'],['minh','Sao chú biết rõ vậy?','How do you know all this?'],['tu','…Chú quen nhiều người. Thôi, đi đi.','…I know people. Go on.']]);
+  else if(k===3)phoneCall('linh',[['linh','Anh… ba mấp máy môi. Hình như ba gọi tên anh.','Joseph… Father\'s lips moved. I think he said your name.'],['minh','Nói với ba là anh sắp về.','Tell him I am coming home soon.']]);
+  else if(k===4){phoneCall('linh',[['linh','Anh! Em thấy Chú Philip ngồi với người của Ông Trùm ở bến cảng. Chú đưa họ một phong bì.','Joseph! I saw Uncle Philip at the docks with the Boss\'s men. He handed them an envelope.'],['minh','…Chú Philip?','…Uncle Philip?']]);
+    phoneCall('tu',[['tu','Joseph… chú xin lỗi. Năm đó chú nợ Ông Trùm. Chính chú chỉ chỗ tiệm của ba con.','Joseph… I am sorry. I owed the Boss. I was the one who told them where your father\'s shop was.'],['minh','Ba coi chú như anh ruột.','Father treated you like a brother.'],
+      ['tu','Desert Han biết con tới. Đi đường phía nam. Đó là điều cuối cùng chú làm được cho con.','Desert Han knows you are coming. Take the south road. That is the last thing I can do for you.']]);}
+  else if(k===5)phoneCall('linh',[['linh','Anh ơi… ba tỉnh rồi! Ba muốn nói chuyện với anh.','Joseph… Father is awake! He wants to talk to you.'],['ba','Joseph… đừng để thù hận nuốt mất con. Về với ba.','Joseph… do not let hatred swallow you. Come home.'],['minh','Con sẽ về, ba. Sau khi chuyện này kết thúc.','I will, Father. As soon as this is over.']]);}
 
 // free mode: collect the one-time reward of a finished story
 if(!STORY){let lg=null;try{lg=JSON.parse(localStorage.getItem('nexus-city2-legend')||'null');}catch(_){}
