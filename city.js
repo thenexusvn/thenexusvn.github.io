@@ -96,13 +96,13 @@ const view=opt.view,root=opt.hudRoot,MOBILE=!!opt.mobile;
 const Q={peds:MOBILE?16:34,traffic:MOBILE?16:34,shadows:!MOBILE,pr:MOBILE?1:Math.min(window.devicePixelRatio||1,1.5),cull:MOBILE?130:175,tex:MOBILE?256:512};
 
 /* ---------- save ---------- */
-const SAVE_KEY='nexus-city2-save';
+const SAVE_KEY=opt.mode==='story'?'nexus-city2-story':'nexus-city2-save';
 let save={money:500,char:'joseph',tutDone:false,bankCD:0,heists:0,hour:17,radio:0,outfit:'base',outfits:['base'],cap:false,capOwned:false,up:{str:0,hp:0,run:0},weapons:{},ammo:{pistol:0,smg:0,rifle:0},armor:0,garage:[],apt:false,lang:null};
-try{const s=JSON.parse(localStorage.getItem(SAVE_KEY)||'null');if(s)Object.assign(save,s);}catch(_){}
+try{const s=JSON.parse(localStorage.getItem(SAVE_KEY)||'null');if(s)Object.assign(save,s);else if(opt.mode==='story'){save.money=1500;save.tutDone=true;}}catch(_){}
 save.up=Object.assign({str:0,hp:0,run:0},save.up);save.ammo=Object.assign({pistol:0,smg:0,rifle:0},save.ammo);save.weapons=save.weapons||{};save.garage=save.garage||[];save.outfits=save.outfits||['base'];
 const maxHp=()=>100+50*(save.up.hp|0);
 if(opt.char)save.char=opt.char;if(save.char==='minh'||!save.char)save.char='joseph';if(save.char==='vy')save.char='oscar';
-function writeSave(){try{save.hour=Math.round(tod.hour*100)/100;}catch(_){}try{localStorage.setItem(SAVE_KEY,JSON.stringify(save));}catch(_){}if(opt.onSave)opt.onSave(save);}
+function writeSave(){try{save.hour=Math.round(tod.hour*100)/100;}catch(_){}try{localStorage.setItem(SAVE_KEY,JSON.stringify(save));}catch(_){}if(opt.mode==='story'){if(opt.onStory)opt.onStory(save);}else if(opt.onSave)opt.onSave(save);}
 
 /* ---------- renderer, scene, sky ---------- */
 const renderer=new T.WebGLRenderer({antialias:!MOBILE,powerPreference:'high-performance'});
@@ -1654,9 +1654,10 @@ Object.assign(CAR_T,{
   minivan:{hl:.85,tl:1.0,w:1.95,wr:.37,wz:1.5,yb:.38,len:4.95,lower:[[-2.42,.38],[-2.48,.75],[-2.45,1.05],[1.3,1.02],[2.2,.9],[2.45,.72],[2.45,.48],[2.35,.38]],cabin:[[-2.4,1.03],[-2.3,1.82],[.55,1.84],[1.4,1.02]],roof:[-2.3,.55,1.83],max:36,acc:10,brk:27,grip:6.4,mass:1.7,co:1.4},
   jeep:{hl:1.12,tl:1.15,w:2.0,wr:.5,wz:1.38,yb:.62,len:4.45,lower:[[-2.15,.62],[-2.2,.9],[-2.2,1.35],[1.0,1.35],[2.12,1.3],[2.22,1.1],[2.22,.75],[2.1,.62]],cabin:[[-2.1,1.33],[-2.05,2.12],[.4,2.12],[.95,1.33]],roof:[-2.05,.4,2.11],max:39,acc:12.5,brk:27,grip:6.8,mass:1.9,co:1.2,cr:1.2},
   limo:{hl:.72,tl:.82,w:1.95,wr:.37,wz:2.55,yb:.32,len:7.2,lower:[[-3.55,.32],[-3.62,.6],[-3.58,.92],[-3.2,.98],[2.3,.98],[3.25,.88],[3.55,.74],[3.6,.48],[3.5,.32]],cabin:[[-3.1,.96],[-2.6,1.42],[1.6,1.44],[2.35,.96]],roof:[-2.6,1.6,1.43],max:38,acc:9,brk:26,grip:6,mass:2.2,co:2.4,cr:1.12,offs:[2.4,0,-2.4]},
+  legend:{hl:.42,tl:.58,w:2.12,wr:.37,wz:1.52,yb:.2,len:4.78,lower:[[-2.3,.2],[-2.4,.5],[-2.26,.74],[-1.15,.8],[.9,.64],[2.12,.4],[2.45,.28],[2.4,.21],[2.26,.2]],cabin:[[-1.25,.76],[-.38,1.03],[.18,1.03],[1.12,.64]],roof:[-.38,.18,1.02],hip:.19,max:94,acc:42,brk:50,grip:12.5,mass:1.1},
   hyper:{hl:.45,tl:.62,w:2.05,wr:.36,wz:1.5,yb:.22,len:4.7,lower:[[-2.35,.22],[-2.42,.55],[-2.3,.78],[-1.2,.84],[1.0,.72],[2.15,.48],[2.4,.36],[2.36,.24],[2.25,.22]],cabin:[[-1.3,.8],[-.45,1.08],[.25,1.08],[1.05,.74]],roof:[-.45,.25,1.07],hip:.2,max:74,acc:30,brk:42,grip:10.5,mass:1.15},
   bus:{hl:.75,tl:.9,w:2.5,wr:.52,wz:3.4,yb:.48,len:11.1,lower:[[-5.5,.48],[-5.56,.9],[-5.56,1.25],[5.42,1.25],[5.56,1.1],[5.56,.55],[5.45,.48]],cabin:[[-5.5,1.23],[-5.5,2.72],[5.5,2.72],[5.56,1.23]],roof:[-5.5,5.5,2.76],hip:1.05,seatZ:4.5,max:27,acc:6,brk:20,grip:5,mass:6,co:3.9,cr:1.4,offs:[3.9,1.3,-1.3,-3.9]}});
-const CAR_BODY={sedan:'sedan',sports:'sports',suv:'suv',taxi:'sedan',police:'sedan',super:'super',bike:'bike',hatch:'hatch',coupe:'coupe',muscle:'muscle',pickup:'pickup',van:'van',minivan:'minivan',jeep:'jeep',limo:'limo',hyper:'hyper',bus:'bus'};
+const CAR_BODY={sedan:'sedan',sports:'sports',suv:'suv',taxi:'sedan',police:'sedan',super:'super',bike:'bike',hatch:'hatch',coupe:'coupe',muscle:'muscle',pickup:'pickup',van:'van',minivan:'minivan',jeep:'jeep',limo:'limo',hyper:'hyper',bus:'bus',legend:'legend'};
 const CARC=['#c0392b','#f4f4f2','#1d3557','#2a9d8f','#e9c46a','#111418','#8d99ae','#6c757d','#3a86ff','#ff8fab','#7b2cbf','#e76f51','#264653','#d4d8dd','#ffb703'];
 const CG={};
 /* ---------- car bodies: lofted from the side profile, with rounded plan view, tumblehome and real cross-sections ---------- */
@@ -1783,6 +1784,7 @@ function makeCar(type,color){
 const XG={};let busSignTex=null;
 function carExtras(type,s,bg,paint){const dk='#15171b',ch='#b9bec5';
   const P2=(parts,m)=>{const me=new T.Mesh(buildVC(parts),m||DETAILM);me.castShadow=Q.shadows;bg.add(me);};
+  if(type==='legend'){const z=s.lower[0][0]+.35;XG.legend=XG.legend||buildVC([{geo:new T.BoxGeometry(s.w+.1,.06,.5),pos:[0,1.18,z],color:'#111111'},{geo:new T.BoxGeometry(.08,.42,.2),pos:[-.55,.98,z],color:'#111111'},{geo:new T.BoxGeometry(.08,.42,.2),pos:[.55,.98,z],color:'#111111'},{geo:new T.BoxGeometry(s.w-.5,.07,.05),pos:[0,.32,s.lower[0][0]-.02],color:'#ff2a2a'},{geo:new T.BoxGeometry(s.w-.3,.05,.06),pos:[0,.28,s.lower[6][0]+.02],color:'#d4a017'},{geo:new T.BoxGeometry(.04,.12,1.2),pos:[-(s.w/2-.02),.42,-.3],color:'#111111'},{geo:new T.BoxGeometry(.04,.12,1.2),pos:[s.w/2-.02,.42,-.3],color:'#111111'}]);bg.add(new T.Mesh(XG.legend,DETAILM));}
   if(type==='hyper'){const z=s.lower[0][0]+.3;XG.hyper=XG.hyper||buildVC([{geo:new T.BoxGeometry(s.w-.1,.05,.42),pos:[0,1.12,z],color:dk},{geo:new T.BoxGeometry(.06,.35,.18),pos:[-.6,.94,z],color:dk},{geo:new T.BoxGeometry(.06,.35,.18),pos:[.6,.94,z],color:dk},{geo:new T.BoxGeometry(.05,.22,.42),pos:[-(s.w/2-.05),1.2,z],color:dk},{geo:new T.BoxGeometry(.05,.22,.42),pos:[s.w/2-.05,1.2,z],color:dk},{geo:new T.BoxGeometry(s.w-.4,.08,.05),pos:[0,.3,s.lower[0][0]-.02],color:'#ff3030'}]);bg.add(new T.Mesh(XG.hyper,DETAILM));}
   if(type==='muscle'){const sc=new T.Mesh(new T.BoxGeometry(.6,.14,.9),paint);sc.position.set(0,1.02,1.75);bg.add(sc);XG.mus=XG.mus||buildVC([{geo:new T.BoxGeometry(.5,.1,.05),pos:[0,1.02,2.2],color:dk},{geo:new T.BoxGeometry(.22,.012,1.2),pos:[-.18,1.325,-.47],color:'#f4f4f2'},{geo:new T.BoxGeometry(.22,.012,1.2),pos:[.18,1.325,-.47],color:'#f4f4f2'}]);
     bg.add(new T.Mesh(XG.mus,DETAILM));}
@@ -1927,7 +1929,7 @@ function npcUpdate(n,dt){
         else{const ang=face+Math.PI/2*n.dir;spd=.9;n.x+=Math.sin(ang)*spd*dt;n.z+=Math.cos(ang)*spd*dt;}}
       if(n.kind==='cop'){if(stars===0){n.state='leave';}}
       else if((n.kind==='ped'||n.kind==='fighter'&&!n.mission)&&(n.t<=0||dp>35||P.car)){n.state='flee';n.t=4;H.guard=0;}
-      if(n.kind==='guard'&&dp>45){n.state='leave';}
+      if(n.kind==='guard'&&dp>45&&!n.story){n.state='leave';}
     }else if(n.state==='leave'){H.guard=0;spd=4;n.h=lerpA(n.h,Math.atan2(n.x-P.x,n.z-P.z),dt*4);n.x+=Math.sin(n.h)*spd*dt;n.z+=Math.cos(n.h)*spd*dt;if(dp>70)removeNPC(n);}
     if(n.state!=='fight')H.guard=0;
     const p=resolve(n.x,n.z,.35);if(p){n.x+=p[0];n.z+=p[1];if(n.state==='walk'&&n.b){n.dir=-n.dir;}}
@@ -2043,7 +2045,7 @@ function fireWeapon(){const w=P.weapon,W=WEAP[w];if(!W)return;if(save.ammo[w]<=0
   muzzlePos(P.H,_o);if(P.aiming){camera.getWorldDirection(_d);const tgt=camera.position.clone().addScaledVector(_d,60);_d.copy(tgt).sub(_o).normalize();}
   else{const f=nearestFoe(W.range*.6,1.2);if(f){P.h=Math.atan2(f.x-P.x,f.z-P.z);_d.set(f.x-_o.x,1.25-_o.y,f.z-_o.z).normalize();}else _d.set(Math.sin(P.h),0,Math.cos(P.h));}
   _d.x+=rnd(-1,1)*W.spread;_d.y+=rnd(-1,1)*W.spread;_d.z+=rnd(-1,1)*W.spread;_d.normalize();
-  const r=rayHit(_o,_d,W.range,P),end=_o.clone().addScaledVector(_d,r.t);addTracer(_o,end);fx3(_o.x,_o.y,_o.z,false);
+  const r=rayHit(_o,_d,W.range,P),end=_o.clone().addScaledVector(_d,r.t);addTracer(_o,end);fx3(_o.x,_o.y,_o.z,false);if(stHeli&&stHeliHit(_o,_d,r.t,W.dmg*.35))r.kind=null;
   if(r.kind==='npc'){const n=r.hit;lastFoe={n,t:time};hurtNPC(n,W.dmg*rnd(.85,1.15),_d.x,_d.z,'player',w==='rifle'&&Math.random()<.4);if(n.kind==='cop')crime(2,true);fx3(end.x,end.y,end.z,true);}
   else if(r.kind==='car'){const c=r.hit;c.hp-=W.dmg*.5;sfx('ric');fx3(end.x,end.y,end.z,false);if(c.kind==='police')crime(1,true);if(c.driver&&c.kind==='traffic'&&Math.random()<.4)bailOut(c);}
   else if(r.kind){sfx('ric');fx3(end.x,end.y,end.z,true);}
@@ -2120,7 +2122,7 @@ function exitCarNow(){if(P.plane){P.plane=null;}if(P.tour){P.tour=null;const T0=
 function mount(c){if(c.type!=='bike')return;const H=P.H;scene.remove(H.root);H.root.position.set(0,.05,-.25);H.root.rotation.set(0,0,0);c.m.bg.add(H.root);H.root.visible=true;rideBikePose(H);P.bike=c;}
 function dismount(){if(!P.bike)return;const H=P.H;P.bike.m.bg.remove(H.root);scene.add(H.root);H.legL.rotation.z=H.legR.rotation.z=0;H.hips.position.y=.95;H.root.rotation.set(0,0,0);P.bike=null;}
 function loseDirty(){const d=P.dirty;P.dirty=0;if(heist&&heist.stage!=='done')heist=null;return d;}
-function wasted(){const fine=Math.min(save.money,Math.max(100,Math.round(save.money*.08)));save.money-=fine;const d=loseDirty();exitCarNow();clearChaos();failMission('Bất tỉnh giữa nhiệm vụ');
+function wasted(){if(STORY)stDied();const fine=Math.min(save.money,Math.max(100,Math.round(save.money*.08)));save.money-=fine;const d=loseDirty();exitCarNow();clearChaos();failMission('Bất tỉnh giữa nhiệm vụ');
   P.koT=3.2;P.H.ko=1;setTimeout(()=>{P.H.ko=0;P.koT=0;P.hp=maxHp();spawnAt(SP.hospital.x,SP.hospital.z,0);P.inv=3;},2600);
   banner('BẤT TỈNH',`Tỉnh dậy ở bệnh viện · viện phí ${fmt$(fine)}${d?` · mất ${fmt$(d)} tiền nóng`:''}`,3.6);writeSave();}
 function busted(){const fine=Math.min(save.money,Math.round(save.money*.1));save.money-=fine;const d=loseDirty();exitCarNow();clearChaos();failMission('Bị bắt giữa nhiệm vụ');
@@ -2241,7 +2243,7 @@ const OUTFITS={base:{n:'Đồ mặc định',p:0},white:{n:'Áo thun trắng',p:
   leather:{n:'Áo khoác da nâu',p:700,shirt:'#4a2c1c',pants:'#111111',shoes:'#1d1d1d',longSleeve:true,sleeve:true},nexus:{n:'Bộ Nexus chanh tím',p:900,shirt:'#c1f354',pants:'#2a1d4a',shoes:'#ad8dff',sleeve:false}};
 function playerLook(){const b=Object.assign({},CHARS[save.char]||CHARS.minh),o=OUTFITS[save.outfit]||{};for(const k of['shirt','pants','shoes','sleeve','longSleeve','skirt'])if(o[k]!==undefined)b[k]=o[k];if(o.shirt!==undefined){b.jacket=null;if(o.longSleeve===undefined)b.longSleeve=false;}b.cap=save.cap?'#1d1d1d':null;if(save.outfit==='nexus'&&save.cap)b.cap='#ad8dff';return b;}
 function rebuildPlayer(){const old=P.H;const H=makeHuman(playerLook());H.root.position.copy(old.root.position);H.root.rotation.copy(old.root.rotation);H.root.visible=old.root.visible;scene.remove(old.root);old.root.traverse(o=>{if(o.geometry&&o.material===HUMAT)o.geometry.dispose();});P.H=H;if(weaponMesh)attachWeapon();}
-const VEH={bike:{n:'Xe máy',p:1500},hatch:{n:'Xe hatchback nhỏ',p:4500},sedan:{n:'Sedan gia đình',p:6000},minivan:{n:'Xe gia đình 7 chỗ',p:8500},van:{n:'Xe tải van',p:9000},suv:{n:'SUV 7 chỗ',p:11000},pickup:{n:'Bán tải',p:13000},jeep:{n:'Xe địa hình gầm cao',p:16000},coupe:{n:'Coupe 2 cửa',p:18000},muscle:{n:'Xe cơ bắp Mỹ',p:22000},sports:{n:'Xe thể thao',p:24000},limo:{n:'Limousine',p:35000},bus:{n:'Xe buýt thành phố',p:40000},super:{n:'Siêu xe Nexus GT',p:60000},hyper:{n:'Siêu xe Hyper X',p:95000}};
+const VEH={bike:{n:'Xe máy',p:1500},hatch:{n:'Xe hatchback nhỏ',p:4500},sedan:{n:'Sedan gia đình',p:6000},minivan:{n:'Xe gia đình 7 chỗ',p:8500},van:{n:'Xe tải van',p:9000},suv:{n:'SUV 7 chỗ',p:11000},pickup:{n:'Bán tải',p:13000},jeep:{n:'Xe địa hình gầm cao',p:16000},coupe:{n:'Coupe 2 cửa',p:18000},muscle:{n:'Xe cơ bắp Mỹ',p:22000},sports:{n:'Xe thể thao',p:24000},limo:{n:'Limousine',p:35000},bus:{n:'Xe buýt thành phố',p:40000},super:{n:'Siêu xe Nexus GT',p:60000},hyper:{n:'Siêu xe Hyper X',p:95000},legend:{n:'Siêu xe Huyền Thoại',p:0,unique:true}};
 const SHOPS={
   food:{n:'Cơm Tấm Cô Ba',items:[{n:'Bánh mì thịt',d:'+25 máu',p:8,ok:()=>!P.tray,fn:()=>takeFood({n:TT('Bánh mì thịt'),hp:25,col:'#c98b4a'})},{n:'Cơm tấm sườn bì chả',d:'+60 máu',p:18,ok:()=>!P.tray,fn:()=>takeFood({n:TT('Cơm tấm sườn bì chả'),hp:60,col:'#a33b20'})},{n:'Phở bò tái',d:'Hồi đầy máu',p:25,ok:()=>!P.tray,fn:()=>takeFood({n:TT('Phở bò tái'),hp:200,col:'#e9c46a'})},{n:'Trà sữa trân châu',d:'+15 máu, chạy nhanh hơn 60 giây',p:12,ok:()=>!P.tray,fn:()=>takeFood({n:TT('Trà sữa trân châu'),hp:15,boost:1,col:'#d4a373'})}]},
   tea:{n:'Trà quán Phố Cổ',items:[{n:'Trà sen nóng',d:'+20 máu',p:6,ok:()=>!P.tray,fn:()=>takeFood({n:TT('Trà sen nóng'),hp:20,col:'#c9a227'})},{n:'Bánh đậu xanh',d:'+30 máu',p:8,ok:()=>!P.tray,fn:()=>takeFood({n:TT('Bánh đậu xanh'),hp:30,col:'#e9c46a'})},{n:'Cao lầu',d:'+70 máu',p:20,ok:()=>!P.tray,fn:()=>takeFood({n:TT('Cao lầu'),hp:70,col:'#c98b4a'})},{n:'Cà phê trứng',d:'+15 máu, chạy nhanh hơn 60 giây',p:10,ok:()=>!P.tray,fn:()=>takeFood({n:TT('Cà phê trứng'),hp:15,boost:1,col:'#d4a373'})}]},
@@ -2261,7 +2263,7 @@ function heal(n){P.hp=Math.min(maxHp(),P.hp+n);}
 let shopOpen=null;
 function shopItems(id){const S=SHOPS[id];if(S.kind==='clothes'){const L2=[];for(const k in OUTFITS){const o=OUTFITS[k],own=save.outfits.includes(k);if(S.own&&!own)continue;L2.push({n:o.n,d:own?(save.outfit===k?L('Đang mặc','Wearing'):L('Đã có · bấm để mặc','Owned · tap to wear')):'',p:own?0:o.p,label:own?(save.outfit===k?'✓':L('Mặc','Wear')):null,dis:save.outfit===k,fn:()=>{if(!own)save.outfits.push(k);save.outfit=k;rebuildPlayer();}});}
     if(!S.own||save.capOwned)L2.push({n:L('Mũ lưỡi trai','Baseball cap'),d:save.capOwned?(save.cap?L('Đang đội · bấm để bỏ','On · tap to remove'):L('Đã có · bấm để đội','Owned · tap to wear')):'',p:save.capOwned?0:80,label:save.capOwned?(save.cap?L('Bỏ','Remove'):L('Đội','Wear')):null,fn:()=>{save.capOwned=true;save.cap=!save.cap;rebuildPlayer();}});return L2;}
-  if(S.kind==='cars'){return Object.keys(VEH).map(k=>({n:VEH[k].n,d:L('Giao xe ngay trước cửa, lưu vào gara nhà bạn','Delivered out front and kept in your home garage'),p:VEH[k].p,fn:()=>buyVehicle(k)}));}
+  if(S.kind==='cars'){return Object.keys(VEH).filter(k=>!VEH[k].unique).map(k=>({n:VEH[k].n,d:L('Giao xe ngay trước cửa, lưu vào gara nhà bạn','Delivered out front and kept in your home garage'),p:VEH[k].p,fn:()=>buyVehicle(k)}));}
   return S.items.map(it=>{if(it.w){const own=!!save.weapons[it.w];return Object.assign({},it,{dis:own,label:own?L('Đã có','Owned'):null,fn:()=>{save.weapons[it.w]=true;save.ammo[it.w]+=({pistol:36,smg:120,rifle:60})[it.w];selectWeapon(it.w);}});}
     if(it.a)return Object.assign({},it,{dis:!save.weapons[it.a],d:save.weapons[it.a]?L('Đang có ','You have ')+save.ammo[it.a]:L('Cần mua súng trước','Buy the gun first'),fn:()=>{save.ammo[it.a]+=it.q;}});
     const dis=(it.need==='car'&&!P.car)||(it.ok&&!it.ok());return Object.assign({},it,{dis,d:it.need==='car'&&!P.car?L('Cần lái xe tới đây','Drive a car here first'):it.d});});}
@@ -2733,8 +2735,8 @@ function z1_(R){return R.z1;}
 /* indoor lights: a fixed number of point lights moved into the room the player is in */
 const ILIGHTS=[];for(let k=0;k<(MOBILE?1:3);k++){const l=new T.PointLight(0xffffff,0,14,2);scene.add(l);ILIGHTS.push(l);}
 function interiorLights(){const R=P.inside&&ROOMS[P.inside];
-  if(R){sun.intensity*=.12;hemi.intensity=Math.min(hemi.intensity,.32);}
-  rain.visible=!R;
+  if(R&&!R.open){sun.intensity*=.12;hemi.intensity=Math.min(hemi.intensity,.32);}
+  rain.visible=!R||!!R.open;
   ILIGHTS.forEach((l,i)=>{const s=R&&R.lights[i];if(s){l.position.set(s[0],s[1],s[2]);l.intensity=s[3]*(MOBILE?1.6:1);l.color.set(s[4]).convertSRGBToLinear();l.distance=s[5]||14;}else l.intensity=0;});}
 function fade(fn){const f=hud.fade;f.classList.add('on');setTimeout(()=>{fn();setTimeout(()=>f.classList.remove('on'),120);},260);}
 function enterInterior(id,out){if(P.car)return;const R=ROOMS[id];curDoor=out||null;fade(()=>{P.outside=out?{x:out.x-Math.sin(out.h)*1.2,z:out.z-Math.cos(out.h)*1.2,h:out.h}:{x:P.x,z:P.z,h:P.h+Math.PI};P.sit=null;P.inside=id;P.x=R.door.x;P.z=R.door.z-.6;P.h=Math.PI;cam.yaw=Math.PI;camera.position.set(P.x,2,P.z+3);sfx('door');if(id==='bank')tutEvent('bank');});}
@@ -2765,7 +2767,7 @@ function planRouteCity(fx,fz,tx,tz){const s=roadProj(fx,fz),e=roadProj(tx,tz),NN
   const out=[pts[0]];for(let k=1;k<pts.length;k++){const q=out[out.length-1];if(hyp(pts[k][0]-q[0],pts[k][1]-q[1])>.5)out.push(pts[k]);}return out;}
 function gpsTarget(){if(gps.wp)return{x:gps.wp.x,z:gps.wp.z,col:'#ff5fd2',name:gps.wp.name};
   if(MK.target.visible)return{x:MK.target.position.x,z:MK.target.position.z,col:'#ffd166',name:mis?'Mục tiêu':'Điểm vàng'};
-  if(heist&&heist.stage==='escape'&&stars===0)return{x:SP.house.door.x,z:SP.house.door.z,col:'#ffffff',name:'Nhà an toàn'};return null;}
+  if(heist&&heist.stage==='escape'&&stars===0)return{x:SP.house.door.x,z:SP.house.door.z,col:'#ffffff',name:'Nhà an toàn'};return stTarget();}
 function buildRouteMesh(pts,col){if(gps.mesh){scene.remove(gps.mesh);gps.mesh.geometry.dispose();gps.mesh=null;}if(!pts||pts.length<2)return;
   const gb=new GB(),W=.75;let u=0,L=0;const yAt=(x,z)=>{const b=blockAt(x,z);return b&&x>b.x0&&x<b.x1&&z>b.z0&&z<b.z1?.33:Math.max(.09,heightAt(x,z)+.24);};
   for(let k=0;k<pts.length-1&&L<360;k++){let[x0,z0]=pts[k],[x1,z1]=pts[k+1];const l=hyp(x1-x0,z1-z0);if(l<.01)continue;const dx=(x1-x0)/l,dz=(z1-z0)/l,nx=-dz*W,nz=dx*W;
@@ -2886,6 +2888,7 @@ const css=document.createElement('style');css.textContent=`
 .nc-gps:empty{display:none}.nc-gps i{width:10px;height:10px;border-radius:50%;flex:none;border:1.5px solid #000}
 .nc-clock{font:400 26px Impact,Haettenschweiler,"Arial Narrow Bold",sans-serif;letter-spacing:.05em;color:#e8e6df;-webkit-text-stroke:1.4px #000;paint-order:stroke fill;font-variant-numeric:tabular-nums}
 .nc-foe{position:absolute;left:50%;top:70px;transform:translateX(-50%);width:min(260px,60vw);text-align:center;font-size:12px;font-weight:600;-webkit-text-stroke:.6px #000;paint-order:stroke fill}
+.nc-win{position:absolute;inset:0;z-index:30;display:grid;place-items:center;background:radial-gradient(circle at 50% 40%,rgba(40,30,0,.55),rgba(0,0,0,.82));pointer-events:auto;animation:ncwin .8s ease}.nc-win-in{text-align:center;color:#fff;padding:26px 22px;max-width:min(560px,92vw);font-family:inherit}.nc-win-in small{letter-spacing:.3em;color:#ffd166;font-weight:700;font-size:12px}.nc-win-in h2{font-size:clamp(34px,7vw,64px);margin:8px 0;line-height:1;background:linear-gradient(180deg,#fff6c9,#ffd166 45%,#c98a00);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 4px 18px rgba(255,200,60,.5))}.nc-win-n{font-weight:700;color:#ffe9a8;margin:0 0 14px}.nc-win-s{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:14px}.nc-win-s span{background:rgba(255,255,255,.1);padding:6px 12px;border-radius:999px;font-weight:600}.nc-win-r{display:grid;gap:6px;background:rgba(255,209,102,.12);border:1px solid rgba(255,209,102,.45);border-radius:14px;padding:14px;margin-bottom:16px}.nc-win-r b{color:#ffd166}.nc-win-r em{font-style:normal;font-size:13px;color:#e9e3c8}.nc-win-b{border:0;border-radius:999px;padding:12px 26px;font-weight:800;font-size:15px;background:linear-gradient(180deg,#ffe08a,#ffb703);color:#1a1200;cursor:pointer}@keyframes ncwin{from{opacity:0;transform:scale(1.08)}to{opacity:1;transform:none}}
 .nc-foe div{height:7px;border-radius:4px;background:rgba(0,0,0,.6);margin-top:4px;overflow:hidden}.nc-foe i{display:block;height:100%;background:#ff6b5d;transform-origin:left center;transition:transform .15s}
 @media (max-width:760px){.nc-map{flex-direction:column;padding-top:52px}.nc-map canvas{max-width:92vw;max-height:56vh}.nc-side{width:92vw;max-height:30vh}}
 .nc-fade{position:absolute;inset:0;background:#000;opacity:0;transition:opacity .25s}.nc-fade.on{opacity:1}
@@ -3026,7 +3029,7 @@ function sitUpdate(dt){const S=P.sit,H=P.H,st=S.s;P.moving=0;P.h=st.h;H.root.pos
   const mv=K('w')||K('a')||K('s')||K('d')||K('arrowup')||K('arrowdown')||K('arrowleft')||K('arrowright')||Math.abs(joy.x)+Math.abs(joy.y)>.3;if(mv&&!(S.left>0))standUp();}
 function trayUpdate(){const want=!!P.tray;if(!want){if(TRAYM&&TRAYM.parent)TRAYM.parent.remove(TRAYM);return;}const m=trayMesh(P.tray.col);if(m.parent!==P.H.root)P.H.root.add(m);
   if(P.sit)m.position.set(0,.785,.58);else{m.position.set(0,1.02,.4);const H=P.H;H.armL.rotation.x=H.armR.rotation.x=-.8;H.elL.rotation.x=H.elR.rotation.x=-.75;}}
-function interactOption(){const t=P.car||P,near=(p,r)=>p&&hyp(P.x-p.x,P.z-p.z)<r;
+function interactOption(){const t=P.car||P,near=(p,r)=>p&&hyp(P.x-p.x,P.z-p.z)<r;{const so=stDoorOption();if(so)return so;}
   if(P.inside){const R=ROOMS[P.inside];
     if(P.sit)return{k:'E',txt:P.sit.left>0?L('Đang ăn · bấm E để đứng dậy','Eating · press E to stand up'):L('Đứng dậy','Stand up'),fn:standUp};
     if(near(R.door,1.8))return{k:'E',txt:L('Ra ngoài','Go outside'),fn:exitInterior};
@@ -3264,12 +3267,13 @@ function hudUpdate(dt){
   const gt=gps.pts&&gps.name?`<i style="background:${gps.col}"></i>${gps.name} · ${gps.len>950?(gps.len/1000).toFixed(1)+' km':Math.round(gps.len/10)*10+' m'}`:'';if(hud.gps.innerHTML!==gt)hud.gps.innerHTML=gt;
   hud.cross.hidden=!(P.aiming||P.weapon!=='fist'&&!P.car&&!MOBILE);const wk=P.weapon+'|'+(save.ammo[P.weapon]|0);if(hud.fistEl.dataset.k!==wk){hud.fistEl.dataset.k=wk;hud.fistEl.innerHTML=P.weapon==='fist'?'<span class="e">✊</span>':'<span></span><b></b>';if(P.weapon!=='fist'){hud.fistEl.querySelector('span').textContent=TT(WEAP[P.weapon].n);hud.fistEl.querySelector('b').textContent=save.ammo[P.weapon]|0;}}
   const ck=clockText();if(hud.clock.textContent!==ck)hud.clock.textContent=ck;
-  const f=lastFoe&&time-lastFoe.t<5&&npcs.includes(lastFoe.n)?lastFoe.n:null;hud.foe.hidden=!f;
-  if(f){hud.foeN.textContent=f.mission?`Đối thủ ${mis?mis.wave:''}`:{ped:'Người đi đường',fighter:'Dân anh chị',cop:'Cảnh sát',guard:'Bảo vệ'}[f.kind]||'Đối thủ';hud.foeI.style.transform=`scaleX(${Math.max(0,f.hp)/(f.maxHp||100)})`;}
+  const f=lastFoe&&time-lastFoe.t<5&&(npcs.includes(lastFoe.n)||lastFoe.n.heli&&stHeli)?lastFoe.n:null;hud.foe.hidden=!f;
+  if(f){hud.foeN.textContent=f.boss?f.boss:f.mission&&f.story?L('Đàn em Syndicate','Syndicate thug'):f.mission?`Đối thủ ${mis?mis.wave:''}`:{ped:'Người đi đường',fighter:'Dân anh chị',cop:'Cảnh sát',guard:'Bảo vệ'}[f.kind]||'Đối thủ';hud.foeI.style.transform=`scaleX(${Math.max(0,f.hp)/(f.maxHp||100)})`;}
   const io=interactOption();const pr=promptT>0?promptTxt:io?`<kbd>${io.k}</kbd>${io.txt}`:'';
   let obj='';
   if(heist&&heist.stage==='escape')obj=stars>0?'Cắt đuôi cảnh sát để mang tiền về':'Mang <span>tiền nóng</span> về nhà an toàn (biểu tượng mái nhà)';
   else if(mis){const s=Math.max(0,Math.ceil(mis.left));if(mis.k==='deliver')obj=(mis.stage==='pickup'?'Lấy gói hàng ở <span>điểm vàng</span>':'Giao hàng tới <span>điểm vàng</span>')+` · ${s}s`;if(mis.k==='race')obj=`Đua: điểm <span>${mis.cp+1}/${mis.cps.length}</span> · ${s}s`;if(mis.k==='fight')obj=`Ẩu đả: hạ đối thủ <span>${mis.wave}/3</span> · ${s}s`;}
+  else if(STORY&&(!P.inside||P.inside==='tower'))obj=stObj()+(stars>0?' · '+L('Cắt đuôi cảnh sát','Lose the police'):'');
   else if(stars>0)obj='Thoát khỏi tầm nhìn cảnh sát';
   const key=[pr,obj,Math.round(save.money),P.dirty,stars,!!seenT,Math.round(P.hp),Math.round(save.armor),P.car?Math.round(Math.abs(P.car.vf)*3.6):-1,heist&&heist.stage==='vault'?Math.round(heist.prog*100):-1,tut.on?tut.step:-1].join('|');
   if(key===lastHUD)return;lastHUD=key;
@@ -3290,7 +3294,7 @@ function step(dt){
     const d=hyp(c.x-P.x,c.z-P.z);c.mesh.visible=d<Q.cull+30;if(c.kind==='traffic'&&d>Q.cull+50)removeCar(c);}
   carPairs();
   for(const n of npcs.slice())npcUpdate(n,dt);
-  wantedUpdate(dt);heliUpdate(dt);heistUpdate(dt);missionUpdate(dt);tutUpdate(dt);gpsUpdate(dt);fxUpdate(dt);fwUpdate(dt);
+  wantedUpdate(dt);heliUpdate(dt);heistUpdate(dt);missionUpdate(dt);storyUpdate(dt);tutUpdate(dt);gpsUpdate(dt);fxUpdate(dt);fwUpdate(dt);
   tod.hour=(tod.hour+dt/30)%24;todApply();weatherUpdate(dt);weatherApply();interiorLights();skyMat.uniforms.ct.value=time;tracerUpdate(dt);heliShoot(dt);lampUpdate(dt);smashUpdate(dt);beamUpdate();doorsUpdate(dt);wildUpdate(dt);airUpdate(dt);
   if(cars.filter(c=>c.kind==='traffic').length<Q.traffic&&Math.random()<dt*2)spawnTraffic(true);
   if(npcs.filter(n=>n.kind==='ped').length<Q.peds&&Math.random()<dt*3)spawnPed();
@@ -3350,6 +3354,128 @@ const PP=(()=>{const gl2=renderer.capabilities.isWebGL2;const o={on:opt.gfx?opt.
     const u=fin.u;u.tDiffuse.value=main.texture;u.tB1.value=b1.texture;u.tB2.value=b3.texture;u.px.value.set(1/o.w,1/o.h);u.time.value=time;u.night.value=nk;u.bloom.value=.42+nk*.45;
     renderer.setRenderTarget(null);renderer.render(fin.sc,cam);};
   return o;})();
+/* ================= STORY MODE: "Lật đổ Ông Trùm" =================
+   ch 0: buy a gun · ch 1-5: beat the boss of each town (1 key card each) · ch 6: Syndicate Tower rooftop, final boss + escape helicopter · ch 7: done.
+   3 lives: dying wakes you in hospital with progress kept; losing all 3 sends you back to the first boss (key cards lost). */
+const STORY=opt.mode==='story';
+const ST_TOWNS=[['oldq','Lão Đèn Lồng','Phố Cổ Đèn Lồng'],['harbor','Cá Mập Cảng','Cảng Bắc'],['highland','Bóng Ma Đồi Mây','Đồi Mây'],['minetown','Vua Mỏ Bạc','Thị trấn Mỏ Bạc'],['westside','Rắn Sa Mạc','Nexus Tây']];
+const ST_LOOKS=[{shirt:'#7a1020',pants:'#1a1a1a',jacket:'#c0392b',cap:null},{shirt:'#1d3557',pants:'#22313f',jacket:'#457b9d',cap:'#0b1a2a'},{shirt:'#eeeeee',pants:'#30343a',jacket:'#6c757d',cap:null},{shirt:'#3b2f2f',pants:'#4a3b2a',jacket:'#8d6e63',cap:'#5d4037'},{shirt:'#2d6a4f',pants:'#1b4332',jacket:'#1b1b1b',cap:'#2d6a4f'}];
+if(STORY){save.story=Object.assign({ch:0,keys:[0,0,0,0,0],lives:3,done:false,deaths:0,t0:Date.now()},save.story||{});}
+const SS=STORY?save.story:null;
+let stGang=null,stTower=null,stHeli=null,stWin=null;
+// a walkable spot near each town centre for the boss fight
+function stSpot(i){const t=TOWNS.find(o=>o.id===ST_TOWNS[i][0]);if(!t)return null;if(t.spot)return t.spot;
+  for(let k=0;k<400;k++){const a=k*2.399,r=8+k*.25,x=t.x+Math.cos(a)*r,z=t.z+Math.sin(a)*r;if(resolve(x,z,1.2))continue;if(Math.abs(heightAt(x,z)-heightAt(x+3,z+3))>1.2)continue;return t.spot={x,z};}
+  return t.spot={x:t.x,z:t.z};}
+// tower door: a downtown sidewalk spot closest to the city centre
+let stDoor=null;
+function stDoorSpot(){if(stDoor)return stDoor;const bs=blocks.filter(b=>b.d==='downtown').sort((a,b)=>hyp((a.x0+a.x1)/2,(a.z0+a.z1)/2)-hyp((b.x0+b.x1)/2,(b.z0+b.z1)/2));
+  for(const b of bs){for(let s=0;s<200;s+=2.5){const p=perim(b,s);if(resolve(p[0],p[1],.8))continue;if(SP.bank&&hyp(p[0]-SP.bank.door.x,p[1]-SP.bank.door.z)<12)continue;return stDoor={x:p[0],z:p[1]};}}
+  return stDoor={x:0,z:0};}
+const stDoorMk=STORY?markerRing('#ff3b3b',1.6):null;
+/* ---------- Syndicate Tower rooftop (built east of the interiors, at ground level; the city below is a painted skyline) ---------- */
+const TW={cx:5600,cz:0,w:46,d:46};
+if(STORY){const x0=TW.cx-TW.w/2,x1=TW.cx+TW.w/2,z0=TW.cz-TW.d/2,z1=TW.cz+TW.d/2,g=new T.Group();scene.add(g);
+  const fl=new T.Mesh(new T.BoxGeometry(TW.w,1,TW.d),mat('#6b6f75',.92));fl.position.set(TW.cx,-.5,TW.cz);fl.receiveShadow=true;g.add(fl);
+  const tiles=makeTex(256,256,(c,w,h)=>{c.fillStyle='#7b8087';c.fillRect(0,0,w,h);c.strokeStyle='rgba(0,0,0,.25)';c.lineWidth=3;for(let i=0;i<=4;i++){c.beginPath();c.moveTo(i*64,0);c.lineTo(i*64,h);c.stroke();c.beginPath();c.moveTo(0,i*64);c.lineTo(w,i*64);c.stroke();}for(let i=0;i<500;i++){c.fillStyle=`rgba(0,0,0,${Math.random()*.08})`;c.fillRect(Math.random()*w,Math.random()*h,3,3);}});
+  tiles.repeat.set(TW.w/4,TW.d/4);const top=new T.Mesh(new T.PlaneGeometry(TW.w,TW.d),new T.MeshStandardMaterial({map:tiles,roughness:.9}));top.rotation.x=-Math.PI/2;top.position.set(TW.cx,.01,TW.cz);top.receiveShadow=true;g.add(top);
+  const pm=mat('#5d6268',.85);const wall=(ax0,ax1,az0,az1,h)=>{const m=new T.Mesh(new T.BoxGeometry(ax1-ax0,h,az1-az0),pm);m.position.set((ax0+ax1)/2,h/2,(az0+az1)/2);m.castShadow=m.receiveShadow=true;g.add(m);addCol({t:'b',x0:ax0,x1:ax1,z0:az0,z1:az1});};
+  wall(x0-.4,x1+.4,z0-.4,z0,1.15);wall(x0-.4,x1+.4,z1,z1+.4,1.15);wall(x0-.4,x0,z0,z1,1.15);wall(x1,x1+.4,z0,z1,1.15);
+  // cover: AC units, vents, a stair hut with the door back down
+  for(const[ax,az,w,d,h]of[[-12,-4,3,2,1.6],[10,-2,2.4,2.4,1.4],[-6,8,4,1.6,1.3],[8,10,2,3,1.7],[-15,12,2.6,2.6,1.5],[15,-12,3,1.8,1.4],[0,2,2,2,1.2]]){const m=new T.Mesh(new T.BoxGeometry(w,h,d),mat('#9aa0a6',.6,.3));m.position.set(TW.cx+ax,h/2,TW.cz+az);m.castShadow=m.receiveShadow=true;g.add(m);addCol({t:'b',x0:TW.cx+ax-w/2,x1:TW.cx+ax+w/2,z0:TW.cz+az-d/2,z1:TW.cz+az+d/2});}
+  const hut=new T.Mesh(new T.BoxGeometry(6,3.2,4),mat('#4a4f55',.8));hut.position.set(TW.cx,1.6,z1-2.4);g.add(hut);addCol({t:'b',x0:TW.cx-3,x1:TW.cx+3,z0:z1-4.4,z1:z1-.4});
+  const dr=new T.Mesh(new T.BoxGeometry(1.4,2.4,.08),mat('#8a1c1c',.5));dr.position.set(TW.cx,1.2,z1-4.45);g.add(dr);
+  // helipad
+  const hp=makeTex(256,256,(c,w,h)=>{c.clearRect(0,0,w,h);c.strokeStyle='#ffd166';c.lineWidth=12;c.beginPath();c.arc(128,128,112,0,7);c.stroke();c.fillStyle='#ffd166';c.font='bold 150px Arial';c.textAlign='center';c.textBaseline='middle';c.fillText('H',128,136);},{repeat:false});
+  const pad=new T.Mesh(new T.CircleGeometry(6,40),new T.MeshStandardMaterial({map:hp,transparent:true,roughness:.8}));pad.rotation.x=-Math.PI/2;pad.position.set(TW.cx,.03,TW.cz-14);g.add(pad);
+  const crate=new T.Mesh(new T.BoxGeometry(1.2,.8,.8),mat('#3d5a2a',.7));crate.position.set(TW.cx-4,.4,z1-6);g.add(crate);addCol({t:'b',x0:TW.cx-4.6,x1:TW.cx-3.4,z0:z1-6.4,z1:z1-5.6});
+  // the city far below: ground, streets of light and a ring of towers
+  const gnd=new T.Mesh(new T.PlaneGeometry(1400,1400),mat('#2a2d33',.95));gnd.rotation.x=-Math.PI/2;gnd.position.set(TW.cx,-80,TW.cz);g.add(gnd);
+  const keys=Object.keys(FAC);let rs=77;const rr=(a,b)=>{rs=(rs*16807)%2147483647;return a+(rs-1)/2147483646*(b-a);};const BG={};
+  for(let i=0;i<140;i++){const a=rr(0,6.283),d=rr(48,320),bx=TW.cx+Math.cos(a)*d,bz=TW.cz+Math.sin(a)*d,w=rr(14,34),dd=rr(14,34),top=-80+rr(30,d<90?72:115);const k=keys[i%keys.length];(BG[k]||(BG[k]=new GB())).box(bx-w/2,bx+w/2,-80,Math.min(top,-3),bz-dd/2,bz+dd/2,{});}
+  for(const k in BG)g.add(new T.Mesh(BG[k].geo(),FAC[k]));
+  ROOMS.tower={x0,x1,z0,z1,h:60,open:true,door:{x:TW.cx,z:z1-5.2},lights:[],acts:[{x:TW.cx-4,z:z1-6,r:2.2,txt:()=>L('Thùng đạn: nạp đầy đạn','Ammo crate: refill ammo'),fn:()=>{let any=false;for(const w in save.weapons)if(save.weapons[w]){save.ammo[w]=Math.max(save.ammo[w]|0,w==='pistol'?72:w==='smg'?240:120);any=true;}if(!any){save.weapons.pistol=1;save.ammo.pistol=72;}sfx('cash');showPrompt(L('Đã nạp đầy đạn','Ammo refilled'),1.4);}}]};}
+/* ---------- boss helicopter ---------- */
+function stHeliMake(){const g=new T.Group();const b=new T.Mesh(new T.SphereGeometry(1.6,18,14),mat('#111318',.35,.6));b.scale.set(1,.85,2);g.add(b);
+  const gl=new T.Mesh(new T.SphereGeometry(1.1,14,10,0,6.3,0,1.4),new T.MeshStandardMaterial({color:0x223344,roughness:.1,metalness:.8}));gl.position.set(0,.35,1.6);gl.rotation.x=-.5;g.add(gl);
+  const tail=new T.Mesh(new T.CylinderGeometry(.2,.4,5,8),mat('#111318',.4,.5));tail.rotation.x=Math.PI/2;tail.position.set(0,.4,-4.2);g.add(tail);
+  const stripe=new T.Mesh(new T.BoxGeometry(3.25,.25,2.5),mat('#d4a017',.3,.8));stripe.position.y=-.2;g.add(stripe);
+  for(const s of[-1,1]){const sk=new T.Mesh(new T.BoxGeometry(.12,.12,3.4),mat('#222',.5,.5));sk.position.set(s*1.1,-1.55,0);g.add(sk);}
+  const rot=new T.Mesh(new T.BoxGeometry(11,.06,.35),mat('#1a1a1a',.6));rot.position.y=1.55;g.add(rot);const rot2=rot.clone();rot2.rotation.y=Math.PI/2;g.add(rot2);
+  const tr=new T.Mesh(new T.BoxGeometry(.06,1.8,.25),mat('#1a1a1a',.6));tr.position.set(.3,.6,-6.6);g.add(tr);
+  g.traverse(o=>{if(o.isMesh)o.castShadow=true;});scene.add(g);return{g,rot:[rot,rot2,tr]};}
+/* ---------- fireworks for the ending ---------- */
+const FWK=[];
+function burst(x,y,z,col){const n=90,p=new Float32Array(n*3),v=[];for(let i=0;i<n;i++){p[i*3]=x;p[i*3+1]=y;p[i*3+2]=z;const a=Math.random()*6.283,b=Math.acos(2*Math.random()-1),s=rnd(9,15);v.push([Math.sin(b)*Math.cos(a)*s,Math.cos(b)*s,Math.sin(b)*Math.sin(a)*s]);}
+  const g=new T.BufferGeometry();g.setAttribute('position',new T.BufferAttribute(p,3));const m=new T.PointsMaterial({color:col,size:.5,transparent:true,depthWrite:false,blending:T.AdditiveBlending,toneMapped:false});const pt=new T.Points(g,m);scene.add(pt);FWK.push({pt,v,t:0});sfx('crash');}
+function fwkUpdate(dt){for(let i=FWK.length-1;i>=0;i--){const f=FWK[i];f.t+=dt;const a=f.pt.geometry.attributes.position;for(let k=0;k<f.v.length;k++){const v=f.v[k];v[1]-=9*dt;v[0]*=.985;v[1]*=.985;v[2]*=.985;a.array[k*3]+=v[0]*dt;a.array[k*3+1]+=v[1]*dt;a.array[k*3+2]+=v[2]*dt;}a.needsUpdate=true;f.pt.material.opacity=Math.max(0,1-f.t/2.2);if(f.t>2.2){scene.remove(f.pt);f.pt.geometry.dispose();FWK.splice(i,1);}}}
+/* ---------- helpers ---------- */
+function stKeys(){return SS?SS.keys.reduce((a,b)=>a+(b?1:0),0):0;}
+function stClearGang(){if(stGang){for(const n of stGang.list)if(npcs.includes(n))removeNPC(n);stGang=null;}}
+function stSpawnGang(i){const p=stSpot(i),list=[];const lk=Object.assign(randomLook('guard'),ST_LOOKS[i]);
+  const boss=newNPC('guard',p.x,p.z,{state:'fight',t:999,mission:true,story:true,boss:ST_TOWNS[i][1],look:lk});boss.hp=boss.maxHp=420+i*90;boss.H.root.scale.setScalar(1.12);list.push(boss);
+  for(let k=0;k<3+Math.min(2,i);k++){const a=k/(3+i)*6.283,x=p.x+Math.cos(a)*7,z=p.z+Math.sin(a)*7,q=resolve(x,z,.6)?p:{x,z};const n=newNPC('guard',q.x,q.z,{state:'fight',t:999,mission:true,story:true,look:Object.assign(randomLook('guard'),{jacket:ST_LOOKS[i].jacket})});n.hp=n.maxHp=110+i*15;list.push(n);}
+  stGang={i,boss,list,said:false};banner(ST_TOWNS[i][1],L('Trùm khu '+ST_TOWNS[i][2]+' và đàn em · hạ hắn để lấy mảnh thẻ khoá','Boss of '+ST_TOWNS[i][2]+' and his crew · take him down for a key card'),3);}
+function stTarget(){if(!STORY||SS.done||P.inside)return null;
+  if(SS.ch===0){const g=SP.shops.find(s=>s.id==='guns');return g?{x:g.x,z:g.z,col:'#ff3b3b',name:L('Cửa hàng súng','Gun shop')}:null;}
+  if(SS.ch>=1&&SS.ch<=5){const p=stSpot(SS.ch-1);return{x:p.x,z:p.z,col:'#ff3b3b',name:ST_TOWNS[SS.ch-1][1]};}
+  if(SS.ch===6){const d=stDoorSpot();return{x:d.x,z:d.z,col:'#ff3b3b',name:L('Tháp Syndicate','Syndicate Tower')};}return null;}
+function stObj(){if(!STORY)return'';const lv=`<span>❤ ${SS.lives}</span> · 🔑 ${stKeys()}/5 · `;
+  if(SS.done)return L('Đã phá đảo Nexus City','Nexus City completed');
+  if(SS.ch===0)return lv+L('Mua một khẩu súng ở <span>Súng Tầm Xa</span> (đường đỏ)','Buy a gun at <span>Long Range Guns</span> (red route)');
+  if(SS.ch>=1&&SS.ch<=5)return lv+(stGang?L('Hạ <span>'+ST_TOWNS[SS.ch-1][1]+'</span>','Take down <span>'+ST_TOWNS[SS.ch-1][1]+'</span>'):L('Tới '+ST_TOWNS[SS.ch-1][2]+', tìm <span>'+ST_TOWNS[SS.ch-1][1]+'</span> (đường đỏ)','Go to '+ST_TOWNS[SS.ch-1][2]+' and find <span>'+ST_TOWNS[SS.ch-1][1]+'</span> (red route)'));
+  if(SS.ch===6){if(P.inside==='tower'){if(stHeli)return lv+L('Bắn rơi <span>trực thăng</span> của Ông Trùm!','Shoot down the boss <span>helicopter</span>!');return lv+L('Hạ <span>Ông Trùm Vương</span> trên sân thượng','Take down <span>Boss Vương</span> on the roof');}return lv+L('Vào <span>Tháp Syndicate</span> ở trung tâm (đường đỏ)','Enter <span>Syndicate Tower</span> downtown (red route)');}
+  return '';}
+function stDoorOption(){if(!STORY||SS.ch!==6||P.inside||P.car)return null;const d=stDoorSpot();if(hyp(P.x-d.x,P.z-d.z)>2.6)return null;
+  return{k:'E',txt:L('Vào Tháp Syndicate','Enter Syndicate Tower'),fn:stEnterTower};}
+function stEnterTower(){if(stars>0){showPrompt(L('Cắt đuôi cảnh sát trước đã','Lose the police first'),1.6);return;}const d=stDoorSpot();enterInterior('tower',{x:d.x,z:d.z,h:0});setTimeout(stStartTower,420);}
+function stStartTower(){stTowerReset();const list=[];const lk=Object.assign(randomLook('guard'),{shirt:'#f5f5f5',pants:'#111111',jacket:'#111111',cap:null});
+  const boss=newNPC('guard',TW.cx,TW.cz-8,{state:'fight',t:999,mission:true,story:true,boss:L('Ông Trùm Vương','Boss Vương'),look:lk});boss.hp=boss.maxHp=1100;boss.H.root.scale.setScalar(1.18);list.push(boss);
+  for(let k=0;k<6;k++){const x=TW.cx+(k%3-1)*12,z=TW.cz-14+Math.floor(k/3)*14+(k%2?3:-3);const n=newNPC('guard',x,z,{state:'fight',t:999,mission:true,story:true,look:Object.assign(randomLook('guard'),{jacket:'#111111',shirt:'#222222'})});n.hp=n.maxHp=150;list.push(n);}
+  stTower={boss,list,phase:'fight'};banner(L('THÁP SYNDICATE','SYNDICATE TOWER'),L('Ông Trùm Vương đang chờ trên sân thượng · thùng đạn ở cạnh cửa','Boss Vương is waiting on the roof · ammo crate by the door'),3.2);}
+function stTowerReset(){if(stTower){for(const n of stTower.list)if(npcs.includes(n))removeNPC(n);}stTower=null;if(stHeli){scene.remove(stHeli.g);stHeli=null;}}
+function stHeliHit(o,d,range,dmg){if(!stHeli||stHeli.dead)return false;const H=stHeli.g.position;_m.set(H.x-o.x,H.y-o.y,H.z-o.z);const t=_m.dot(d);if(t<0||t>range)return false;const q=_m.lengthSq()-t*t;if(q>3.2*3.2)return false;
+  stHeli.hp-=dmg;fx3(H.x+rnd(-1,1),H.y+rnd(-.5,.5),H.z+rnd(-1,1),false);sfx('ric');lastFoe={n:{boss:L('Trực thăng Ông Trùm','Boss helicopter'),hp:Math.max(0,stHeli.hp),maxHp:100,heli:true},t:time};return true;}
+function stDied(){if(!STORY||SS.done)return;SS.lives--;SS.deaths=(SS.deaths|0)+1;stClearGang();stTowerReset();
+  if(SS.lives<=0){SS.lives=3;SS.keys=[0,0,0,0,0];SS.ch=Math.min(SS.ch,1);if(SS.ch>0)SS.ch=1;setTimeout(()=>banner(L('HẾT MẠNG','OUT OF LIVES'),L('Mất hết mảnh thẻ khoá · làm lại từ trùm đầu tiên, bạn có lại 3 mạng','All key cards lost · start again from the first boss with 3 lives'),4.5),2900);}
+  else setTimeout(()=>banner(L('Tỉnh lại ở bệnh viện','You woke up in hospital'),L(`Còn ${SS.lives} mạng · tiến độ vẫn được giữ`,`${SS.lives} lives left · progress kept`),3.5),2900);
+  writeSave();}
+function stWinBoss(i){SS.keys[i]=1;SS.ch=Math.min(6,SS.ch+1);while(SS.ch<=5&&SS.keys[SS.ch-1])SS.ch++;sfx('cash');P.hp=maxHp();save.money+=2000;
+  banner(L('Mảnh thẻ khoá '+stKeys()+'/5','Key card '+stKeys()+'/5'),stKeys()>=5?L('Đủ 5 mảnh! Tháp Syndicate ở trung tâm đã mở · +$2.000','All 5! Syndicate Tower downtown is open · +$2,000'):L('Hạ '+ST_TOWNS[i][1]+' · +$2.000 · tới thị trấn tiếp theo','Beat '+ST_TOWNS[i][1]+' · +$2,000 · on to the next town'),4);writeSave();
+  const g=stGang;stGang=null;setTimeout(()=>{if(g)for(const n of g.list)if(npcs.includes(n)&&n.state==='down')removeNPC(n);},6000);for(const n of g.list)if(n!==g.boss&&n.state!=='down'){n.state='leave';n.story=false;}}
+function stVictory(){if(stWin)return;SS.done=true;SS.ch=7;const mins=Math.round((Date.now()-(SS.t0||Date.now()))/60000);
+  let lg={};try{lg=JSON.parse(localStorage.getItem('nexus-city2-legend')||'{}');}catch(_){}const first=!lg.done;
+  if(first){lg={done:true,claimed:false,at:Date.now()};try{localStorage.setItem('nexus-city2-legend',JSON.stringify(lg));}catch(_){}}
+  writeSave();if(opt.onStory)opt.onStory(save);
+  for(let k=0;k<14;k++)setTimeout(()=>burst(P.x+rnd(-25,25),rnd(18,32),P.z+rnd(-25,25),pick(['#ffd166','#ff5fd2','#7df9ff','#c1f354','#ff6b5d'])),k*450);
+  stWin=document.createElement('div');stWin.className='nc-win';
+  stWin.innerHTML=`<div class="nc-win-in"><small>${L('THE SYNDICATE ĐÃ SỤP ĐỔ','THE SYNDICATE HAS FALLEN')}</small><h2>${L('PHÁ ĐẢO NEXUS CITY','NEXUS CITY COMPLETE')}</h2><p class="nc-win-n">${L('Danh hiệu: Huyền Thoại Nexus','Title: Nexus Legend')}</p>
+    <div class="nc-win-s"><span>⏱ ${mins} ${L('phút','min')}</span><span>💀 ${SS.deaths|0} ${L('lần ngã','falls')}</span><span>🔑 5/5</span></div>
+    ${first?`<div class="nc-win-r"><b>${L('Phần thưởng','Rewards')}</b><span>🏎️ ${L('Siêu xe Huyền Thoại (chỉ có 1 chiếc)','Legend supercar (one of a kind)')}</span><span>💰 $100.000</span><em>${L('Đã chuyển vào chế độ "Vào thẳng thành phố" · xe nằm trong gara nhà bạn','Sent to "Go straight to the city" · the car is in your home garage')}</em></div>`
+      :`<div class="nc-win-r"><b>${L('Bạn đã phá đảo trước đó','You already beat the game')}</b><em>${L('Chơi lại Story mode không nhận thêm xe hay tiền','Replaying Story mode gives no extra car or money')}</em></div>`}
+    <button type="button" class="nc-win-b">${L('Về menu','Back to menu')}</button></div>`;
+  root.appendChild(stWin);stWin.querySelector('button').addEventListener('click',()=>{stWin.remove();stWin=null;if(opt.onMenu)opt.onMenu();});}
+function storyUpdate(dt){fwkUpdate(dt);if(!STORY)return;if(stTower&&P.inside!=='tower'&&P.koT<=0)stTowerReset();
+  if(stDoorMk){const show=SS.ch===6&&!P.inside;stDoorMk.visible=show;if(show){const d=stDoorSpot();stDoorMk.position.set(d.x,.25,d.z);stDoorMk.children[0].rotation.z+=dt;}}
+  if(SS.done)return;
+  if(SS.ch===0&&Object.keys(save.weapons).some(w=>save.weapons[w])){SS.ch=1;banner(L('Đã có vũ khí','Armed'),L('Giờ tới Phố Cổ Đèn Lồng hạ trùm đầu tiên','Now head to the Lantern Old Quarter for the first boss'),3.5);writeSave();}
+  if(SS.ch>=1&&SS.ch<=5&&!P.inside){const i=SS.ch-1,p=stSpot(i),t=P.car||P,d=hyp(t.x-p.x,t.z-p.z);
+    if(!stGang&&d<85&&P.koT<=0)stSpawnGang(i);
+    if(stGang){if(d>170){stClearGang();showPrompt(L('Bạn đã rời khỏi khu trùm','You left the boss area'),1.6);}
+      else{for(const n of stGang.list)if(n.state==='leave'&&n.story){n.state='fight';n.t=999;}const b=stGang.boss;if(!npcs.includes(b)||b.state==='down'||b.hp<=0)stWinBoss(i);}}}
+  if(SS.ch===6&&P.inside==='tower'&&stTower){const T2=stTower,b=T2.boss;for(const n of T2.list)if(n.state==='leave'&&npcs.includes(n)){n.state='fight';n.t=999;}
+    if(T2.phase==='fight'&&(b.hp<=b.maxHp*.25||b.state==='down')){T2.phase='escape';removeNPC(b);stHeli=stHeliMake();stHeli.hp=100;stHeli.t=0;stHeli.g.position.set(TW.cx,1.8,TW.cz-14);stHeli.a=0;banner(L('ÔNG TRÙM BỎ CHẠY!','THE BOSS IS ESCAPING!'),L('Hắn nhảy lên trực thăng · bắn rơi nó!','He jumped into his helicopter · shoot it down!'),3.2);sfx('horn');}
+    if(stHeli){const H=stHeli;H.t+=dt;for(const r of H.rot)r.rotation.y+=dt*(r===H.rot[2]?0:28);H.rot[2].rotation.x+=dt*30;const g=H.g;
+      if(!H.dead){if(H.t<3){g.position.y=1.8+H.t*5;}else{H.a+=dt*.35;const R=24,y=17+Math.sin(H.t*.7)*3;g.position.set(TW.cx+Math.sin(H.a)*R,y,TW.cz+Math.cos(H.a)*R);}
+        g.rotation.y=Math.atan2(P.x-g.position.x,P.z-g.position.z);g.rotation.z=Math.sin(H.t)*.08;
+        H.scd=(H.scd==null?2:H.scd)-dt;if(H.t>3&&H.scd<=0&&P.koT<=0){H.scd=rnd(.9,1.6);_o.copy(g.position);_o.y-=1;_d.set(P.x-_o.x,1.1-_o.y,P.z-_o.z).normalize();_d.x+=rnd(-.04,.04);_d.z+=rnd(-.04,.04);_d.normalize();const r=rayHit(_o,_d,90,null),end=_o.clone().addScaledVector(_d,r.t);addTracer(_o,end);sfx('smg');if(r.kind==='player')hurtPlayer(6,null);}
+        if(H.hp<=0){H.dead=true;H.vy=0;banner(L('TRÚNG RỒI!','DIRECT HIT!'),L('Trực thăng của Ông Trùm đang rơi','The boss helicopter is going down'),2.5);for(let k=0;k<6;k++)setTimeout(()=>{if(stHeli)fx3(g.position.x+rnd(-2,2),g.position.y+rnd(-1,1),g.position.z+rnd(-2,2),false);sfx('crash');},k*180);}}
+      else{H.vy-=12*dt;g.position.y+=H.vy*dt;g.rotation.y+=dt*6;g.position.x+=(g.position.x-TW.cx)*dt*.4;g.position.z+=(g.position.z-TW.cz)*dt*.4;if(g.position.y<-70){scene.remove(g);stHeli=null;for(const n of T2.list)if(npcs.includes(n))n.state='leave';T2.phase='won';stVictory();}}}}}
+// free mode: collect the one-time reward of a finished story
+if(!STORY){let lg=null;try{lg=JSON.parse(localStorage.getItem('nexus-city2-legend')||'null');}catch(_){}
+  if(lg&&lg.done&&!lg.claimed){lg.claimed=true;try{localStorage.setItem('nexus-city2-legend',JSON.stringify(lg));}catch(_){}
+    if(!save.garage.some(o=>o.type==='legend')){save.money+=100000;save.garage.push({type:'legend',color:'#d4a017'});save.legend=true;writeSave();setTimeout(()=>banner(L('Phần thưởng phá đảo!','Story reward!'),L('+$100.000 và Siêu xe Huyền Thoại · lấy xe ở gara nhà bạn','+$100,000 and the Legend supercar · get it from your home garage'),5),2500);}}}
+
 function frame(now){raf=requestAnimationFrame(frame);const raw=(now-last)/1000||0;let dt=Math.max(0,Math.min(.05,raw));last=now;if(hitStop>0){hitStop-=dt;dt*=.12;}if(raw>0&&raw<1)adapt(raw);if(!paused&&!mapOpen&&!shopOpen)step(dt);camUpdate(dt);hudUpdate(dt);audioUpdate(dt);if(GRASS&&!P.inside)GRASS.update(P.car?P.car.x:P.x,P.car?P.car.z:P.z);PP.render();}
 function resize(){const w=view.clientWidth||innerWidth,h=view.clientHeight||innerHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();const pr=renderer.getPixelRatio();PP.setSize(Math.round(w*pr),Math.round(h*pr));}
 window.addEventListener('resize',()=>{if(!view.closest('[hidden]'))resize();});
@@ -3364,7 +3490,7 @@ const api={
   resume(){active=true;paused=false;keys.clear();cam.rmb=false;last=performance.now();cancelAnimationFrame(raf);raf=requestAnimationFrame(frame);resize();if(P.car&&radio.idx>=0)radioPlay();},
   resize,
   get save(){return save;},
-  _dbg:{heightAt,resolve,TOWNS,DIAS,PADS,inBld,AIR,PP,P,cars,newCar,buyVehicle,interactOption,sitDown,standUp,takeFood,GDOORS,SHOPS,save,bookTour,npcs,get stars(){return stars;},set stars(v){stars=v;},startHeist,startMission,interact,toggleCar,playerPunch,get heist(){return heist;},set heistProg(v){if(heist)heist.prog=v;},SP,tut,toggleMap,bag,time:()=>time,scene,renderer,sun,step,info:()=>renderer.info.render,keys,camUpdate,camera,weather,ROOMS,openShop,closeShop,enterInterior,exitInterior,selectWeapon,fireWeapon,get shopOpen(){return shopOpen;},tod,todApply,gps,setWaypoint,clearWaypoint,planRoute,poiList,radio,radioNext,playerHitBy,get lastFoe(){return lastFoe;},cam,tb,render:()=>renderer.render(scene,camera)}
+  _dbg:{story:{get SS(){return SS;},stSpot,stDoorSpot,get gang(){return stGang;},get tower(){return stTower;},get heli(){return stHeli;},stEnterTower,stStartTower,stVictory,stDied,storyUpdate,wasted,get win(){return stWin;}},heightAt,resolve,TOWNS,DIAS,PADS,inBld,AIR,PP,P,cars,newCar,buyVehicle,interactOption,sitDown,standUp,takeFood,GDOORS,SHOPS,save,bookTour,npcs,get stars(){return stars;},set stars(v){stars=v;},startHeist,startMission,interact,toggleCar,playerPunch,get heist(){return heist;},set heistProg(v){if(heist)heist.prog=v;},SP,tut,toggleMap,bag,time:()=>time,scene,renderer,sun,step,info:()=>renderer.info.render,keys,camUpdate,camera,weather,ROOMS,openShop,closeShop,enterInterior,exitInterior,selectWeapon,fireWeapon,get shopOpen(){return shopOpen;},tod,todApply,gps,setWaypoint,clearWaypoint,planRoute,poiList,radio,radioNext,playerHitBy,get lastFoe(){return lastFoe;},cam,tb,render:()=>renderer.render(scene,camera)}
 };
 return api;
 }
