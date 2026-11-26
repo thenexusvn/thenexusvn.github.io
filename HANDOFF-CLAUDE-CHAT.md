@@ -296,3 +296,10 @@ Python helper scripts used during development:
 ## Báo cập nhật + chặn từ bậy (26/11/2026)
 - MỖI LẦN publish: chạy `python3 tools/bump.py "ghi chú"` trước khi commit. Nó đổi `<meta name="nexus-build">` trong index.html (+dev) và ghi `version.json`. Trang đang mở kiểm tra /version.json mỗi 60 giây (và khi quay lại tab): khác build → màn hình "Có bản cập nhật mới / There's an update" với nút Tải lại (tạm dừng game đang chơi).
 - `window.NexusMod` (script trước firebase-config): `guard(...texts)` chặn từ bậy tiếng Việt (có/không dấu, từ mơ hồ khi bỏ dấu chỉ bắt khi có dấu — đánh dấu '!') và tiếng Anh (leetspeak, f.u.c.k, kéo dài chữ). 3 lần → cấm viết 1 tiếng (localStorage 'nexus-mod' theo uid). Gắn vào: setProfile, addDoc, createMatch, sendMessage, addFeedback, addSong, makeGroup, sendRoom, postVideo, addComment.
+
+## Guest mode (Khách)
+- Onboarding auth step: link "Tiếp tục với tư cách khách / Continue as guest" (cloud mode only) → ND.continueAsGuest() sets LS 'guest' and keeps the anonymous Firebase user → profile step (name + avatar saved with updateProfile on the anonymous user).
+- ND.user.guest = anonymous && LS guest. ND.isGuest. needChat() lets guests sendMessage; other features still need needUser().
+- Main app: chatOK() gates CommsHub (channels, DMs, groups, people). Profile docs carry guest:true → "Khách" badge (.guest-badge) in chat, rooms, people list, profile card; sidebar shows "Khách (Guest)"; account page shows a guest note.
+- firestore.rules: chatter() = signedIn() && notBanned() for channels/profiles/friends/rooms; profiles allow 'guest' key. User must re-paste rules.
+- Signing in with email/Google clears the guest flag.

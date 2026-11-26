@@ -12,6 +12,8 @@ service cloud.firestore {
     // người bị quản trị viên chặn thì không đăng gì được nữa
     function notBanned() { return !exists(/databases/$(database)/documents/banned/$(request.auth.uid)); }
     function poster() { return member() && notBanned(); }
+    // CommsHub: cả khách (guest, đăng nhập ẩn danh) cũng được nhắn tin, kết bạn và tạo nhóm
+    function chatter() { return signedIn() && notBanned(); }
 
     // The 7-Vault: ai cũng xem được, thành viên đăng bài, chỉ người đăng được xoá
     match /docs/{id} {
@@ -51,27 +53,27 @@ service cloud.firestore {
     // Chỉ quản trị viên được gắn nhãn admin vào tin nhắn của mình.
     match /channels/{ch}/messages/{id} {
       allow read: if true;
-      allow create: if poster()
+      allow create: if chatter()
         && request.resource.data.keys().hasOnly(['text', 'uid', 'name', 'createdAt', 'admin'])
         && request.resource.data.uid == request.auth.uid
         && str(request.resource.data.text, 500) && request.resource.data.text.size() > 0
         && str(request.resource.data.name, 40)
         && (!('admin' in request.resource.data) || (request.resource.data.admin == true && isAdmin()));
-      allow delete: if (member() && resource.data.uid == request.auth.uid) || isAdmin();
+      allow delete: if (signedIn() && resource.data.uid == request.auth.uid) || isAdmin();
     }
 
     // CommsHub: hồ sơ công khai (tên + ảnh đại diện) để mọi người thấy nhau và kết bạn. Mỗi người chỉ sửa hồ sơ của mình.
     match /profiles/{uid} {
       allow read: if true;
-      allow create, update: if member() && request.auth.uid == uid
-        && request.resource.data.keys().hasOnly(['name', 'photo', 'at'])
+      allow create, update: if signedIn() && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['name', 'photo', 'guest', 'at'])
         && str(request.resource.data.name, 40) && str(request.resource.data.photo, 120);
-      allow delete: if (member() && request.auth.uid == uid) || isAdmin();
+      allow delete: if (signedIn() && request.auth.uid == uid) || isAdmin();
     }
     // lời mời kết bạn / bạn bè: id là hai uid xếp theo thứ tự, nối bằng dấu _. Chỉ hai người trong cuộc đọc được.
     match /friends/{id} {
       allow read: if signedIn() && request.auth.uid in resource.data.users;
-      allow create: if poster()
+      allow create: if chatter()
         && request.resource.data.keys().hasOnly(['users', 'by', 'status', 'at'])
         && request.resource.data.users.size() == 2
         && request.resource.data.users[0] < request.resource.data.users[1]
@@ -80,15 +82,15 @@ service cloud.firestore {
         && request.resource.data.by == request.auth.uid
         && request.resource.data.status == 'pending';
       // chỉ người được mời mới chấp nhận
-      allow update: if member() && request.auth.uid in resource.data.users && request.auth.uid != resource.data.by
+      allow update: if signedIn() && request.auth.uid in resource.data.users && request.auth.uid != resource.data.by
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
         && request.resource.data.status == 'ok';
-      allow delete: if member() && request.auth.uid in resource.data.users;
+      allow delete: if signedIn() && request.auth.uid in resource.data.users;
     }
     // tin nhắn riêng (dm) và nhóm chat: chỉ thành viên đọc và nhắn được
     match /rooms/{rid} {
       allow read: if signedIn() && request.auth.uid in resource.data.members;
-      allow create: if poster()
+      allow create: if chatter()
         && request.resource.data.keys().hasOnly(['type', 'name', 'members', 'owner', 'names', 'createdAt', 'lastAt', 'last', 'lastBy'])
         && request.resource.data.owner == request.auth.uid
         && request.auth.uid in request.resource.data.members
@@ -97,7 +99,7 @@ service cloud.firestore {
         && (request.resource.data.type == 'group'
           || (request.resource.data.type == 'dm' && request.resource.data.members.size() == 2
               && rid == 'dm_' + request.resource.data.members[0] + '_' + request.resource.data.members[1]));
-      allow update: if member() && request.auth.uid in resource.data.members && (
+      allow update: if signedIn() && request.auth.uid in resource.data.members && (
           // tin nhắn mới nhất
           (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['last', 'lastBy', 'lastAt'])
             && str(request.resource.data.last, 80) && request.resource.data.lastBy == request.auth.uid)
@@ -109,17 +111,17 @@ service cloud.firestore {
           || (resource.data.type == 'group'
             && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['members'])
             && request.resource.data.members.toSet() == resource.data.members.toSet().difference([request.auth.uid].toSet())));
-      allow delete: if (member() && request.auth.uid in resource.data.members
+      allow delete: if (signedIn() && request.auth.uid in resource.data.members
           && (resource.data.type == 'dm' || resource.data.owner == request.auth.uid)) || isAdmin();
       match /messages/{mid} {
         allow read: if signedIn() && request.auth.uid in get(/databases/$(database)/documents/rooms/$(rid)).data.members;
-        allow create: if poster()
+        allow create: if chatter()
           && request.auth.uid in get(/databases/$(database)/documents/rooms/$(rid)).data.members
           && request.resource.data.keys().hasOnly(['text', 'uid', 'name', 'createdAt'])
           && request.resource.data.uid == request.auth.uid
           && str(request.resource.data.text, 500) && request.resource.data.text.size() > 0
           && str(request.resource.data.name, 40);
-        allow delete: if member() && resource.data.uid == request.auth.uid;
+        allow delete: if signedIn() && resource.data.uid == request.auth.uid;
       }
     }
 
