@@ -2854,7 +2854,7 @@ const dRim=a=>hyp(a.x-HP.hoop.x,a.z-HP.hoop.z);
 // ---- actors: the player proxy and the bot share the same fields ----
 function hpActor(H,isBot){return{H,x:0,z:0,y:0,h:0,vy:0,act:null,hand:1,dph:0,spd:0,isBot,stun:0,cool:0,jy:0};}
 function hpEnter(h){HP.on=true;HP.hoop=h;HP.PA=HP.PA||hpActor(P.H,false);HP.PA.H=P.H;HP.ball={st:'held',owner:HP.PA,x:P.x,y:1,z:P.z,vx:0,vy:0,vz:0,spin:0};hpUI(true);
-  if(P.weapon!=='fist')selectWeapon('fist');banner(L('Bóng rổ','Basketball'),MOBILE?L('Dùng các nút bên phải · bấm 1v1 để solo với bot','Use the buttons on the right · tap 1v1 to play a bot'):L('J ném · K layup · L úp rổ · Space đảo bóng · E thoát · nút 1v1 để solo với bot','J shoot · K layup · L dunk · Space crossover · E leave · 1v1 button to play a bot'),4);}
+  if(P.weapon!=='fist')selectWeapon('fist');banner(L('Bóng rổ','Basketball'),MOBILE?L('Dùng các nút bên phải · bấm 1v1 để solo với bot','Use the buttons on the right · tap 1v1 to play a bot'):L('J ném · K layup · L úp rổ · Space đảo bóng · V solo 1v1 với bot · E thoát','J shoot · K layup · L dunk · Space crossover · V 1v1 vs bot · E leave'),4);}
 function hpExit(){HP.on=false;{const H=P.H;H.armL.rotation.z=-.07;H.armR.rotation.z=.07;H.spine.rotation.z=0;}if(HP.bot){scene.remove(HP.bot.H.root);HP.bot=null;}HP.game=null;if(HP.ballMesh)HP.ballMesh.visible=false;HP.ball=null;hpUI(false);if(BB.board)BB.board.draw();P.H.root.position.y=P.y;}
 function hpBallMesh(){if(!HP.ballMesh){HP.ballMesh=new T.Mesh(new T.SphereGeometry(.12,20,16),BBM.ball);HP.ballMesh.castShadow=true;scene.add(HP.ballMesh);}HP.ballMesh.visible=true;return HP.ballMesh;}
 // ---- 1v1 ----
@@ -2869,7 +2869,7 @@ function hpFace(a,t){a.h=Math.atan2(t.x-a.x,t.z-a.z);}
 // ---- input ----
 function hpKey(k){if(!HP.on)return false;const A=HP.PA,b=HP.ball;if(!b)return false;
   if(k==='e'||k==='q'){hpExit();return true;}
-  if(k==='1v1'){hp1v1();return true;}
+  if(k==='1v1'||k==='v'){hp1v1();return true;}
   if(A.act&&A.act.k!=='cross')return true;
   const mine=b.st==='held'&&b.owner===A;
   if(mine){if(k==='j')hpStart(A,'shot');else if(k==='k')hpStart(A,dRim(A)<5.2?'layup':'shot');else if(k==='l'){if(dRim(A)<3.8)hpStart(A,'dunk');else showPrompt(L('Lại gần rổ hơn để úp (dưới 3,8 m)','Get closer to dunk (under 3.8 m)'),1.3);}else if(k===' ')hpStart(A,'cross');else return false;return true;}
@@ -2990,7 +2990,7 @@ function hpUI(show){if(!HP.ui){const d=document.createElement('div');d.className
   HP.ui.hidden=!show;HP.uiKey='';}
 function hpUIUpdate(){if(!HP.ui)return;const A=HP.PA,b=HP.ball,mine=b&&b.st==='held'&&b.owner===A,g=HP.game;const key=[mine,!!g,g&&g.sc.join('-'),g&&g.clear,dRim(A)<3.8].join('|');if(key===HP.uiKey)return;HP.uiKey=key;
   const B=(k,l,s)=>`<button type="button" data-hk="${k}"><b>${l}</b>${MOBILE?'':`<kbd>${s}</kbd>`}</button>`;
-  HP.ui.querySelector('.nc-hp-b').innerHTML=(mine?B('j',L('Ném','Shoot'),'J')+B('k',L('Layup','Layup'),'K')+B('l',L('Úp rổ','Dunk'),'L')+B(' ',L('Đảo bóng','Crossover'),'Space'):B('j',L('Cướp bóng','Steal'),'J')+B('k',L('Chắn bóng','Block'),'K'))+(g?'':B('1v1',L('Solo 1v1','1v1 bot'),''))+B('e',L('Thoát','Leave'),'E');
+  HP.ui.querySelector('.nc-hp-b').innerHTML=(mine?B('j',L('Ném','Shoot'),'J')+B('k',L('Layup','Layup'),'K')+B('l',L('Úp rổ','Dunk'),'L')+B(' ',L('Đảo bóng','Crossover'),'Space'):B('j',L('Cướp bóng','Steal'),'J')+B('k',L('Chắn bóng','Block'),'K'))+(g?'':B('1v1',L('Solo 1v1','1v1 bot'),'V'))+B('e',L('Thoát','Leave'),'E');
   HP.ui.querySelector('.nc-hp-sc').innerHTML=g?`<span>${L('Bạn','You')} <b>${g.sc[0]}</b></span><i>${L('tới','to')} ${g.to}</i><span><b>${g.sc[1]}</b> ${HP.bot?HP.bot.name:'Bot'}</span>${g.clear?`<em>${g.poss===0?L('Đưa bóng ra ngoài vạch 3 điểm','Take it beyond the arc'):L('Bot đang đưa bóng ra ngoài','Bot is clearing the ball')}</em>`:''}`:`<em>${L('Tập ném','Practice')} · ${BB.made}/${BB.taken}</em>`;}
 
 for(const C of COURTS)buildParkCourts(C);
