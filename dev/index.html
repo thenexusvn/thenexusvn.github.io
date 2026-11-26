@@ -2769,7 +2769,7 @@ const wrap=$('#city');let game=null,loading=false,char='joseph';
 function recText(sv){const r=$('#cityRec');if(r&&sv){r.textContent='Tiền của bạn: $'+Math.round(sv.money).toLocaleString('vi-VN')+(sv.heists?` · ${sv.heists} vụ cướp ngân hàng`:'');r.classList.remove('none');}}
 try{const sv=JSON.parse(localStorage.getItem('nexus-city2-save')||'null');if(sv){if(sv.char)char=sv.char;recText(sv);}}catch(_){}
 function load(src){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=()=>{s.remove();rej(new Error(src));};document.head.appendChild(s);});}
-async function ensure(){if(!window.THREE)await load('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js');if(!window.NexusCity2)await load('city.js?v=20261126h');}
+async function ensure(){if(!window.THREE)await load('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js');if(!window.NexusCity2)await load('city.js?v=20261126h2');}
 let gfx=localStorage.getItem('nexus-city-gfx')||(matchMedia('(pointer:coarse)').matches?'low':'high');
 function setGfx(v){gfx=v;try{localStorage.setItem('nexus-city-gfx',v);}catch(_){}document.querySelectorAll('[data-gfx]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.gfx===v)));if(game&&game.setGfx)game.setGfx(v);}
 document.querySelectorAll('[data-gfx]').forEach(b=>b.addEventListener('click',()=>setGfx(b.dataset.gfx)));setGfx(gfx);
