@@ -151,12 +151,14 @@ function mat(c,r,m,ex){r=r===undefined?.8:r;m=m||0;const k=c+'|'+r+'|'+m+(ex?'x'
 function emat(c,i){i=i===undefined?1:i;const k='e|'+c+'|'+i;if(!MC[k])MC[k]=new T.MeshStandardMaterial({color:lin('#202020'),emissive:lin(c),emissiveIntensity:i,roughness:.35});return MC[k];}
 /* ---------- HDRI reflections: real sky photos (Poly Haven, CC0) reflected in car paint, glass, chrome and water.
    Three HDRIs (day, golden hour, night) are swapped by time of day; the general scene lighting is unchanged. ---------- */
-const HDR={names:{day:'kloofendal_48d_partly_cloudy_puresky',gold:'venice_sunset',night:'satara_night'},tex:{},cur:'',mats:new Set(),t:0,on:!MOBILE&&ENV_OK&&opt.gfx!=='low'};
+const HDR={names:{day:'kloofendal_48d_partly_cloudy_puresky',gold:'venice_sunset',night:'satara_night'},tex:{},cur:'',mats:new Set(),t:0,on:!MOBILE&&opt.gfx!=='low'};
+function envProbe(E){try{const rt=new T.WebGLRenderTarget(8,8),ts=new T.Scene();ts.add(new T.Mesh(new T.SphereGeometry(1,16,12),new T.MeshStandardMaterial({color:0xffffff,metalness:1,roughness:.4,envMap:E})));
+  const tc=new T.PerspectiveCamera(40,1,.1,10);tc.position.z=3;renderer.setRenderTarget(rt);renderer.render(ts,tc);const px=new Uint8Array(256);renderer.readRenderTargetPixels(rt,0,0,8,8,px);renderer.setRenderTarget(null);rt.dispose();let sum=0;for(let i=0;i<px.length;i+=4)sum+=px[i]+px[i+1]+px[i+2];return sum>300;}catch(_){return false;}}
 function hdrJs(src){return new Promise((res,rej)=>{if(T.RGBELoader)return res();const sc=document.createElement('script');sc.src=src;sc.onload=res;sc.onerror=rej;document.head.appendChild(sc);});}
 async function hdrLoad(k){if(HDR.tex[k]!==undefined)return HDR.tex[k];HDR.tex[k]=null;
   try{await hdrJs('https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/RGBELoader.js');
     const t=await new Promise((r,j)=>new T.RGBELoader().setDataType(T.UnsignedByteType).load('https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/'+HDR.names[k]+'_1k.hdr',r,null,j));
-    const pm=new T.PMREMGenerator(renderer);const e=pm.fromEquirectangular(t).texture;t.dispose();pm.dispose();HDR.tex[k]=e;return e;}catch(err){console.warn('hdri',err);HDR.tex[k]=false;return false;}}
+    const pm=new T.PMREMGenerator(renderer);const e=pm.fromEquirectangular(t).texture;t.dispose();pm.dispose();const ok=envProbe(e);HDR.tex[k]=ok?e:false;if(!ok)console.warn('hdri probe failed',k);return HDR.tex[k];}catch(err){console.warn('hdri',err);HDR.tex[k]=false;return false;}}
 function hdrReg(m){if(m)HDR.mats.add(m);const e=HDR.cur&&HDR.tex[HDR.cur];if(e&&m){m.envMap=e;m.needsUpdate=true;}return m;}
 function hdrTick(dt){if(!HDR.on)return;HDR.t-=dt;if(HDR.t>0)return;HDR.t=1;const h=((tod.hour%24)+24)%24,k=h>=7.3&&h<17.2?'day':(h>=17.2&&h<19.9)||(h>=5&&h<7.3)?'gold':'night';
   const inten=k==='night'?.55:k==='gold'?1.15:1;for(const m of HDR.mats)m.envMapIntensity=(m.userData.envBase||1)*inten;
@@ -1774,7 +1776,7 @@ function makeCar(type,color){
   const pl=carPool[type];if(pl&&pl.length){const m=pl.pop();m.g.visible=true;if(m.door){m.door.visible=m.hole.visible=false;m.door.rotation.y=0;m.drv.visible=false;}m.bg.rotation.set(0,0,0);m.bg.position.y=0;if(m.rider)m.rider.root.visible=false;if(type!=='police'&&type!=='taxi')m.paint.color.copy(lin(color));for(const w of m.wheels)w.rotation.x=0;return m;}
   if(type==='bike')return makeBike(color);
   const b=CAR_BODY[type],s=CAR_T[b],M=carMeshes(b),g=new T.Group(),bg=new T.Group();g.add(bg);
-  const pc={color:lin(type==='police'?'#14171d':type==='taxi'?'#f5c518':color),roughness:ENV_OK?.3:.35,metalness:ENV_OK?.5:.15};const paint=!MOBILE&&ENV_OK?new T.MeshPhysicalMaterial(Object.assign(pc,{clearcoat:1,clearcoatRoughness:.04,envMapIntensity:1.1,roughness:.24,metalness:.55})):new T.MeshStandardMaterial(pc);if(paint.isMeshPhysicalMaterial){paint.userData.envBase=1.1;hdrReg(paint);}
+  const pc={color:lin(type==='police'?'#14171d':type==='taxi'?'#f5c518':color),roughness:ENV_OK?.3:.35,metalness:ENV_OK?.5:.15};const paint=!MOBILE&&(ENV_OK||HDR.on)?new T.MeshPhysicalMaterial(Object.assign(pc,{clearcoat:1,clearcoatRoughness:.04,envMapIntensity:1.1,roughness:.24,metalness:.55})):new T.MeshStandardMaterial(pc);if(paint.isMeshPhysicalMaterial){paint.userData.envBase=1.1;hdrReg(paint);}
   const body=new T.Mesh(M.paint,paint);body.castShadow=Q.shadows;bg.add(body);
   const gl=new T.Mesh(M.glass,GLASS);gl.castShadow=Q.shadows;bg.add(gl);bg.add(new T.Mesh(M.detail,DETAILM));if(M.trim)bg.add(new T.Mesh(M.trim,TRIMM));
   if(type==='police'){const door=new T.Mesh(new T.BoxGeometry(s.w+.03,.4,2.1),mat('#f4f5f7',.35,.2));door.position.set(0,.66,-.1);bg.add(door);
