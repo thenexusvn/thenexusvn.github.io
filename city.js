@@ -2926,7 +2926,7 @@ function hpScore(b){const g=HP.game,A=b.shooter,pts=b.pts;
   if(!g){BB.made++;BB.streak++;BB.score+=pts;const cash=pts===3?25:b.kind==='dunk'?20:10;save.money+=cash;banner(b.kind==='dunk'?L('ÚP RỔ!','SLAM DUNK!'):pts===3?L('BA ĐIỂM!','THREE!'):L('VÀO!','BUCKET!'),`+${pts} · +${fmt$(cash)}`,1.3);if(BB.board)BB.board.draw();return;}
   if(b.noCount){showPrompt(L('Không tính: chưa ra ngoài vạch 3 điểm sau khi đổi bóng','No basket: take it beyond the arc after a change of possession'),2.2);g.pause=1;g.next=A.isBot?0:1;return;}
   const t=A.isBot?1:0;g.sc[t]+=pts;banner(A.isBot?`${HP.bot.name} +${pts}`:(b.kind==='dunk'?L('ÚP RỔ!','SLAM DUNK!'):pts===3?L('BA ĐIỂM!','THREE!'):L('VÀO!','BUCKET!'))+` +${pts}`,`${L('Bạn','You')} ${g.sc[0]} - ${g.sc[1]} ${HP.bot.name}`,1.6);if(BB.board)BB.board.draw();
-  if(g.sc[t]>=g.to){const win=t===0;setTimeout(()=>{if(!HP.game)return;banner(win?L('BẠN THẮNG!','YOU WIN!'):L('BẠN THUA','YOU LOST'),`${g.sc[0]} - ${g.sc[1]}`+(win?' · +$500':''),4);if(win){save.money+=500;sfx('cash');writeSave();}HP.game=null;if(HP.bot){scene.remove(HP.bot.H.root);HP.bot=null;}hpGive(HP.PA,false);if(BB.board)BB.board.draw();},900);return;}
+  if(g.sc[t]>=g.to){g.over=t===0?'win':'lose';g.endT=1;g.pause=99;return;}
   g.pause=1.1;g.next=t===0?1:0;}
 // ---- bot brain ----
 function hpBot(dt){const B=HP.bot,A=HP.PA,b=HP.ball,h=HP.hoop,g=HP.game;if(!B)return;B.cool-=dt;
@@ -2980,7 +2980,8 @@ function hpPlayer(dt,fwd,side,sprint){const A=HP.PA;P.H.guard=0;P.H.hold=0;P.H.a
   P.H.root.position.set(P.x,P.y+A.jy,P.z);P.H.root.rotation.y=P.h;animHuman(P.H,dt,A.act?0:spd,time);hpPose(A,dt);}
 function bbUpdate(dt){if(!HP.on)return;const h=HP.hoop;
   if(P.car||P.koT>0||(h.inside||null)!==(P.inside||null)||hyp(P.x-h.x,P.z-h.z)>26){hpExit();return;}
-  const g=HP.game;if(g&&g.clear&&HP.ball.st==='held'&&HP.ball.owner&&dRim(HP.ball.owner)>6.9)g.clear=false;if(g&&g.pause>0){g.pause-=dt;if(g.pause<=0&&g.next!=null){const n=g.next;g.next=null;hpReset(n);}}
+  const g=HP.game;if(g&&g.over){g.endT-=dt;if(g.endT<=0){const win=g.over==='win';banner(win?L('BẠN THẮNG!','YOU WIN!'):L('BẠN THUA','YOU LOST'),`${g.sc[0]} - ${g.sc[1]}`+(win?' · +$500':''),4);if(win){save.money+=500;sfx('cash');writeSave();}HP.game=null;if(HP.bot){scene.remove(HP.bot.H.root);HP.bot=null;}hpGive(HP.PA,false);if(BB.board)BB.board.draw();}}
+  if(g&&g.clear&&HP.ball.st==='held'&&HP.ball.owner&&dRim(HP.ball.owner)>6.9)g.clear=false;if(g&&g.pause>0){g.pause-=dt;if(g.pause<=0&&g.next!=null){const n=g.next;g.next=null;hpReset(n);}}
   if(HP.bot){const B=HP.bot;hpBot(dt);hpActUpdate(B,dt);hpClamp(B);B.y=hpFloor();B.H.root.position.set(B.x,B.y+B.jy,B.z);B.H.root.rotation.y=B.h;animHuman(B.H,dt,B.act?0:B.spd,time);hpPose(B,dt);}
   hpBallUpdate(dt);hpUIUpdate();}
 // ---- on-screen buttons ----
