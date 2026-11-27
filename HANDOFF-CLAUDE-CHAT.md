@@ -347,3 +347,6 @@ Python helper scripts used during development:
 - Mall: ROOMS.mall at x 6300, 64×48, floors y 0/6/12, atrium |x|<12,|z|<8. mallGround() gives floor/ramp height; colliders carry lv (0/1/2 or 'A'/'B' for escalator sides) and y0; lvOK() in resolve/inBld. Escalators A (L0 east → L1 west) and B (L1 west → L2 east) carry 1.3 m/s. Elevator ELEV in the back core (shaft |x|<1.6, -20<z<-16), SHOPS.elev menu, call from landings.
 - Entrances: west-town "NEXUS TÂY MALL" door and the biggest downtown building (SP.mall).
 - Doors everywhere: every building face without a door gets one (office/hotel/ware/flat, 1 in 6 small ones become mart24/barber/nails with merged signs SIGNGB). ~1500 doors.
+
+## CommsHub unread counts (index.html, after markRead)
+- hubCount(): for each room newer than lastRead (localStorage, default last 3 days) counts messages from others since then (limit 99) → HUB.unread; hubBadge() puts a green .nav-count on the CommsHub menu link; roomRow shows the number.
