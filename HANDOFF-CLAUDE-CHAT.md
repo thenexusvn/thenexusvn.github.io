@@ -327,3 +327,10 @@ Python helper scripts used during development:
 - Start menu button "🌐 Multiplayer · Chơi chung" → begin(false,'multi'); uses the free-mode save. Needs Firebase Realtime Database: databaseURL in firebase-config.js (asia-southeast1), rules in database.rules.json (paste into RTDB → Rules).
 - city.js MP block: each client writes /mp/players/{uid} every 0.2 s when something changed (pos, heading, speed, car type/colour, interior, punch, look) with onDisconnect().remove(); others are rendered as humans (makeHuman + animHuman) or cars (makeCar + syncCar) with name-tag sprites; "Online: N" pill. NPCs/traffic/police stay local.
 - Graphics pass (Nov 26): HDRI reflections (HDR block near GLASS; Poly Haven day/gold/night via RGBELoader from jsDelivr, applied as envMap to registered reflective materials only, probe-checked). Cars: LED strips, projector lenses, sporty body kit (splitter, skirts, diffuser, exhaust tips, rear wing, hood vents), 10-spoke rims with brake discs. Humans: wrist and ankle joints (H.wrL/R, H.anL/R), hip sway, shoulder counter-rotation, heel-to-toe feet, running arms, idle breathing/weight shift/head look.
+
+## Graphics tiers (city.js GFX = 'low' | 'mid' | 'ultra'; index.html buttons data-gfx, localStorage 'nexus-city-gfx')
+- Smooth(low): no post-processing, 1024 shadows. Good(mid): bloom/grade/FXAA, HDRI reflections + IBL, PBR normal maps, 2048 shadows.
+- Ultra: + SAO ambient occlusion, god rays, roughness maps, 4096 shadows, DPR up to 2, cutscene depth of field (PP.dof in movCam).
+- HDRIs and PBR textures come from Poly Haven CC0 (dl.polyhaven.org, 1k). Grass keeps its own colour (normal map only).
+- Water: procedural normal texture WN, animated in step. Wet roads: ASPH.envMap = HDRI.
+- adapt() turns AO/god rays off first when FPS drops.
