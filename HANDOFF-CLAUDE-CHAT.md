@@ -356,3 +356,7 @@ Python helper scripts used during development:
 - Grass material switched to MeshStandardMaterial (Lambert DoubleSide hack failed to compile: vLightFront redefinition).
 - Real item models in itemGeo (plate carrier, helmet, bandage rolls, medkit, ammo cans/shell boxes); guns on the ground use gunMesh; new gunGeos with receiver, rail, mag, stock, optics.
 - Multiplayer (save.play 'multi'): RTDB lz/q queue, lz/inv invites, lz/m/{mid} {seed,t0,p}, s/{sid} state 10 Hz, e/ events (f fire, h hit, x out, p pick, d drop). Need 10 (?lzneed=N for tests), 30 s timeout. Seeded RNG (RNG/rr) for loot, cars, plane, zone; zone and plane follow server time. Needs the "lz" section of database.rules.json pasted into Firebase.
+
+## Mouse look + gun mode (city.js)
+- One click on the canvas → pointer lock (mouseLock); document pointermove with movementX/Y turns cam.yaw / cam.pitch (AIM.pitch when armed). Lock is released when paused, map or shop open. .nc-lock hint when not locked.
+- Desktop: holding a gun (2-4) sets AIM.on automatically (shoulder camera, centre circle), WASD walks at 4.4 (Shift 7.2), B/J fires (hold for auto). 1 puts the gun away.

@@ -2073,7 +2073,7 @@ function gunGeo(w){if(WMESH[w])return WMESH[w];const L2=WEAP[w].len,parts=[{geo:
   return WMESH[w]=buildVC(parts);}
 const GUNM=new T.MeshStandardMaterial({vertexColors:true,roughness:.45,metalness:.5});
 function attachWeapon(){if(weaponMesh&&weaponMesh.parent)weaponMesh.parent.remove(weaponMesh);weaponMesh=null;if(P.weapon==='fist')return;weaponMesh=new T.Mesh(gunGeo(P.weapon),GUNM);weaponMesh.castShadow=Q.shadows;P.H.elR.add(weaponMesh);}
-function selectWeapon(w){if(w!=='fist'&&!save.weapons[w]){showPrompt(L('Chưa có súng này · mua ở Súng Tầm Xa','You do not own this gun · buy it at Long Range Guns'),1.6);return;}P.weapon=w;P.trigger=false;attachWeapon();hudT=0;lastHUD='';if(w==='fist'){if(typeof aimOff==='function')aimOff();}else if(!MOBILE)showPrompt(L('B: giơ súng ngắm · B lần nữa: bắn · chuột phải: hạ súng','B: raise and aim · B again: shoot · right click: lower'),2.6);}
+function selectWeapon(w){if(w!=='fist'&&!save.weapons[w]){showPrompt(L('Chưa có súng này · mua ở Súng Tầm Xa','You do not own this gun · buy it at Long Range Guns'),1.6);return;}P.weapon=w;P.trigger=false;attachWeapon();hudT=0;lastHUD='';if(w==='fist'){if(typeof aimOff==='function')aimOff();}else if(!MOBILE)showPrompt(L('Di chuột để ngắm · B để bắn · bấm 1 để cất súng','Move the mouse to aim · B to shoot · press 1 to put the gun away'),2.6);}
 function cycleWeapon(){const own=WORDER.filter(w=>w==='fist'||save.weapons[w]);const i=own.indexOf(P.weapon);selectWeapon(own[(i+1)%own.length]);}
 function giveCopGun(n){const m=new T.Mesh(gunGeo('pistol'),GUNM);n.H.elR.add(m);n.gun=true;}
 // tracers (one LineSegments, pooled) and muzzle flashes (reuse the impact sprites)
@@ -3466,7 +3466,7 @@ function radioNext(){if(!P.car){showPrompt('Lên xe để nghe radio',1.2);retur
 /* ---------- tutorial (optional) ---------- */
 const TUT=[
   {t:'Đi lại',d:'Dùng W A S D hoặc phím mũi tên để đi.',ok:()=>tut.moved>8},
-  {t:'Camera',d:'Kéo chuột (hoặc vuốt màn hình) để xoay camera. Q và E cũng xoay được.',ok:()=>tut.turned>1.2},
+  {t:'Camera',d:'Bấm vào màn hình một lần, rồi chỉ cần di chuột hoặc touchpad để xoay camera (Esc để hiện chuột). Trên điện thoại thì vuốt màn hình.',ok:()=>tut.turned>1.2},
   {t:'Chạy',d:'Giữ Shift trong lúc đi để chạy nhanh.',ok:()=>tut.sprint>1.5},
   {t:'Đánh nhau',d:'Bấm J hoặc click trái để đánh. Bấm liền 3 lần ra combo: đấm trái, đấm phải, đá. Giữ K hoặc chuột phải để đỡ. Đánh bao cát 3 lần.',ok:()=>bag&&bag.hits>=3,mark:()=>bag},
   {t:'Lên xe',d:'Lại gần chiếc xe đậu ở lối vào nhà rồi bấm F.',ok:()=>!!P.car,mark:()=>homeCar},
@@ -3474,7 +3474,7 @@ const TUT=[
   {t:'Xuống xe',d:'Dừng lại và bấm F để xuống xe.',ok:()=>!P.car},
   {t:'Bản đồ',d:'Bấm M (hoặc nút Bản đồ) để mở bản đồ. Bấm vào một địa điểm để được chỉ đường, mũi tên sẽ hiện trên mặt đường.',ok:()=>tut.map},
   {t:'Cửa hàng',d:'Ghé một cửa hàng và bấm E ở cửa. Cơm Tấm Cô Ba bán đồ ăn hồi máu. Bấm số để mua, E để đóng.',ok:()=>tut.shop,mark:()=>SP.shops.find(s=>s.id==='food')},
-  {t:'Vũ khí',d:'Súng mua ở Súng Tầm Xa. Phím 1 đến 4 để đổi vũ khí. Bấm B để giơ súng ngắm, rê chuột hoặc WASD đưa vòng tròn vào mục tiêu, bấm B lần nữa để bắn. Chuột phải để hạ súng. Bắn người là phạm tội.',ok:()=>tut.wT>8},
+  {t:'Vũ khí',d:'Súng mua ở Súng Tầm Xa. Phím 1 đến 4 để đổi vũ khí. Cầm súng là vòng ngắm hiện giữa màn hình, di chuột để ngắm, vẫn đi bằng WASD, bấm B để bắn. Bắn người là phạm tội.',ok:()=>tut.wT>8},
   {t:'Nhà an toàn',d:'Bấm E ở cửa để vào nhà. Tới giường và bấm E để ngủ: lưu game, hồi máu, cất tiền.',ok:()=>tut.saved,mark:()=>P.inside?null:SP.house.door},
   {t:'Xong',d:'Bạn đã sẵn sàng. Cướp ngân hàng ở cột xanh lá giữa trung tâm, rồi cắt đuôi cảnh sát và mang tiền về nhà.',ok:()=>tut.doneT>6}
 ];
@@ -3518,6 +3518,7 @@ const css=document.createElement('style');css.textContent=`
 .nc-stars i{font-style:normal;color:rgba(255,255,255,.28)}.nc-stars i.on{color:#fff}
 .nc-stars.blink i.on{animation:ncb .6s steps(2) infinite}@keyframes ncb{50%{opacity:.3}}
 .nc-fist{min-width:44px;height:44px;padding:0 10px;border-radius:10px;background:rgba(0,0,0,.45);display:flex;align-items:center;gap:6px;justify-content:center;font:700 14px Inter,sans-serif;margin-top:4px;pointer-events:auto;cursor:pointer}.nc-fist .e{font-size:22px}
+.nc-lock{position:absolute;left:50%;bottom:120px;transform:translateX(-50%);background:rgba(0,0,0,.62);color:#fff;font:600 13px Inter,sans-serif;padding:8px 14px;border-radius:999px;pointer-events:none;white-space:nowrap}
 .nc-cross{position:absolute;left:50%;top:50%;width:22px;height:22px;margin:-11px 0 0 -11px;border:2px solid rgba(255,255,255,.9);border-radius:50%;box-shadow:0 0 0 1px rgba(0,0,0,.5)}.nc-cross{transition:transform .15s,border-color .1s,opacity .15s;opacity:.55}.nc-cross.aim{transform:scale(1.35);opacity:1}.nc-cross.hot{border-color:#ff3b47;box-shadow:0 0 0 1px rgba(0,0,0,.5),0 0 12px rgba(255,59,71,.8)}.nc-cross.hot::after{background:#ff3b47}.nc-cross::after{content:'';position:absolute;left:50%;top:50%;width:3px;height:3px;margin:-1.5px;background:#fff;border-radius:50%}
 .nc-mini{position:absolute;left:18px;bottom:18px;width:230px}
 .nc-mini canvas{display:block;width:230px;height:150px;border-radius:10px;border:2px solid rgba(0,0,0,.6);box-shadow:0 4px 18px rgba(0,0,0,.35)}
@@ -3575,7 +3576,7 @@ root.appendChild(css);
 const hudEl=document.createElement('div');hudEl.className='nc';hudEl.innerHTML=`
 <div class="nc-flash"></div><div class="nc-fade"></div><div class="nc-shop" hidden><div class="nc-shopbox"><div class="nc-shophead"><h3></h3><span class="nc-cash"></span></div><div class="nc-items"></div><p>Bấm số hoặc chạm để mua · E để đóng</p><button type="button" class="nc-shopx">Đóng</button></div></div>
 <div class="nc-help" hidden><b></b><div></div><button type="button" class="nc-skip1">Bỏ qua bước này</button> <button type="button" class="nc-skipall">Tắt hướng dẫn</button></div>
-<div class="nc-tr"><div class="nc-clock"></div><div class="nc-money"></div><div class="nc-dirty"></div><div class="nc-stars"></div><div class="nc-fist" title="Đổi vũ khí (1-4)"><span class="e">✊</span></div></div><div class="nc-cross" hidden></div>
+<div class="nc-tr"><div class="nc-clock"></div><div class="nc-money"></div><div class="nc-dirty"></div><div class="nc-stars"></div><div class="nc-fist" title="Đổi vũ khí (1-4)"><span class="e">✊</span></div></div><div class="nc-cross" hidden></div><div class="nc-lock" hidden>${L('Bấm vào màn hình để điều khiển bằng chuột / touchpad','Click the screen to control with the mouse / touchpad')}</div>
 <div class="nc-foe" hidden><span></span><div><i></i></div></div>
 <div class="nc-mini"><div class="nc-gps"></div><canvas width="460" height="300"></canvas><div class="nc-hp"><i></i></div><div class="nc-hp nc-ar" hidden><i></i></div></div>
 <div class="nc-obj"></div><div class="nc-prompt"></div>
@@ -3587,6 +3588,7 @@ const hudEl=document.createElement('div');hudEl.className='nc';hudEl.innerHTML=`
 root.appendChild(hudEl);
 const $h=s=>hudEl.querySelector(s);
 const hud={help:$h('.nc-help'),money:$h('.nc-money'),dirty:$h('.nc-dirty'),stars:$h('.nc-stars'),mini:$h('.nc-mini canvas'),hp:$h('.nc-hp i'),obj:$h('.nc-obj'),prompt:$h('.nc-prompt'),bar:$h('.nc-bar'),barI:$h('.nc-bar i'),speed:$h('.nc-speed'),banner:$h('.nc-banner'),flash:$h('.nc-flash'),map:$h('.nc-map'),mapC:$h('.nc-map canvas'),touch:$h('.nc-touch'),gps:$h('.nc-gps'),fistEl:$h('.nc-fist'),cross:$h('.nc-cross'),armor:$h('.nc-ar i'),shop:$h('.nc-shop'),clock:$h('.nc-clock'),foe:$h('.nc-foe'),foeN:$h('.nc-foe span'),foeI:$h('.nc-foe i'),poi:$h('.nc-poi')};
+hud.lockHint=$h('.nc-lock');hud.lockHint.hidden=MOBILE;
 hud.help.querySelector('.nc-skipall').addEventListener('click',endTut);hud.help.querySelector('.nc-skip1').addEventListener('click',tutSkipStep);$h('.nc-fist').addEventListener('click',()=>{if(active)cycleWeapon();});hud.fade=$h('.nc-fade');$h('.nc-shopx').addEventListener('click',closeShop);
 let banT=0,promptT=0,promptTxt='';
 function banner(t,d,dur){hud.banner.querySelector('b').textContent=t;hud.banner.querySelector('span').textContent=d||'';hud.banner.classList.add('on');clearTimeout(banT);banT=setTimeout(()=>hud.banner.classList.remove('on'),(dur||2.6)*1000);}
@@ -3685,11 +3687,11 @@ function aimAssist(snap,dt){const W=WEAP[P.weapon];if(!W)return;const e=aimEye()
   for(const t of aimTargets()){const dx=t.x-e.x,dz=t.z-e.z,d=Math.hypot(dx,dz);if(d>W.range||d<1.5)continue;const yw=Math.atan2(dx,dz),pt=-Math.atan2(t.y-e.y,d);
     const sc=Math.abs(angD(yw,cam.yaw))+Math.abs(pt-AIM.pitch)*.7;if(sc<bs){bs=sc;best={yw,pt};}}
   if(!best)return;const k=snap?1:1-Math.exp(-5*dt);cam.yaw=lerpA(cam.yaw,best.yw,k);AIM.pitch+=(best.pt-AIM.pitch)*k;}
-function aimOn(){if(!aimArmed()||MOBILE)return;AIM.on=true;AIM.pitch=0;P.trigger=false;aimAssist(true,0);cam.lastDrag=performance.now();
-  try{const r=cv.requestPointerLock&&cv.requestPointerLock();if(r&&r.catch)r.catch(()=>{});}catch(_){}}
-function aimOff(){if(!AIM.on)return;AIM.on=false;P.trigger=false;try{if(document.pointerLockElement===cv)document.exitPointerLock();}catch(_){}}
-function aimKey(){if(!aimArmed()){if(P.weapon==='fist'&&!P.car)showPrompt(L('Chọn súng trước (phím 2-4) rồi bấm B để ngắm','Pick a gun first (keys 2-4), then press B to aim'),1.8);return;}
-  if(!AIM.on)aimOn();else P.trigger=true;}
+function aimOn(){if(!aimArmed()||MOBILE)return;AIM.on=true;AIM.pitch=clamp(-(cam.pitch-.28)*.9,-.5,.4);P.trigger=false;cam.lastDrag=performance.now();}
+function aimOff(){if(!AIM.on)return;AIM.on=false;P.trigger=false;cam.pitch=clamp(.28-AIM.pitch/.9,.12,.6);}
+function mouseLock(){if(MOBILE||!active||paused||mapOpen||shopOpen||document.pointerLockElement===cv)return;try{const r=cv.requestPointerLock&&cv.requestPointerLock();if(r&&r.catch)r.catch(()=>{});}catch(_){}}
+function aimKey(){if(!aimArmed()){if(P.weapon==='fist'&&!P.car)showPrompt(L('Bấm 2, 3 hoặc 4 để cầm súng rồi bấm B để bắn','Press 2, 3 or 4 to hold a gun, then B to shoot'),1.8);return;}
+  if(!AIM.on)aimOn();P.trigger=true;}
 function onKey(e){if(!active)return;sfxInit();const k=e.key.toLowerCase();if([' ','arrowup','arrowdown','arrowleft','arrowright'].includes(k))e.preventDefault();if(movKey(k)||cinKey(k)){keys.clear();return;}if(e.repeat){keys.add(k);return;}
   if(shopOpen){if(k==='e'||k==='backspace')closeShop();else if(/^[1-9]$/.test(k)){const it=shopItems(shopOpen)[+k-1];if(it)buyItem(it);}return;}
   if(k==='m')toggleMap();else if(mapOpen)return;
@@ -3698,11 +3700,13 @@ function onKey(e){if(!active)return;sfxInit();const k=e.key.toLowerCase();if([' 
 const offKey=e=>{const k=e.key.toLowerCase();keys.delete(k);if(k==='j'||k==='b')P.trigger=false;};
 window.addEventListener('keydown',onKey);window.addEventListener('keyup',offKey);
 const cv=renderer.domElement;
-cv.addEventListener('pointerdown',e=>{sfxInit();if(e.pointerType==='mouse'&&e.button===2){if(AIM.on){aimOff();return;}cam.rmb=true;}if(AIM.on&&e.pointerType==='mouse'&&document.pointerLockElement!==cv){try{cv.requestPointerLock();}catch(_){}}cam.drag={x:e.clientX,y:e.clientY,id:e.pointerId,t:performance.now(),moved:0,mouse:e.pointerType==='mouse'};try{cv.setPointerCapture(e.pointerId);}catch(_){}});
-document.addEventListener('pointermove',e=>{if(!AIM.on||!active||e.pointerType==='touch')return;const mx=e.movementX||0,my=e.movementY||0;if(Math.abs(mx)>300||Math.abs(my)>300)return;cam.yaw-=mx*.0022;AIM.pitch=clamp(AIM.pitch+my*.0018,-1.15,.55);cam.lastDrag=performance.now();});
-document.addEventListener('pointerlockchange',()=>{if(document.pointerLockElement!==cv&&AIM.on&&AIM.lockT&&performance.now()-AIM.lockT>200)aimOff();if(document.pointerLockElement===cv)AIM.lockT=performance.now();});
+cv.addEventListener('pointerdown',e=>{sfxInit();if(e.pointerType==='mouse'&&e.button===2)cam.rmb=true;if(e.pointerType==='mouse'&&document.pointerLockElement!==cv){mouseLock();if(e.button===0)return;}cam.drag={x:e.clientX,y:e.clientY,id:e.pointerId,t:performance.now(),moved:0,mouse:e.pointerType==='mouse'};try{cv.setPointerCapture(e.pointerId);}catch(_){}});
+// mouse / touchpad look: once the mouse is captured (one click on the game), just moving it turns the camera, like Last Zone
+document.addEventListener('pointermove',e=>{if(document.pointerLockElement!==cv||!active||e.pointerType==='touch')return;const mx=e.movementX||0,my=e.movementY||0;if(Math.abs(mx)>300||Math.abs(my)>300)return;
+  cam.yaw-=mx*.0024;if(AIM.on)AIM.pitch=clamp(AIM.pitch+my*.0018,-1.15,.55);else cam.pitch=clamp(cam.pitch+my*.0018,.05,1.05);cam.lastDrag=performance.now();tut.turned+=Math.abs(mx*.0024);});
+document.addEventListener('pointerlockchange',()=>{if(hud.lockHint)hud.lockHint.hidden=document.pointerLockElement===cv||MOBILE;});
 cv.addEventListener('contextmenu',e=>e.preventDefault());
-cv.addEventListener('pointermove',e=>{if(AIM.on)return;const d=cam.drag;if(!d||d.id!==e.pointerId)return;const dx=e.clientX-d.x,dy=e.clientY-d.y;d.x=e.clientX;d.y=e.clientY;d.moved+=Math.abs(dx)+Math.abs(dy);cam.yaw-=dx*.006;cam.pitch=clamp(cam.pitch+dy*.004,.05,1.05);cam.lastDrag=performance.now();tut.turned+=Math.abs(dx*.006);});
+cv.addEventListener('pointermove',e=>{if(document.pointerLockElement===cv)return;const d=cam.drag;if(!d||d.id!==e.pointerId)return;const dx=e.clientX-d.x,dy=e.clientY-d.y;d.x=e.clientX;d.y=e.clientY;d.moved+=Math.abs(dx)+Math.abs(dy);cam.yaw-=dx*.006;cam.pitch=clamp(cam.pitch+dy*.004,.05,1.05);cam.lastDrag=performance.now();tut.turned+=Math.abs(dx*.006);});
 const endDrag=e=>{if(e.pointerType==='mouse'&&(e.button===2||e.type==='pointercancel'))cam.rmb=false;if(e.button===0||e.type==='pointercancel')P.trigger=false;const d=cam.drag;if(!d||d.id!==e.pointerId)return;cam.drag=null;if(d.mouse&&e.button===0&&d.moved<6&&performance.now()-d.t<300&&active&&!mapOpen&&P.weapon==='fist'){if(HP.on)hpKey('j');else playerPunch();}};
 cv.addEventListener('pointerup',endDrag);cv.addEventListener('pointercancel',endDrag);
 cv.addEventListener('wheel',e=>{cam.dist=clamp(cam.dist+e.deltaY*.01,4,14);e.preventDefault();},{passive:false});
@@ -3774,7 +3778,8 @@ function playerUpdate(dt){
   if(P.plane&&P.koT<=0){const pl=P.plane,inp={thr:(K('w')||tb.sprint?1:0)-(K('s')||tb.jump?1:0),pitch:clamp((K('arrowup')?1:0)-(K('arrowdown')?1:0)+(MOBILE?joy.y:0),-1,1),turn:clamp((K('d')||K('arrowright')?1:0)-(K('a')||K('arrowleft')?1:0)+joy.x,-1,1)};planeStep(pl,dt,inp);if(P.plane){P.x=pl.x;P.z=pl.z;P.y=pl.y;}P.moving=pl.spd;return;}
   if(P.koT>0){P.koT-=dt;if(P.getUp&&P.koT<.5){P.H.ko=0;P.getUp=false;}P.pend=null;P.blocking=false;P.H.blockHold=false;if(!P.car){P.H.root.position.set(P.x,P.y,P.z);}animHuman(P.H,dt,0,time);return;}
   if(P.pend){P.pend.t-=dt;if(P.pend.t<=0){const pe=P.pend;P.pend=null;resolvePlayerHit(pe);}}
-  const armed=P.weapon!=='fist'&&!P.car;if(AIM.on&&!aimArmed())aimOff();if(AIM.on){const ax=(K('a')||K('arrowleft')?1:0)-(K('d')||K('arrowright')?1:0),ay=(K('s')||K('arrowdown')?1:0)-(K('w')||K('arrowup')?1:0);cam.yaw+=ax*1.5*dt;AIM.pitch=clamp(AIM.pitch+ay*1.1*dt,-1.15,.55);aimAssist(false,dt);}
+  const armed=P.weapon!=='fist'&&!P.car;if(!MOBILE){if(aimArmed()&&!AIM.on)aimOn();else if(AIM.on&&!aimArmed())aimOff();}if(AIM.on)aimAssist(false,dt);
+  if(document.pointerLockElement===cv&&(paused||mapOpen||shopOpen||!active))try{document.exitPointerLock();}catch(_){}
   const wantAim=armed&&(AIM.on||tb.block);P.aiming=wantAim;P.fireCD-=dt;
   P.H.hold=armed?1:0;P.H.two=armed&&WEAP[P.weapon].two;P.H.aim=wantAim||armed&&time-(P.lastShot||-9)<.6?1:0;P.H.aimP=wantAim?(AIM.on?-AIM.pitch:(cam.pitch-.28)*-.9):0;
   if(wantAim)P.h=lerpA(P.h,cam.yaw,1-Math.exp(-20*dt));
@@ -3782,7 +3787,7 @@ function playerUpdate(dt){
   const wantBlock=!armed&&!P.car&&(K('k')||cam.rmb||tb.block);if(wantBlock&&!P.blocking)P.blockStart=time;P.blocking=wantBlock;P.H.blockHold=wantBlock;if(wantBlock)P.H.block=.1;
   if(P.blocking){const f=nearestFoe(5);if(f)P.h=lerpA(P.h,Math.atan2(f.x-P.x,f.z-P.z),1-Math.exp(-14*dt));}
   if(P.lunge>0&&!P.car){const s=Math.min(P.lunge,dt*9);P.lunge-=s;P.x+=Math.sin(P.h)*s;P.z+=Math.cos(P.h)*s;}
-  const fwd=AIM.on?0:clamp((K('w')||K('arrowup')?1:0)-(K('s')||K('arrowdown')?1:0)+joy.y,-1,1),side=AIM.on?0:clamp((K('d')||K('arrowright')?1:0)-(K('a')||K('arrowleft')?1:0)+joy.x,-1,1);
+  const fwd=clamp((K('w')||K('arrowup')?1:0)-(K('s')||K('arrowdown')?1:0)+joy.y,-1,1),side=clamp((K('d')||K('arrowright')?1:0)-(K('a')||K('arrowleft')?1:0)+joy.x,-1,1);
   const jump=K(' ')||tb.jump,sprint=K('shift')||tb.sprint;
   if(HP.on&&!P.car){hpPlayer(dt,fwd,side,sprint);return;}
   cam.yaw+=((K('q')?1:0)-(K('e')&&false?1:0))*0;
@@ -3790,7 +3795,7 @@ function playerUpdate(dt){
     carStep(c,dt,dead?0:Math.max(0,fwd),dead?.3:Math.max(0,-fwd),side,jump);P.x=c.x;P.z=c.z;P.moving=Math.abs(c.vf);if(tut.on&&TUT[tut.step].t==='Lái xe');return;}
   const y=cam.yaw,fx=Math.sin(y),fz=Math.cos(y),rx=-Math.cos(y),rz=Math.sin(y);let mx=fx*fwd+rx*side,mz=fz*fwd+rz*side;const n=hyp(mx,mz);let spd=0;
   const busy=P.punchCD>0&&time-P.lastPunch<.25;
-  if(n>.05){spd=(P.blocking?1.8:P.aiming?2.4:busy?1.2:sprint?9.5*(1+.15*(save.up.run|0))*(P.boostT>0?1.15:1):4.6)*Math.min(1,n);mx/=n;mz/=n;P.x+=mx*spd*dt;P.z+=mz*spd*dt;if(!P.blocking&&!busy&&!P.aiming)P.h=lerpA(P.h,Math.atan2(mx,mz),1-Math.exp(-12*dt));tut.moved+=spd*dt;if(sprint)tut.sprint+=dt;}
+  if(n>.05){spd=(P.blocking?1.8:P.aiming?(AIM.on&&!busy?(sprint?7.2:4.4):2.4):busy?1.2:sprint?9.5*(1+.15*(save.up.run|0))*(P.boostT>0?1.15:1):4.6)*Math.min(1,n);mx/=n;mz/=n;P.x+=mx*spd*dt;P.z+=mz*spd*dt;if(!P.blocking&&!busy&&!P.aiming)P.h=lerpA(P.h,Math.atan2(mx,mz),1-Math.exp(-12*dt));tut.moved+=spd*dt;if(sprint)tut.sprint+=dt;}
   P.moving=spd;
   const p=resolve(P.x,P.z,.38);if(p){P.x+=p[0];P.z+=p[1];}
   for(const c of cars){const dx=P.x-c.x,dz=P.z-c.z;if(dx*dx+dz*dz>16)continue;const fx2=Math.sin(c.h),fz2=Math.cos(c.h),lz=dx*fx2+dz*fz2,lx=dx*-fz2+dz*fx2;if(Math.abs(lx)<1.35&&Math.abs(lz)<2.6){const sp=Math.abs(c.vf);if(sp>6&&c!==P.car){hurtPlayer(sp*2.4,c);if(P.hp>0){P.koT=1.4;P.H.ko=1;setTimeout(()=>{P.H.ko=0;},1100);}P.x+=fx2*Math.sign(c.vf)*2;P.z+=fz2*Math.sign(c.vf)*2;}else{const ox=1.35-Math.abs(lx),oz=2.6-Math.abs(lz);if(ox<oz){P.x+=-fz2*Math.sign(lx)*ox;P.z+=fx2*Math.sign(lx)*ox;}else{P.x+=fx2*Math.sign(lz)*oz;P.z+=fz2*Math.sign(lz)*oz;}}}}
@@ -4381,7 +4386,7 @@ function stMission1(){cine({type:'tip',wait:true,kick:L('Nhiệm vụ 1','Missio
     steps:[['M',L('mở bản đồ · đường đỏ luôn chỉ chỗ cần tới','open the map · the red route always shows where to go')],['W A S D',L('đi · giữ Shift để chạy','move · hold Shift to run')],['F',L('lên xe gần nhất cho nhanh','jump into the nearest car to get there faster')],['E',L('vào tiệm · bấm số để mua','enter the shop · press a number to buy')]]});}
 function stArmed(){cine({type:'stamp',hold:2.6,slow:.25,kick:L('Mở khoá','Unlocked'),title:L('Vũ khí đầu tiên','First weapon'),c:'#ffd166',c2:'#ff8a3d',snd:'stamp',flash:true});
   if(stOnce('gun'))cine({type:'tip',wait:true,kick:L('Hướng dẫn','How to'),title:L('Bắn súng','Shooting'),c:'#ffd166',c2:'#ff8a3d',
-    steps:[['1 – 4',L('đổi vũ khí · 1 là tay không','switch weapons · 1 is fists')],['B',L('giơ súng, hiện vòng ngắm','raise the gun, show the aim circle')],[L('Chuột / WASD','Mouse / WASD'),L('đưa vòng tròn vào địch · vòng đỏ là trúng','move the circle onto the enemy · red means on target')],['B',L('bắn · chuột phải để hạ súng','shoot · right click to lower')],['!',L('bắn người ngoài phố là bị truy nã','shooting people on the street gets you wanted')]]});
+    steps:[['1 – 4',L('đổi vũ khí · 1 là tay không','switch weapons · 1 is fists')],['2 – 4',L('cầm súng · vòng ngắm hiện giữa màn hình','hold a gun · the aim circle appears in the middle')],[L('Chuột / touchpad','Mouse / touchpad'),L('di chuyển để ngắm, không cần bấm · vòng đỏ là trúng','just move it to aim, no clicking · red means on target')],['B',L('bắn · giữ B để xả liên tục','shoot · hold B to keep firing')],['!',L('bắn người ngoài phố là bị truy nã','shooting people on the street gets you wanted')]]});
   cine({type:'tip',wait:true,kick:L('Chương 1','Chapter 1'),title:ST_TOWNS[0][2],c:ST_COL[0][0],c2:'#ffb36b',sub:L(`Trùm đầu tiên, ${ST_TOWNS[0][1]}, đang giữ khu này. Theo đường đỏ để tìm hắn.`,`The first boss, ${ST_TOWNS[0][1]}, runs this district. Follow the red route to find him.`)});}
 function stIntro(i){const g=stGang;if(!g)return;const b=g.boss;
   cine({type:'intro',wait:true,at:b,atName:L('Trùm','Boss'),kick:L(`Chương ${i+1} · ${ST_TOWNS[i][2]}`,`Chapter ${i+1} · ${ST_TOWNS[i][2]}`),title:ST_TOWNS[i][1],tag:L(ST_TAG[i][0],ST_TAG[i][1]),
@@ -4403,7 +4408,7 @@ function stTowerIntro(){cine({type:'intro',wait:true,at:stTower&&stTower.boss,at
   if(stOnce('tower'))cine({type:'tip',wait:true,kick:L('Sân thượng','Rooftop'),title:L('Sống sót trên mái','Survive the roof'),c:'#ffd166',c2:'#ff8a3d',
     steps:[['E',L('thùng đạn cạnh cửa: nạp đầy đạn bao nhiêu lần cũng được','ammo crate by the door: refill as often as you like')],['⬛',L('núp sau máy lạnh và lỗ thông gió','take cover behind AC units and vents')],['🎯',L('hạ vệ sĩ trước, rồi dồn Ông Trùm','drop the bodyguards first, then go for the Boss')]]});}
 function stHeliTip(){cine({type:'tip',wait:true,kick:L('Hắn đang bỏ chạy!','He is getting away!'),title:L('Bắn rơi trực thăng','Shoot down the helicopter'),c:'#ff3b47',c2:'#ffd166',snd:'boss',flash:true,
-    steps:[['2 – 4',L('chọn súng bắn nhanh nhất','pick your fastest-firing gun')],['B',L('giơ súng, rê chuột ngắm lên thân trực thăng','raise the gun, aim at the helicopter body')],[L('Giữ B','Hold B'),L('xả đạn liên tục','keep firing')],['Shift',L('chạy liên tục · hắn bắn trả từ trên cao','keep moving · he shoots back from above')],['E',L('hết đạn thì ra thùng đạn cạnh cửa','out of ammo? hit the crate by the door')]]});}
+    steps:[['2 – 4',L('chọn súng bắn nhanh nhất','pick your fastest-firing gun')],[L('Chuột','Mouse'),L('di chuột ngắm lên thân trực thăng','move the mouse onto the helicopter body')],[L('Giữ B','Hold B'),L('xả đạn liên tục','keep firing')],['Shift',L('chạy liên tục · hắn bắn trả từ trên cao','keep moving · he shoots back from above')],['E',L('hết đạn thì ra thùng đạn cạnh cửa','out of ammo? hit the crate by the door')]]});}
 function stHeliDown(){cine({type:'stamp',hold:2.6,slow:.15,kick:L('Trúng rồi!','Direct hit!'),title:L('Trực thăng đang rơi','The helicopter is going down'),c:'#ffd166',c2:'#ff5fa2',snd:'stamp',flash:true});}
 function stFail(lost){const h=[0,1,2].map(j=>j<SS.lives?1:j===SS.lives&&!lost?2:0);
   if(lost)cine({type:'fail',hold:4.4,slow:.15,kick:L('Hết mạng','Out of lives'),title:L('Nhiệm vụ thất bại','Mission failed'),hearts:[2,2,2],snd:'fail',c:'#ff3b47',
