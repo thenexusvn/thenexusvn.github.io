@@ -3188,31 +3188,31 @@ function cashBag(x,y,z){const b=new T.Mesh(new T.SphereGeometry(.2,12,9),SAFE_M.
 /* ---------- shop furnishing by type (also used for the mall units) ---------- */
 const SHOPTYPE={
   mart24:{n:'Nexus 24h',kind:'market',bg:'#0f9d58',fg:'#fff',cols:['#e63946','#ffb703','#2a9d8f','#3a86ff','#f4a261','#6a994e','#ff8fab','#8338ec'],fridge:1,floor:'tileW'},
-  pharmacy:{n:'Nhà thuốc Hoa Sen',kind:'market',bg:'#1b998b',fg:'#fff',cols:['#ffffff','#e0f2f1','#80cbc4','#4db6ac','#ef5350','#90caf9'],floor:'tileW',shop:'pharmacy'},
+  pharmacy:{n:L('Nhà thuốc Hoa Sen','Lotus Pharmacy'),kind:'market',bg:'#1b998b',fg:'#fff',cols:['#ffffff','#e0f2f1','#80cbc4','#4db6ac','#ef5350','#90caf9'],floor:'tileW',shop:'pharmacy'},
   tech:{n:'Nexus Tech',kind:'market',bg:'#111827',fg:'#7dd3fc',cols:['#1f2937','#374151','#111827','#0ea5e9','#e5e7eb'],floor:'marbleDk',shop:'tech',pay:[300,700],spay:[1500,3200]},
-  toys:{n:'Thế Giới Đồ Chơi',kind:'market',bg:'#ff6b6b',fg:'#fff',cols:['#ff595e','#ffca3a','#8ac926','#1982c4','#6a4c93','#ff924c'],floor:'oak',shop:'toys'},
-  books:{n:'Nhà sách Gió',kind:'market',bg:'#3d405b',fg:'#f2cc8f',cols:['#8d5524','#c68642','#3d405b','#81b29a','#e07a5f','#f2cc8f','#264653'],floor:'oak',shop:'books'},
-  cosm:{n:'Mỹ phẩm Mây',kind:'market',bg:'#ffafcc',fg:'#5a1a3a',cols:['#ffc8dd','#ffafcc','#cdb4db','#ffffff','#e5989b'],floor:'marble',shop:'cosm'},
-  clothes:{n:'Lụa Boutique',kind:'fashion',bg:'#ad8dff',fg:'#fff',floor:'oak',shop:'clothes'},
+  toys:{n:L('Thế Giới Đồ Chơi','Toy World'),kind:'market',bg:'#ff6b6b',fg:'#fff',cols:['#ff595e','#ffca3a','#8ac926','#1982c4','#6a4c93','#ff924c'],floor:'oak',shop:'toys'},
+  books:{n:L('Nhà sách Gió','Wind Bookstore'),kind:'market',bg:'#3d405b',fg:'#f2cc8f',cols:['#8d5524','#c68642','#3d405b','#81b29a','#e07a5f','#f2cc8f','#264653'],floor:'oak',shop:'books'},
+  cosm:{n:L('Mỹ phẩm Mây','Cloud Cosmetics'),kind:'market',bg:'#ffafcc',fg:'#5a1a3a',cols:['#ffc8dd','#ffafcc','#cdb4db','#ffffff','#e5989b'],floor:'marble',shop:'cosm'},
+  clothes:{n:L('Lụa Boutique','Silk Boutique'),kind:'fashion',bg:'#ad8dff',fg:'#fff',floor:'oak',shop:'clothes'},
   urban:{n:'Urban Wear',kind:'fashion',bg:'#1d1d1d',fg:'#c1f354',floor:'marbleDk',shop:'clothes'},
   shoes:{n:'Sneaker Lab',kind:'fashion',bg:'#f8f9fa',fg:'#e63946',floor:'oak',shop:'clothes',shoes:1},
-  sport:{n:'Thể Thao 24',kind:'fashion',bg:'#e63946',fg:'#fff',floor:'oakDk',shop:'clothes'},
+  sport:{n:L('Thể Thao 24','Sport 24'),kind:'fashion',bg:'#e63946',fg:'#fff',floor:'oakDk',shop:'clothes'},
   outlet:{n:'Nexus Outlet',kind:'fashion',bg:'#ffd166',fg:'#1d1d1d',floor:'oak',shop:'clothes'},
-  jewel:{n:'Kim Hoàn Ngọc Bảo',kind:'jewel',bg:'#1d1d1d',fg:'#e0b04a',floor:'marbleDk',shop:'jewel',pay:[600,1400],spay:[4000,8000]},
-  watch:{n:'Đồng Hồ Thời Gian',kind:'jewel',bg:'#0b2545',fg:'#e0b04a',floor:'marbleDk',shop:'watch',pay:[500,1100],spay:[2500,5000]},
-  optic:{n:'Kính Mắt Sáng',kind:'jewel',bg:'#ffffff',fg:'#1d3557',floor:'marble',shop:'optic'},
-  bags:{n:'Túi Xinh',kind:'fashion',bg:'#ffb4a2',fg:'#6d2e46',floor:'marble',shop:'bags'},
-  barber:{n:'Tóc Đẹp Barber',kind:'salon',bg:'#1d3557',fg:'#fff',floor:'tileK',shop:'barber',pole:1},
-  nails:{n:'Nail Hồng',kind:'salon',bg:'#ff8fab',fg:'#fff',floor:'marble',shop:'nails',nails:1},
+  jewel:{n:L('Kim Hoàn Ngọc Bảo','Ngoc Bao Jewellers'),kind:'jewel',bg:'#1d1d1d',fg:'#e0b04a',floor:'marbleDk',shop:'jewel',pay:[600,1400],spay:[4000,8000]},
+  watch:{n:L('Đồng Hồ Thời Gian','Time Watches'),kind:'jewel',bg:'#0b2545',fg:'#e0b04a',floor:'marbleDk',shop:'watch',pay:[500,1100],spay:[2500,5000]},
+  optic:{n:L('Kính Mắt Sáng','Bright Optics'),kind:'jewel',bg:'#ffffff',fg:'#1d3557',floor:'marble',shop:'optic'},
+  bags:{n:L('Túi Xinh','Pretty Bags'),kind:'fashion',bg:'#ffb4a2',fg:'#6d2e46',floor:'marble',shop:'bags'},
+  barber:{n:L('Tóc Đẹp Barber','Good Hair Barber'),kind:'salon',bg:'#1d3557',fg:'#fff',floor:'tileK',shop:'barber',pole:1},
+  nails:{n:L('Nail Hồng','Pink Nails'),kind:'salon',bg:'#ff8fab',fg:'#fff',floor:'marble',shop:'nails',nails:1},
   arcade:{n:'Arcade Nexus',kind:'arcade',bg:'#240046',fg:'#ff4ecd',floor:'navy',shop:'arcade'},
-  coffee:{n:'Cà Phê Gác Mái',kind:'food',bg:'#6f4e37',fg:'#fff',floor:'oakDk',shop:'coffee'},
-  com:{n:'Cơm Tấm Cô Ba',kind:'food',bg:'#ffb703',fg:'#1d1d1d',floor:'tileK',shop:'food'},
-  pizza:{n:'Pizza Lửa Hồng',kind:'food',bg:'#c1121f',fg:'#fff',floor:'tileK',shop:'pizza'},
-  boba:{n:'Trà Sữa Mây',kind:'food',bg:'#a47148',fg:'#fff',floor:'tileW',shop:'boba'},
-  pho:{n:'Phở Hà Thành',kind:'food',bg:'#bc4749',fg:'#fff',floor:'tileK',shop:'pho'},
-  bbq:{n:'Lẩu Nướng Khói',kind:'food',bg:'#370617',fg:'#ffba08',floor:'oakDk',shop:'bbq'},
-  sushi:{n:'Sushi Sóng',kind:'food',bg:'#f1faee',fg:'#e63946',floor:'oak',shop:'sushi'},
-  kem:{n:'Kem Tuyết',kind:'food',bg:'#bde0fe',fg:'#1d3557',floor:'tileW',shop:'kem'}};
+  coffee:{n:L('Cà Phê Gác Mái','Attic Coffee'),kind:'food',bg:'#6f4e37',fg:'#fff',floor:'oakDk',shop:'coffee'},
+  com:{n:L('Cơm Tấm Cô Ba',"Co Ba's Broken Rice"),kind:'food',bg:'#ffb703',fg:'#1d1d1d',floor:'tileK',shop:'food'},
+  pizza:{n:L('Pizza Lửa Hồng','Pink Flame Pizza'),kind:'food',bg:'#c1121f',fg:'#fff',floor:'tileK',shop:'pizza'},
+  boba:{n:L('Trà Sữa Mây','Cloud Bubble Tea'),kind:'food',bg:'#a47148',fg:'#fff',floor:'tileW',shop:'boba'},
+  pho:{n:L('Phở Hà Thành','Ha Thanh Pho'),kind:'food',bg:'#bc4749',fg:'#fff',floor:'tileK',shop:'pho'},
+  bbq:{n:L('Lẩu Nướng Khói','Smoke Hotpot & Grill'),kind:'food',bg:'#370617',fg:'#ffba08',floor:'oakDk',shop:'bbq'},
+  sushi:{n:L('Sushi Sóng','Wave Sushi'),kind:'food',bg:'#f1faee',fg:'#e63946',floor:'oak',shop:'sushi'},
+  kem:{n:L('Kem Tuyết','Snow Ice Cream'),kind:'food',bg:'#bde0fe',fg:'#1d3557',floor:'tileW',shop:'kem'}};
 SHOPTYPE.mart24.shop='mart24';SHOPTYPE.barber.shop='barber';SHOPTYPE.nails.shop='nails';
 const STEX={},SIGNGB={};
 function shopSignQ(t,x,y,z,h,w,hh){const g=SIGNGB[t]||(SIGNGB[t]=new GB());const rx=Math.cos(h),rz=-Math.sin(h),n=[Math.sin(h),0,Math.cos(h)];g.quad([x-rx*w/2,y-hh/2,z-rz*w/2],[x+rx*w/2,y-hh/2,z+rz*w/2],[x+rx*w/2,y+hh/2,z+rz*w/2],[x-rx*w/2,y+hh/2,z-rz*w/2],n,[[0,0],[1,0],[1,1],[0,1]]);}
@@ -3245,7 +3245,7 @@ function furnish(F,type,y,lv,roomId,R){const S=SHOPTYPE[type],W=F.W,D=F.D,col={c
     if(S.pole){const[a,b]=F.p(.35,-.25);cyl('white',a,y+1.6,y+2.6,b,.1,.1,12);cyl('red',a,y+1.9,y+2.3,b,.105,.105,12);sph('chrome',a,y+2.65,b,.11);}
     if(S.nails)for(let j=0;j<14;j++)ubox(F,['#e63946','#ff8fab','#ffb703','#8338ec','#2a9d8f','#111','#f1faee'][j%7],.06,.14,y+1.0+(j%2)*.3,y+1.18+(j%2)*.3,1.2+(j>>1)*.3,1.32+(j>>1)*.3);}
   else if(S.kind==='food'){ubox(F,'steel',.6,W-5.6,y,y+.92,D-.8,D-.05,col);ubox(F,'dark',.6,W-5.6,y+.92,y+.96,D-.8,D-.05);for(let u=1.2;u<W-6;u+=1.3)ucyl(F,'black',u,D-.45,y+.96,y+.99,.15,.15,14);
-    ubox(F,'steel',.6,W-5.6,y+2.0,y+2.4,D-1.0,D-.05);const[a,b]=F.p(Math.max(2.4,(W-5)/2),D-.04);glow(menuTex(S.n.toUpperCase().slice(0,16),[[L('Món chính','Mains'),'$18'],[L('Món nhẹ','Snacks'),'$8'],[L('Đồ uống','Drinks'),'$6']],S.bg,S.fg),a,y+1.65,b,2.4,1.1,F.h,.95);
+    ubox(F,'steel',.6,W-5.6,y+2.0,y+2.4,D-1.0,D-.05);const[a,b]=F.p(Math.max(2.4,(W-5)/2),D-.04);glow(menuTex(S.n.toUpperCase().slice(0,22),[[L('Món chính','Mains'),'$18'],[L('Món nhẹ','Snacks'),'$8'],[L('Đồ uống','Drinks'),'$6']],S.bg,S.fg),a,y+1.65,b,2.4,1.1,F.h,.95);
     for(const u of[1.2,3.2])if(u<W-6){ubox(F,'oak',u-.5,u+.5,y+.72,y+.76,1.2,2.0);ubox(F,'dark',u-.04,u+.04,y,y+.72,1.55,1.65);mcol(...F.r(u-.5,u+.5,1.2,2.0),y,y+.8,lv);}}
   else if(S.kind==='arcade'){for(let k=0;k<4;k++){const u=1.0+k*1.25;if(u>W-6)break;ubox(F,'#2b2d42',u-.4,u+.4,y,y+1.85,D-1.0,D-.2,col);const[a,b]=F.p(u,D-1.02);glow(['#ff4ecd','#00f5d4','#fee440','#9b5de5'][k],a,y+1.35,b,.6,.45,F.h,.9);ubox(F,'#111',u-.35,u+.35,y+.9,y+.98,D-1.25,D-1.0);}
     for(let k=0;k<3;k++){const v=1.4+k*1.3;if(v>D-3)break;ubox(F,'#2b2d42',.2,.9,y,y+1.85,v-.4,v+.4,col);const[a,b]=F.p(.92,v);glow(['#00bbf9','#f15bb5','#fee440'][k],a,y+1.35,b,.6,.45,F.h-Math.PI/2,.9);}}
