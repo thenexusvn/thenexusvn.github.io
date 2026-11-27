@@ -87,7 +87,7 @@ function buildVC(parts){let tot=0;const arr=[];for(const p of parts){const g=p.g
   const G=new T.BufferGeometry();G.setAttribute('position',new T.BufferAttribute(pos,3));G.setAttribute('normal',new T.BufferAttribute(nor,3));G.setAttribute('color',new T.BufferAttribute(col,3));G.setAttribute('uv',new T.BufferAttribute(uv,2));G.computeBoundingSphere();return G;}
 /* ---------- canvas textures ---------- */
 let MAXANISO=0;
-function makeTex(w,h,draw,o){o=o||{};const c=document.createElement('canvas');c.width=w;c.height=h;const g=c.getContext('2d');draw(g,w,h);const t=new T.CanvasTexture(c);if(o.repeat!==false)t.wrapS=t.wrapT=T.RepeatWrapping;if(o.srgb!==false)t.encoding=T.sRGBEncoding;t.anisotropy=o.aniso||4;if(MAXANISO)t.anisotropy=Math.min(t.anisotropy,MAXANISO);return t;}
+function makeTex(w,h,draw,o){o=o||{};const c=document.createElement('canvas');c.width=w;c.height=h;const g=c.getContext('2d');draw(g,w,h);const t=new T.CanvasTexture(c);if(o.repeat!==false)t.wrapS=t.wrapT=T.RepeatWrapping;if(o.srgb!==false)t.encoding=T.sRGBEncoding;t.anisotropy=o.aniso||(GFX==='ultra'?16:GFX==='low'?1:4);if(MAXANISO)t.anisotropy=Math.min(t.anisotropy,MAXANISO);return t;}
 function speckle(g,w,h,base,n,a){g.fillStyle=base;g.fillRect(0,0,w,h);for(let i=0;i<n;i++){const d=Math.random()<.5;g.fillStyle=d?`rgba(0,0,0,${Math.random()*a})`:`rgba(255,255,255,${Math.random()*a})`;g.fillRect(Math.random()*w,Math.random()*h,1+Math.random()*2.5,1+Math.random()*2.5);}}
 
 /* ======================================================================= */
@@ -95,7 +95,14 @@ function create(opt){
 const view=opt.view,root=opt.hudRoot,MOBILE=!!opt.mobile;
 /* graphics tier: low = Smooth, mid = Good, ultra = Ultra (old saves said 'high', which is Good now) */
 const GFX=opt.gfx==='low'?'low':opt.gfx==='ultra'?'ultra':'mid';
-const Q={peds:MOBILE?16:34,traffic:MOBILE?16:34,shadows:!MOBILE,pr:MOBILE?1:Math.min(window.devicePixelRatio||1,GFX==='ultra'?2:1.5),cull:MOBILE?130:175,tex:MOBILE?256:512};
+// tiers: Smooth = lean (hard shadows, 1x resolution, no post FX, fewer people, shorter view); Good = balanced;
+// Ultra = everything on: supersampled 1.5-2x resolution, 4096 soft shadows, AO, god rays, 16x texture filtering, sharper drawn textures, busier streets, longer view, never auto-downgraded
+const DPR=window.devicePixelRatio||1;
+const Q=MOBILE?{peds:16,traffic:16,shadows:true,pr:1,cull:130,tex:256}
+  :GFX==='low'?{peds:22,traffic:20,shadows:true,pr:1,cull:140,tex:256}
+  :GFX==='ultra'?{peds:46,traffic:44,shadows:true,pr:Math.min(2,Math.max(1.5,DPR)),cull:235,tex:1024}
+  :{peds:34,traffic:34,shadows:true,pr:Math.min(DPR,1.25),cull:175,tex:512};
+if(MOBILE)Q.shadows=false;
 
 /* ---------- save ---------- */
 const SAVE_KEY=opt.mode==='story'?'nexus-city2-story':'nexus-city2-save';
@@ -110,7 +117,7 @@ function writeSave(){try{save.hour=Math.round(tod.hour*100)/100;}catch(_){}try{l
 const renderer=new T.WebGLRenderer({antialias:!MOBILE,powerPreference:'high-performance'});
 renderer.setPixelRatio(Q.pr);MAXANISO=renderer.capabilities.getMaxAnisotropy()||4;
 renderer.outputEncoding=T.sRGBEncoding;renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.0;
-renderer.shadowMap.enabled=Q.shadows;renderer.shadowMap.type=T.PCFSoftShadowMap;
+renderer.shadowMap.enabled=Q.shadows;renderer.shadowMap.type=GFX==='low'?T.PCFShadowMap:T.PCFSoftShadowMap;
 view.appendChild(renderer.domElement);
 const scene=new T.Scene();
 scene.fog=new T.Fog(lin('#f3b48a'),90,MOBILE?Q.cull+150:Q.cull+300);
@@ -3634,7 +3641,7 @@ function step(dt){
   foamUpdate();if(Math.floor(time*20)%2===0){const pa=waterG.attributes.position;for(let i=0;i<pa.count;i++){const x=waterBase[i*3],z=waterBase[i*3+2];pa.array[i*3+1]=Math.sin(x*.06+time*1.3)*.08+Math.cos(z*.05+time*.9)*.06+Math.sin((x+z)*.13+time*2.1)*.04;}pa.needsUpdate=true;waterG.computeVertexNormals();}
 }
 let perfT=0,perfN=0,lowQ=false;
-function adapt(raw){if(lowQ||paused)return;perfT+=raw;perfN++;if(perfT>4){const avg=perfT/perfN;perfT=0;perfN=0;
+function adapt(raw){if(lowQ||paused||GFX==='ultra')return;perfT+=raw;perfN++;if(perfT>4){const avg=perfT/perfN;perfT=0;perfN=0;
   // step down gently: resolution first, then bloom, then shadows (each only if it is still slow)
   if(avg>.03&&(PP.ao||PP.gr)){PP.ao=PP.gr=false;return;}
   if(avg>.034&&renderer.getPixelRatio()>1){renderer.setPixelRatio(1);resize();return;}
@@ -4404,7 +4411,8 @@ function pbrImg(u){return new Promise((res,rej)=>{const im=new Image();im.crossO
 async function pbrLoad(){if(!PBR.on)return;const base=n=>'https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/'+n+'/'+n+'_';
   for(const k in PBR.set){const n=PBR.set[k],t=TX[k];if(!t)continue;
     try{const[d,nm,r]=await Promise.all([pbrImg(base(n)+'diff_1k.jpg'),pbrImg(base(n)+'nor_gl_1k.jpg'),GFX==='ultra'?pbrImg(base(n)+'rough_1k.jpg'):Promise.resolve(null)]);
-      if(k!=='grass'){t.image=d;t.needsUpdate=true;}// grass keeps its own green colour and only takes the photo's bumpsconst mk=im=>{const x=new T.Texture(im);x.wrapS=x.wrapT=T.RepeatWrapping;x.repeat.copy(t.repeat);x.anisotropy=t.anisotropy;x.needsUpdate=true;return x;};
+      if(k!=='grass'){t.image=d;t.needsUpdate=true;}// grass keeps its own green colour and only takes the photo's bumps
+      const mk=im=>{const x=new T.Texture(im);x.wrapS=x.wrapT=T.RepeatWrapping;x.repeat.copy(t.repeat);x.anisotropy=GFX==='ultra'?(MAXANISO||16):t.anisotropy;x.needsUpdate=true;return x;};
       PBR.nor[k]=mk(nm);if(r)PBR.rough[k]=mk(r);pbrApply();}catch(e){console.warn('pbr',k,e);}}
   setTimeout(pbrApply,8000);}
 function pbrApply(){const by=new Map();for(const k in PBR.nor)by.set(TX[k],k);scene.traverse(o=>{if(!o.material)return;for(const m of(Array.isArray(o.material)?o.material:[o.material])){const k=m.map&&by.get(m.map);if(!k||m.normalMap||!m.isMeshStandardMaterial)continue;
