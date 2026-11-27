@@ -2318,8 +2318,13 @@ function shopItems(id){const S=SHOPS[id];if(S.kind==='clothes'){const L2=[];for(
   return S.items.map(it=>{if(it.w){const own=!!save.weapons[it.w];return Object.assign({},it,{dis:own,label:own?L('Đã có','Owned'):null,fn:()=>{save.weapons[it.w]=true;save.ammo[it.w]+=({pistol:36,smg:120,rifle:60})[it.w];selectWeapon(it.w);}});}
     if(it.a)return Object.assign({},it,{dis:!save.weapons[it.a],d:save.weapons[it.a]?L('Đang có ','You have ')+save.ammo[it.a]:L('Cần mua súng trước','Buy the gun first'),fn:()=>{save.ammo[it.a]+=it.q;}});
     const dis=(it.need==='car'&&!P.car)||(it.ok&&!it.ok());return Object.assign({},it,{dis,d:it.need==='car'&&!P.car?L('Cần lái xe tới đây','Drive a car here first'):it.d});});}
-function openShop(id){shopOpen=id;keys.clear();renderShop();hud.shop.hidden=false;sfx('door');tutEvent('shop');}
-function closeShop(){shopOpen=null;hud.shop.hidden=true;writeSave();}
+/* menus, the map and pause give the mouse back; closing them takes it again if it was captured */
+let relock=false;
+function freeMouse(){if(document.pointerLockElement===cv){relock=true;try{document.exitPointerLock();}catch(_){}}lockHintUpd();}
+function backMouse(){if(relock&&!shopOpen&&!mapOpen&&!paused){relock=false;mouseLock();}lockHintUpd();}
+function lockHintUpd(){if(hud&&hud.lockHint)hud.lockHint.hidden=MOBILE||document.pointerLockElement===cv||!!shopOpen||mapOpen||paused||!active;}
+function openShop(id){shopOpen=id;freeMouse();keys.clear();renderShop();hud.shop.hidden=false;sfx('door');tutEvent('shop');}
+function closeShop(){shopOpen=null;hud.shop.hidden=true;writeSave();backMouse();}
 function renderShop(){const id=shopOpen;if(!id)return;const its=shopItems(id);hud.shop.querySelector('h3').textContent=SHOPS[id].n;hud.shop.querySelector('.nc-cash').textContent=fmt$(save.money);
   const ul=hud.shop.querySelector('.nc-items');ul.innerHTML='';its.forEach((it,i)=>{const b=document.createElement('button');b.type='button';const poor=it.p>save.money;b.disabled=!!it.dis||poor&&!it.label;
     b.innerHTML=`<span class="k">${i+1}</span><span class="t"><b></b><small></small></span><span class="p"></span>`;b.querySelector('b').textContent=it.n;b.querySelector('small').textContent=it.d||'';b.querySelector('.p').textContent=it.label||(it.p?fmt$(it.p):L('Miễn phí','Free'));
@@ -3518,7 +3523,7 @@ const css=document.createElement('style');css.textContent=`
 .nc-stars i{font-style:normal;color:rgba(255,255,255,.28)}.nc-stars i.on{color:#fff}
 .nc-stars.blink i.on{animation:ncb .6s steps(2) infinite}@keyframes ncb{50%{opacity:.3}}
 .nc-fist{min-width:44px;height:44px;padding:0 10px;border-radius:10px;background:rgba(0,0,0,.45);display:flex;align-items:center;gap:6px;justify-content:center;font:700 14px Inter,sans-serif;margin-top:4px;pointer-events:auto;cursor:pointer}.nc-fist .e{font-size:22px}
-.nc-lock{position:absolute;left:50%;bottom:120px;transform:translateX(-50%);background:rgba(0,0,0,.62);color:#fff;font:600 13px Inter,sans-serif;padding:8px 14px;border-radius:999px;pointer-events:none;white-space:nowrap}
+.nc-lock{position:absolute;left:50%;top:64px;transform:translateX(-50%);background:rgba(0,0,0,.62);color:#fff;font:600 13px Inter,sans-serif;padding:8px 14px;border-radius:999px;pointer-events:none;white-space:nowrap}
 .nc-cross{position:absolute;left:50%;top:50%;width:22px;height:22px;margin:-11px 0 0 -11px;border:2px solid rgba(255,255,255,.9);border-radius:50%;box-shadow:0 0 0 1px rgba(0,0,0,.5)}.nc-cross{transition:transform .15s,border-color .1s,opacity .15s;opacity:.55}.nc-cross.aim{transform:scale(1.35);opacity:1}.nc-cross.hot{border-color:#ff3b47;box-shadow:0 0 0 1px rgba(0,0,0,.5),0 0 12px rgba(255,59,71,.8)}.nc-cross.hot::after{background:#ff3b47}.nc-cross::after{content:'';position:absolute;left:50%;top:50%;width:3px;height:3px;margin:-1.5px;background:#fff;border-radius:50%}
 .nc-mini{position:absolute;left:18px;bottom:18px;width:230px}
 .nc-mini canvas{display:block;width:230px;height:150px;border-radius:10px;border:2px solid rgba(0,0,0,.6);box-shadow:0 4px 18px rgba(0,0,0,.35)}
@@ -3662,7 +3667,7 @@ function drawBigMap(){const c=hud.mapC,g=c.getContext('2d'),s=mapS();g.fillStyle
 function renderPOI(){hud.poi.innerHTML='';for(const p of poiList()){const b=document.createElement('button');b.type='button';const col=p.i==='bank'?'#4ade80':p.i==='house'?'#ffffff':p.i==='hosp'?'#d62828':p.i==='police'?'#3d6fd6':p.i;b.innerHTML='<i style="background:'+col+'"></i>';b.appendChild(document.createTextNode(p.n));b.addEventListener('click',()=>{setWaypoint(p.x,p.z,p.n);gpsUpdate(0);drawBigMap();});hud.poi.appendChild(b);}}
 let MAPLAB=[],MAPHOV=null,mapT=0;
 hud.mapC.addEventListener('mousemove',e=>{const c=hud.mapC,r=c.getBoundingClientRect(),px=(e.clientX-r.left)*c.width/r.width,py=(e.clientY-r.top)*c.height/r.height;let best=null,bd=16;for(const l of MAPLAB){const d=Math.hypot(l.x-px,l.y-py);if(d<bd){bd=d;best=l;}}if(best!==MAPHOV){MAPHOV=best;hud.mapC.style.cursor=best?'pointer':'';drawBigMap();}});
-let mapOpen=false;function toggleMap(){mapOpen=!mapOpen;hud.map.hidden=!mapOpen;if(mapOpen){gps.t=0;gpsUpdate(0);drawBigMap();renderPOI();tutEvent('map');}}
+let mapOpen=false;function toggleMap(){mapOpen=!mapOpen;hud.map.hidden=!mapOpen;if(mapOpen)freeMouse();else backMouse();if(mapOpen){gps.t=0;gpsUpdate(0);drawBigMap();renderPOI();tutEvent('map');}}
 hud.mapC.addEventListener('click',e=>{const c=hud.mapC,r=c.getBoundingClientRect(),px=(e.clientX-r.left)*c.width/r.width,py=(e.clientY-r.top)*c.height/r.height,s=mapS();
   const x=px/(MK1*s)+MAPX0,z=(py-mapOY())/(MK1*s)+MAPZ0;
   if(gps.wp&&hyp(gps.wp.x-x,gps.wp.z-z)*MK1*s<16){clearWaypoint(true);gpsUpdate(0);drawBigMap();return;}
@@ -3704,7 +3709,7 @@ cv.addEventListener('pointerdown',e=>{sfxInit();if(e.pointerType==='mouse'&&e.bu
 // mouse / touchpad look: once the mouse is captured (one click on the game), just moving it turns the camera, like Last Zone
 document.addEventListener('pointermove',e=>{if(document.pointerLockElement!==cv||!active||e.pointerType==='touch')return;const mx=e.movementX||0,my=e.movementY||0;if(Math.abs(mx)>300||Math.abs(my)>300)return;
   cam.yaw-=mx*.0024;if(AIM.on)AIM.pitch=clamp(AIM.pitch+my*.0018,-1.15,.55);else cam.pitch=clamp(cam.pitch+my*.0018,.05,1.05);cam.lastDrag=performance.now();tut.turned+=Math.abs(mx*.0024);});
-document.addEventListener('pointerlockchange',()=>{if(hud.lockHint)hud.lockHint.hidden=document.pointerLockElement===cv||MOBILE;});
+document.addEventListener('pointerlockchange',lockHintUpd);
 cv.addEventListener('contextmenu',e=>e.preventDefault());
 cv.addEventListener('pointermove',e=>{if(document.pointerLockElement===cv)return;const d=cam.drag;if(!d||d.id!==e.pointerId)return;const dx=e.clientX-d.x,dy=e.clientY-d.y;d.x=e.clientX;d.y=e.clientY;d.moved+=Math.abs(dx)+Math.abs(dy);cam.yaw-=dx*.006;cam.pitch=clamp(cam.pitch+dy*.004,.05,1.05);cam.lastDrag=performance.now();tut.turned+=Math.abs(dx*.006);});
 const endDrag=e=>{if(e.pointerType==='mouse'&&(e.button===2||e.type==='pointercancel'))cam.rmb=false;if(e.button===0||e.type==='pointercancel')P.trigger=false;const d=cam.drag;if(!d||d.id!==e.pointerId)return;cam.drag=null;if(d.mouse&&e.button===0&&d.moved<6&&performance.now()-d.t<300&&active&&!mapOpen&&P.weapon==='fist'){if(HP.on)hpKey('j');else playerPunch();}};
@@ -4803,7 +4808,7 @@ setTimeout(pbrLoad,1500);
 const api={
   setGfx(v){PP.on=v!=='low';PP.ao=PP.gr=v==='ultra'&&GFX==='ultra';resize();},
   start(){paused=false;active=true;keys.clear();try{if(sfxAC&&sfxAC.state==='suspended')sfxAC.resume();}catch(_){}last=performance.now();cancelAnimationFrame(raf);raf=requestAnimationFrame(frame);resize();},
-  setPaused(p){paused=p;active=!p;keys.clear();cam.rmb=false;tb.block=false;if(p)radioStop();else{last=performance.now();if(P.car&&radio.idx>=0)radioPlay();}},
+  setPaused(p){paused=p;active=!p;if(p)freeMouse();else backMouse();keys.clear();cam.rmb=false;tb.block=false;if(p)radioStop();else{last=performance.now();if(P.car&&radio.idx>=0)radioPlay();}},
   stop(){mpStop();MP.keep=0;cancelAnimationFrame(raf);active=false;paused=true;keys.clear();radioStop();try{if(sfxAC&&sfxAC.state==='running')sfxAC.suspend();}catch(_){}writeSave();},
   resume(){active=true;paused=false;keys.clear();cam.rmb=false;last=performance.now();cancelAnimationFrame(raf);raf=requestAnimationFrame(frame);resize();if(P.car&&radio.idx>=0)radioPlay();},
   resize,
