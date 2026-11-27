@@ -350,3 +350,9 @@ Python helper scripts used during development:
 
 ## CommsHub unread counts (index.html, after markRead)
 - hubCount(): for each room newer than lastRead (localStorage, default last 3 days) counts messages from others since then (limit 99) → HUB.unread; hubBadge() puts a green .nav-count on the CommsHub menu link; roomRow shows the number.
+
+## Last Zone upgrade (lastzone.js)
+- Graphics tiers save.quality low/mid/ultra (old 'high' → ultra), QP table; PP module copied from city.js (night/weather removed); HDRI + leafy_grass normal map + procedural water normals on mid/ultra. Lobby "Đồ hoạ" buttons (data-lzgfx) → opt.onRestart (launcher destroys and recreates the game).
+- Grass material switched to MeshStandardMaterial (Lambert DoubleSide hack failed to compile: vLightFront redefinition).
+- Real item models in itemGeo (plate carrier, helmet, bandage rolls, medkit, ammo cans/shell boxes); guns on the ground use gunMesh; new gunGeos with receiver, rail, mag, stock, optics.
+- Multiplayer (save.play 'multi'): RTDB lz/q queue, lz/inv invites, lz/m/{mid} {seed,t0,p}, s/{sid} state 10 Hz, e/ events (f fire, h hit, x out, p pick, d drop). Need 10 (?lzneed=N for tests), 30 s timeout. Seeded RNG (RNG/rr) for loot, cars, plane, zone; zone and plane follow server time. Needs the "lz" section of database.rules.json pasted into Firebase.

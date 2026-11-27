@@ -8,7 +8,29 @@
         "$uid": {
           ".write": "auth != null && auth.uid === $uid",
           ".validate": "!newData.exists() || (newData.hasChildren(['x', 'z', 't']) && newData.child('x').isNumber() && newData.child('z').isNumber())",
-          "n": { ".validate": "newData.isString() && newData.val().length <= 24" }
+          "n": {
+            ".validate": "newData.isString() && newData.val().length <= 24"
+          }
+        }
+      }
+    },
+    "lz": {
+      "q": {
+        ".read": "auth != null",
+        "$sid": {
+          ".write": "auth != null && (newData.exists() ? newData.child('u').val() === auth.uid : data.child('u').val() === auth.uid)"
+        }
+      },
+      "inv": {
+        "$sid": {
+          ".read": "auth != null",
+          ".write": "auth != null"
+        }
+      },
+      "m": {
+        "$mid": {
+          ".read": "auth != null",
+          ".write": "auth != null"
         }
       }
     }
