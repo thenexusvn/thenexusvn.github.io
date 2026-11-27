@@ -1232,18 +1232,18 @@ function cessnaGeo(liv){const W='#f4f4f2',D='#1c2430',P=[];
   for(const s of[-1,1]){P.push({geo:wh,pos:[s*1.1,.3,.6],color:'#15171a'});const g2=new T.BoxGeometry(.07,.9,.07);g2.rotateZ(s*.6);P.push({geo:g2,pos:[s*.75,.7,.6],color:'#3a3f46'});}
   return buildVC(P);}
 /* NEXUS ONE: long-range private jet, gloss black with gold, nose towards +z, wheels touch y=0 */
-function sjetGeo(){const B='#0f1115',G='#c9a24a',D='#0a1c2b',S='#1b1e24',M='#c9ced4',P=[];const Y=2.3;
+function sjetGeo(){const B='#0f1115',G='#c9a24a',D='#0a1c2b',S='#1b1e24',M='#c9ced4',P=[];const Y=2.3;const rg=(g,x,y,z)=>{if(x)g.rotateX(x);if(y)g.rotateY(y);if(z)g.rotateZ(z);return g;};
   const fus=new T.CylinderGeometry(1.25,1.25,16,28);fus.rotateX(Math.PI/2);P.push({geo:fus,pos:[0,Y,0],color:B});
-  P.push({geo:new T.SphereGeometry(1.25,28,16,0,Math.PI*2,0,Math.PI/2),pos:[0,Y,8],rot:[Math.PI/2,0,0],scale:[1,2.6,.92],color:B});
+  P.push({geo:rg(new T.SphereGeometry(1.25,28,16,0,Math.PI*2,0,Math.PI/2),Math.PI/2),pos:[0,Y,8],scale:[1,.92,2.6],color:B});
   const tc=new T.CylinderGeometry(1.25,.32,7,28);tc.rotateX(Math.PI/2);P.push({geo:tc,pos:[0,Y+.35,-11.5],scale:[1,.9,1],color:B});
   P.push({geo:new T.BoxGeometry(2.52,.11,17),pos:[0,Y+.12,-.5],color:G},{geo:new T.BoxGeometry(2.4,.5,19),pos:[0,Y-.95,-1],color:S});
   for(let z=-5.2;z<=5.6;z+=1.15)for(const s of[-1,1])P.push({geo:new T.SphereGeometry(.2,10,8),pos:[s*1.2,Y+.5,z],scale:[.35,1.25,1],color:D});
-  P.push({geo:shapeBox(1.9,.5,1.25,(x,y,z)=>[x*(1-(y+.25)*.6),y,z-(y+.25)*.9]),pos:[0,Y+.82,9.6],rot:[-.18,0,0],color:D});
-  for(const s of[-1,1])P.push({geo:new T.BoxGeometry(.06,.36,1),pos:[s*1.08,Y+.62,9.7],rot:[0,s*.18,0],color:D});
+  P.push({geo:rg(shapeBox(1.9,.5,1.25,(x,y,z)=>[x*(1-(y+.25)*.6),y,z-(y+.25)*.9]),-.18),pos:[0,Y+.82,9.6],color:D});
+  for(const s of[-1,1])P.push({geo:rg(new T.BoxGeometry(.06,.36,1),0,s*.18),pos:[s*1.08,Y+.62,9.7],color:D});
   for(const s of[1]){P.push({geo:new T.BoxGeometry(.04,1.75,.05),pos:[s*1.26,Y+.1,6.4],color:G},{geo:new T.BoxGeometry(.04,1.75,.05),pos:[s*1.26,Y+.1,7.3],color:G},{geo:new T.BoxGeometry(.04,.05,.95),pos:[s*1.26,Y+.97,6.85],color:G});}
   P.push({geo:shapeBox(19,.26,4.2,(x,y,z)=>{const t=Math.abs(x)/9.5;return[x,y+t*.55,z*(1-t*.72)-t*4.2];},4),pos:[0,Y-.75,-.5],color:B});
   P.push({geo:shapeBox(19.05,.05,.35,(x,y,z)=>{const t=Math.abs(x)/9.5;return[x,y+t*.55,z-t*4.2+(1-t*.72)*2.1-.17];},4),pos:[0,Y-.6,-.5],color:G});
-  for(const s of[-1,1])P.push({geo:shapeBox(.1,1.5,1.1,(x,y,z)=>[x,y,z-(y+.75)*.5]),pos:[s*9.55,Y+.45,-5],rot:[0,0,s*-.12],color:G});
+  for(const s of[-1,1])P.push({geo:rg(shapeBox(.1,1.5,1.1,(x,y,z)=>[x,y,z-(y+.75)*.5]),0,0,s*-.12),pos:[s*9.55,Y+.45,-5],color:G});
   for(const s of[-1,1]){const n=new T.CylinderGeometry(.62,.55,3.6,20);n.rotateX(Math.PI/2);P.push({geo:n,pos:[s*2.05,Y+.85,-7.3],color:M});
     const i=new T.CylinderGeometry(.5,.5,.05,20);i.rotateX(Math.PI/2);P.push({geo:i,pos:[s*2.05,Y+.85,-5.48],color:'#111'});const ex=new T.CylinderGeometry(.42,.3,.6,16);ex.rotateX(Math.PI/2);P.push({geo:ex,pos:[s*2.05,Y+.85,-9.35],color:'#2a2a2a'});
     P.push({geo:new T.BoxGeometry(1.1,.18,1.6),pos:[s*1.45,Y+.85,-7.3],color:B},{geo:new T.BoxGeometry(.04,.62,3.2),pos:[s*2.68,Y+.85,-7.3],color:G});}
@@ -3420,7 +3420,7 @@ function shopsTick(dt){mallTick(dt);robTick(dt);ceoTick(dt);sjTick(dt);}
 /* ================= THE SECRET JET: black market key card → Nexus Tower 40th floor → CEO safe → secret key → locked hangar at the airport → NEXUS ONE =================
    save.towerCard, save.secretKey, save.hangarOpen and save.ceoCool persist, so the chain is only done once. */
 /* ---------- black market (a back room near the harbour) ---------- */
-{const R=room('bmarket',7100,0,14,11,3.2,{wall:'stone',floor:'tileK',fts:1,wts:1.6,ceil:'plaster',cts:1.2,skirt:'dark'}),x0=R.x0,x1=R.x1,z0=R.z0,z1=R.z1,cx=7100;R.seats=[];
+{const R=room('bmarket',7100,0,14,11,3.2,{wall:'navy',floor:'tileK',fts:1,wts:1.6,ceil:'dark',cts:1.2,skirt:'dark'}),x0=R.x0,x1=R.x1,z0=R.z0,z1=R.z1,cx=7100;R.seats=[];
   for(const[x,z,s]of[[x0+1,z0+1,1.1],[x0+2.2,z0+1,.9],[x0+1,z0+2.3,1],[x1-1.1,z1-2,1.1],[x1-1.1,z1-3.3,.9],[x0+1,z1-2.5,1]]){itb('oakDk',x-s/2,x+s/2,0,s,z-s/2,z+s/2,{col:1});itb('dark',x-s/2-.01,x+s/2+.01,s*.45,s*.55,z-s/2-.01,z+s/2+.01);}
   itb('dark',cx-1.6,cx+1.6,0,.78,z0+3.2,z0+4,{col:1});itb('black',cx-1.7,cx+1.7,.78,.82,z0+3.1,z0+4.1);itb('black',cx-.5,cx+.3,.82,.84,z0+3.3,z0+3.8);glow('#38bdf8',cx-.1,1.05,z0+3.32,.75,.42,-.25,1);
   extra(Object.assign(randomLook('ped'),{jacket:'#111',shirt:'#222',cap:'#111'}),cx,z0+2.4,0);
@@ -3429,7 +3429,7 @@ function shopsTick(dt){mallTick(dt);robTick(dt);ceoTick(dt);sjTick(dt);}
   glow(textTex(L('CHỢ ĐEN','BLACK MARKET'),{fg:'#ff2bd6',bg:'#0b0b10',size:72,w:768,h:150,glow:'#ff2bd6'}),cx,2.55,z0+.04,3.2,.62,0,1.2);
   glow(textTex(L('KHÔNG HỎI · KHÔNG KỂ','NO QUESTIONS · NO STORIES'),{fg:'#fee440',bg:'#0b0b10',size:40,w:768,h:90}),x0+.04,1.9,(z0+z1)/2,2.6,.3,Math.PI/2,1);
   act(R,cx,z0+5,2.4,()=>L('Nói chuyện với tay buôn','Talk to the dealer'),()=>openShop('bmarket'));
-  R.lights=[[cx,2.9,z0+3.5,1.1,'#ff4fd8',10],[cx,2.9,z1-3,.8,'#ffd29a',9]];IE.push([cx,R.h-.04,z0+3.5],[cx,R.h-.04,z1-3]);}
+  R.lights=[[cx,2.6,z0+3.5,1.3,'#ff4fd8',9],[cx,2.6,z1-3,.7,'#ffb36b',8]];for(const[x,z]of[[cx,z0+3.5],[cx,z1-3]]){cyl('black',x,2.7,3.2,z,.01,.01,4);sph('white',x,2.65,z,.08);}}
 SHOPS.bmarket={n:L('Chợ đen','Black market'),items:[
   {n:L('Thẻ nhân viên Nexus Tower','Nexus Tower staff key card'),d:save.towerCard?L('Đã có','You have it'):L('Mở thang máy lên tầng 40','Opens the lifts to the 40th floor'),p:2500,ok:()=>!save.towerCard,fn:()=>{save.towerCard=true;banner(L('THẺ NHÂN VIÊN','STAFF KEY CARD'),L('Vào sảnh Nexus Tower (toà văn phòng), bấm E ở thang máy để lên tầng 40','Go to the Nexus Tower lobby (any office tower), press E at the lifts for the 40th floor'),4.2);}},
   {n:L('Xoá hồ sơ truy nã','Wipe your wanted record'),d:L('Xoá hết sao truy nã','Clears every wanted star'),p:900,ok:()=>stars>0,fn:()=>{stars=0;evadeT=0;banner(L('SẠCH HỒ SƠ','RECORD WIPED'),L('Cảnh sát không còn tìm bạn','The police stopped looking'),2.4);}},
