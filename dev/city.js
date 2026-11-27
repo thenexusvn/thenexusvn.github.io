@@ -3149,9 +3149,9 @@ function autoSafe(R,cash,y){const st=.5,x0=R.x0+.4,z0=R.z0+.4,nx=Math.floor((R.x
   const si=Math.round((R.door.x-x0)/st),sj=Math.round((R.door.z-.6-z0)/st);const q=[];if(si>=0&&si<nx&&sj>=0&&sj<nz&&ok[sj*nx+si]){q.push(sj*nx+si);seen[sj*nx+si]=1;}
   while(q.length){const c=q.pop(),i=c%nx,j=(c-i)/nx;for(const[di,dj]of[[1,0],[-1,0],[0,1],[0,-1]]){const a=i+di,b=j+dj;if(a<0||b<0||a>=nx||b>=nz)continue;const k=b*nx+a;if(!seen[k]&&ok[k]){seen[k]=1;q.push(k);}}}
   let best=null,bd=1e9;const cx=cash.root.position.x,cz=cash.root.position.z;
-  const tryWall=(sx,sz,h)=>{if(resolve(sx,sz,.62))return;const fx=Math.sin(h),fz=Math.cos(h),px=sx+fx*1.0,pz=sz+fz*1.0;const i=Math.round((px-x0)/st),j=Math.round((pz-z0)/st);if(i<0||j<0||i>=nx||j>=nz||!seen[j*nx+i])return;
+  const tryWall=(sx,sz,h)=>{const ax=Math.cos(h),az=-Math.sin(h);if(resolve(sx,sz,.42)||resolve(sx+ax*.3,sz+az*.3,.42)||resolve(sx-ax*.3,sz-az*.3,.42))return;const fx=Math.sin(h),fz=Math.cos(h),px=sx+fx*1.0,pz=sz+fz*1.0;const i=Math.round((px-x0)/st),j=Math.round((pz-z0)/st);if(i<0||j<0||i>=nx||j>=nz||!seen[j*nx+i])return;
     if(hyp(sx-R.door.x,sz-R.door.z)<4.5)return;const d=hyp(sx-cx,sz-cz);if(d<1.4)return;if(d<bd){bd=d;best={x:sx,z:sz,h,px,pz};}};
-  for(let x=R.x0+.9;x<R.x1-.9;x+=.5){tryWall(x,R.z0+.5,0);}for(let z=R.z0+.9;z<R.z1-.9;z+=.5){tryWall(R.x0+.5,z,Math.PI/2);tryWall(R.x1-.5,z,-Math.PI/2);}
+  for(let x=R.x0+.9;x<R.x1-.9;x+=.5){tryWall(x,R.z0+.55,0);}for(let z=R.z0+.9;z<R.z1-.9;z+=.5){tryWall(R.x0+.55,z,Math.PI/2);tryWall(R.x1-.55,z,-Math.PI/2);}
   if(!best)return null;const s=makeSafe(best.x,y||0,best.z,best.h);addCol({t:'b',x0:best.x-.5,x1:best.x+.5,z0:best.z-.5,z1:best.z+.5,h:(y||0)+1.1});return{s,px:best.px,pz:best.pz};}
 function cashBag(x,y,z){const b=new T.Mesh(new T.SphereGeometry(.2,12,9),SAFE_M.bag);b.scale.setScalar(.2);b.position.set(x,y,z);b.visible=false;scene.add(b);return b;}
 /* ---------- shop furnishing by type (also used for the mall units) ---------- */
