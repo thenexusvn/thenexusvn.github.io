@@ -339,3 +339,11 @@ Python helper scripts used during development:
 - Desktop: B (or J) raises the gun → AIM.on, pointer lock, aim-assist snap (aimAssist). While aiming: mouse movementX/Y or WASD/arrows move cam.yaw / AIM.pitch, player stands still; B again (hold for auto guns) fires along the screen centre (fireWeapon raycasts from the camera). Right click / Esc / switching to fists / entering a car lowers the gun. Left click never fires.
 - Crosshair .nc-cross: .aim when aiming, .hot (red) when the centre ray hits an NPC or the story helicopter.
 - Mobile unchanged (block button aims, punch button fires).
+
+## Shops 2 · robberies · Nexus Mall · doors everywhere (city.js block "SHOPS 2", before buildParkCourts)
+- New shop types in SHOPTYPE (+ SHOPS menus): mart24, barber (save.hairStyle/hairCol/beard → playerLook), nails, pharmacy, tech, jewel, watch, optic (save.glasses), bags, toys, books, cosm, fashion units, arcade, food court (pizza, boba, pho, bbq, sushi, kem, coffee).
+- Street rooms 'mart24','barber','nails' at x 5100/5180/5260. furnish(F,type,y,lv,roomId,R) builds a shop in a unit frame UF(...): counter, cashier (extra), menu act, safe, robbery registration.
+- Robbery: ROBS / robTick. X at a till (or aim a gun at the cashier 0.5 s) → armed: hands up + bag; unarmed: 3 punches, KO, till. Then E at the safe → 5 s crack (dial, clicks) → door swings, cash flies (money credited at spawn). Stars 2 → 3, 150 s cooldown per store. Existing shops got cashier+safe automatically (autoSafe flood fill).
+- Mall: ROOMS.mall at x 6300, 64×48, floors y 0/6/12, atrium |x|<12,|z|<8. mallGround() gives floor/ramp height; colliders carry lv (0/1/2 or 'A'/'B' for escalator sides) and y0; lvOK() in resolve/inBld. Escalators A (L0 east → L1 west) and B (L1 west → L2 east) carry 1.3 m/s. Elevator ELEV in the back core (shaft |x|<1.6, -20<z<-16), SHOPS.elev menu, call from landings.
+- Entrances: west-town "NEXUS TÂY MALL" door and the biggest downtown building (SP.mall).
+- Doors everywhere: every building face without a door gets one (office/hotel/ware/flat, 1 in 6 small ones become mart24/barber/nails with merged signs SIGNGB). ~1500 doors.
