@@ -2889,7 +2889,7 @@ const $=s=>document.querySelector(s);const wrap=$('#lz');let game=null,loading=f
 function recText(sv){const r=$('#lzRec');if(r&&sv&&sv.stats&&sv.stats.matches){r.textContent=`${sv.stats.matches} trận · ${sv.stats.wins} lần Top 1 · ${sv.stats.kills} hạ gục`;r.classList.remove('none');}}
 try{recText(JSON.parse(localStorage.getItem('lastzone-save')||'null'));}catch(_){}
 function load(src){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=()=>{s.remove();rej(new Error(src));};document.head.appendChild(s);});}
-async function ensure(){if(!window.THREE)await load('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js');if(!window.LastZone)await load('lastzone.js?v=20261127m');}
+async function ensure(){if(!window.THREE)await load('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js');if(!window.LastZone)await load('lastzone.js?v=20261127n');}
 let stale=false;
 if(window.NexusData)window.NexusData.on('sync',e=>{if(!(e.changed||[]).includes('lastzone'))return;const sv=(()=>{try{return JSON.parse(localStorage.getItem('lastzone-save')||'null');}catch(_){return null;}})();const r=$('#lzRec');if(sv)recText(sv);else if(r)r.classList.add('none');if(game)stale=true;});
 async function open(){if(stale){location.reload();return;}if(window.NexusCity)window.NexusCity.close();if(window.NexusMobaUI)window.NexusMobaUI.close();wrap.hidden=false;if(game){game.start();return;}if(loading)return;loading=true;$('#lzStatus').textContent='Đang dựng đảo, chờ vài giây...';

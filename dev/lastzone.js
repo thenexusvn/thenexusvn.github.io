@@ -288,8 +288,8 @@ const grassTex=makeTex(128,128,(g,w,h)=>{g.clearRect(0,0,w,h);for(let i=0;i<34;i
 const grassU={uTime:{value:0}};let grass=null;
 if(Q.grass){const g=new T.BufferGeometry(),P=[],U=[],N=[],I=[];for(let k=0;k<3;k++){const a=k/3*Math.PI,cx=Math.cos(a)*.6,cz=Math.sin(a)*.6,o=P.length/3;P.push(-cx,0,-cz,cx,0,cz,cx,.62,cz,-cx,.62,-cz);U.push(0,0,1,0,1,1,0,1);for(let q=0;q<4;q++)N.push(0,1,0);I.push(o,o+1,o+2,o,o+2,o+3);}
   g.setAttribute('position',new T.Float32BufferAttribute(P,3));g.setAttribute('uv',new T.Float32BufferAttribute(U,2));g.setAttribute('normal',new T.Float32BufferAttribute(N,3));g.setIndex(I);
-  const gm=new T.MeshLambertMaterial({map:grassTex,alphaTest:.5,side:T.DoubleSide});
-  gm.onBeforeCompile=sh=>{sh.uniforms.uTime=grassU.uTime;sh.fragmentShader=sh.fragmentShader.split('vLightBack').join('vLightFront').split('vIndirectBack').join('vIndirectFront');sh.vertexShader='uniform float uTime;\n'+sh.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\n#ifdef USE_INSTANCING\nfloat ph=instanceMatrix[3].x*.21+instanceMatrix[3].z*.17;transformed.x+=sin(uTime*1.7+ph)*.16*uv.y;transformed.z+=cos(uTime*1.3+ph)*.1*uv.y;\n#endif');};
+  const gm=new T.MeshStandardMaterial({map:grassTex,alphaTest:.5,side:T.DoubleSide,roughness:.9,metalness:0});
+  gm.onBeforeCompile=sh=>{sh.uniforms.uTime=grassU.uTime;sh.vertexShader='uniform float uTime;\n'+sh.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\n#ifdef USE_INSTANCING\nfloat ph=instanceMatrix[3].x*.21+instanceMatrix[3].z*.17;transformed.x+=sin(uTime*1.7+ph)*.16*uv.y;transformed.z+=cos(uTime*1.3+ph)*.1*uv.y;\n#endif');};
   grass=new T.InstancedMesh(g,gm,Q.grass);grass.frustumCulled=false;grass.receiveShadow=!!Q.shadow;scene.add(grass);grass.lastX=1e9;grass.lastZ=1e9;}
 function grassUpdate(px,pz){if(!grass||hyp(px-grass.lastX,pz-grass.lastZ)<6)return;grass.lastX=px;grass.lastZ=pz;const R=Math.sqrt(Q.grass/Math.PI)*1.35,cell=1.35;let n=0;
   const i0=Math.floor((px-R)/cell),i1=Math.floor((px+R)/cell),j0=Math.floor((pz-R)/cell),j1=Math.floor((pz+R)/cell);
