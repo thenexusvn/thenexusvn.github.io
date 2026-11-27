@@ -3360,23 +3360,26 @@ function mallTick(dt){const inM=P.inside==='mall';if(!mallAmb){mallAmb=new T.Hem
 /* ---------- a door on every building that has none: offices, flats, warehouses, and new 24h stores, barbers and nail salons ---------- */
 const SHOP2POI=[];
 {const pts=[];const grab=(o,d)=>{if(!o||d>3||typeof o!=='object'||o.isObject3D)return;if(typeof o.x==='number'&&typeof o.z==='number')pts.push(o);if(Array.isArray(o))o.forEach(v=>grab(v,d+1));else for(const k in o)grab(o[k],d+1);};grab(SP,0);
-  for(const d of GDOORS)pts.push(d);const near=c=>pts.some(p=>p.x>c.x0-3&&p.x<c.x1+3&&p.z>c.z0-3&&p.z<c.z1+3);
+  for(const d of GDOORS)pts.push(d);
   const cyc=['mart24','barber','nails'];let nShop=0,nAll=0;const doorParts=[];
   // the downtown mall entrance on the biggest downtown building
   let mallB=null;{let ba=0;for(const c of blds){if(c.x0>2400)continue;const b=blockAt((c.x0+c.x1)/2,(c.z0+c.z1)/2);if(!b||b.d!=='downtown')continue;const a=(c.x1-c.x0)*(c.z1-c.z0);if(a>ba&&a<6000){ba=a;mallB=c;}}}
-  const place=(c,room,force)=>{const cx=(c.x0+c.x1)/2,cz=(c.z0+c.z1)/2;const faces=[[cx,c.z1,0],[cx,c.z0,Math.PI],[c.x1,cz,Math.PI/2],[c.x0,cz,-Math.PI/2]];
-    for(const[x,z,h]of faces){const fx=Math.sin(h),fz=Math.cos(h),ox=x+fx*1.4,oz=z+fz*1.4;if(resolve(ox,oz,.45)||inBld(ox,oz)||resolve(x+fx*3,z+fz*3,.6)||inBld(x+fx*3,z+fz*3))continue;
+  const addDoor=(x,z,h,room)=>{const fx=Math.sin(h),fz=Math.cos(h),ox=x+fx*1.4,oz=z+fz*1.4;if(resolve(ox,oz,.45)||inBld(ox,oz)||resolve(x+fx*3,z+fz*3,.6)||inBld(x+fx*3,z+fz*3))return false;
       const gy=groundY(ox,oz);const w=room==='mall'?3.6:room==='ware'?3.4:1.8,ht=room==='mall'||room==='ware'?3.3:2.6;
       if(Math.abs(fz)>.5)doorParts.push([x,gy,z+fz*.06,w,ht,.12,room==='flat'?'#5a3d28':'#22323f'],[x,gy+ht,z+fz*.07,w+.3,.16,.14,'#e8dfcc']);else doorParts.push([x+fx*.06,gy,z,.12,ht,w,room==='flat'?'#5a3d28':'#22323f'],[x+fx*.07,gy+ht,z,.14,.16,w+.3,'#e8dfcc']);
       GDOORS.push({id:'x'+GDOORS.length,x:ox,z:oz,h,room});pts.push({x:ox,z:oz});
       if(SHOPTYPE[room]){const S=SHOPTYPE[room];shopSign(room,x+fx*.1,gy+ht+.75,z+fz*.1,h,3.8,.62);SHOP2POI.push({n:S.n,x:ox,z:oz,i:S.bg==='#f8f9fa'?'#e63946':S.bg});}
       if(room==='mall'){sign('NEXUS MALL',x+fx*.12,gy+ht+1.6,z+fz*.12,h,12,2,{fg:'#fff',bg:'#e63946',size:96,w:1024,h:160});SP.mall={x:ox,z:oz};}
-      return true;}return false;};
-  if(mallB)place(mallB,'mall');
+      return true;};
+  // a face already has a door if any known door point sits within 3 m in front of it
+  const faceHas=(c,h)=>{const fx=Math.round(Math.sin(h)),fz=Math.round(Math.cos(h));for(const p of pts){if(fz){const z=fz>0?c.z1:c.z0,d=(p.z-z)*fz;if(d>-1&&d<3.2&&p.x>c.x0-1&&p.x<c.x1+1)return true;}else{const x=fx>0?c.x1:c.x0,d=(p.x-x)*fx;if(d>-1&&d<3.2&&p.z>c.z0-1&&p.z<c.z1+1)return true;}}return false;};
+  const faces=c=>{const cx=(c.x0+c.x1)/2,cz=(c.z0+c.z1)/2;return[[cx,c.z1,0,c.x1-c.x0,'x'],[cx,c.z0,Math.PI,c.x1-c.x0,'x'],[c.x1,cz,Math.PI/2,c.z1-c.z0,'z'],[c.x0,cz,-Math.PI/2,c.z1-c.z0,'z']];};
+  if(mallB){for(const[x,z,h]of faces(mallB))if(addDoor(x,z,h,'mall'))break;}
   for(const c of blds){if(c.x0>2400||c===mallB)continue;const w=c.x1-c.x0,d=c.z1-c.z0,a=w*d;if(w<4||d<4||a>9000)continue;const cx=(c.x0+c.x1)/2,cz=(c.z0+c.z1)/2,gy=groundY(cx,cz),hh=c.h-gy;if(hh<3)continue;
-    if(near(c))continue;if(AIR.term&&cx>AIR.term.x0-5&&cx<AIR.term.x1+5&&cz>AIR.term.z0-5&&cz<AIR.term.z1+5)continue;
-    let room=hh>22?(nAll%5===0?'hotel':'office'):a>900?'ware':'flat';if(room==='flat'&&hh<16&&nAll%3===1)room=cyc[nShop%3];
-    if(place(c,room)){nAll++;if(SHOPTYPE[room])nShop++;}}
+    if(AIR.term&&cx>AIR.term.x0-5&&cx<AIR.term.x1+5&&cz>AIR.term.z0-5&&cz<AIR.term.z1+5)continue;
+    for(const[x,z,h,len,ax]of faces(c)){if(len<5||faceHas(c,h))continue;
+      let room=hh>22?(nAll%5===0?'hotel':'office'):a>900&&hh<14?'ware':'flat';if(room!=='ware'&&hh<18&&nAll%3===1)room=cyc[nShop%3];
+      for(const off of[0,-len/4,len/4]){const px=ax==='x'?x+off:x,pz=ax==='z'?z+off:z;if(addDoor(px,pz,h,room)){nAll++;if(SHOPTYPE[room])nShop++;break;}}}}
   for(const p of doorParts)IM.push({geo:_bx.g||(_bx.g=new T.BoxGeometry(1,1,1)),pos:[p[0],p[1]+p[4]/2,p[2]],scale:[p[3],p[4],p[5]],color:p[6]});
   console.log('[nexus] doors added',nAll,'shops',nShop);}
 function shopsTick(dt){mallTick(dt);robTick(dt);}
