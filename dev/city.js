@@ -3049,7 +3049,7 @@ const MALL={X:6300,Z:0,lv:0,ramp:null,Y:[0,6,12]};
 function lvOK(c){if(c.off)return false;if(c.lv===undefined)return true;if(typeof c.lv==='string')return MALL.ramp===c.lv;return !MALL.ramp&&MALL.lv===c.lv;}
 function mcol(x0,x1,z0,z1,y0,y1,lv){return addCol({t:'b',x0,x1,z0,z1,h:y1,y0,lv});}
 ITX.mglass={c:'#bfe3ef',r:.05};IMAT.mglass=new T.MeshStandardMaterial({color:lin('#cfeaf3'),roughness:.04,metalness:.2,transparent:true,opacity:.22,depthWrite:false,envMapIntensity:1.2});
-ITX.pinkW={map:plasterTex('#f6dbe4'),r:.85};ITX.sage={map:plasterTex('#d9e4d6'),r:.85};ITX.navy={c:'#22324a',r:.6};ITX.leather={c:'#7a1f24',r:.45};ITX.oakDk={map:plankTex('#7a5232','#3a2412'),r:.5};
+ITX.pinkW={map:plasterTex('#f6dbe4'),r:.85};ITX.mallTile={map:tileTex('#c9c1b4','#8f877b',2,4),r:.22};ITX.sage={map:plasterTex('#d9e4d6'),r:.85};ITX.navy={c:'#22324a',r:.6};ITX.leather={c:'#7a1f24',r:.45};ITX.oakDk={map:plankTex('#7a5232','#3a2412'),r:.5};
 /* a unit frame: u runs along the shop front, v from the front (0) to the back (D); h = the direction the front faces */
 function UF(x0,x1,z0,z1,front){const f={front};
   if(front==='z1'){f.W=x1-x0;f.D=z1-z0;f.p=(u,v)=>[x0+u,z1-v];f.h=0;}
@@ -3087,9 +3087,9 @@ function robAlarm(){const a=sfxAC;if(!a||!active)return;const t=a.currentTime;fo
 function robClick(f){const a=sfxAC;if(!a||!active)return;const t=a.currentTime,o=a.createOscillator(),g=a.createGain();o.type='square';o.frequency.value=f||rnd(1500,2100);g.gain.setValueAtTime(.06,t);g.gain.exponentialRampToValueAtTime(.001,t+.05);o.connect(g);g.connect(a.out);o.start(t);o.stop(t+.06);}
 function robDing(){const a=sfxAC;if(!a||!active)return;const t=a.currentTime;for(const[f,d]of[[988,0],[1319,.16]]){const o=a.createOscillator(),g=a.createGain();o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(.0001,t+d);g.gain.linearRampToValueAtTime(.12,t+d+.02);g.gain.exponentialRampToValueAtTime(.001,t+d+.9);o.connect(g);g.connect(a.out);o.start(t+d);o.stop(t+d+1);}}
 const FLY=[];
-function robFly(from,amount,mat){const m=new T.Mesh(new T.BoxGeometry(.2,.07,.11),mat||SAFE_M.cash);m.position.copy(from);scene.add(m);FLY.push({m,a:from.clone(),t:0,amount});}
+function robFly(from,amount,mat){if(amount){save.money+=amount;writeSave();}const m=new T.Mesh(new T.BoxGeometry(.2,.07,.11),mat||SAFE_M.cash);m.position.copy(from);scene.add(m);FLY.push({m,a:from.clone(),t:0,amount});}
 function flyUpdate(dt){for(let i=FLY.length-1;i>=0;i--){const f=FLY[i];f.t+=dt/.55;const k=Math.min(1,f.t),b=new T.Vector3(P.x,P.y+1.2,P.z);f.m.position.lerpVectors(f.a,b,k);f.m.position.y+=Math.sin(k*Math.PI)*.9;f.m.rotation.x+=dt*14;f.m.rotation.y+=dt*9;
-    if(k>=1){scene.remove(f.m);f.m.geometry.dispose();FLY.splice(i,1);if(f.amount){save.money+=f.amount;sfx('cash');}}}}
+    if(k>=1){scene.remove(f.m);f.m.geometry.dispose();FLY.splice(i,1);if(f.amount)sfx('cash');}}}
 let robUI=null;
 function robUIEl(){if(robUI)return robUI;const d=document.createElement('div');d.className='nc-rob';
   d.innerHTML='<style>.nc-rob .rb{position:absolute;left:50%;top:62%;transform:translateX(-50%);width:min(380px,74vw);text-align:center;font:700 14px Inter,sans-serif;color:#fff;text-shadow:0 1px 3px #000}.nc-rob .rb div{height:11px;border-radius:6px;background:rgba(0,0,0,.6);margin-top:7px;overflow:hidden;box-shadow:0 0 0 1px rgba(255,255,255,.15)}.nc-rob .rb i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ff3b47,#ffd166)}'
@@ -3183,7 +3183,8 @@ const SHOPTYPE={
   sushi:{n:'Sushi Sóng',kind:'food',bg:'#f1faee',fg:'#e63946',floor:'oak',shop:'sushi'},
   kem:{n:'Kem Tuyết',kind:'food',bg:'#bde0fe',fg:'#1d3557',floor:'tileW',shop:'kem'}};
 SHOPTYPE.mart24.shop='mart24';SHOPTYPE.barber.shop='barber';SHOPTYPE.nails.shop='nails';
-const STEX={};
+const STEX={},SIGNGB={};
+function shopSignQ(t,x,y,z,h,w,hh){const g=SIGNGB[t]||(SIGNGB[t]=new GB());const rx=Math.cos(h),rz=-Math.sin(h),n=[Math.sin(h),0,Math.cos(h)];g.quad([x-rx*w/2,y-hh/2,z-rz*w/2],[x+rx*w/2,y-hh/2,z+rz*w/2],[x+rx*w/2,y+hh/2,z+rz*w/2],[x-rx*w/2,y+hh/2,z-rz*w/2],n,[[0,0],[1,0],[1,1],[0,1]]);}
 function signMat(t){if(STEX[t])return STEX[t];const S=SHOPTYPE[t];const tx=textTex(S.n,{fg:S.fg,bg:S.bg,size:66,w:1024,h:160,glow:S.fg});return STEX[t]=new T.MeshBasicMaterial({map:tx,toneMapped:false});}
 function shopSign(t,x,y,z,h,w,hh){const m=new T.Mesh(new T.PlaneGeometry(w,hh),signMat(t));m.position.set(x,y,z);m.rotation.y=h;scene.add(m);return m;}
 function furnish(F,type,y,lv,roomId,R){const S=SHOPTYPE[type],W=F.W,D=F.D,col={col:1,lv},hc=y+(R&&R.unitH||3.2);
@@ -3264,9 +3265,9 @@ for(const[room,key,pay,spay]of[['mart','mart'],['guns','guns',[400,900],[1800,35
   robReg({room,cx:a.x,cz:a.z,cash,safe:sf&&sf.s,sx:sf&&sf.px,sz:sf&&sf.pz,y:0,bag,pay:pay||[160,420],spay:spay||[700,1800]});}
 /* ================= NEXUS MALL: 3 floors around a glass-roofed atrium, criss-cross escalators, a glass elevator, 26 shops and a food court ================= */
 {const MX=MALL.X,MZ=MALL.Z,Y=MALL.Y,X=v=>MX+v,Z=v=>MZ+v;
-  const R=room('mall',MX,MZ,64,48,18,{wall:'plasterW',floor:'marble',fts:3,wts:3,ceil:'ceilT',cts:2.4,skirt:'dark'});R.seats=[];R.bright=true;R.unitH=5.7;MALL.R=R;
+  const R=room('mall',MX,MZ,64,48,18,{wall:'sage',floor:'mallTile',fts:2.4,wts:3,ceil:'ceilT',cts:2.4,skirt:'dark'});R.seats=[];R.unitH=5.7;MALL.R=R;
   // floor slabs of level 1 and 2 with the atrium (|x|<12,|z|<8) and the elevator shaft (|x|<1.6, -20<z<-16) cut out
-  const slab=(y,a,b,c,d)=>{itb('marble',X(a),X(b),y-.3,y,Z(c),Z(d),{ts:3});ceilQ('ceilT',X(a),X(b),y-.31,Z(c),Z(d),2.4);};
+  const slab=(y,a,b,c,d)=>{itb('mallTile',X(a),X(b),y-.3,y,Z(c),Z(d),{ts:2.4});ceilQ('ceilT',X(a),X(b),y-.31,Z(c),Z(d),2.4);};
   for(const y of[Y[1],Y[2]]){slab(y,-32,32,8,24);slab(y,-32,-1.6,-24,-8);slab(y,1.6,32,-24,-8);slab(y,-1.6,1.6,-24,-20);slab(y,-1.6,1.6,-16,-8);slab(y,-32,-12,-8,8);slab(y,12,32,-8,8);
     // glass balustrade round the atrium, gaps where the escalators land
     const rail=(x0,x1,z0,z1)=>{itb('mglass',X(x0),X(x1),y,y+1.05,Z(z0),Z(z1));itb('chrome',X(x0),X(x1),y+1.05,y+1.1,Z(z0),Z(z1));mcol(X(x0),X(x1),Z(z0),Z(z1),y,y+1.1,y===Y[1]?1:2);};
@@ -3345,7 +3346,7 @@ function mallOption(){if(P.inside!=='mall')return null;const lz=P.z-MALL.Z,lx=P.
   if(Math.abs(lx)<2.4&&lz>-16&&lz<-13.4&&ELEV.st==='idle'&&(ELEV.lvl!==MALL.lv||ELEV.door<.5))return{k:'E',txt:L('Gọi thang máy','Call the elevator'),fn:()=>elevGo(MALL.lv)};
   return null;}
 let mallAmb=null;
-function mallTick(dt){const inM=P.inside==='mall';if(!mallAmb){mallAmb=new T.HemisphereLight(lin('#fff6ea'),lin('#b9b3a8'),0);scene.add(mallAmb);}mallAmb.intensity=inM?.55:0;
+function mallTick(dt){const inM=P.inside==='mall';if(!mallAmb){mallAmb=new T.HemisphereLight(lin('#fff6ea'),lin('#b9b3a8'),0);scene.add(mallAmb);}mallAmb.intensity=inM?.28:0;
   for(const e of ESC)e.tex.offset.x=(e.tex.offset.x+dt*1.4/.4)%1;
   const E=ELEV;if(E.st==='closing'){E.door=Math.max(0,E.door-dt*1.5);if(E.door<=0)E.st=E.lvl===E.tgt?'opening':'moving';}
   else if(E.st==='moving'){const ty=MALL.Y[E.tgt],d=ty-E.y,s=Math.min(Math.abs(d),dt*2.6);E.y+=Math.sign(d)*s;if(Math.abs(ty-E.y)<.001){E.y=ty;E.lvl=E.tgt;E.st='opening';robDing();}}
@@ -3368,7 +3369,7 @@ const SHOP2POI=[];
       const gy=groundY(ox,oz);const w=room==='mall'?3.6:room==='ware'?3.4:1.8,ht=room==='mall'||room==='ware'?3.3:2.6;
       if(Math.abs(fz)>.5)doorParts.push([x,gy,z+fz*.06,w,ht,.12,room==='flat'?'#5a3d28':'#22323f'],[x,gy+ht,z+fz*.07,w+.3,.16,.14,'#e8dfcc']);else doorParts.push([x+fx*.06,gy,z,.12,ht,w,room==='flat'?'#5a3d28':'#22323f'],[x+fx*.07,gy+ht,z,.14,.16,w+.3,'#e8dfcc']);
       GDOORS.push({id:'x'+GDOORS.length,x:ox,z:oz,h,room});pts.push({x:ox,z:oz});
-      if(SHOPTYPE[room]){const S=SHOPTYPE[room];shopSign(room,x+fx*.1,gy+ht+.75,z+fz*.1,h,3.8,.62);SHOP2POI.push({n:S.n,x:ox,z:oz,i:S.bg==='#f8f9fa'?'#e63946':S.bg});}
+      if(SHOPTYPE[room]){const S=SHOPTYPE[room];shopSignQ(room,x+fx*.1,gy+ht+.75,z+fz*.1,h,3.8,.62);SHOP2POI.push({n:S.n,x:ox,z:oz,i:S.bg==='#f8f9fa'?'#e63946':S.bg});}
       if(room==='mall'){sign('NEXUS MALL',x+fx*.12,gy+ht+1.6,z+fz*.12,h,12,2,{fg:'#fff',bg:'#e63946',size:96,w:1024,h:160});SP.mall={x:ox,z:oz};}
       return true;};
   // a face already has a door if any known door point sits within 3 m in front of it
@@ -3378,8 +3379,9 @@ const SHOP2POI=[];
   for(const c of blds){if(c.x0>2400||c===mallB)continue;const w=c.x1-c.x0,d=c.z1-c.z0,a=w*d;if(w<4||d<4||a>9000)continue;const cx=(c.x0+c.x1)/2,cz=(c.z0+c.z1)/2,gy=groundY(cx,cz),hh=c.h-gy;if(hh<3)continue;
     if(AIR.term&&cx>AIR.term.x0-5&&cx<AIR.term.x1+5&&cz>AIR.term.z0-5&&cz<AIR.term.z1+5)continue;
     for(const[x,z,h,len,ax]of faces(c)){if(len<5||faceHas(c,h))continue;
-      let room=hh>22?(nAll%5===0?'hotel':'office'):a>900&&hh<14?'ware':'flat';if(room!=='ware'&&hh<18&&nAll%3===1)room=cyc[nShop%3];
+      let room=hh>22?(nAll%5===0?'hotel':'office'):a>900&&hh<14?'ware':'flat';if(room!=='ware'&&hh<18&&nAll%6===1)room=cyc[nShop%3];
       for(const off of[0,-len/4,len/4]){const px=ax==='x'?x+off:x,pz=ax==='z'?z+off:z;if(addDoor(px,pz,h,room)){nAll++;if(SHOPTYPE[room])nShop++;break;}}}}
+  for(const t in SIGNGB){const m=new T.Mesh(SIGNGB[t].geo(),signMat(t));scene.add(m);}
   for(const p of doorParts)IM.push({geo:_bx.g||(_bx.g=new T.BoxGeometry(1,1,1)),pos:[p[0],p[1]+p[4]/2,p[2]],scale:[p[3],p[4],p[5]],color:p[6]});
   console.log('[nexus] doors added',nAll,'shops',nShop);}
 function shopsTick(dt){mallTick(dt);robTick(dt);}
@@ -4799,7 +4801,7 @@ const api={
   resume(){active=true;paused=false;keys.clear();cam.rmb=false;last=performance.now();cancelAnimationFrame(raf);raf=requestAnimationFrame(frame);resize();if(P.car&&radio.idx>=0)radioPlay();},
   resize,
   get save(){return save;},
-  _dbg:{AIM,aimOn,aimOff,BB,HP,hpEnter,hpExit,hpKey,hp1v1,bbShoot,bbNearHoop,COURTS,SP,film:{run(n,d){for(let i=0;i<n;i++){if(MOV.on)movTick(d||1/30);}PP.render();return MOV.si+':'+MOV.t.toFixed(1);},go(i){MOV.si=i-1;movNext();PP.render();},MOV,playFilm,filmOpening,filmEnding,phoneCall,stCall,say},cin:{CIN,cine,stOpening,stArmed,stIntro,stFightTip,stKeyStamp,stTowerIntro,stHeliTip,stFail,stWantedTip},story:{get SS(){return SS;},stSpot,stDoorSpot,get gang(){return stGang;},get tower(){return stTower;},get heli(){return stHeli;},stEnterTower,stStartTower,stVictory,stDied,storyUpdate,wasted,get win(){return stWin;}},heightAt,resolve,TOWNS,DIAS,PADS,inBld,AIR,PP,P,cars,newCar,buyVehicle,interactOption,sitDown,standUp,takeFood,GDOORS,SHOPS,save,bookTour,npcs,get stars(){return stars;},set stars(v){stars=v;},startHeist,startMission,interact,toggleCar,playerPunch,get heist(){return heist;},set heistProg(v){if(heist)heist.prog=v;},SP,tut,toggleMap,bag,time:()=>time,scene,renderer,sun,step,info:()=>renderer.info.render,keys,camUpdate,camera,weather,ROOMS,openShop,closeShop,enterInterior,exitInterior,selectWeapon,fireWeapon,get shopOpen(){return shopOpen;},tod,todApply,gps,setWaypoint,clearWaypoint,planRoute,poiList,radio,radioNext,playerHitBy,get lastFoe(){return lastFoe;},cam,tb,render:()=>renderer.render(scene,camera)}
+  _dbg:{ROBS,ELEV,MALL,robKey,AIM,aimOn,aimOff,BB,HP,hpEnter,hpExit,hpKey,hp1v1,bbShoot,bbNearHoop,COURTS,SP,film:{run(n,d){for(let i=0;i<n;i++){if(MOV.on)movTick(d||1/30);}PP.render();return MOV.si+':'+MOV.t.toFixed(1);},go(i){MOV.si=i-1;movNext();PP.render();},MOV,playFilm,filmOpening,filmEnding,phoneCall,stCall,say},cin:{CIN,cine,stOpening,stArmed,stIntro,stFightTip,stKeyStamp,stTowerIntro,stHeliTip,stFail,stWantedTip},story:{get SS(){return SS;},stSpot,stDoorSpot,get gang(){return stGang;},get tower(){return stTower;},get heli(){return stHeli;},stEnterTower,stStartTower,stVictory,stDied,storyUpdate,wasted,get win(){return stWin;}},heightAt,resolve,TOWNS,DIAS,PADS,inBld,AIR,PP,P,cars,newCar,buyVehicle,interactOption,sitDown,standUp,takeFood,GDOORS,SHOPS,save,bookTour,npcs,get stars(){return stars;},set stars(v){stars=v;},startHeist,startMission,interact,toggleCar,playerPunch,get heist(){return heist;},set heistProg(v){if(heist)heist.prog=v;},SP,tut,toggleMap,bag,time:()=>time,scene,renderer,sun,step,info:()=>renderer.info.render,keys,camUpdate,camera,weather,ROOMS,openShop,closeShop,enterInterior,exitInterior,selectWeapon,fireWeapon,get shopOpen(){return shopOpen;},tod,todApply,gps,setWaypoint,clearWaypoint,planRoute,poiList,radio,radioNext,playerHitBy,get lastFoe(){return lastFoe;},cam,tb,render:()=>renderer.render(scene,camera)}
 };
 return api;
 }
