@@ -321,13 +321,13 @@ const blds=[];
 function colB(x0,x1,z0,z1,h){const c=addCol({t:'b',x0,x1,z0,z1,h});blds.push(c);return c;}
 function query(x,z,r,cb){stamp++;for(let ix=cellOf(x-r);ix<=cellOf(x+r);ix++)for(let iz=cellOf(z-r);iz<=cellOf(z+r);iz++){const a=hash.get(hk(ix,iz));if(!a)continue;for(const c of a){if(c.s===stamp||c.off)continue;c.s=stamp;cb(c);}}}
 function resolve(x,z,r){let px=0,pz=0,hit=false;
-  query(x,z,r,c=>{if(c.t==='b'){const cx=clamp(x,c.x0,c.x1),cz=clamp(z,c.z0,c.z1),dx=x-cx,dz=z-cz,d2=dx*dx+dz*dz;if(d2<r*r){hit=true;if(d2>1e-8){const d=Math.sqrt(d2);px+=dx/d*(r-d);pz+=dz/d*(r-d);}else{const l=x-c.x0,rr=c.x1-x,t=z-c.z0,b=c.z1-z,m=Math.min(l,rr,t,b);if(m===l)px-=l+r;else if(m===rr)px+=rr+r;else if(m===t)pz-=t+r;else pz+=b+r;}}}
+  query(x,z,r,c=>{if(c.off||(c.lv!==undefined&&!lvOK(c)))return;if(c.t==='b'){const cx=clamp(x,c.x0,c.x1),cz=clamp(z,c.z0,c.z1),dx=x-cx,dz=z-cz,d2=dx*dx+dz*dz;if(d2<r*r){hit=true;if(d2>1e-8){const d=Math.sqrt(d2);px+=dx/d*(r-d);pz+=dz/d*(r-d);}else{const l=x-c.x0,rr=c.x1-x,t=z-c.z0,b=c.z1-z,m=Math.min(l,rr,t,b);if(m===l)px-=l+r;else if(m===rr)px+=rr+r;else if(m===t)pz-=t+r;else pz+=b+r;}}}
     else{const dx=x-c.x,dz=z-c.z,d=hyp(dx,dz),R=r+c.r;if(d<R&&d>1e-6){hit=true;px+=dx/d*(R-d);pz+=dz/d*(R-d);}}});
   if(x<2500){const ins=(qx,qz)=>AREAS.some(a=>qx>=a.x0&&qx<=a.x1&&qz>=a.z0&&qz<=a.z1);
     if(!(ins(x-r,z)&&ins(x+r,z)&&ins(x,z-r)&&ins(x,z+r))){let bd=1e9,bp=null;for(const a of AREAS){const cx=clamp(x,a.x0+r,a.x1-r),cz=clamp(z,a.z0+r,a.z1-r),d=hyp(cx-x,cz-z);if(d<bd){bd=d;bp=[cx-x,cz-z];}}if(bp){px+=bp[0];pz+=bp[1];hit=true;}}
     const LK=WILD.lake;if(LK&&!onDock(x,z)){const dx=x-LK.x,dz=z-LK.z,d=hyp(dx,dz),Rr=LK.r-2+r;if(d<Rr&&d>1e-6){px+=dx/d*(Rr-d);pz+=dz/d*(Rr-d);hit=true;}}}
   return hit?[px,pz]:null;}
-function inBld(x,z,y){let r=false;query(x,z,0,c=>{if(!r&&c.t==='b'&&x>c.x0-.3&&x<c.x1+.3&&z>c.z0-.3&&z<c.z1+.3&&(y===undefined||y<c.h+.6))r=true;});return r;}
+function inBld(x,z,y){let r=false;query(x,z,0,c=>{if(!r&&c.t==='b'&&!c.off&&(c.lv===undefined||lvOK(c))&&(y===undefined||c.y0===undefined||y>c.y0-.6)&&x>c.x0-.3&&x<c.x1+.3&&z>c.z0-.3&&z<c.z1+.3&&(y===undefined||y<c.h+.6))r=true;});return r;}
 function los(x0,z0,x1,z1){const n=Math.ceil(hyp(x1-x0,z1-z0)/3);for(let i=1;i<n;i++){const t=i/n;if(inBld(x0+(x1-x0)*t,z0+(z1-z0)*t,4))return false;}return true;}
 
 /* ---------- build the city ---------- */
@@ -1148,7 +1148,7 @@ function wildBuild(ST,EXTX0,EXTZ0){
       for(let a=0;a<6.28;a+=.785)tree(fx+Math.cos(a)*22,fzz+Math.sin(a)*22,y,1);
       {const x0=-1066,x1=-1026,z0=-55,z1=-12;bld('decoTeal',x0,x1,z0,z1,y,13,true);door(-1046,z1,0,'cinema',y,3.2,3,'#1d1f22',()=>L('Vào Rạp chiếu phim Nexus','Enter Nexus Cinema'));
         sign('RẠP PHIM NEXUS',-1046,y+9.6,z1+.08,0,14,2,{fg:'#ffd166',bg:'#1d1f22',size:80,w:1024,h:150});for(let k=0;k<12;k++)LANT['#ffcc33'].push([x0+2+k*3.3,y+12.2,z1+.3]);}
-      {const x0=-950,x1=-893,z0=-55,z1=0;bld('glassSilver',x0,x1,z0,z1,y,16,true);door(-921,z1,0,'clothes',y,4,3.2,'#22323f',null);door(x0,-28,-Math.PI/2,'mart',y,2.4,2.8,'#22323f',null);
+      {const x0=-950,x1=-893,z0=-55,z1=0;bld('glassSilver',x0,x1,z0,z1,y,16,true);door(-921,z1,0,'mall',y,4,3.2,'#22323f',null);door(x0,-28,-Math.PI/2,'mart',y,2.4,2.8,'#22323f',null);
         sign('NEXUS TÂY MALL',-921,y+13,z1+.08,0,16,2,{fg:'#fff',bg:'#e63946',size:84,w:1024,h:150});}
       {const x0=-950,x1=-893,z0=88,z1=136;bld('glassBlue',x0,x1,z0,z1,y,9,true);door(-921,z0,Math.PI,'cars',y,4,3.2,'#22323f',null);sign('NEXUS MOTORS TÂY',-921,y+7,z0-.08,Math.PI,12,1.4,{fg:'#111',bg:'#c1f354',size:72,w:1024,h:130});}
       {const x0=-1066,x1=-1036,z0=100,z1=136;bld('decoPink',x0,x1,z0,z1,y,8,true);door(-1051,z0,Math.PI,'diner',y,2.2,2.8,'#22323f',null);sign('QUÁN CƠM TÂY THÀNH',-1051,y+6.2,z0-.08,Math.PI,10,1.2,{fg:'#3a2000',bg:'#ffb703',size:62,w:1024,h:128});
@@ -2292,7 +2292,7 @@ function sleepHome(){stashAtHome();if(stars===0){const h=tod.hour;if(h>20||h<6){
 const OUTFITS={base:{n:'Đồ mặc định',p:0},white:{n:'Áo thun trắng',p:150,shirt:'#f1faee',pants:'#2b2f3a',sleeve:false},sport:{n:'Đồ thể thao đỏ',p:250,shirt:'#e63946',pants:'#1f1f1f',shoes:'#f4f4f4',sleeve:false},
   shirt:{n:'Sơ mi xanh dài tay',p:300,shirt:'#457b9d',pants:'#3a4a6b',longSleeve:true,sleeve:true},summer:{n:'Váy hè hồng',p:350,shirt:'#ffd6e8',pants:'#ff8fab',skirt:true,sleeve:false},hoodie:{n:'Hoodie đen',p:450,shirt:'#151515',pants:'#262b36',longSleeve:true,sleeve:true},
   leather:{n:'Áo khoác da nâu',p:700,shirt:'#4a2c1c',pants:'#111111',shoes:'#1d1d1d',longSleeve:true,sleeve:true},nexus:{n:'Bộ Nexus chanh tím',p:900,shirt:'#c1f354',pants:'#2a1d4a',shoes:'#ad8dff',sleeve:false}};
-function playerLook(){const b=Object.assign({},CHARS[save.char]||CHARS.minh),o=OUTFITS[save.outfit]||{};for(const k of['shirt','pants','shoes','sleeve','longSleeve','skirt'])if(o[k]!==undefined)b[k]=o[k];if(o.shirt!==undefined){b.jacket=null;if(o.longSleeve===undefined)b.longSleeve=false;}b.cap=save.cap?'#1d1d1d':null;if(save.outfit==='nexus'&&save.cap)b.cap='#ad8dff';return b;}
+function playerLook(){const b=Object.assign({},CHARS[save.char]||CHARS.minh),o=OUTFITS[save.outfit]||{};for(const k of['shirt','pants','shoes','sleeve','longSleeve','skirt'])if(o[k]!==undefined)b[k]=o[k];if(o.shirt!==undefined){b.jacket=null;if(o.longSleeve===undefined)b.longSleeve=false;}b.cap=save.cap?'#1d1d1d':null;if(save.outfit==='nexus'&&save.cap)b.cap='#ad8dff';if(save.hairStyle)b.hairStyle=save.hairStyle;if(save.hairCol)b.hair=save.hairCol;if(save.beard!==undefined&&save.beard!==null)b.beard=save.beard;if(save.glasses)b.glasses=true;return b;}
 function rebuildPlayer(){const old=P.H;const H=makeHuman(playerLook());H.root.position.copy(old.root.position);H.root.rotation.copy(old.root.rotation);H.root.visible=old.root.visible;scene.remove(old.root);old.root.traverse(o=>{if(o.geometry&&o.material===HUMAT)o.geometry.dispose();});P.H=H;if(weaponMesh)attachWeapon();}
 const VEH={bike:{n:'Xe máy',p:1500},hatch:{n:'Xe hatchback nhỏ',p:4500},sedan:{n:'Sedan gia đình',p:6000},minivan:{n:'Xe gia đình 7 chỗ',p:8500},van:{n:'Xe tải van',p:9000},suv:{n:'SUV 7 chỗ',p:11000},pickup:{n:'Bán tải',p:13000},jeep:{n:'Xe địa hình gầm cao',p:16000},coupe:{n:'Coupe 2 cửa',p:18000},muscle:{n:'Xe cơ bắp Mỹ',p:22000},sports:{n:'Xe thể thao',p:24000},limo:{n:'Limousine',p:35000},bus:{n:'Xe buýt thành phố',p:40000},super:{n:'Siêu xe Nexus GT',p:60000},hyper:{n:'Siêu xe Hyper X',p:95000},legend:{n:'Siêu xe Huyền Thoại',p:0,unique:true}};
 const SHOPS={
@@ -2535,7 +2535,8 @@ function room(id,cx,cz,w,d,h,o){const x0=cx-w/2,x1=cx+w/2,z0=cz-d/2,z1=cz+d/2,t=
 const XROOM={food:'diner',mart:'mart',guns:'guns',gym:'gym',clothes:'clothes',cars:'cars'};
 function sitPose(H,eat){H.root.rotation.x=0;H.hips.position.y=.5;H.legL.rotation.x=H.legR.rotation.x=-1.5;H.legL.rotation.z=.06;H.legR.rotation.z=-.06;H.knL.rotation.x=H.knR.rotation.x=1.5;H.spine.rotation.set(.06,0,0);H.armL.rotation.x=-.85;H.elL.rotation.x=-.55;
   if(eat!=null&&eat>=0){const k=.5+.5*Math.sin(eat);H.armR.rotation.x=-.95-.5*k;H.elR.rotation.x=-.7-1.25*k;H.head.rotation.x=.14-.12*k;}else{H.armR.rotation.x=-.85;H.elR.rotation.x=-.55;H.head.rotation.x=0;}H.head.rotation.y=0;}
-function extra(look,x,z,h,sit){const H=makeHuman(look);H.root.position.set(x,0,z);H.root.rotation.y=h;if(sit)sitPose(H,-1);else{H.armL.rotation.x=H.armR.rotation.x=-.08;H.elL.rotation.x=H.elR.rotation.x=-.2;}return H;}
+const EXTRAS=[];
+function extra(look,x,z,h,sit){const H=makeHuman(look);EXTRAS.push({H,x,z});H.root.position.set(x,0,z);H.root.rotation.y=h;if(sit)sitPose(H,-1);else{H.armL.rotation.x=H.armR.rotation.x=-.08;H.elL.rotation.x=H.elR.rotation.x=-.2;}return H;}
 /* chair facing h (0:+z, PI:-z, PI/2:+x, -PI/2:-x); the seat goes into R.seats so the player can sit on it */
 function chair(R,x,z,h,col,taken){const fx=Math.round(Math.sin(h)),fz=Math.round(Math.cos(h)),c=col||'walnut',w=.23;
   itb(c,x-w,x+w,.42,.48,z-w,z+w);for(const[a,b]of[[-1,-1],[1,-1],[-1,1],[1,1]])itb('dark',x+a*.19-.025,x+a*.19+.025,0,.42,z+b*.19-.025,z+b*.19+.025);
@@ -3041,6 +3042,352 @@ function hpUIUpdate(){if(!HP.ui)return;const A=HP.PA,b=HP.ball,mine=b&&b.st==='h
   HP.ui.querySelector('.nc-hp-b').innerHTML=(mine?B('j',L('Ném','Shoot'),'J')+B('k',L('Layup','Layup'),'K')+B('l',L('Úp rổ','Dunk'),'L')+B(' ',L('Đảo bóng','Crossover'),'Space'):B('j',L('Cướp bóng','Steal'),'J')+B('k',L('Chắn bóng','Block'),'K'))+(g?'':B('1v1',L('Solo 1v1','1v1 bot'),'V'))+B('e',L('Thoát','Leave'),'E');
   HP.ui.querySelector('.nc-hp-sc').innerHTML=g?`<span>${L('Bạn','You')} <b>${g.sc[0]}</b></span><i>${L('tới','to')} ${g.to}</i><span><b>${g.sc[1]}</b> ${HP.bot?HP.bot.name:'Bot'}</span>${g.clear?`<em>${g.poss===0?L('Đưa bóng ra ngoài vạch 3 điểm','Take it beyond the arc'):L('Bot đang đưa bóng ra ngoài','Bot is clearing the ball')}</em>`:''}`:`<em>${L('Tập ném','Practice')} · ${BB.made}/${BB.taken}</em>`;}
 
+/* ================= SHOPS 2: 24h store, barber, nail salon · store robberies · NEXUS MALL (3 floors, escalators, elevator) · a door on every building =================
+   Robbery: walk to any shop counter and press X (or aim a gun at the cashier). With a gun the cashier puts his hands up and fills a bag;
+   barehanded you knock him out and empty the till. Then crack the safe in the back: the dial spins, the door swings open and the cash flies out. */
+const MALL={X:6300,Z:0,lv:0,ramp:null,Y:[0,6,12]};
+function lvOK(c){if(c.off)return false;if(c.lv===undefined)return true;if(typeof c.lv==='string')return MALL.ramp===c.lv;return !MALL.ramp&&MALL.lv===c.lv;}
+function mcol(x0,x1,z0,z1,y0,y1,lv){return addCol({t:'b',x0,x1,z0,z1,h:y1,y0,lv});}
+ITX.mglass={c:'#bfe3ef',r:.05};IMAT.mglass=new T.MeshStandardMaterial({color:lin('#cfeaf3'),roughness:.04,metalness:.2,transparent:true,opacity:.22,depthWrite:false,envMapIntensity:1.2});
+ITX.pinkW={map:plasterTex('#f6dbe4'),r:.85};ITX.mallTile={map:tileTex('#c9c1b4','#8f877b',2,4),r:.22};ITX.sage={map:plasterTex('#d9e4d6'),r:.85};ITX.navy={c:'#22324a',r:.6};ITX.leather={c:'#7a1f24',r:.45};ITX.oakDk={map:plankTex('#7a5232','#3a2412'),r:.5};
+/* a unit frame: u runs along the shop front, v from the front (0) to the back (D); h = the direction the front faces */
+function UF(x0,x1,z0,z1,front){const f={front};
+  if(front==='z1'){f.W=x1-x0;f.D=z1-z0;f.p=(u,v)=>[x0+u,z1-v];f.h=0;}
+  else if(front==='z0'){f.W=x1-x0;f.D=z1-z0;f.p=(u,v)=>[x1-u,z0+v];f.h=Math.PI;}
+  else if(front==='x1'){f.W=z1-z0;f.D=x1-x0;f.p=(u,v)=>[x1-v,z1-u];f.h=Math.PI/2;}
+  else{f.W=z1-z0;f.D=x1-x0;f.p=(u,v)=>[x0+v,z0+u];f.h=-Math.PI/2;}
+  f.r=(u0,u1,v0,v1)=>{const a=f.p(u0,v0),b=f.p(u1,v1);return[Math.min(a[0],b[0]),Math.max(a[0],b[0]),Math.min(a[1],b[1]),Math.max(a[1],b[1])];};return f;}
+function ubox(F,k,u0,u1,y0,y1,v0,v1,o){const[a,b,c,d]=F.r(u0,u1,v0,v1);if(k[0]==='#')ibox(a,b,y0,y1,c,d,k);else itb(k,a,b,y0,y1,c,d,o&&o.ts?{ts:o.ts}:undefined);if(o&&o.col)mcol(a,b,c,d,y0,y1,o.lv);}
+function ucyl(F,k,u,v,y0,y1,r0,r1,seg){const[x,z]=F.p(u,v);cyl(k,x,y0,y1,z,r0,r1,seg);}
+/* ---------- safe ---------- */
+const SAFE_M={body:new T.MeshStandardMaterial({color:lin('#30353c'),roughness:.32,metalness:.85}),door:new T.MeshStandardMaterial({color:lin('#454b54'),roughness:.28,metalness:.9}),
+  chrome:new T.MeshStandardMaterial({color:lin('#e9edf1'),roughness:.12,metalness:1}),gold:new T.MeshStandardMaterial({color:lin('#e0b04a'),roughness:.22,metalness:1,emissive:lin('#5a3c08'),emissiveIntensity:.6}),
+  cash:new T.MeshStandardMaterial({color:lin('#5a9e62'),roughness:.85}),band:new T.MeshStandardMaterial({color:lin('#f3e6c2'),roughness:.8}),inner:new T.MeshStandardMaterial({color:lin('#15171a'),roughness:.9}),
+  bag:new T.MeshStandardMaterial({color:lin('#2b2b2b'),roughness:.9}),red:new T.MeshBasicMaterial({color:0xff2a2a,toneMapped:false})};
+function makeSafe(x,y,z,h){const g=new T.Group();g.position.set(x,y,z);g.rotation.y=h;scene.add(g);const W=.92,H=1.08,D=.78,t=.07;
+  // merged parts: one mesh per material so a safe costs a handful of draw calls
+  const parts={};const bx=(k,w,hh,d,px,py,pz,rz)=>{const b=new T.BoxGeometry(w,hh,d);if(rz)b.rotateZ(rz);b.translate(px,py,pz);(parts[k]||(parts[k]=[])).push(b);};
+  const flush=(par,k,m)=>{if(!parts[k])return null;const me=new T.Mesh(mergeGeos(parts[k]),m);me.castShadow=me.receiveShadow=Q.shadows;par.add(me);parts[k]=null;return me;};
+  bx('b',W,H,t,0,H/2,-D/2+t/2);bx('b',t,H,D,-W/2+t/2,H/2,0);bx('b',t,H,D,W/2-t/2,H/2,0);bx('b',W,t,D,0,H-t/2,0);bx('b',W,.14,D,0,.07,0);bx('b',W-2*t,.03,D-t-.04,0,H*.52,-.02);flush(g,'b',SAFE_M.body);
+  bx('i',W-2*t,H-.2,.01,0,H/2,-D/2+t+.01);flush(g,'i',SAFE_M.inner);
+  const loot=[];for(let i=0;i<3;i++)for(let j=0;j<2;j++){const p=new T.Vector3(-.25+i*.25,H*.52+.05+j*.075,-.05);bx('c',.2,.07,.11,p.x,p.y,p.z);bx('n',.04,.075,.115,p.x,p.y,p.z);loot.push({p,m:SAFE_M.cash});}
+  for(let i=0;i<3;i++){const p=new T.Vector3(-.27+i*.27,.18,0);bx('g',.24,.07,.11,p.x,p.y,p.z);loot.push({p,m:SAFE_M.gold});}
+  const lootM=[flush(g,'c',SAFE_M.cash),flush(g,'n',SAFE_M.band),flush(g,'g',SAFE_M.gold)];
+  const piv=new T.Group();piv.position.set(-W/2,0,D/2);g.add(piv);bx('d',W,H,.08,W/2,H/2,.04);bx('d',W*.8,H*.8,.02,W/2,H/2,.085);flush(piv,'d',SAFE_M.door);
+  for(let k=0;k<3;k++)bx('s',.024,.26,.024,W*.5,H*.32,.12,k*Math.PI/3);flush(piv,'s',SAFE_M.chrome);
+  const dg=new T.Group();dg.position.set(W*.5,H*.6,.1);piv.add(dg);const dial=new T.Mesh(new T.CylinderGeometry(.12,.12,.05,28),SAFE_M.chrome);dial.rotation.x=Math.PI/2;dg.add(dial);const tk=new T.Mesh(new T.BoxGeometry(.02,.07,.02),SAFE_M.gold);tk.position.set(0,.085,.03);dg.add(tk);
+  const led=new T.Mesh(new T.BoxGeometry(.05,.05,.02),SAFE_M.red);led.position.set(W*.85,H*.85,.09);piv.add(led);
+  return{g,piv,dg,loot,lootM,led};}
+/* ---------- robbable shops ---------- */
+const ROBS=[],EXTRA_ACTS=[];let ROB=null,robLast=null,robAim=0;
+function robReg(o){const r=Object.assign({st:'idle',t:0,cool:0,y:0,pay:[160,420],spay:[700,1800]},o);ROBS.push(r);return r;}
+function robNear(){if(!P.inside||P.car)return null;let best=null,bd=1e9;for(const r of ROBS){if(r.room!==P.inside||Math.abs((r.y||0)-P.y)>2.2)continue;const d=hyp(P.x-r.cx,P.z-r.cz);if(d<bd){bd=d;best=r;}}return best?{r:best,d:bd}:null;}
+function robPose(r,k){const H=r.cash;if(!H)return;if(k==='rest'){H.root.rotation.x=0;H.root.position.y=r.y;H.armL.rotation.set(-.08,0,-.07);H.armR.rotation.set(-.08,0,.07);H.elL.rotation.x=H.elR.rotation.x=-.2;H.spine.rotation.x=0;H.head.rotation.x=0;}
+  else if(k==='up'){H.armL.rotation.set(-2.95,0,-.25);H.armR.rotation.set(-2.95,0,.25);H.elL.rotation.x=H.elR.rotation.x=-.15;}}
+function robReset(r){r.st='idle';r.t=0;robPose(r,'rest');if(r.safe){r.safe.piv.rotation.y=0;for(const m of r.safe.lootM)if(m)m.visible=true;r.safe.led.material=SAFE_M.red;}if(r.bag)r.bag.visible=false;}
+function robAlarm(){const a=sfxAC;if(!a||!active)return;const t=a.currentTime;for(let i=0;i<6;i++){const o=a.createOscillator(),g=a.createGain();o.type='square';o.frequency.setValueAtTime(i%2?880:660,t+i*.22);g.gain.setValueAtTime(.0001,t+i*.22);g.gain.linearRampToValueAtTime(.07,t+i*.22+.02);g.gain.linearRampToValueAtTime(.0001,t+i*.22+.2);o.connect(g);g.connect(a.out);o.start(t+i*.22);o.stop(t+i*.22+.22);}}
+function robClick(f){const a=sfxAC;if(!a||!active)return;const t=a.currentTime,o=a.createOscillator(),g=a.createGain();o.type='square';o.frequency.value=f||rnd(1500,2100);g.gain.setValueAtTime(.06,t);g.gain.exponentialRampToValueAtTime(.001,t+.05);o.connect(g);g.connect(a.out);o.start(t);o.stop(t+.06);}
+function robDing(){const a=sfxAC;if(!a||!active)return;const t=a.currentTime;for(const[f,d]of[[988,0],[1319,.16]]){const o=a.createOscillator(),g=a.createGain();o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(.0001,t+d);g.gain.linearRampToValueAtTime(.12,t+d+.02);g.gain.exponentialRampToValueAtTime(.001,t+d+.9);o.connect(g);g.connect(a.out);o.start(t+d);o.stop(t+d+1);}}
+const FLY=[];
+function robFly(from,amount,mat){if(amount){save.money+=amount;writeSave();}const m=new T.Mesh(new T.BoxGeometry(.2,.07,.11),mat||SAFE_M.cash);m.position.copy(from);scene.add(m);FLY.push({m,a:from.clone(),t:0,amount});}
+function flyUpdate(dt){for(let i=FLY.length-1;i>=0;i--){const f=FLY[i];f.t+=dt/.55;const k=Math.min(1,f.t),b=new T.Vector3(P.x,P.y+1.2,P.z);f.m.position.lerpVectors(f.a,b,k);f.m.position.y+=Math.sin(k*Math.PI)*.9;f.m.rotation.x+=dt*14;f.m.rotation.y+=dt*9;
+    if(k>=1){scene.remove(f.m);f.m.geometry.dispose();FLY.splice(i,1);if(f.amount)sfx('cash');}}}
+let robUI=null;
+function robUIEl(){if(robUI)return robUI;const d=document.createElement('div');d.className='nc-rob';
+  d.innerHTML='<style>.nc-rob .rb{position:absolute;left:50%;top:62%;transform:translateX(-50%);width:min(380px,74vw);text-align:center;font:700 14px Inter,sans-serif;color:#fff;text-shadow:0 1px 3px #000}.nc-rob .rb div{height:11px;border-radius:6px;background:rgba(0,0,0,.6);margin-top:7px;overflow:hidden;box-shadow:0 0 0 1px rgba(255,255,255,.15)}.nc-rob .rb i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ff3b47,#ffd166)}'
+    +'.nc-rob .rbtn{position:absolute;left:50%;bottom:118px;transform:translateX(-50%);pointer-events:auto;background:#d62828;color:#fff;border:0;border-radius:999px;padding:10px 20px 10px 12px;font:800 15px Inter,sans-serif;box-shadow:0 6px 20px rgba(214,40,40,.45);cursor:pointer;display:flex;gap:9px;align-items:center}.nc-rob .rbtn kbd{background:#fff;color:#d62828;border-radius:6px;padding:2px 7px;font:800 13px Inter,sans-serif}'
+    +'.nc-rob .rflash{position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle,rgba(255,40,40,0) 40%,rgba(255,40,40,.35));opacity:0;transition:opacity .25s}.nc-rob .rflash.on{opacity:1}</style>'
+    +'<div class="rflash"></div><div class="rb" hidden><b></b><div><i></i></div></div><button type="button" class="rbtn" hidden><kbd>X</kbd><span></span></button>';
+  hudEl.appendChild(d);const b=d.querySelector('.rbtn');b.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();sfxInit();robKey();});if(MOBILE)b.querySelector('kbd').remove();
+  robUI={bar:d.querySelector('.rb'),barT:d.querySelector('.rb b'),barI:d.querySelector('.rb i'),btn:b,btnT:b.querySelector('span'),flash:d.querySelector('.rflash')};return robUI;}
+function robStart(r,armed){if(Date.now()<r.cool){showPrompt(L('Tiệm vừa bị cướp · quay lại sau ','This store was just robbed · come back in ')+Math.ceil((r.cool-Date.now())/60000)+L(' phút',' min'),2);return;}
+  if(ROB&&ROB!==r)return;ROB=r;r.armed=armed;r.st=armed?'hold':'fight';r.t=0;r.hit=0;P.h=Math.atan2(r.cash.root.position.x-P.x,r.cash.root.position.z-P.z);cam.shake=.18;robAlarm();crime(2,true);
+  const u=robUIEl();u.flash.classList.add('on');setTimeout(()=>u.flash.classList.remove('on'),900);
+  banner(L('CƯỚP TIỆM!','STICK-UP!'),armed?L('Chĩa súng · thu ngân đang bỏ tiền vào túi','Gun out · the cashier is filling a bag'):L('Hạ gục thu ngân rồi vét quầy tiền','Knock the cashier out and empty the till'),2.6);}
+function robKey(){const n=robNear();if(!n)return;const r=n.r;if(r.st==='idle'&&n.d<3.4)robStart(r,P.weapon!=='fist'&&!!save.weapons[P.weapon]);
+  else if(r.st==='regdone'&&r.safe&&hyp(P.x-r.sx,P.z-r.sz)<2.2)robCrack(r);}
+function robCrack(r){if(r.st!=='regdone')return;r.st='crack';r.t=0;r.ck=0;P.h=Math.atan2(r.safe.g.position.x-P.x,r.safe.g.position.z-P.z);showPrompt(L('Đang dò mã két...','Cracking the combination...'),1.4);}
+function robOption(){const n=robNear();if(!n)return null;const r=n.r;
+  if(r.st==='regdone'&&r.safe&&hyp(P.x-r.sx,P.z-r.sz)<2.2)return{k:'E',txt:L('Phá két sắt','Crack the safe'),fn:()=>robCrack(r)};
+  if(r.st==='crack'||r.st==='open')return{k:'E',txt:L('Đang phá két...','Cracking the safe...'),fn:()=>{}};return null;}
+function robDecor(o){const n=robNear();if(n&&n.r.st==='idle'&&n.d<3.4&&!MOBILE)o.txt+=' · X: '+L('cướp tiệm','rob the store');return o;}
+function robTick(dt){const u=robUI||(hudEl?robUIEl():null);if(!u)return;
+  if(robLast!==P.inside){robLast=P.inside;for(const r of ROBS)if(r.room===P.inside&&r.st!=='idle'&&(r.st!=='done'||Date.now()>=r.cool))robReset(r);if(ROB&&ROB.room!==P.inside){if(ROB.st!=='done'&&ROB.st!=='regdone')robReset(ROB);ROB=null;}}
+  const n=robNear();
+  // gun pointed at the cashier for half a second starts a robbery too
+  if(!ROB&&n&&n.r.st==='idle'&&n.d<5&&P.aiming&&Date.now()>=n.r.cool){const c=n.r.cash.root.position;if(Math.abs(angD(Math.atan2(c.x-P.x,c.z-P.z),cam.yaw))<.32){robAim+=dt;if(robAim>.5){robAim=0;robStart(n.r,true);}}else robAim=0;}else robAim=0;
+  const showBtn=n&&((n.r.st==='idle'&&n.d<3.4&&Date.now()>=n.r.cool)||(n.r.st==='regdone'&&MOBILE&&hyp(P.x-n.r.sx,P.z-n.r.sz)<2.2));u.btn.hidden=!showBtn||!!shopOpen;
+  if(showBtn)u.btnT.textContent=n.r.st==='idle'?L('Cướp tiệm','Rob the store'):L('Phá két','Crack the safe');
+  MK_SAFE.visible=false;let bar=null;const r=ROB;
+  if(r){const H=r.cash;r.t+=dt;
+    if(r.st==='hold'){const k=Math.min(1,r.t/.5);H.armL.rotation.x=H.armR.rotation.x=-.08-2.87*k;H.armL.rotation.z=-.07-.18*k;H.armR.rotation.z=.07+.18*k;H.elL.rotation.x=H.elR.rotation.x=-.2+.05*k;H.head.rotation.x=-.1*k;if(r.t>1){r.st='bag';r.t=0;if(r.bag){r.bag.visible=true;r.bag.scale.setScalar(.2);}}}
+    else if(r.st==='bag'){const s=r.t*9;H.armR.rotation.set(-1.05+Math.sin(s)*.45,0,.1);H.armL.rotation.set(-1.0+Math.cos(s)*.45,0,-.1);H.elL.rotation.x=H.elR.rotation.x=-.9;H.head.rotation.x=.35;H.spine.rotation.x=.18;
+      if(r.bag)r.bag.scale.setScalar(.2+.8*Math.min(1,r.t/3.2));if(Math.random()<dt*3)sfx('swing');bar=[L('Thu ngân đang bỏ tiền vào túi...','The cashier is filling the bag...'),r.t/3.2];
+      if(r.t>=3.2){const pay=Math.round(rnd(r.pay[0],r.pay[1])/10)*10;const from=r.bag?r.bag.getWorldPosition(new T.Vector3()):H.root.position.clone().setY(r.y+1.1);if(r.bag)r.bag.visible=false;robFly(from,pay,SAFE_M.bag);H.spine.rotation.x=0;H.head.rotation.x=0;robPose(r,'up');
+        r.st='regdone';r.t=0;banner('+'+fmt$(pay),r.safe?L('Két sắt ở phía sau · lại gần bấm E để phá','The safe is in the back · walk up and press E to crack it'):L('Chạy đi trước khi cảnh sát tới!','Run before the cops arrive!'),2.8);if(!r.safe){r.st='done';r.cool=Date.now()+150000;ROB=null;}}}
+    else if(r.st==='fight'){P.h=lerpA(P.h,Math.atan2(H.root.position.x-P.x,H.root.position.z-P.z),.3);for(const tt of[0,.42,.84])if(r.t-dt<tt&&r.t>=tt){P.punchCD=0;playerPunch();}
+      for(const tt of[.18,.6,1.02])if(r.t-dt<tt&&r.t>=tt){sfx('hit');r.hit=.25;cam.shake=Math.max(cam.shake,.07);}
+      if(r.hit>0){r.hit-=dt;const j=Math.max(0,r.hit)/.25;H.spine.rotation.x=-.35*j;H.head.rotation.x=-.4*j;H.armL.rotation.x=H.armR.rotation.x=-.5*j-.08;}
+      if(r.t>1.2){const k=Math.min(1,(r.t-1.2)/.45),e=k*k;H.root.rotation.x=-Math.PI/2*e;H.root.position.y=r.y+.16*e;H.armL.rotation.x=H.armR.rotation.x=-2.2*e;if(r.t-dt<1.2)sfx('heavy');}
+      bar=r.t<1.2?null:[L('Vét tiền trong quầy...','Emptying the till...'),(r.t-1.2)/1.1];
+      if(r.t>=2.3){const pay=Math.round(rnd(r.pay[0],r.pay[1])/10)*10;robFly(new T.Vector3(r.cx,r.y+1.1,r.cz),Math.round(pay/2));robFly(new T.Vector3(r.cx+.2,r.y+1.15,r.cz),pay-Math.round(pay/2));
+        r.st='regdone';r.t=0;banner('+'+fmt$(pay),r.safe?L('Két sắt ở phía sau · lại gần bấm E để phá','The safe is in the back · walk up and press E to crack it'):L('Chạy đi trước khi cảnh sát tới!','Run before the cops arrive!'),2.8);if(!r.safe){r.st='done';r.cool=Date.now()+150000;ROB=null;}}}
+    else if(r.st==='regdone'){if(r.safe){MK_SAFE.visible=true;MK_SAFE.position.set(r.sx,r.y+.05,r.sz);MK_SAFE.children[0].rotation.z+=dt;}}
+    else if(r.st==='crack'){const near=hyp(P.x-r.sx,P.z-r.sz)<2.6;if(near){r.t+=0;r.ck=(r.ck||0)+dt;}else r.t-=dt;
+      const p=Math.min(1,(r.ck||0)/5);r.safe.dg.rotation.z+=dt*(Math.sin(r.ck*3)>0?7:-5);if(Math.floor(r.ck*5)!==Math.floor((r.ck-dt)*5)&&near)robClick();
+      if(near){P.h=lerpA(P.h,Math.atan2(r.safe.g.position.x-P.x,r.safe.g.position.z-P.z),.2);P.H.punchT=Math.max(P.H.punchT||0,Math.sin(r.ck*6)>.9?.12:0);}
+      bar=[near?L('Đang dò mã két · giữ vị trí','Cracking the combination · stay close'):L('Quay lại két sắt!','Get back to the safe!'),p];
+      if(p>=1){r.st='open';r.t=0;robClick(2600);setTimeout(()=>robClick(3100),120);r.safe.led.material=SAFE_M.gold;}}
+    else if(r.st==='open'){const k=Math.min(1,r.t/1.1),e=1-Math.pow(1-k,3);r.safe.piv.rotation.y=-1.95*e;if(r.t-dt<.05)sfx('heavy');
+      if(r.t>.7&&!r.paid){r.paid=1;const tot=Math.round(rnd(r.spay[0],r.spay[1])/10)*10;r.lastPay=tot;const L2=r.safe.loot;const each=Math.floor(tot/L2.length);r.safe.g.updateMatrixWorld();const wps=L2.map(l=>l.p.clone().applyMatrix4(r.safe.g.matrixWorld));for(const m of r.safe.lootM)if(m)m.visible=false;L2.forEach((l,i)=>setTimeout(()=>robFly(wps[i],i===L2.length-1?tot-each*(L2.length-1):each,l.m),i*110));}
+      if(r.t>2.4){r.st='done';r.paid=0;r.cool=Date.now()+150000;ROB=null;stars=Math.max(stars,3);evadeT=0;lastSeen={x:P.x,z:P.z};robAlarm();
+        banner(L('PHÁ KÉT THÀNH CÔNG','SAFE CRACKED')+' +'+fmt$(r.lastPay||0),L('3 sao truy nã · chạy ra ngoài và cắt đuôi cảnh sát','3 wanted stars · get out and lose the cops'),3.4);}}}
+  u.bar.hidden=!bar;if(bar){u.barT.textContent=bar[0];u.barI.style.width=Math.round(clamp(bar[1],0,1)*100)+'%';}
+  flyUpdate(dt);}
+const MK_SAFE=markerRing(0xffd166,.75);MK_SAFE.visible=false;
+/* place a safe in a free corner the player can walk to (flood fill from the door), as close to the cashier as possible */
+function autoSafe(R,cash,y){const st=.5,x0=R.x0+.4,z0=R.z0+.4,nx=Math.floor((R.x1-R.x0-.8)/st)+1,nz=Math.floor((R.z1-R.z0-.8)/st)+1,ok=new Uint8Array(nx*nz),seen=new Uint8Array(nx*nz);
+  for(let i=0;i<nx;i++)for(let j=0;j<nz;j++)ok[j*nx+i]=resolve(x0+i*st,z0+j*st,.42)?0:1;
+  const si=Math.round((R.door.x-x0)/st),sj=Math.round((R.door.z-.6-z0)/st);const q=[];if(si>=0&&si<nx&&sj>=0&&sj<nz&&ok[sj*nx+si]){q.push(sj*nx+si);seen[sj*nx+si]=1;}
+  while(q.length){const c=q.pop(),i=c%nx,j=(c-i)/nx;for(const[di,dj]of[[1,0],[-1,0],[0,1],[0,-1]]){const a=i+di,b=j+dj;if(a<0||b<0||a>=nx||b>=nz)continue;const k=b*nx+a;if(!seen[k]&&ok[k]){seen[k]=1;q.push(k);}}}
+  let best=null,bd=1e9;const cx=cash.root.position.x,cz=cash.root.position.z;
+  const tryWall=(sx,sz,h)=>{const ax=Math.cos(h),az=-Math.sin(h);if(resolve(sx,sz,.42)||resolve(sx+ax*.3,sz+az*.3,.42)||resolve(sx-ax*.3,sz-az*.3,.42))return;const fx=Math.sin(h),fz=Math.cos(h),px=sx+fx*1.0,pz=sz+fz*1.0;const i=Math.round((px-x0)/st),j=Math.round((pz-z0)/st);if(i<0||j<0||i>=nx||j>=nz||!seen[j*nx+i])return;
+    if(hyp(sx-R.door.x,sz-R.door.z)<4.5)return;const d=hyp(sx-cx,sz-cz);if(d<1.4)return;if(d<bd){bd=d;best={x:sx,z:sz,h,px,pz};}};
+  for(let x=R.x0+.9;x<R.x1-.9;x+=.5){tryWall(x,R.z0+.55,0);}for(let z=R.z0+.9;z<R.z1-.9;z+=.5){tryWall(R.x0+.55,z,Math.PI/2);tryWall(R.x1-.55,z,-Math.PI/2);}
+  if(!best)return null;const s=makeSafe(best.x,y||0,best.z,best.h);addCol({t:'b',x0:best.x-.5,x1:best.x+.5,z0:best.z-.5,z1:best.z+.5,h:(y||0)+1.1});return{s,px:best.px,pz:best.pz};}
+function cashBag(x,y,z){const b=new T.Mesh(new T.SphereGeometry(.2,12,9),SAFE_M.bag);b.scale.setScalar(.2);b.position.set(x,y,z);b.visible=false;scene.add(b);return b;}
+/* ---------- shop furnishing by type (also used for the mall units) ---------- */
+const SHOPTYPE={
+  mart24:{n:'Nexus 24h',kind:'market',bg:'#0f9d58',fg:'#fff',cols:['#e63946','#ffb703','#2a9d8f','#3a86ff','#f4a261','#6a994e','#ff8fab','#8338ec'],fridge:1,floor:'tileW'},
+  pharmacy:{n:'Nhà thuốc Hoa Sen',kind:'market',bg:'#1b998b',fg:'#fff',cols:['#ffffff','#e0f2f1','#80cbc4','#4db6ac','#ef5350','#90caf9'],floor:'tileW',shop:'pharmacy'},
+  tech:{n:'Nexus Tech',kind:'market',bg:'#111827',fg:'#7dd3fc',cols:['#1f2937','#374151','#111827','#0ea5e9','#e5e7eb'],floor:'marbleDk',shop:'tech',pay:[300,700],spay:[1500,3200]},
+  toys:{n:'Thế Giới Đồ Chơi',kind:'market',bg:'#ff6b6b',fg:'#fff',cols:['#ff595e','#ffca3a','#8ac926','#1982c4','#6a4c93','#ff924c'],floor:'oak',shop:'toys'},
+  books:{n:'Nhà sách Gió',kind:'market',bg:'#3d405b',fg:'#f2cc8f',cols:['#8d5524','#c68642','#3d405b','#81b29a','#e07a5f','#f2cc8f','#264653'],floor:'oak',shop:'books'},
+  cosm:{n:'Mỹ phẩm Mây',kind:'market',bg:'#ffafcc',fg:'#5a1a3a',cols:['#ffc8dd','#ffafcc','#cdb4db','#ffffff','#e5989b'],floor:'marble',shop:'cosm'},
+  clothes:{n:'Lụa Boutique',kind:'fashion',bg:'#ad8dff',fg:'#fff',floor:'oak',shop:'clothes'},
+  urban:{n:'Urban Wear',kind:'fashion',bg:'#1d1d1d',fg:'#c1f354',floor:'marbleDk',shop:'clothes'},
+  shoes:{n:'Sneaker Lab',kind:'fashion',bg:'#f8f9fa',fg:'#e63946',floor:'oak',shop:'clothes',shoes:1},
+  sport:{n:'Thể Thao 24',kind:'fashion',bg:'#e63946',fg:'#fff',floor:'oakDk',shop:'clothes'},
+  outlet:{n:'Nexus Outlet',kind:'fashion',bg:'#ffd166',fg:'#1d1d1d',floor:'oak',shop:'clothes'},
+  jewel:{n:'Kim Hoàn Ngọc Bảo',kind:'jewel',bg:'#1d1d1d',fg:'#e0b04a',floor:'marbleDk',shop:'jewel',pay:[600,1400],spay:[4000,8000]},
+  watch:{n:'Đồng Hồ Thời Gian',kind:'jewel',bg:'#0b2545',fg:'#e0b04a',floor:'marbleDk',shop:'watch',pay:[500,1100],spay:[2500,5000]},
+  optic:{n:'Kính Mắt Sáng',kind:'jewel',bg:'#ffffff',fg:'#1d3557',floor:'marble',shop:'optic'},
+  bags:{n:'Túi Xinh',kind:'fashion',bg:'#ffb4a2',fg:'#6d2e46',floor:'marble',shop:'bags'},
+  barber:{n:'Tóc Đẹp Barber',kind:'salon',bg:'#1d3557',fg:'#fff',floor:'tileK',shop:'barber',pole:1},
+  nails:{n:'Nail Hồng',kind:'salon',bg:'#ff8fab',fg:'#fff',floor:'marble',shop:'nails',nails:1},
+  arcade:{n:'Arcade Nexus',kind:'arcade',bg:'#240046',fg:'#ff4ecd',floor:'navy',shop:'arcade'},
+  coffee:{n:'Cà Phê Gác Mái',kind:'food',bg:'#6f4e37',fg:'#fff',floor:'oakDk',shop:'coffee'},
+  com:{n:'Cơm Tấm Cô Ba',kind:'food',bg:'#ffb703',fg:'#1d1d1d',floor:'tileK',shop:'food'},
+  pizza:{n:'Pizza Lửa Hồng',kind:'food',bg:'#c1121f',fg:'#fff',floor:'tileK',shop:'pizza'},
+  boba:{n:'Trà Sữa Mây',kind:'food',bg:'#a47148',fg:'#fff',floor:'tileW',shop:'boba'},
+  pho:{n:'Phở Hà Thành',kind:'food',bg:'#bc4749',fg:'#fff',floor:'tileK',shop:'pho'},
+  bbq:{n:'Lẩu Nướng Khói',kind:'food',bg:'#370617',fg:'#ffba08',floor:'oakDk',shop:'bbq'},
+  sushi:{n:'Sushi Sóng',kind:'food',bg:'#f1faee',fg:'#e63946',floor:'oak',shop:'sushi'},
+  kem:{n:'Kem Tuyết',kind:'food',bg:'#bde0fe',fg:'#1d3557',floor:'tileW',shop:'kem'}};
+SHOPTYPE.mart24.shop='mart24';SHOPTYPE.barber.shop='barber';SHOPTYPE.nails.shop='nails';
+const STEX={},SIGNGB={};
+function shopSignQ(t,x,y,z,h,w,hh){const g=SIGNGB[t]||(SIGNGB[t]=new GB());const rx=Math.cos(h),rz=-Math.sin(h),n=[Math.sin(h),0,Math.cos(h)];g.quad([x-rx*w/2,y-hh/2,z-rz*w/2],[x+rx*w/2,y-hh/2,z+rz*w/2],[x+rx*w/2,y+hh/2,z+rz*w/2],[x-rx*w/2,y+hh/2,z-rz*w/2],n,[[0,0],[1,0],[1,1],[0,1]]);}
+function signMat(t){if(STEX[t])return STEX[t];const S=SHOPTYPE[t];const tx=textTex(S.n,{fg:S.fg,bg:S.bg,size:66,w:1024,h:160,glow:S.fg});return STEX[t]=new T.MeshBasicMaterial({map:tx,toneMapped:false});}
+function shopSign(t,x,y,z,h,w,hh){const m=new T.Mesh(new T.PlaneGeometry(w,hh),signMat(t));m.position.set(x,y,z);m.rotation.y=h;scene.add(m);return m;}
+function furnish(F,type,y,lv,roomId,R){const S=SHOPTYPE[type],W=F.W,D=F.D,col={col:1,lv},hc=y+(R&&R.unitH||3.2);
+  ubox(F,S.floor||'oak',.05,W-.05,y,y+.012,.05,D-.05);
+  const cash=extra(Object.assign(randomLook('ped'),{shirt:S.bg==='#ffffff'||S.bg==='#f8f9fa'||S.bg==='#f1faee'?S.fg:S.bg,jacket:null}),...F.p(W-3,D-1.8),F.h);cash.root.position.y=y;
+  // the counter, the till and the menu/brand panel behind it
+  ubox(F,'white',W-5.2,W-1,y,y+1.0,D-3.3,D-2.6,col);ubox(F,'marbleTop',W-5.3,W-.95,y+1.0,y+1.05,D-3.4,D-2.5);ubox(F,'#16181c',W-2.6,W-2.0,y+1.05,y+1.3,D-3.1,D-2.75);ubox(F,'#c1f354',W-2.55,W-2.05,y+1.27,y+1.3,D-3.1,D-2.95);
+  {const[a,b]=F.p(W-3.2,D-.06);const bb=new T.Mesh(new T.PlaneGeometry(3.4,.8),signMat(type));bb.position.set(a,y+2.3,b);bb.rotation.y=F.h;scene.add(bb);}
+  const bag=cashBag(0,0,0);{const[a,b]=F.p(W-3.6,D-2.95);bag.position.set(a,y+1.25,b);}
+  const PC=S.cols||['#e63946','#ffb703','#2a9d8f','#3a86ff','#f4a261'];
+  if(S.kind==='market'){for(const u of[2.4,4.9]){if(u>W-6)continue;ubox(F,'steel',u-.32,u+.32,y,y+1.7,1.6,D-2.4,col);for(const yy of[.2,.65,1.1])for(let v=1.7;v<D-2.5;v+=.55){const c=PC[Math.floor(Math.abs(Math.sin(v*7.1+yy*3+u))*PC.length)];ubox(F,c,u-.4,u-.32,y+yy,y+yy+.32,v,v+.42);ubox(F,PC[(PC.indexOf(c)+2)%PC.length],u+.32,u+.4,y+yy,y+yy+.32,v,v+.42);}}
+    ubox(F,'white',2.9,W-5.6,y,y+2.1,D-.55,D-.05,col);for(const yy of[.3,.85,1.4])for(let u=3;u<W-5.8;u+=.5)ubox(F,PC[Math.floor(Math.abs(Math.sin(u*5.3+yy))*PC.length)],u,u+.38,y+yy,y+yy+.35,D-.5,D-.38);
+    if(S.fridge){ubox(F,'white',.05,.75,y,y+2.1,1.2,D-2.6,col);const[a,b]=F.p(.78,(D-1.4)/2+.6);glow('#dff4ff',a,y+1.1,b,D-4.2,1.8,F.h+Math.PI/2,.6);}
+    if(type==='tech'){for(let u=1.2;u<W-6;u+=1.6){const[a,b]=F.p(u,D-.04);glow('#38bdf8',a,y+1.6,b,1.2,.7,F.h,.8);}}}
+  else if(S.kind==='fashion'){const GC=['#e63946','#f1faee','#457b9d','#1d3557','#ffb703','#2a9d8f','#ad8dff','#111111','#f4a261'];
+    for(const v of[2.0,4.2]){if(v>D-3)continue;for(const[u]of[[1.2],[W-6.2]])ucyl(F,'chrome',u,v,y,y+1.55,.025,.025,8);
+      ubox(F,'chrome',1.2,W-6.2,y+1.5,y+1.55,v-.02,v+.02);for(let u=1.5;u<W-6.4;u+=.32)ubox(F,GC[Math.floor(Math.abs(Math.sin(u*9.7+v))*GC.length)],u,u+.07,y+.55,y+1.45,v-.28,v+.28);
+      mcol(...F.r(1.0,W-6.0,v-.3,v+.3),y,y+1.6,lv);}
+    for(const u of[1.0,W-6.6]){ubox(F,'#e9e6df',u-.22,u+.22,y,y+.06,.8,1.25);ubox(F,'#e9e6df',u-.04,u+.04,y+.06,y+.95,.98,1.06);ubox(F,GC[(u*3|0)%GC.length],u-.24,u+.24,y+.95,y+1.6,.88,1.16);ubox(F,'#f3d2b8',u-.1,u+.1,y+1.6,y+1.85,.92,1.12);}
+    if(S.shoes){ubox(F,'white',.8,W-5.6,y,y+2.2,D-.5,D-.05,col);for(const yy of[.35,.8,1.25,1.7])for(let u=1;u<W-5.9;u+=.55)ubox(F,GC[Math.floor(Math.abs(Math.sin(u*3.1+yy*5))*GC.length)],u,u+.34,y+yy,y+yy+.14,D-.45,D-.2);}
+    else{const[a,b]=F.p(1.6,D-.04);glow('#dfeff5',a,y+1.4,b,1.2,2.2,F.h,.45);}}
+  else if(S.kind==='jewel'){for(const[u0,u1,v0,v1]of[[.8,W-6,1.6,2.2],[.8,1.4,2.2,D-2.2]]){ubox(F,'dark',u0,u1,y,y+.9,v0,v1,col);ubox(F,'#bfe6f2',u0,u1,y+.9,y+1.12,v0,v1);for(let u=u0+.15;u<u1-.1;u+=.35)for(let v=v0+.15;v<v1-.1;v+=.3)ubox(F,(u*7|0)%3?'#e0b04a':'#e8eef5',u,u+.09,y+.92,y+.97,v,v+.06);}
+    ubox(F,'#e0b04a',.8,W-6,y+1.12,y+1.14,1.6,2.2);const[a,b]=F.p(3.5,D-.04);glow('#fff1cc',a,y+1.8,b,3,1.1,F.h,.5);}
+  else if(S.kind==='salon'){for(let k=0;k<3;k++){const u=1.3+k*1.7;if(u>W-6)break;const v=D-1.0;if(S.nails){ubox(F,'white',u-.5,u+.5,y,y+.75,v-1.4,v-.9,col);ubox(F,'#ff8fab',u-.55,u+.55,y+.75,y+.79,v-1.45,v-.85);ubox(F,'pinkW',u-.25,u+.25,y,y+.45,v-.6,v-.2);for(let j=0;j<6;j++)ubox(F,PC[j%PC.length]||'#e63946',u-.4+j*.14,u-.32+j*.14,y+.79,y+.9,v-1.3,v-1.24);}
+      else{ubox(F,'leather',u-.3,u+.3,y+.35,y+.6,v-.3,v+.3,col);ubox(F,'leather',u-.3,u+.3,y+.6,y+1.25,v+.2,v+.3);ubox(F,'chrome',u-.05,u+.05,y,y+.35,v-.05,v+.05);ubox(F,'dark',u-.32,u+.32,y,y+.04,v-.32,v+.32);}
+      const[a,b]=F.p(u,D-.04);glow('#e8f4fa',a,y+1.55,b,.9,1.1,F.h,.55);ubox(F,'white',u-.55,u+.55,y+.9,y+.95,D-.3,D-.05);}
+    if(S.pole){const[a,b]=F.p(.35,-.25);cyl('white',a,y+1.6,y+2.6,b,.1,.1,12);cyl('red',a,y+1.9,y+2.3,b,.105,.105,12);sph('chrome',a,y+2.65,b,.11);}
+    if(S.nails)for(let j=0;j<14;j++)ubox(F,['#e63946','#ff8fab','#ffb703','#8338ec','#2a9d8f','#111','#f1faee'][j%7],.06,.14,y+1.0+(j%2)*.3,y+1.18+(j%2)*.3,1.2+(j>>1)*.3,1.32+(j>>1)*.3);}
+  else if(S.kind==='food'){ubox(F,'steel',.6,W-5.6,y,y+.92,D-.8,D-.05,col);ubox(F,'dark',.6,W-5.6,y+.92,y+.96,D-.8,D-.05);for(let u=1.2;u<W-6;u+=1.3)ucyl(F,'black',u,D-.45,y+.96,y+.99,.15,.15,14);
+    ubox(F,'steel',.6,W-5.6,y+2.0,y+2.4,D-1.0,D-.05);const[a,b]=F.p(Math.max(2.4,(W-5)/2),D-.04);glow(menuTex(S.n.toUpperCase().slice(0,16),[[L('Món chính','Mains'),'$18'],[L('Món nhẹ','Snacks'),'$8'],[L('Đồ uống','Drinks'),'$6']],S.bg,S.fg),a,y+1.65,b,2.4,1.1,F.h,.95);
+    for(const u of[1.2,3.2])if(u<W-6){ubox(F,'oak',u-.5,u+.5,y+.72,y+.76,1.2,2.0);ubox(F,'dark',u-.04,u+.04,y,y+.72,1.55,1.65);mcol(...F.r(u-.5,u+.5,1.2,2.0),y,y+.8,lv);}}
+  else if(S.kind==='arcade'){for(let k=0;k<4;k++){const u=1.0+k*1.25;if(u>W-6)break;ubox(F,'#2b2d42',u-.4,u+.4,y,y+1.85,D-1.0,D-.2,col);const[a,b]=F.p(u,D-1.02);glow(['#ff4ecd','#00f5d4','#fee440','#9b5de5'][k],a,y+1.35,b,.6,.45,F.h,.9);ubox(F,'#111',u-.35,u+.35,y+.9,y+.98,D-1.25,D-1.0);}
+    for(let k=0;k<3;k++){const v=1.4+k*1.3;if(v>D-3)break;ubox(F,'#2b2d42',.2,.9,y,y+1.85,v-.4,v+.4,col);const[a,b]=F.p(.92,v);glow(['#00bbf9','#f15bb5','#fee440'][k],a,y+1.35,b,.6,.45,F.h-Math.PI/2,.9);}}
+  const[ax,az]=F.p(W-3.1,D-4.3);if(R){act(R,ax,az,2.4,()=>L('Mua ở quầy · ','Buy at the counter · ')+S.n,()=>openShop(S.shop||type));R.acts[R.acts.length-1].y=y;}
+  // safe in the back-left corner, behind a little partition
+  const[sx,sz]=F.p(1.0,D-.55);const sf=makeSafe(sx,y,sz,F.h);mcol(sx-.55,sx+.55,sz-.55,sz+.55,y,y+1.1,lv);const[spx,spz]=F.p(1.0,D-1.6);
+  const r=robReg({room:roomId,cx:ax,cz:az,cash,safe:sf,sx:spx,sz:spz,y,bag,name:S.n,pay:S.pay||[160,420],spay:S.spay||[700,1800]});
+  return r;}
+/* ---------- the menus for the new shops ---------- */
+function gift(n,en,d,den,p){return{n:L(n,en),d:L(d,den),p,fn:()=>{save.items=save.items||{};save.items[n]=(save.items[n]|0)+1;banner(L(n,en),L('Đã cất vào túi đồ','Added to your bag'));}};}
+function food(n,en,hp,p,col,boost){return{n:L(n,en),d:hp>=200?L('Hồi đầy máu','Full health'):'+'+hp+L(' máu',' HP')+(boost?L(', chạy nhanh 60 giây',', run faster for 60 s'):''),p,ok:()=>!P.tray,fn:()=>takeFood({n:L(n,en),hp,col,boost})};}
+function hairItem(n,en,style,p){return{n:L(n,en),d:L('Kiểu tóc mới','New haircut'),p,fn:()=>{save.hairStyle=style;rebuildPlayer();banner(L('Tóc mới!','Fresh cut!'),L(n,en));}};}
+function hairCol(n,en,c,p){return{n:L(n,en),d:L('Nhuộm màu tóc','Hair colour'),p,fn:()=>{save.hairCol=c;rebuildPlayer();banner(L('Tóc mới!','Fresh colour!'),L(n,en));}};}
+Object.assign(SHOPS,{
+  mart24:{n:L('Nexus 24h · cửa hàng tiện lợi','Nexus 24h · convenience store'),items:[{n:L('Mì ly','Cup noodles'),d:'+20'+L(' máu',' HP'),p:3,fn:()=>heal(20)},{n:L('Bánh bao nóng','Hot steamed bun'),d:'+30'+L(' máu',' HP'),p:5,fn:()=>heal(30)},{n:L('Nước tăng lực','Energy drink'),d:L('Chạy nhanh 60 giây','Run faster for 60 s'),p:6,fn:()=>{P.boostT=60;}},{n:L('Cơm nắm','Rice ball'),d:'+40'+L(' máu',' HP'),p:7,fn:()=>heal(40)},{n:L('Bộ sơ cứu','First aid kit'),d:L('Hồi đầy máu','Full health'),p:110,fn:()=>heal(999)}]},
+  pharmacy:{n:L('Nhà thuốc Hoa Sen','Lotus Pharmacy'),items:[{n:L('Băng cá nhân','Plasters'),d:'+25'+L(' máu',' HP'),p:6,fn:()=>heal(25)},{n:L('Vitamin tổng hợp','Multivitamins'),d:'+60'+L(' máu',' HP'),p:25,fn:()=>heal(60)},{n:L('Hộp cứu thương','Medkit'),d:L('Hồi đầy máu','Full health'),p:90,fn:()=>heal(999)}]},
+  tech:{n:'Nexus Tech',items:[{n:L('Máy quét sóng cảnh sát','Police scanner'),d:L('Giảm 1 sao truy nã','Drops 1 wanted star'),p:450,ok:()=>stars>0,fn:()=>{stars=Math.max(0,stars-1);evadeT=0;}},gift('Tai nghe không dây','Wireless earbuds','Đồ sưu tầm','Collectible',220),gift('Điện thoại Nexus X','Nexus X phone','Đồ sưu tầm','Collectible',1200),gift('Máy chơi game cầm tay','Handheld console','Đồ sưu tầm','Collectible',650)]},
+  toys:{n:L('Thế Giới Đồ Chơi','Toy World'),items:[gift('Gấu bông khổng lồ','Giant teddy bear','Đồ sưu tầm','Collectible',60),gift('Xe điều khiển','RC car','Đồ sưu tầm','Collectible',140),gift('Bộ xếp hình thành phố','City building set','Đồ sưu tầm','Collectible',90)]},
+  books:{n:L('Nhà sách Gió','Wind Bookstore'),items:[gift('Truyện tranh Nexus','Nexus comic','Đồ sưu tầm','Collectible',8),gift('Sách nấu ăn','Cookbook','Đồ sưu tầm','Collectible',15),gift('Bản đồ thành phố','City map','Đồ sưu tầm','Collectible',5)]},
+  cosm:{n:L('Mỹ phẩm Mây','Cloud Cosmetics'),items:[gift('Son môi','Lipstick','Đồ sưu tầm','Collectible',25),gift('Nước hoa','Perfume','Đồ sưu tầm','Collectible',120),{n:L('Mặt nạ dưỡng da','Face mask'),d:'+30'+L(' máu',' HP'),p:12,fn:()=>heal(30)}]},
+  jewel:{n:L('Kim Hoàn Ngọc Bảo','Ngoc Bao Jewellers'),items:[gift('Nhẫn bạc','Silver ring','Trang sức','Jewellery',300),gift('Dây chuyền vàng','Gold chain','Trang sức','Jewellery',2200),gift('Nhẫn kim cương','Diamond ring','Trang sức','Jewellery',12000)]},
+  watch:{n:L('Đồng Hồ Thời Gian','Time Watches'),items:[gift('Đồng hồ thể thao','Sports watch','Đồ sưu tầm','Collectible',180),gift('Đồng hồ cơ','Mechanical watch','Đồ sưu tầm','Collectible',1500),gift('Đồng hồ vàng','Gold watch','Đồ sưu tầm','Collectible',9000)]},
+  optic:{n:L('Kính Mắt Sáng','Bright Optics'),items:[{n:L('Kính râm','Sunglasses'),d:save.glasses?L('Đang đeo · bấm để tháo','Wearing · tap to remove'):L('Đeo ngay','Wear them now'),p:80,fn:()=>{save.glasses=!save.glasses;rebuildPlayer();}},gift('Kính áp tròng','Contact lenses','Đồ sưu tầm','Collectible',30)]},
+  bags:{n:L('Túi Xinh','Pretty Bags'),items:[gift('Túi tote','Tote bag','Đồ sưu tầm','Collectible',45),gift('Ba lô du lịch','Travel backpack','Đồ sưu tầm','Collectible',110),gift('Túi da cao cấp','Designer handbag','Đồ sưu tầm','Collectible',2400)]},
+  barber:{n:L('Tóc Đẹp Barber','Good Hair Barber'),items:[hairItem('Tóc ngắn gọn','Short cut','short',25),hairItem('Đầu đinh','Buzz cut','buzz',20),hairItem('Cạo trọc','Shaved','bald',15),hairItem('Tóc dài','Long hair','long',60),hairItem('Buộc đuôi ngựa','Ponytail','pony',40),hairItem('Búi tóc','Bun','bun',40),
+    hairCol('Nhuộm đen','Black dye','#151515',30),hairCol('Nhuộm nâu hạt dẻ','Chestnut dye','#7a5230',35),hairCol('Nhuộm vàng','Blonde dye','#e0c070',45),hairCol('Nhuộm bạch kim','Platinum dye','#e8e8e8',60),hairCol('Nhuộm đỏ','Red dye','#b3202a',50),hairCol('Nhuộm xanh','Blue dye','#2a5ca8',50),
+    {n:L('Cạo râu / để râu','Shave / grow a beard'),d:L('Đổi qua lại','Toggle'),p:15,fn:()=>{save.beard=!(save.beard===undefined?(CHARS[save.char]||{}).beard:save.beard);rebuildPlayer();}}]},
+  nails:{n:L('Nail Hồng','Pink Nails'),items:[{n:L('Sơn gel','Gel polish'),d:'+30'+L(' máu',' HP'),p:20,fn:()=>{heal(30);banner(L('Móng xinh!','Nice nails!'),L('Thư giãn, hồi 30 máu','Relaxed, +30 HP'));}},{n:L('Đắp bột','Acrylic set'),d:'+60'+L(' máu',' HP'),p:45,fn:()=>{heal(60);banner(L('Móng xinh!','Nice nails!'),L('Hồi 60 máu','+60 HP'));}},{n:L('Massage tay chân','Hand and foot massage'),d:L('Hồi đầy máu, chạy nhanh 60 giây','Full health, run faster for 60 s'),p:80,fn:()=>{heal(999);P.boostT=60;banner(L('Thư giãn','Relaxed'),L('Hồi đầy máu','Full health'));}}]},
+  arcade:{n:'Arcade Nexus',items:[{n:L('Máy gắp thú','Claw machine'),d:L('50% gắp được gấu bông','50% chance to win a teddy'),p:5,fn:()=>{if(Math.random()<.5){save.items=save.items||{};save.items['Gấu bông']=(save.items['Gấu bông']|0)+1;banner(L('GẮP TRÚNG!','GOT ONE!'),L('Bạn được 1 gấu bông','You won a teddy bear'));}else showPrompt(L('Trượt rồi, thử lại!','Missed, try again!'),1.4);}},{n:L('Đua xe arcade','Arcade racer'),d:L('Thắng được $30','Win $30'),p:10,fn:()=>{if(Math.random()<.4){save.money+=30;banner(L('VỀ NHẤT!','FIRST PLACE!'),'+$30');}else showPrompt(L('Về nhì rồi!','Second place!'),1.4);}}]},
+  coffee:{n:L('Cà Phê Gác Mái','Attic Coffee'),items:[food('Cà phê sữa đá','Iced milk coffee',10,4,'#6f4e37',1),food('Bạc xỉu','Bac xiu',12,5,'#d4a373',1),food('Bánh croissant','Croissant',25,6,'#e9c46a')]},
+  pizza:{n:L('Pizza Lửa Hồng','Pink Flame Pizza'),items:[food('Pizza hải sản','Seafood pizza',70,16,'#e76f51'),food('Pizza phô mai','Cheese pizza',55,12,'#f4a261'),food('Nước ngọt','Soft drink',10,3,'#c1121f',1)]},
+  boba:{n:L('Trà Sữa Mây','Cloud Bubble Tea'),items:[food('Trà sữa trân châu','Bubble milk tea',15,6,'#d4a373',1),food('Trà đào cam sả','Peach lemongrass tea',12,5,'#f4a261',1),food('Sữa tươi đường đen','Brown sugar milk',18,7,'#8a5a3a',1)]},
+  pho:{n:L('Phở Hà Thành','Ha Thanh Pho'),items:[food('Phở bò tái','Rare beef pho',200,9,'#e9c46a'),food('Phở gà','Chicken pho',80,8,'#f1e3b5'),food('Quẩy','Fried dough',15,2,'#d4a373')]},
+  bbq:{n:L('Lẩu Nướng Khói','Smoke Hotpot and Grill'),items:[food('Lẩu thái','Thai hotpot',200,30,'#e63946'),food('Ba chỉ nướng','Grilled pork belly',70,14,'#8a4b2a'),food('Trà đá','Iced tea',8,1,'#c9a227')]},
+  sushi:{n:L('Sushi Sóng','Wave Sushi'),items:[food('Cơm cuộn cá hồi','Salmon roll',45,12,'#f4a261'),food('Sashimi tổng hợp','Sashimi platter',120,28,'#e76f51'),food('Trà xanh','Green tea',10,3,'#6a994e',1)]},
+  kem:{n:L('Kem Tuyết','Snow Ice Cream'),items:[food('Kem ốc quế','Ice cream cone',15,3,'#fbe7c6'),food('Kem dừa','Coconut ice cream',25,6,'#f1faee'),food('Bingsu xoài','Mango bingsu',40,9,'#ffb703')]}});
+SHOPS.food.n=SHOPS.food.n||'Cơm Tấm Cô Ba';
+/* ---------- street shops: 24h store, barber, nail salon (shared interiors, entered from doors all over the city) ---------- */
+for(const[id,cx,w,d,wall,ceil]of[['mart24',5100,14,11,'plasterW','ceilT'],['barber',5180,12,10,'paper','plaster'],['nails',5260,12,10,'pinkW','plaster']]){
+  const R=room(id,cx,0,w,d,3.4,{wall,floor:'tileW',fts:1,wts:1.6,ceil,cts:1.2,skirt:'dark'});R.seats=[];
+  const F=UF(R.x0,R.x1,R.z0,R.z1,'z1');furnish(F,id,0,undefined,id,R);
+  for(let x=R.x0+2.5;x<R.x1-1;x+=3.5)for(let z=R.z0+2;z<R.z1-1;z+=3.5)IE.push([x,R.h-.04,z]);R.lights=[[cx,3.2,R.z0+3,.9,'#fff4e6',13],[cx,3.2,R.z1-3,.7,'#fff4e6',11]];plant(R.x0+.7,R.z1-.8,.9);}
+/* robberies in the existing shops: find the counter that opens the shop, the cashier standing behind it, and drop a safe in a free corner */
+for(const[room,key,pay,spay]of[['mart','mart'],['guns','guns',[400,900],[1800,3500]],['diner','food'],['gym','gym'],['clothes','clothes'],['cars','cars',[500,1200],[2500,5000]],['hotel','bar',[300,700]],['tea','tea'],['sea','sea'],['saloon','saloon'],['cinema','Bắp rang']]){
+  const R=ROOMS[room];if(!R||!R.acts)continue;const a=R.acts.find(a=>String(a.fn).includes(key));if(!a)continue;
+  let cash=null,bd=5.5;for(const e of EXTRAS){if(e.x<R.x0||e.x>R.x1||e.z<R.z0||e.z>R.z1)continue;const d=hyp(e.x-a.x,e.z-a.z);if(d<bd){bd=d;cash=e.H;}}if(!cash)continue;
+  const sf=autoSafe(R,cash,0);const bag=cashBag(0,0,0);{const c=cash.root.position,dx=a.x-c.x,dz=a.z-c.z,l=hyp(dx,dz)||1;bag.position.set(c.x+dx/l*.7,1.15,c.z+dz/l*.7);}
+  robReg({room,cx:a.x,cz:a.z,cash,safe:sf&&sf.s,sx:sf&&sf.px,sz:sf&&sf.pz,y:0,bag,pay:pay||[160,420],spay:spay||[700,1800]});}
+/* ================= NEXUS MALL: 3 floors around a glass-roofed atrium, criss-cross escalators, a glass elevator, 26 shops and a food court ================= */
+{const MX=MALL.X,MZ=MALL.Z,Y=MALL.Y,X=v=>MX+v,Z=v=>MZ+v;
+  const R=room('mall',MX,MZ,64,48,18,{wall:'sage',floor:'mallTile',fts:2.4,wts:3,ceil:'ceilT',cts:2.4,skirt:'dark'});R.seats=[];R.unitH=5.7;MALL.R=R;
+  // floor slabs of level 1 and 2 with the atrium (|x|<12,|z|<8) and the elevator shaft (|x|<1.6, -20<z<-16) cut out
+  const slab=(y,a,b,c,d)=>{itb('mallTile',X(a),X(b),y-.3,y,Z(c),Z(d),{ts:2.4});ceilQ('ceilT',X(a),X(b),y-.31,Z(c),Z(d),2.4);};
+  for(const y of[Y[1],Y[2]]){slab(y,-32,32,8,24);slab(y,-32,-1.6,-24,-8);slab(y,1.6,32,-24,-8);slab(y,-1.6,1.6,-24,-20);slab(y,-1.6,1.6,-16,-8);slab(y,-32,-12,-8,8);slab(y,12,32,-8,8);
+    // glass balustrade round the atrium, gaps where the escalators land
+    const rail=(x0,x1,z0,z1)=>{itb('mglass',X(x0),X(x1),y,y+1.05,Z(z0),Z(z1));itb('chrome',X(x0),X(x1),y+1.05,y+1.1,Z(z0),Z(z1));mcol(X(x0),X(x1),Z(z0),Z(z1),y,y+1.1,y===Y[1]?1:2);};
+    rail(-12,12,-8.06,-7.94);rail(-12,12,7.94,8.06);
+    if(y===Y[1]){rail(-12.06,-11.94,-8,-5.3);rail(-12.06,-11.94,-2.7,2.7);rail(-12.06,-11.94,5.3,8);rail(11.94,12.06,-8,8);}
+    else{rail(-12.06,-11.94,-8,8);rail(11.94,12.06,-8,2.7);rail(11.94,12.06,5.3,8);}
+    const cy=y===Y[2]?17.96:y+5.66;for(let x=-30;x<=30;x+=6)for(const z of[-12,12])if(Math.abs(x)>1||z>0)IE.push([X(x),cy,Z(z)]);for(const x of[-18,18])for(const z of[-4,4])IE.push([X(x),cy,Z(z)]);}
+  for(let x=-30;x<=30;x+=6)for(const z of[-12,12,20])IE.push([X(x),Y[1]-.35,Z(z)]);for(const x of[-18,18])for(const z of[-4,4])IE.push([X(x),Y[1]-.35,Z(z)]);
+  // skylight over the atrium and a big window wall over the entrance
+  {const sk=new T.Mesh(new T.PlaneGeometry(24,16),new T.MeshBasicMaterial({color:lin('#dcefff'),toneMapped:false}));sk.rotation.x=Math.PI/2;sk.position.set(MX,17.94,MZ);scene.add(sk);
+    for(let k=-2;k<=2;k++)itb('dark',X(k*5.6-.1),X(k*5.6+.1),17.6,17.95,Z(-8),Z(8));glow(VIEW,MX,10.5,MZ+23.9,40,13,Math.PI,.95);for(let k=-4;k<=4;k++)itb('dark',X(k*5-.12),X(k*5+.12),4.2,17,Z(23.75),Z(23.95));}
+  // entrance hall: NEXUS MALL letters, planters, a directory board
+  sign('NEXUS MALL',MX,4.9,MZ+23.8,Math.PI,14,2.2,{fg:'#ffffff',bg:'rgba(0,0,0,0)',size:110,w:1024,h:160,glow:'#c1f354'});
+  for(const sx of[-1,1]){plant(X(sx*6),Z(21),1.3);plant(X(sx*10),Z(21),1.3);}
+  glow(menuTex('NEXUS MALL',[[L('Tầng 1 · Siêu thị, trang sức','Floor 1 · Market, jewellery'),''],[L('Tầng 2 · Thời trang, tóc, nail','Floor 2 · Fashion, hair, nails'),''],[L('Tầng 3 · Khu ẩm thực','Floor 3 · Food court'),''],[L('Thang máy ở phía sau','Elevator at the back'),'']],'#111827','#c1f354'),X(-6),2.1,Z(14.2),1.8,1.35,0,.95);
+  itb('dark',X(-6.95),X(-5.05),0,1.45,Z(14.05),Z(14.15));mcol(X(-7),X(-5),Z(14),Z(14.2),0,2.8,0);
+  // back-centre service core around the elevator, all floors
+  for(const[a,b]of[[-8,-1.8],[1.8,8]]){itb('marbleDk',X(a),X(b),0,18,Z(-24),Z(-16),{ts:2});addCol({t:'b',x0:X(a),x1:X(b),z0:Z(-24),z1:Z(-16),h:18});}
+  itb('steel',X(-1.8),X(-1.6),0,18,Z(-20.2),Z(-16));itb('steel',X(1.6),X(1.8),0,18,Z(-20.2),Z(-16));itb('steel',X(-1.8),X(1.8),0,18,Z(-20.4),Z(-20.2));
+  addCol({t:'b',x0:X(-1.8),x1:X(-1.6),z0:Z(-20.2),z1:Z(-16),h:18});addCol({t:'b',x0:X(1.6),x1:X(1.8),z0:Z(-20.2),z1:Z(-16),h:18});addCol({t:'b',x0:X(-1.8),x1:X(1.8),z0:Z(-20.4),z1:Z(-20.2),h:18});
+  for(const y of Y){itb('marbleDk',X(-1.8),X(1.8),y+2.8,y+(y===Y[2]?6:6)-.3,Z(-16.1),Z(-15.9));glow(textTex(L('THANG MÁY','ELEVATOR'),{fg:'#c1f354',bg:'#111',size:54,w:512,h:96}),MX,y+3.3,MZ-15.85,1.8,.34,0,1);
+    for(const sx of[-1,1])glow(textTex('WC',{fg:'#fff',bg:'#1d3557',size:70,w:256,h:128}),X(sx*5),y+2.4,MZ-15.95,.9,.45,0,1);}
+  const UNITS=[];// [level, x0,x1,z0,z1, front, type]
+  const back=[[-32,-20],[-20,-8],[8,20],[20,32]],side=[[-16,-3],[-3,10]];
+  const LT=[['mart24','jewel','tech','pharmacy','clothes','shoes','toys','books'],['barber','nails','urban','cosm','sport','watch','bags','optic','arcade','coffee'],['com','pizza','boba','pho','bbq','sushi','kem','coffee','outlet','arcade']];
+  for(let lv=0;lv<3;lv++){const T0=LT[lv];let i=0;for(const[a,b]of back)UNITS.push([lv,a,b,-24,-16,'z1',T0[i++]]);for(const[c,d]of side){UNITS.push([lv,-32,-24,c,d,'x1',T0[i++]]);UNITS.push([lv,24,32,c,d,'x0',T0[i++]]);}
+    if(lv>0){UNITS.push([lv,-32,-8,16,24,'z0',T0[i++]]);UNITS.push([lv,8,32,16,24,'z0',T0[i++]]);}}
+  for(const[lv,a,b,c,d,front,type]of UNITS){const y=Y[lv],F=UF(X(a),X(b),Z(c),Z(d),front),W=F.W,D=F.D,top=lv===2?18:y+5.7;
+    // party walls, the glass front with a 3.2 m opening, a header with the shop sign
+    ubox(F,'plasterW',-.1,.1,y,top,0,D,{col:1,lv});ubox(F,'plasterW',W-.1,W+.1,y,top,0,D,{col:1,lv});
+    const o0=W/2-1.6,o1=W/2+1.6;ubox(F,'mglass',.1,o0,y,y+3.6,-.04,.04,{col:1,lv});ubox(F,'mglass',o1,W-.1,y,y+3.6,-.04,.04,{col:1,lv});
+    for(const u of[.1,o0,o1,W-.1])ubox(F,'dark',u-.05,u+.05,y,y+3.6,-.06,.06);ubox(F,'plasterW',.1,W-.1,y+3.6,top,-.12,.02);ubox(F,'dark',.1,W-.1,y,y+.12,-.07,.07);
+    const[sx,sz]=F.p(W/2,-.14);shopSign(type,sx,y+4.6,sz,F.h,Math.min(W-2,8),1.25);
+    for(let u=2;u<W-1;u+=3.5)for(let v=2;v<D-1;v+=3.5){const[px,pz]=F.p(u,v);IE.push([px,top-.04,pz]);}
+    furnish(F,type,y,lv,'mall',R);}
+  // food court tables on the top floor, benches and planters along the corridors
+  for(const x of[-26,-20,-14,14,20,26])for(const z of[-12,12]){const y=Y[2];cyl('marbleTop',X(x),y+.73,y+.77,Z(z),.6,.6,22);cyl('dark',X(x),y,y+.73,Z(z),.05,.05,8);for(const a of[0,1.57,3.14,4.71]){const cx=X(x)+Math.sin(a)*.95,cz=Z(z)+Math.cos(a)*.95;cyl('red',cx,y+.42,y+.48,cz,.2,.2,14);cyl('dark',cx,y,y+.42,cz,.03,.03,6);}mcol(X(x)-.7,X(x)+.7,Z(z)-.7,Z(z)+.7,y,y+.8,2);}
+  for(let lv=0;lv<3;lv++){const y=Y[lv];for(const x of[-20,20]){itb('oak',X(x-1.2),X(x+1.2),y,y+.45,Z(-12.3),Z(-11.7));mcol(X(x-1.2),X(x+1.2),Z(-12.3),Z(-11.7),y,y+.5,lv);}
+    for(const[x,z]of[[-15,-10.5],[15,-10.5],[-15,10.5],[15,10.5]]){cyl('pot',X(x),y,y+.55,Z(z),.45,.55,16);for(let k=0;k<5;k++)sph('leaf',X(x)+rnd(-.3,.3),y+.9+k*.18,Z(z)+rnd(-.3,.3),.42-k*.04,1.15);mcol(X(x)-.55,X(x)+.55,Z(z)-.55,Z(z)+.55,y,y+1.5,lv);}}
+  // a few shoppers
+  for(const[lv,x,z,h]of[[0,-16,-11,.4],[0,17,-10,-.6],[0,-4,15,3],[0,9,12,2.5],[1,-18,-11,0],[1,20,11,3.1],[1,-25,10,1.6],[2,-21,-13,0],[2,19,-12,.3],[2,-6,12,3]]){const H=extra(randomLook('ped'),X(x),Z(z),h);H.root.position.y=Y[lv];}
+  R.lights=[[MX,5.2,MZ,1.2,'#fff4e6',30],[MX-18,5.2,MZ-12,1,'#fff4e6',22],[MX+18,5.2,MZ+12,1,'#fff4e6',22]];}
+/* ---------- escalators: A climbs from the ground floor (east) to floor 2 (west), B from floor 2 (west) to floor 3 (east) ---------- */
+const ESC=[];
+{const MX=MALL.X,MZ=MALL.Z;const stepTex=makeTex(64,64,(g,w,h)=>{g.fillStyle='#3b3f45';g.fillRect(0,0,w,h);g.fillStyle='#9aa1a9';for(let x=0;x<w;x+=4)g.fillRect(x,0,2,h);g.fillStyle='#ffd166';g.fillRect(0,0,w,3);});stepTex.wrapS=stepTex.wrapT=T.RepeatWrapping;
+  const stepM=new T.MeshStandardMaterial({map:stepTex,metalness:.6,roughness:.45,side:T.DoubleSide});const glassM=IMAT.mglass,steelM=new T.MeshStandardMaterial({color:lin('#c9ced4'),metalness:.9,roughness:.25}),railM=new T.MeshStandardMaterial({color:lin('#111'),roughness:.5});
+  const mk=(id,z0,z1,xa,ya,xb,yb)=>{const g=new GB(),len=hyp(xb-xa,yb-ya),n=[-(yb-ya)/len*Math.sign(xb-xa),Math.abs(xb-xa)/len,0];
+    g.quad([xa,ya+.02,z1],[xb,yb+.02,z1],[xb,yb+.02,z0],[xa,ya+.02,z0],n,[[0,0],[len/0.4,0],[len/0.4,1],[0,1]]);const me=new T.Mesh(g.geo(),stepM);me.receiveShadow=Q.shadows;scene.add(me);
+    const ang=Math.atan2(yb-ya,xb-xa),mx=(xa+xb)/2,my=(ya+yb)/2;
+    const bar=(m,w,h,d,dy,z)=>{const b=new T.Mesh(new T.BoxGeometry(w,h,d),m);b.position.set(mx,my+dy,z);b.rotation.z=ang;scene.add(b);return b;};
+    bar(steelM,len,.7,z1-z0+.3,-.42,(z0+z1)/2);for(const z of[z0-.06,z1+.06]){bar(glassM,len,1.0,.04,.55,z);bar(railM,len,.08,.12,1.08,z);bar(steelM,len,.18,.12,.05,z);}
+    for(const[x,y]of[[xa,ya],[xb,yb]]){const p=new T.Mesh(new T.BoxGeometry(1.2,.03,z1-z0),steelM);p.position.set(x+Math.sign(xb-xa)*(x===xa?-.6:.6),y+.015,(z0+z1)/2);scene.add(p);}
+    for(const z of[z0-.12,z1+.12]){const x0=Math.min(xa,xb),x1=Math.max(xa,xb);addCol({t:'b',x0,x1,z0:z-.06,z1:z+.06,h:Math.max(ya,yb)+1.2,lv:id});}
+    ESC.push({id,z0,z1,xa,ya,xb,yb,tex:stepTex});};
+  mk('A',MZ-5.2,MZ-2.8,MX+12,0,MX-12,6);addCol({t:'b',x0:MX-1,x1:MX+11.3,z0:MZ-5.35,z1:MZ-2.65,h:3,y0:0,lv:0});mk('B',MZ+2.8,MZ+5.2,MX-12,6,MX+12,12);}
+/* ---------- elevator: glass cab in the back core; call it from any floor, choose a floor inside ---------- */
+const ELEV={y:0,lvl:0,tgt:0,st:'idle',door:1,dc:[],pan:[]};
+{const MX=MALL.X,MZ=MALL.Z,cz=MZ-18;const g=new T.Group();g.position.set(MX,0,cz);scene.add(g);ELEV.g=g;
+  const steel=new T.MeshStandardMaterial({color:lin('#c9ced4'),metalness:.9,roughness:.22}),floorM=new T.MeshStandardMaterial({color:lin('#2b2d31'),roughness:.4}),lightM=new T.MeshBasicMaterial({color:lin('#fff6e0'),toneMapped:false}),mir=new T.MeshStandardMaterial({color:lin('#dfe7ee'),metalness:1,roughness:.05});
+  const add=(m,w,h,d,x,y,z)=>{const b=new T.Mesh(new T.BoxGeometry(w,h,d),m);b.position.set(x,y,z);g.add(b);return b;};
+  add(floorM,3.2,.12,3.9,0,-.06,0);add(steel,3.2,.1,3.9,0,2.75,0);add(lightM,2.2,.02,2.6,0,2.69,0);add(mir,3.2,2.7,.06,0,1.35,-1.95);add(steel,.06,2.7,3.9,-1.6,1.35,0);add(steel,.06,2.7,3.9,1.6,1.35,0);add(railM2(),2.8,.05,.05,0,.95,-1.85);
+  function railM2(){return new T.MeshStandardMaterial({color:lin('#111'),roughness:.4});}
+  const pan=add(new T.MeshBasicMaterial({color:lin('#111'),toneMapped:false}),.3,.5,.04,1.35,1.3,-1.9);
+  for(let k=0;k<3;k++){const y=MALL.Y[k];const ps=[];for(const s of[-1,1]){const p=new T.Mesh(new T.BoxGeometry(1.6,2.75,.06),steel);p.position.set(MX+s*.8,y+1.4,MZ-15.95);scene.add(p);ps.push(p);}ELEV.pan.push(ps);
+    ELEV.dc.push(addCol({t:'b',x0:MX-1.6,x1:MX+1.6,z0:MZ-16.15,z1:MZ-15.9,h:y+3,y0:y,lv:k}));}}
+function elevGo(k){if(ELEV.st!=='idle')return;if(ELEV.lvl===k&&ELEV.door>.9)return;ELEV.tgt=k;ELEV.st='closing';}
+SHOPS.elev={n:L('Thang máy · chọn tầng','Elevator · choose a floor'),items:[0,1,2].map(k=>({n:[L('Tầng 1 · Siêu thị, trang sức, công nghệ','Floor 1 · Market, jewellery, tech'),L('Tầng 2 · Thời trang, tóc, nail, arcade','Floor 2 · Fashion, hair, nails, arcade'),L('Tầng 3 · Khu ẩm thực','Floor 3 · Food court')][k],d:'',p:0,label:'→',ok:()=>ELEV.lvl!==k,fn:()=>{closeShop();elevGo(k);}}))};
+function inShaft(x,z){const lx=x-MALL.X,lz=z-MALL.Z;return Math.abs(lx)<1.6&&lz>-20.2&&lz<-15.95;}
+function mallGround(x,z,y){const lx=x-MALL.X,lz=z-MALL.Z;MALL.ramp=null;if(inShaft(x,z))return ELEV.y;let g=0;const inVoid=Math.abs(lx)<12&&Math.abs(lz)<8;
+  if(!inVoid){if(6<=y+.7)g=6;if(12<=y+.7)g=12;}
+  if(Math.abs(lx)<=12.6){if(lz>-5.2&&lz<-2.8){const ry=clamp((12-lx)/24*6,0,6);if(ry<=y+.7&&ry>=g-.01){g=ry;MALL.ramp=lx<12&&lx>-12?'A':null;}}
+    if(lz>2.8&&lz<5.2){const ry=clamp(6+(lx+12)/24*6,6,12);if(ry<=y+.7&&ry>=g-.01){g=ry;MALL.ramp=lx<12&&lx>-12?'B':null;}}}
+  return g;}
+function mallOption(){if(P.inside!=='mall')return null;const lz=P.z-MALL.Z,lx=P.x-MALL.X;
+  if(inShaft(P.x,P.z)&&ELEV.st==='idle')return{k:'E',txt:L('Thang máy · chọn tầng','Elevator · choose a floor'),fn:()=>openShop('elev')};
+  if(Math.abs(lx)<2.4&&lz>-16&&lz<-13.4&&ELEV.st==='idle'&&(ELEV.lvl!==MALL.lv||ELEV.door<.5))return{k:'E',txt:L('Gọi thang máy','Call the elevator'),fn:()=>elevGo(MALL.lv)};
+  return null;}
+let mallAmb=null;
+function mallTick(dt){const inM=P.inside==='mall';if(!mallAmb){mallAmb=new T.HemisphereLight(lin('#fff6ea'),lin('#b9b3a8'),0);scene.add(mallAmb);}mallAmb.intensity=inM?.28:0;
+  for(const e of ESC)e.tex.offset.x=(e.tex.offset.x+dt*1.4/.4)%1;
+  const E=ELEV;if(E.st==='closing'){E.door=Math.max(0,E.door-dt*1.5);if(E.door<=0)E.st=E.lvl===E.tgt?'opening':'moving';}
+  else if(E.st==='moving'){const ty=MALL.Y[E.tgt],d=ty-E.y,s=Math.min(Math.abs(d),dt*2.6);E.y+=Math.sign(d)*s;if(Math.abs(ty-E.y)<.001){E.y=ty;E.lvl=E.tgt;E.st='opening';robDing();}}
+  else if(E.st==='opening'){E.door=Math.min(1,E.door+dt*1.5);if(E.door>=1)E.st='idle';}
+  E.g.position.y=E.y;E.pan.forEach((ps,k)=>{const o=(k===E.lvl&&E.st!=='moving')?E.door:0;ps[0].position.x=MALL.X-.8-o*1.45;ps[1].position.x=MALL.X+.8+o*1.45;});
+  E.dc.forEach((c,k)=>{c.off=k===E.lvl&&E.door>.75&&E.st!=='moving';});
+  if(!inM){MALL.ramp=null;return;}
+  if(inShaft(P.x,P.z)&&(E.st==='moving')){P.y=E.y;P.vy=0;P.H.root.position.y=E.y;}
+  MALL.lv=P.y>=10.8?2:P.y>=4.8?1:0;
+  if(MALL.ramp==='A')P.x-=dt*1.3;else if(MALL.ramp==='B')P.x+=dt*1.3;
+  const Rl=MALL.R.lights,y=MALL.Y[MALL.lv];Rl[0][0]=P.x;Rl[0][1]=y+5.2;Rl[0][2]=P.z;Rl[1][1]=Rl[2][1]=y+5.2;}
+/* ---------- a door on every building that has none: offices, flats, warehouses, and new 24h stores, barbers and nail salons ---------- */
+const SHOP2POI=[];
+{const pts=[];const grab=(o,d)=>{if(!o||d>3||typeof o!=='object'||o.isObject3D)return;if(typeof o.x==='number'&&typeof o.z==='number')pts.push(o);if(Array.isArray(o))o.forEach(v=>grab(v,d+1));else for(const k in o)grab(o[k],d+1);};grab(SP,0);
+  for(const d of GDOORS)pts.push(d);
+  const cyc=['mart24','barber','nails'];let nShop=0,nAll=0;const doorParts=[];
+  // the downtown mall entrance on the biggest downtown building
+  let mallB=null;{let ba=0;for(const c of blds){if(c.x0>2400)continue;const b=blockAt((c.x0+c.x1)/2,(c.z0+c.z1)/2);if(!b||b.d!=='downtown')continue;const a=(c.x1-c.x0)*(c.z1-c.z0);if(a>ba&&a<6000){ba=a;mallB=c;}}}
+  const addDoor=(x,z,h,room)=>{const fx=Math.sin(h),fz=Math.cos(h),ox=x+fx*1.4,oz=z+fz*1.4;if(resolve(ox,oz,.45)||inBld(ox,oz)||resolve(x+fx*3,z+fz*3,.6)||inBld(x+fx*3,z+fz*3))return false;
+      const gy=groundY(ox,oz);const w=room==='mall'?3.6:room==='ware'?3.4:1.8,ht=room==='mall'||room==='ware'?3.3:2.6;
+      if(Math.abs(fz)>.5)doorParts.push([x,gy,z+fz*.06,w,ht,.12,room==='flat'?'#5a3d28':'#22323f'],[x,gy+ht,z+fz*.07,w+.3,.16,.14,'#e8dfcc']);else doorParts.push([x+fx*.06,gy,z,.12,ht,w,room==='flat'?'#5a3d28':'#22323f'],[x+fx*.07,gy+ht,z,.14,.16,w+.3,'#e8dfcc']);
+      GDOORS.push({id:'x'+GDOORS.length,x:ox,z:oz,h,room});pts.push({x:ox,z:oz});
+      if(SHOPTYPE[room]){const S=SHOPTYPE[room];shopSignQ(room,x+fx*.1,gy+ht+.75,z+fz*.1,h,3.8,.62);SHOP2POI.push({n:S.n,x:ox,z:oz,i:S.bg==='#f8f9fa'?'#e63946':S.bg});}
+      if(room==='mall'){sign('NEXUS MALL',x+fx*.12,gy+ht+1.6,z+fz*.12,h,12,2,{fg:'#fff',bg:'#e63946',size:96,w:1024,h:160});SP.mall={x:ox,z:oz};}
+      return true;};
+  // a face already has a door if any known door point sits within 3 m in front of it
+  const faceHas=(c,h)=>{const fx=Math.round(Math.sin(h)),fz=Math.round(Math.cos(h));for(const p of pts){if(fz){const z=fz>0?c.z1:c.z0,d=(p.z-z)*fz;if(d>-1&&d<3.2&&p.x>c.x0-1&&p.x<c.x1+1)return true;}else{const x=fx>0?c.x1:c.x0,d=(p.x-x)*fx;if(d>-1&&d<3.2&&p.z>c.z0-1&&p.z<c.z1+1)return true;}}return false;};
+  const faces=c=>{const cx=(c.x0+c.x1)/2,cz=(c.z0+c.z1)/2;return[[cx,c.z1,0,c.x1-c.x0,'x'],[cx,c.z0,Math.PI,c.x1-c.x0,'x'],[c.x1,cz,Math.PI/2,c.z1-c.z0,'z'],[c.x0,cz,-Math.PI/2,c.z1-c.z0,'z']];};
+  if(mallB){for(const[x,z,h]of faces(mallB))if(addDoor(x,z,h,'mall'))break;}
+  for(const c of blds){if(c.x0>2400||c===mallB)continue;const w=c.x1-c.x0,d=c.z1-c.z0,a=w*d;if(w<4||d<4||a>9000)continue;const cx=(c.x0+c.x1)/2,cz=(c.z0+c.z1)/2,gy=groundY(cx,cz),hh=c.h-gy;if(hh<3)continue;
+    if(AIR.term&&cx>AIR.term.x0-5&&cx<AIR.term.x1+5&&cz>AIR.term.z0-5&&cz<AIR.term.z1+5)continue;
+    for(const[x,z,h,len,ax]of faces(c)){if(len<5||faceHas(c,h))continue;
+      let room=hh>22?(nAll%5===0?'hotel':'office'):a>900&&hh<14?'ware':'flat';if(room!=='ware'&&hh<18&&nAll%6===1)room=cyc[nShop%3];
+      for(const off of[0,-len/4,len/4]){const px=ax==='x'?x+off:x,pz=ax==='z'?z+off:z;if(addDoor(px,pz,h,room)){nAll++;if(SHOPTYPE[room])nShop++;break;}}}}
+  for(const t in SIGNGB){const m=new T.Mesh(SIGNGB[t].geo(),signMat(t));scene.add(m);}
+  for(const p of doorParts)IM.push({geo:_bx.g||(_bx.g=new T.BoxGeometry(1,1,1)),pos:[p[0],p[1]+p[4]/2,p[2]],scale:[p[3],p[4],p[5]],color:p[6]});
+  console.log('[nexus] doors added',nAll,'shops',nShop);}
+function shopsTick(dt){mallTick(dt);robTick(dt);}
+
 for(const C of COURTS)buildParkCourts(C);
 function z1_(R){return R.z1;}
 /* build the meshes: one per textured material, cylinders per material, coloured props, glowing planes */
@@ -3056,7 +3403,7 @@ function interiorLights(){const R=P.inside&&ROOMS[P.inside];
   rain.visible=!R||!!R.open;
   ILIGHTS.forEach((l,i)=>{const s=R&&R.lights[i];if(s){l.position.set(s[0],s[1],s[2]);l.intensity=s[3]*(MOBILE?1.6:1);l.color.set(s[4]).convertSRGBToLinear();l.distance=s[5]||14;}else l.intensity=0;});}
 function fade(fn){const f=hud.fade;f.classList.add('on');setTimeout(()=>{fn();setTimeout(()=>f.classList.remove('on'),120);},260);}
-function enterInterior(id,out){if(P.car)return;const R=ROOMS[id];curDoor=out||null;fade(()=>{P.outside=out?{x:out.x-Math.sin(out.h)*1.2,z:out.z-Math.cos(out.h)*1.2,h:out.h}:{x:P.x,z:P.z,h:P.h+Math.PI};P.sit=null;P.inside=id;P.x=R.door.x;P.z=R.door.z-.6;P.h=Math.PI;cam.yaw=Math.PI;camera.position.set(P.x,2,P.z+3);sfx('door');if(id==='bank')tutEvent('bank');});}
+function enterInterior(id,out){if(P.car)return;const R=ROOMS[id];curDoor=out||null;fade(()=>{P.outside=out?{x:out.x-Math.sin(out.h)*1.2,z:out.z-Math.cos(out.h)*1.2,h:out.h}:{x:P.x,z:P.z,h:P.h+Math.PI};P.sit=null;P.inside=id;P.x=R.door.x;P.z=R.door.z-.6;P.y=0;P.vy=0;P.h=Math.PI;cam.yaw=Math.PI;camera.position.set(P.x,2,P.z+3);sfx('door');if(id==='bank')tutEvent('bank');});}
 function exitInterior(){if(heist&&heist.stage==='vault'){heist=null;banner(L('Bỏ dở vụ cướp','Heist abandoned'),L('Bạn rời két quá sớm','You left the vault too early'));for(const n of npcs.filter(n=>n.kind==='guard'))removeNPC(n);}
   if(P.sit)P.sit=null;if(P.tray){heal(P.tray.hp);if(P.tray.boost)P.boostT=60;P.tray=null;showPrompt(L('Bạn ăn mang đi trên đường','You ate it on the go'),1.6);}
   const o=P.outside||{x:SP.house.door.x,z:SP.house.door.z,h:0};fade(()=>{P.inside=null;curDoor=null;P.x=o.x+Math.sin(o.h)*1.2;P.z=o.z+Math.cos(o.h)*1.2;P.h=o.h;cam.yaw=o.h;camera.position.set(P.x-Math.sin(o.h)*5,3,P.z-Math.cos(o.h)*5);sfx('door');});}
@@ -3103,6 +3450,7 @@ function clearWaypoint(say){if(!gps.wp)return;gps.wp=null;gps.t=0;gps.key='';if(
 function poiList(){const L=[{n:'Nhà an toàn',x:SP.house.door.x,z:SP.house.door.z,i:'house'},{n:'Ngân hàng Nexus',x:SP.bank.door.x,z:SP.bank.door.z,i:'bank'},{n:'Bệnh viện',x:SP.hospital.x,z:SP.hospital.z,i:'hosp'},{n:'Đồn cảnh sát',x:SP.police.x,z:SP.police.z,i:'police'},
   {n:'Công viên trung tâm',x:SP.parkMain.x,z:SP.parkMain.z,i:'#5fbf5a'},...(SP.courts?[{n:LL('Sân bóng rổ ngoài trời','Outdoor courts'),x:SP.courts.x,z:SP.courts.z,i:'#2c5f9e'}]:[]),...(SP.arena?[{n:LL('Nhà thi đấu bóng rổ','Basketball arena'),x:SP.arena.x,z:SP.arena.z,i:'#e0561b'}]:[]),{n:'Vòng quay bãi biển',x:FW.x-10,z:FW.z,i:'#ff7ad9'},{n:'Cầu tàu',x:FW.pier.x0-2,z:FW.pier.z,i:'#3ef0e0'}];
   const SC={food:'#ffb703',mart:'#e63946',clothes:'#ad8dff',guns:'#8f1a20',cars:'#c1f354',gym:'#2d6a4f',garage:'#ffd166'};const seen={};for(const sh of SP.shops){if(sh.id==='mart'&&seen.mart)continue;seen[sh.id]=1;L.push({n:SHOPS[sh.id].n,x:sh.x,z:sh.z,i:SC[sh.id]||'#fff'});}
+  if(SP.mall)L.push({n:'Nexus Mall',x:SP.mall.x,z:SP.mall.z,i:'#c1f354'});for(const s of SHOP2POI.filter((s,i,a)=>a.findIndex(o=>o.n===s.n)===i))L.push(s);
   if(SP.school)L.push({n:'Trường THPT Nexus',x:SP.school.x,z:SP.school.z,i:'#f1faee'});if(SP.stadium)L.push({n:'Sân vận động',x:SP.stadium.x,z:SP.stadium.z,i:'#9aa3ad'});if(SP.apt)L.push({n:save.apt?'Căn hộ của bạn':'Căn hộ ven biển (bán)',x:SP.apt.x,z:SP.apt.z,i:'#2a9d8f'});if(SP.bigBridge)L.push({n:'Cầu dây văng',x:SP.bigBridge.x,z:SP.bigBridge.z-40,i:'#e9edf2'});
   if(!mis)for(const k in GIVERS)if(giverPos[k])L.push({n:GIVERS[k].name,x:giverPos[k].x,z:giverPos[k].z,i:GIVERS[k].css});
   if(WILD.places)for(const p of WILD.places)L.push({n:LL(p.n,p.en)+(save.disc[p.id]?' ✓':''),x:p.x,z:p.z,i:save.disc[p.id]?'#7ef9a0':'#b9c2cc'});return L.map(p=>Object.assign(p,{n:TT(p.n)}));}
@@ -3346,7 +3694,7 @@ function onKey(e){if(!active)return;sfxInit();const k=e.key.toLowerCase();if([' 
   if(shopOpen){if(k==='e'||k==='backspace')closeShop();else if(/^[1-9]$/.test(k)){const it=shopItems(shopOpen)[+k-1];if(it)buyItem(it);}return;}
   if(k==='m')toggleMap();else if(mapOpen)return;
   if(HP.on&&hpKey(k)){keys.add(k);return;}
-  if(k==='f')toggleCar();if(k==='b'&&!MOBILE)aimKey();if(k==='j'){if(P.weapon!=='fist'&&!P.car){if(!MOBILE)aimKey();else P.trigger=true;}else playerPunch();}if(k==='h'&&P.car)sfx('horn');if(k>='1'&&k<='4')selectWeapon(WORDER[+k-1]);if(k==='e')interact();if(k==='r')radioNext();if(k==='g')clearWaypoint(true);if(k==='c')cam.lastDrag=-1e9,cam.yaw=P.car?P.car.h:P.h;keys.add(k);}
+  if(k==='f')toggleCar();if(k==='b'&&!MOBILE)aimKey();if(k==='x')robKey();if(k==='j'){if(P.weapon!=='fist'&&!P.car){if(!MOBILE)aimKey();else P.trigger=true;}else playerPunch();}if(k==='h'&&P.car)sfx('horn');if(k>='1'&&k<='4')selectWeapon(WORDER[+k-1]);if(k==='e')interact();if(k==='r')radioNext();if(k==='g')clearWaypoint(true);if(k==='c')cam.lastDrag=-1e9,cam.yaw=P.car?P.car.h:P.h;keys.add(k);}
 const offKey=e=>{const k=e.key.toLowerCase();keys.delete(k);if(k==='j'||k==='b')P.trigger=false;};
 window.addEventListener('keydown',onKey);window.addEventListener('keyup',offKey);
 const cv=renderer.domElement;
@@ -3367,7 +3715,7 @@ if(MOBILE){hud.touch.hidden=false;const jEl=$h('.nc-joy'),kn=$h('.nc-joy i');
     const up=()=>{if(k==='punch')P.trigger=false;if(k==='jump')tb.jump=false;if(k==='block')tb.block=false;};b.addEventListener('pointerup',up);b.addEventListener('pointercancel',up);b.addEventListener('pointerleave',up);});}
 
 /* ---------- interaction ---------- */
-const DOORTXT={court:()=>L('Vào nhà thi đấu bóng rổ','Enter the basketball arena'),tea:()=>L('Vào trà quán','Enter the teahouse'),sea:()=>L('Vào nhà hàng hải sản','Enter the seafood restaurant'),church:()=>L('Vào nhà thờ','Enter the church'),saloon:()=>L('Vào saloon','Enter the saloon'),cinema:()=>L('Vào rạp phim','Enter the cinema'),hotel:()=>L('Vào khách sạn','Enter the hotel'),ware:()=>L('Vào nhà kho','Enter the warehouse'),office:()=>L('Vào toà nhà','Enter the building'),mart:()=>L('Vào cửa hàng tạp hoá','Enter the store'),guns:()=>L('Vào tiệm súng','Enter the gun shop'),gym:()=>L('Vào phòng tập','Enter the gym'),clothes:()=>L('Vào shop quần áo','Enter the clothes shop'),cars:()=>L('Vào showroom xe','Enter the car showroom'),diner:()=>L('Vào quán ăn','Enter the restaurant'),police:()=>L('Vào đồn cảnh sát','Enter the police station'),flat:()=>L('Vào nhà','Go inside'),office:()=>L('Vào toà nhà văn phòng','Enter the office tower'),hotel:()=>L('Vào khách sạn','Enter the hotel'),ware:()=>L('Vào nhà kho','Enter the warehouse')};
+const DOORTXT={mart24:()=>L('Vào Nexus 24h','Enter Nexus 24h'),barber:()=>L('Vào tiệm cắt tóc','Enter the barber shop'),nails:()=>L('Vào tiệm làm móng','Enter the nail salon'),mall:()=>L('Vào trung tâm thương mại Nexus Mall','Enter Nexus Mall'),court:()=>L('Vào nhà thi đấu bóng rổ','Enter the basketball arena'),tea:()=>L('Vào trà quán','Enter the teahouse'),sea:()=>L('Vào nhà hàng hải sản','Enter the seafood restaurant'),church:()=>L('Vào nhà thờ','Enter the church'),saloon:()=>L('Vào saloon','Enter the saloon'),cinema:()=>L('Vào rạp phim','Enter the cinema'),hotel:()=>L('Vào khách sạn','Enter the hotel'),ware:()=>L('Vào nhà kho','Enter the warehouse'),office:()=>L('Vào toà nhà','Enter the building'),mart:()=>L('Vào cửa hàng tạp hoá','Enter the store'),guns:()=>L('Vào tiệm súng','Enter the gun shop'),gym:()=>L('Vào phòng tập','Enter the gym'),clothes:()=>L('Vào shop quần áo','Enter the clothes shop'),cars:()=>L('Vào showroom xe','Enter the car showroom'),diner:()=>L('Vào quán ăn','Enter the restaurant'),police:()=>L('Vào đồn cảnh sát','Enter the police station'),flat:()=>L('Vào nhà','Go inside'),office:()=>L('Vào toà nhà văn phòng','Enter the office tower'),hotel:()=>L('Vào khách sạn','Enter the hotel'),ware:()=>L('Vào nhà kho','Enter the warehouse')};
 /* sitting, carrying a tray, eating at a table */
 let TRAYM=null;
 function trayMesh(col){if(!TRAYM){TRAYM=new T.Group();TRAYM.add(new T.Mesh(buildVC([{geo:new T.BoxGeometry(.5,.03,.36),color:'#7a4a24'},{geo:new T.CylinderGeometry(.15,.12,.03,16),pos:[-.06,.03,0],color:'#f4f1ea'},{geo:new T.CylinderGeometry(.045,.04,.14,10),pos:[.17,.085,.08],color:'#e9e2d0'},{geo:new T.CylinderGeometry(.01,.01,.12,5),pos:[.17,.18,.08],color:'#d62828'}]),HUMAT));
@@ -3386,8 +3734,9 @@ function trayUpdate(){const want=!!P.tray;if(!want){if(TRAYM&&TRAYM.parent)TRAYM
 function interactOption(){const t=P.car||P,near=(p,r)=>p&&hyp(P.x-p.x,P.z-p.z)<r;{const so=stDoorOption()||bbOption();if(so)return so;}
   if(P.inside){const R=ROOMS[P.inside];
     if(P.sit)return{k:'E',txt:P.sit.left>0?L('Đang ăn · bấm E để đứng dậy','Eating · press E to stand up'):L('Đứng dậy','Stand up'),fn:standUp};
-    if(near(R.door,1.8))return{k:'E',txt:L('Ra ngoài','Go outside'),fn:exitInterior};
-    if(R.acts)for(const a of R.acts)if(near(a,a.r||2)&&(!a.ok||a.ok()))return{k:'E',txt:typeof a.txt==='function'?a.txt():a.txt,fn:a.fn};
+    {const mo=mallOption()||robOption();if(mo)return mo;}
+    if(near(R.door,1.8)&&P.y<2)return{k:'E',txt:L('Ra ngoài','Go outside'),fn:exitInterior};
+    if(R.acts)for(const a of R.acts)if(near(a,a.r||2)&&(a.y===undefined||Math.abs(P.y-a.y)<2.2)&&(!a.ok||a.ok()))return robDecor({k:'E',txt:typeof a.txt==='function'?a.txt():a.txt,fn:a.fn});
     if(R.seats){let b=null,bd=1.3;for(const st of R.seats){if(st.taken)continue;const d=hyp(P.x-st.x,P.z-st.z);if(d<bd){bd=d;b=st;}}if(b)return{k:'E',txt:P.tray?L('Ngồi xuống ăn','Sit down and eat'):L('Ngồi xuống','Sit down'),fn:()=>sitDown(b)};}
     if(P.inside==='house'){if(near(R.bed,2.2))return{k:'E',txt:P.dirty?L('Cất tiền và lưu game','Stash the cash and save'):L('Ngủ: lưu game, hồi máu','Sleep: save and heal'),fn:sleepHome};if(near(R.wardrobe,2))return{k:'E',txt:L('Tủ quần áo','Wardrobe'),fn:()=>openShop('wardrobe')};if(near(R.fridge,2))return{k:'E',txt:L('Tủ lạnh: ăn nhẹ, +30 máu','Fridge: grab a snack, +30 HP'),fn:()=>{heal(30);showPrompt(L('Ngon!','Tasty!'),1);}};}
     if(P.inside==='hospital'&&near(R.desk,2.6))return{k:'E',txt:L('Khám bệnh: hồi đầy máu · $50','Check-up: full health · $50'),fn:checkup};
@@ -3446,7 +3795,7 @@ function playerUpdate(dt){
   const p=resolve(P.x,P.z,.38);if(p){P.x+=p[0];P.z+=p[1];}
   for(const c of cars){const dx=P.x-c.x,dz=P.z-c.z;if(dx*dx+dz*dz>16)continue;const fx2=Math.sin(c.h),fz2=Math.cos(c.h),lz=dx*fx2+dz*fz2,lx=dx*-fz2+dz*fx2;if(Math.abs(lx)<1.35&&Math.abs(lz)<2.6){const sp=Math.abs(c.vf);if(sp>6&&c!==P.car){hurtPlayer(sp*2.4,c);if(P.hp>0){P.koT=1.4;P.H.ko=1;setTimeout(()=>{P.H.ko=0;},1100);}P.x+=fx2*Math.sign(c.vf)*2;P.z+=fz2*Math.sign(c.vf)*2;}else{const ox=1.35-Math.abs(lx),oz=2.6-Math.abs(lz);if(ox<oz){P.x+=-fz2*Math.sign(lx)*ox;P.z+=fx2*Math.sign(lx)*ox;}else{P.x+=fx2*Math.sign(lz)*oz;P.z+=fz2*Math.sign(lz)*oz;}}}}
   for(const n2 of npcs){if(n2.state==='down')continue;const dx=P.x-n2.x,dz=P.z-n2.z,d=hyp(dx,dz);if(d<.7&&d>0){P.x+=dx/d*(.7-d)*.5;P.z+=dz/d*(.7-d)*.5;n2.x-=dx/d*(.7-d)*.5;n2.z-=dz/d*(.7-d)*.5;}}
-  const ground=(()=>{const b=blockAt(P.x,P.z);return b&&P.x>b.x0&&P.x<b.x1&&P.z>b.z0&&P.z<b.z1&&!inCut(b,P.x,P.z)?.25:heightAt(P.x,P.z);})();
+  const ground=P.inside==='mall'?mallGround(P.x,P.z,P.y):(()=>{const b=blockAt(P.x,P.z);return b&&P.x>b.x0&&P.x<b.x1&&P.z>b.z0&&P.z<b.z1&&!inCut(b,P.x,P.z)?.25:heightAt(P.x,P.z);})();
   if(jump&&P.y<=ground+.001)P.vy=6.5;P.vy-=20*dt;P.y+=P.vy*dt;if(P.y<ground){P.y=ground;P.vy=0;}
   const near=npcs.some(n2=>n2.state==='fight'&&hyp(n2.x-P.x,n2.z-P.z)<4);P.H.guard=near||time-P.lastPunch<1.2?1:0;
   P.H.root.position.set(P.x,P.y,P.z);P.H.root.rotation.y=P.h;animHuman(P.H,dt,spd,time);trayUpdate();
@@ -3650,7 +3999,7 @@ function step(dt){
     const d=hyp(c.x-P.x,c.z-P.z);c.mesh.visible=d<Q.cull+30;if(c.kind==='traffic'&&d>Q.cull+50)removeCar(c);}
   carPairs();
   for(const n of npcs.slice())npcUpdate(n,dt);
-  wantedUpdate(dt);heliUpdate(dt);heistUpdate(dt);missionUpdate(dt);storyUpdate(dt);bbUpdate(dt);tutUpdate(dt);gpsUpdate(dt);fxUpdate(dt);fwUpdate(dt);
+  wantedUpdate(dt);heliUpdate(dt);heistUpdate(dt);shopsTick(dt);missionUpdate(dt);storyUpdate(dt);bbUpdate(dt);tutUpdate(dt);gpsUpdate(dt);fxUpdate(dt);fwUpdate(dt);
   tod.hour=(tod.hour+dt/30)%24;todApply();weatherUpdate(dt);weatherApply();interiorLights();skyMat.uniforms.ct.value=time;tracerUpdate(dt);heliShoot(dt);lampUpdate(dt);smashUpdate(dt);beamUpdate();doorsUpdate(dt);wildUpdate(dt);airUpdate(dt);
   if(cars.filter(c=>c.kind==='traffic').length<Q.traffic&&Math.random()<dt*2)spawnTraffic(true);
   if(npcs.filter(n=>n.kind==='ped').length<Q.peds&&Math.random()<dt*3)spawnPed();
@@ -4454,7 +4803,7 @@ const api={
   resume(){active=true;paused=false;keys.clear();cam.rmb=false;last=performance.now();cancelAnimationFrame(raf);raf=requestAnimationFrame(frame);resize();if(P.car&&radio.idx>=0)radioPlay();},
   resize,
   get save(){return save;},
-  _dbg:{AIM,aimOn,aimOff,BB,HP,hpEnter,hpExit,hpKey,hp1v1,bbShoot,bbNearHoop,COURTS,SP,film:{run(n,d){for(let i=0;i<n;i++){if(MOV.on)movTick(d||1/30);}PP.render();return MOV.si+':'+MOV.t.toFixed(1);},go(i){MOV.si=i-1;movNext();PP.render();},MOV,playFilm,filmOpening,filmEnding,phoneCall,stCall,say},cin:{CIN,cine,stOpening,stArmed,stIntro,stFightTip,stKeyStamp,stTowerIntro,stHeliTip,stFail,stWantedTip},story:{get SS(){return SS;},stSpot,stDoorSpot,get gang(){return stGang;},get tower(){return stTower;},get heli(){return stHeli;},stEnterTower,stStartTower,stVictory,stDied,storyUpdate,wasted,get win(){return stWin;}},heightAt,resolve,TOWNS,DIAS,PADS,inBld,AIR,PP,P,cars,newCar,buyVehicle,interactOption,sitDown,standUp,takeFood,GDOORS,SHOPS,save,bookTour,npcs,get stars(){return stars;},set stars(v){stars=v;},startHeist,startMission,interact,toggleCar,playerPunch,get heist(){return heist;},set heistProg(v){if(heist)heist.prog=v;},SP,tut,toggleMap,bag,time:()=>time,scene,renderer,sun,step,info:()=>renderer.info.render,keys,camUpdate,camera,weather,ROOMS,openShop,closeShop,enterInterior,exitInterior,selectWeapon,fireWeapon,get shopOpen(){return shopOpen;},tod,todApply,gps,setWaypoint,clearWaypoint,planRoute,poiList,radio,radioNext,playerHitBy,get lastFoe(){return lastFoe;},cam,tb,render:()=>renderer.render(scene,camera)}
+  _dbg:{ROBS,ELEV,MALL,robKey,AIM,aimOn,aimOff,BB,HP,hpEnter,hpExit,hpKey,hp1v1,bbShoot,bbNearHoop,COURTS,SP,film:{run(n,d){for(let i=0;i<n;i++){if(MOV.on)movTick(d||1/30);}PP.render();return MOV.si+':'+MOV.t.toFixed(1);},go(i){MOV.si=i-1;movNext();PP.render();},MOV,playFilm,filmOpening,filmEnding,phoneCall,stCall,say},cin:{CIN,cine,stOpening,stArmed,stIntro,stFightTip,stKeyStamp,stTowerIntro,stHeliTip,stFail,stWantedTip},story:{get SS(){return SS;},stSpot,stDoorSpot,get gang(){return stGang;},get tower(){return stTower;},get heli(){return stHeli;},stEnterTower,stStartTower,stVictory,stDied,storyUpdate,wasted,get win(){return stWin;}},heightAt,resolve,TOWNS,DIAS,PADS,inBld,AIR,PP,P,cars,newCar,buyVehicle,interactOption,sitDown,standUp,takeFood,GDOORS,SHOPS,save,bookTour,npcs,get stars(){return stars;},set stars(v){stars=v;},startHeist,startMission,interact,toggleCar,playerPunch,get heist(){return heist;},set heistProg(v){if(heist)heist.prog=v;},SP,tut,toggleMap,bag,time:()=>time,scene,renderer,sun,step,info:()=>renderer.info.render,keys,camUpdate,camera,weather,ROOMS,openShop,closeShop,enterInterior,exitInterior,selectWeapon,fireWeapon,get shopOpen(){return shopOpen;},tod,todApply,gps,setWaypoint,clearWaypoint,planRoute,poiList,radio,radioNext,playerHitBy,get lastFoe(){return lastFoe;},cam,tb,render:()=>renderer.render(scene,camera)}
 };
 return api;
 }

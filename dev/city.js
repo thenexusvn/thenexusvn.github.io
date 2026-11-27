@@ -3256,9 +3256,9 @@ Object.assign(SHOPS,{
 SHOPS.food.n=SHOPS.food.n||'Cơm Tấm Cô Ba';
 /* ---------- street shops: 24h store, barber, nail salon (shared interiors, entered from doors all over the city) ---------- */
 for(const[id,cx,w,d,wall,ceil]of[['mart24',5100,14,11,'plasterW','ceilT'],['barber',5180,12,10,'paper','plaster'],['nails',5260,12,10,'pinkW','plaster']]){
-  const R=room(id,cx,0,w,d,3.4,{wall,floor:'tileW',fts:1,wts:1.6,ceil,cts:1.2,skirt:'dark'});R.seats=[];R.bright=true;
+  const R=room(id,cx,0,w,d,3.4,{wall,floor:'tileW',fts:1,wts:1.6,ceil,cts:1.2,skirt:'dark'});R.seats=[];
   const F=UF(R.x0,R.x1,R.z0,R.z1,'z1');furnish(F,id,0,undefined,id,R);
-  for(let x=R.x0+2.5;x<R.x1-1;x+=3.5)for(let z=R.z0+2;z<R.z1-1;z+=3.5)IE.push([x,R.h-.04,z]);R.lights=[[cx,3.2,R.z0+3,1.2,'#fff4e6',14],[cx,3.2,R.z1-3,1,'#fff4e6',12]];plant(R.x0+.7,R.z1-.8,.9);}
+  for(let x=R.x0+2.5;x<R.x1-1;x+=3.5)for(let z=R.z0+2;z<R.z1-1;z+=3.5)IE.push([x,R.h-.04,z]);R.lights=[[cx,3.2,R.z0+3,.9,'#fff4e6',13],[cx,3.2,R.z1-3,.7,'#fff4e6',11]];plant(R.x0+.7,R.z1-.8,.9);}
 /* robberies in the existing shops: find the counter that opens the shop, the cashier standing behind it, and drop a safe in a free corner */
 for(const[room,key,pay,spay]of[['mart','mart'],['guns','guns',[400,900],[1800,3500]],['diner','food'],['gym','gym'],['clothes','clothes'],['cars','cars',[500,1200],[2500,5000]],['hotel','bar',[300,700]],['tea','tea'],['sea','sea'],['saloon','saloon'],['cinema','Bắp rang']]){
   const R=ROOMS[room];if(!R||!R.acts)continue;const a=R.acts.find(a=>String(a.fn).includes(key));if(!a)continue;
