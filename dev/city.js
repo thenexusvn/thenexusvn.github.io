@@ -4404,7 +4404,7 @@ function pbrImg(u){return new Promise((res,rej)=>{const im=new Image();im.crossO
 async function pbrLoad(){if(!PBR.on)return;const base=n=>'https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/'+n+'/'+n+'_';
   for(const k in PBR.set){const n=PBR.set[k],t=TX[k];if(!t)continue;
     try{const[d,nm,r]=await Promise.all([pbrImg(base(n)+'diff_1k.jpg'),pbrImg(base(n)+'nor_gl_1k.jpg'),GFX==='ultra'?pbrImg(base(n)+'rough_1k.jpg'):Promise.resolve(null)]);
-      t.image=d;t.needsUpdate=true;const mk=im=>{const x=new T.Texture(im);x.wrapS=x.wrapT=T.RepeatWrapping;x.repeat.copy(t.repeat);x.anisotropy=t.anisotropy;x.needsUpdate=true;return x;};
+      if(k!=='grass'){t.image=d;t.needsUpdate=true;}// grass keeps its own green colour and only takes the photo's bumpsconst mk=im=>{const x=new T.Texture(im);x.wrapS=x.wrapT=T.RepeatWrapping;x.repeat.copy(t.repeat);x.anisotropy=t.anisotropy;x.needsUpdate=true;return x;};
       PBR.nor[k]=mk(nm);if(r)PBR.rough[k]=mk(r);pbrApply();}catch(e){console.warn('pbr',k,e);}}
   setTimeout(pbrApply,8000);}
 function pbrApply(){const by=new Map();for(const k in PBR.nor)by.set(TX[k],k);scene.traverse(o=>{if(!o.material)return;for(const m of(Array.isArray(o.material)?o.material:[o.material])){const k=m.map&&by.get(m.map);if(!k||m.normalMap||!m.isMeshStandardMaterial)continue;
