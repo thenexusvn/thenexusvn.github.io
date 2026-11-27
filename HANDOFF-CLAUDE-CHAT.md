@@ -360,3 +360,9 @@ Python helper scripts used during development:
 ## Mouse look + gun mode (city.js)
 - One click on the canvas → pointer lock (mouseLock); document pointermove with movementX/Y turns cam.yaw / cam.pitch (AIM.pitch when armed). Lock is released when paused, map or shop open. .nc-lock hint when not locked.
 - Desktop: holding a gun (2-4) sets AIM.on automatically (shoulder camera, centre circle), WASD walks at 4.4 (Shift 7.2), B/J fires (hold for auto). 1 puts the gun away.
+
+## Secret jet chain (city.js, block "THE SECRET JET" before buildParkCourts)
+- bmarket room (x 7100) on the GDOOR nearest the harbour town, SHOPS.bmarket: key card $2500 (save.towerCard), wipe wanted, armour.
+- office lobby lift act → towerLift(true) → penthouse room (x 7200, R.door moved away; lift act goes back to the office). CEO safe (makeSafe ×1.35): 7 s crack, first time $8000 + save.secretKey + waypoint, later $2500 with save.ceoCool 5 min.
+- HANG: locked hangar at airport x -400, z 695-752, keypad E (needs secretKey) → doors slide, collider off, save.hangarOpen. SJ = makePlane("sjet") (sjetGeo, SJM clearcoat, PT.sjet max 230). E by the front-right door → sjcabin room (x 7300) with cockpit act → sjFly(). Plane collision now skips colliders with off/lv.
+- NOTE: city buildVC ignores rot, pre-rotate geometries.
