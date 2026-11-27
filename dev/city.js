@@ -86,15 +86,15 @@ function buildVC(parts){let tot=0;const arr=[];for(const p of parts){const g=p.g
   for(const[g,c]of arr){const n=g.attributes.position.count;pos.set(g.attributes.position.array,o*3);nor.set(g.attributes.normal.array,o*3);if(g.attributes.uv)uv.set(g.attributes.uv.array,o*2);for(let i=0;i<n;i++){col[(o+i)*3]=c.r;col[(o+i)*3+1]=c.g;col[(o+i)*3+2]=c.b;}o+=n;g.dispose();}
   const G=new T.BufferGeometry();G.setAttribute('position',new T.BufferAttribute(pos,3));G.setAttribute('normal',new T.BufferAttribute(nor,3));G.setAttribute('color',new T.BufferAttribute(col,3));G.setAttribute('uv',new T.BufferAttribute(uv,2));G.computeBoundingSphere();return G;}
 /* ---------- canvas textures ---------- */
-let MAXANISO=0;
-function makeTex(w,h,draw,o){o=o||{};const c=document.createElement('canvas');c.width=w;c.height=h;const g=c.getContext('2d');draw(g,w,h);const t=new T.CanvasTexture(c);if(o.repeat!==false)t.wrapS=t.wrapT=T.RepeatWrapping;if(o.srgb!==false)t.encoding=T.sRGBEncoding;t.anisotropy=o.aniso||(GFX==='ultra'?16:GFX==='low'?1:4);if(MAXANISO)t.anisotropy=Math.min(t.anisotropy,MAXANISO);return t;}
+let MAXANISO=0,GFX_T='mid';
+function makeTex(w,h,draw,o){o=o||{};const c=document.createElement('canvas');c.width=w;c.height=h;const g=c.getContext('2d');draw(g,w,h);const t=new T.CanvasTexture(c);if(o.repeat!==false)t.wrapS=t.wrapT=T.RepeatWrapping;if(o.srgb!==false)t.encoding=T.sRGBEncoding;t.anisotropy=o.aniso||(GFX_T==='ultra'?16:GFX_T==='low'?1:4);if(MAXANISO)t.anisotropy=Math.min(t.anisotropy,MAXANISO);return t;}
 function speckle(g,w,h,base,n,a){g.fillStyle=base;g.fillRect(0,0,w,h);for(let i=0;i<n;i++){const d=Math.random()<.5;g.fillStyle=d?`rgba(0,0,0,${Math.random()*a})`:`rgba(255,255,255,${Math.random()*a})`;g.fillRect(Math.random()*w,Math.random()*h,1+Math.random()*2.5,1+Math.random()*2.5);}}
 
 /* ======================================================================= */
 function create(opt){
 const view=opt.view,root=opt.hudRoot,MOBILE=!!opt.mobile;
 /* graphics tier: low = Smooth, mid = Good, ultra = Ultra (old saves said 'high', which is Good now) */
-const GFX=opt.gfx==='low'?'low':opt.gfx==='ultra'?'ultra':'mid';
+const GFX=opt.gfx==='low'?'low':opt.gfx==='ultra'?'ultra':'mid';GFX_T=GFX;
 // tiers: Smooth = lean (hard shadows, 1x resolution, no post FX, fewer people, shorter view); Good = balanced;
 // Ultra = everything on: supersampled 1.5-2x resolution, 4096 soft shadows, AO, god rays, 16x texture filtering, sharper drawn textures, busier streets, longer view, never auto-downgraded
 const DPR=window.devicePixelRatio||1;
