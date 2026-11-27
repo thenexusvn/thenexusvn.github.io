@@ -3487,7 +3487,7 @@ const HANG={x:-400,z:722,z0:695,z1:752,w:50,H:12,open:0,doors:[],col:null};
   SP.secretHangar={x:HANG.x,z:z1+3};}
 /* the jet itself */
 const SJ=(()=>{const p=makePlane('sjet','#0f1115','#c9a24a');const Y=AP.y;p.x=HANG.x;p.z=HANG.z-2;p.h=0;p.y=Y;p.home={x:p.x,z:p.z,h:0};p.flyable=true;p.g.position.set(p.x,Y,p.z);AIR.planes.push(p);return p;})();
-function hangarOpen(anim){save.hangarOpen=true;HANG.col.off=true;HANG.led.material.color.set(0x30ff60);if(!anim)HANG.open=1;}
+function hangarOpen(anim){if(anim&&!save.hangarOpen){save.hangarOpen=true;writeSave();}save.hangarOpen=true;HANG.col.off=true;HANG.led.material.color.set(0x30ff60);if(!anim)HANG.open=1;}
 if(save.hangarOpen)hangarOpen(false);
 function secretOption(){if(P.car||P.plane||P.inside)return null;
   if(!save.hangarOpen&&hyp(P.x-HANG.pad.x,P.z-HANG.pad.z)<3.2)return save.secretKey?{k:'E',txt:L('Dùng chìa khoá bí mật · mở nhà chứa','Use the secret key · open the hangar'),fn:()=>{hangarOpen(true);sfx('heavy');cam.shake=.2;banner('NEXUS ONE',L('Chiếc máy bay riêng nhanh nhất thành phố · đã là của bạn','The fastest private jet in the city · it is yours now'),4);}}
