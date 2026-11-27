@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="nexus-build" content="20261127181601">
+<meta name="nexus-build" content="20261127182732">
 <title>Nexus</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Crect%20width%3D%22100%22%20height%3D%22100%22%20rx%3D%2226%22%20fill%3D%22%23c1f354%22%2F%3E%3Cpath%20d%3D%22M28%2076V24L72%2076V24%22%20fill%3D%22none%22%20stroke%3D%22%2308090c%22%20stroke-width%3D%2213%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3Ccircle%20cx%3D%2284%22%20cy%3D%2216%22%20r%3D%229%22%20fill%3D%22%23ad8dff%22%2F%3E%3C%2Fsvg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -2320,7 +2320,7 @@ const markRead=id=>{try{localStorage.setItem(readKey(id),String(Date.now()));}ca
 /* unread counts: for every chat with a newer message than I last read, count the messages others sent since then (max 99) */
 HUB.unread={};HUB.unKey={};
 function hubCount(){if(!HUB.uid||!hubCloud())return;const db=ND._db;
-  for(const r of Object.values(HUB.rooms)){const lr=lastRead(r.id),la=r.lastAt?ND.tsMs(r.lastAt):0;
+  for(const r of Object.values(HUB.rooms)){const lr=lastRead(r.id)||Date.now()-3*864e5,la=r.lastAt?ND.tsMs(r.lastAt):0;
     if(!la||la<=lr||r.lastBy===HUB.uid||HUB.roomCur===r.id){if(HUB.unread[r.id]){HUB.unread[r.id]=0;}continue;}
     const key=la+'|'+lr;if(HUB.unKey[r.id]===key)continue;HUB.unKey[r.id]=key;if(!HUB.unread[r.id])HUB.unread[r.id]=1;
     db.collection('rooms').doc(r.id).collection('messages').where('createdAt','>',new Date(lr)).limit(99).get().then(s=>{if(HUB.unKey[r.id]!==key)return;
