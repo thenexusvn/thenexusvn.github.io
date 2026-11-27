@@ -305,6 +305,7 @@ select.input{appearance:none;background-image:linear-gradient(45deg,transparent 
 .chans button:hover{background:var(--muted);color:var(--fg)}
 .chans button[aria-current="true"]{background:var(--hover);color:var(--fg)}
 .chans button svg{width:14px;height:14px}
+.nav a .nav-count{margin-left:auto;min-width:22px;height:22px;border-radius:99px;background:#22c55e;color:#fff;font-size:12px;font-weight:800;display:grid;place-items:center;padding:0 7px;box-shadow:0 0 0 3px rgba(34,197,94,.18)}.nav a .nav-count[hidden]{display:none}.chans .badge.num{background:#22c55e;color:#fff;font-weight:800}
 .chans .badge{margin-left:auto;min-width:18px;height:18px;border-radius:99px;background:var(--lime);color:var(--lime-ink);font-size:11px;font-weight:700;display:grid;place-items:center;padding:0 5px}
 .chans .chip{margin-top:auto;align-self:flex-start}
 .hub-new{display:grid;gap:6px;margin:0 4px 8px}.hub-new .btn{justify-content:center}
@@ -2315,8 +2316,19 @@ const avHTML=(p,name)=>{const a=avOf(p);return a&&window.nexusAvatarHTML?window.
 const pairId=(a,b)=>a<b?a+'_'+b:b+'_'+a;
 const readKey=id=>'nexus-read-'+id;
 const lastRead=id=>{try{return +localStorage.getItem(readKey(id))||0;}catch(_){return 0;}};
-const markRead=id=>{try{localStorage.setItem(readKey(id),String(Date.now()));}catch(_){}};
-function hubStop(){HUB.unsub.forEach(f=>{try{f();}catch(_){}});HUB.unsub=[];HUB.people={};HUB.friends={};HUB.rooms={};HUB.uid=null;}
+const markRead=id=>{try{localStorage.setItem(readKey(id),String(Date.now()));}catch(_){}if(HUB.unread&&HUB.unread[id]){HUB.unread[id]=0;hubBadge();}};
+/* unread counts: for every chat with a newer message than I last read, count the messages others sent since then (max 99) */
+HUB.unread={};HUB.unKey={};
+function hubCount(){if(!HUB.uid||!hubCloud())return;const db=ND._db;
+  for(const r of Object.values(HUB.rooms)){const lr=lastRead(r.id),la=r.lastAt?ND.tsMs(r.lastAt):0;
+    if(!la||la<=lr||r.lastBy===HUB.uid||HUB.roomCur===r.id){if(HUB.unread[r.id]){HUB.unread[r.id]=0;}continue;}
+    const key=la+'|'+lr;if(HUB.unKey[r.id]===key)continue;HUB.unKey[r.id]=key;if(!HUB.unread[r.id])HUB.unread[r.id]=1;
+    db.collection('rooms').doc(r.id).collection('messages').where('createdAt','>',new Date(lr)).limit(99).get().then(s=>{if(HUB.unKey[r.id]!==key)return;
+      const n=s.docs.filter(d=>d.data().uid!==HUB.uid).length;HUB.unread[r.id]=HUB.roomCur===r.id?0:Math.max(n,1);renderChans();hubBadge();}).catch(e=>console.warn('unread',e));}
+  hubBadge();}
+function hubBadge(){const tot=Object.values(HUB.unread||{}).reduce((a,b)=>a+(b||0),0);
+  document.querySelectorAll('[data-nav="commshub"]').forEach(a=>{let b=a.querySelector('.nav-count');if(!b){b=document.createElement('span');b.className='nav-count';a.appendChild(b);}b.hidden=!tot;b.textContent=tot>99?'99+':String(tot);b.setAttribute('aria-label',tot+' tin nhắn chưa đọc');});}
+function hubStop(){HUB.unsub.forEach(f=>{try{f();}catch(_){}});HUB.unsub=[];HUB.people={};HUB.friends={};HUB.rooms={};HUB.uid=null;HUB.unread={};HUB.unKey={};hubBadge();}
 function hubStart(){const u=me();if(!hubCloud()||!chatOK()){if(HUB.uid)hubStop();renderChans();return;}
   const db=ND._db,FV=ND._FV;
   // keep my public profile row up to date (name and avatar)
@@ -2324,7 +2336,7 @@ function hubStart(){const u=me();if(!hubCloud()||!chatOK()){if(HUB.uid)hubStop()
   if(HUB.uid===u.uid)return;hubStop();HUB.uid=u.uid;
   HUB.unsub.push(db.collection('profiles').limit(1000).onSnapshot(s=>{HUB.people={};s.docs.forEach(d=>HUB.people[d.id]=d.data());renderChans();renderPeople();renderChat();},e=>console.warn('profiles',e)));
   HUB.unsub.push(db.collection('friends').where('users','array-contains',u.uid).onSnapshot(s=>{HUB.friends={};s.docs.forEach(d=>HUB.friends[d.id]=d.data());renderChans();renderPeople();},e=>console.warn('friends',e)));
-  HUB.unsub.push(db.collection('rooms').where('members','array-contains',u.uid).onSnapshot(s=>{HUB.rooms={};s.docs.forEach(d=>HUB.rooms[d.id]=Object.assign({id:d.id},d.data()));if(HUB.roomCur&&!HUB.rooms[HUB.roomCur])openChannel('chung');renderChans();if(HUB.roomCur)renderChat();},e=>console.warn('rooms',e)));
+  HUB.unsub.push(db.collection('rooms').where('members','array-contains',u.uid).onSnapshot(s=>{HUB.rooms={};s.docs.forEach(d=>HUB.rooms[d.id]=Object.assign({id:d.id},d.data()));if(HUB.roomCur&&!HUB.rooms[HUB.roomCur])openChannel('chung');hubCount();renderChans();if(HUB.roomCur)renderChat();},e=>console.warn('rooms',e)));
   const pres=()=>db.collection('presence').where('t','>',new Date(Date.now()-150000)).get().then(s=>{HUB.online=new Set(s.docs.map(d=>d.id));renderPeople();renderChans();}).catch(()=>{});pres();const iv=setInterval(pres,60000);HUB.unsub.push(()=>clearInterval(iv));}
 ND.on('user',()=>hubStart());ND.on('mode',()=>hubStart());
 const friendState=uid=>{const f=HUB.friends[pairId(HUB.uid,uid)];if(!f)return 'none';if(f.status==='ok')return 'friend';return f.by===HUB.uid?'sent':'incoming';};
@@ -2333,7 +2345,7 @@ const roomSorted=()=>Object.values(HUB.rooms).sort((a,b)=>ND.tsMs(b.lastAt||b.cr
 function roomRow(r){const unread=r.lastAt&&r.lastBy!==HUB.uid&&ND.tsMs(r.lastAt)>lastRead(r.id)&&HUB.roomCur!==r.id;
   const o=r.type==='dm'?(r.members||[]).find(x=>x!==HUB.uid):null,p=o?HUB.people[o]:null,on=o&&HUB.online.has(o);
   const icon=r.type==='dm'?`<span class="hub-mini">${avHTML(p,roomTitle(r))}${on?'<i class="dot"></i>':''}</span>`:`<span class="hub-mini grp">${ic('chat')}</span>`;
-  return `<button data-room="${esc(r.id)}" ${HUB.roomCur===r.id?'aria-current="true"':''}>${icon}<span class="nm">${esc(roomTitle(r))}</span>${unread?'<span class="badge">●</span>':''}</button>`;}
+  return `<button data-room="${esc(r.id)}" ${HUB.roomCur===r.id?'aria-current="true"':''}>${icon}<span class="nm">${esc(roomTitle(r))}</span>${unread?`<span class="badge num">${(HUB.unread[r.id]||1)>99?'99+':(HUB.unread[r.id]||1)}</span>`:''}</button>`;}
 
 /* the side list: create buttons, public channels, my chats */
 const _renderChansOld=renderChans;
