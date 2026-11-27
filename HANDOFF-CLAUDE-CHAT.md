@@ -334,3 +334,8 @@ Python helper scripts used during development:
 - HDRIs and PBR textures come from Poly Haven CC0 (dl.polyhaven.org, 1k). Grass keeps its own colour (normal map only).
 - Water: procedural normal texture WN, animated in step. Wet roads: ASPH.envMap = HDRI.
 - adapt() turns AO/god rays off first when FPS drops.
+
+## Gun aiming (city.js, block "gun aiming" after the input keys)
+- Desktop: B (or J) raises the gun → AIM.on, pointer lock, aim-assist snap (aimAssist). While aiming: mouse movementX/Y or WASD/arrows move cam.yaw / AIM.pitch, player stands still; B again (hold for auto guns) fires along the screen centre (fireWeapon raycasts from the camera). Right click / Esc / switching to fists / entering a car lowers the gun. Left click never fires.
+- Crosshair .nc-cross: .aim when aiming, .hot (red) when the centre ray hits an NPC or the story helicopter.
+- Mobile unchanged (block button aims, punch button fires).
