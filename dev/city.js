@@ -3065,24 +3065,26 @@ const SAFE_M={body:new T.MeshStandardMaterial({color:lin('#30353c'),roughness:.3
   cash:new T.MeshStandardMaterial({color:lin('#5a9e62'),roughness:.85}),band:new T.MeshStandardMaterial({color:lin('#f3e6c2'),roughness:.8}),inner:new T.MeshStandardMaterial({color:lin('#15171a'),roughness:.9}),
   bag:new T.MeshStandardMaterial({color:lin('#2b2b2b'),roughness:.9}),red:new T.MeshBasicMaterial({color:0xff2a2a,toneMapped:false})};
 function makeSafe(x,y,z,h){const g=new T.Group();g.position.set(x,y,z);g.rotation.y=h;scene.add(g);const W=.92,H=1.08,D=.78,t=.07;
-  const add=(w,hh,d,px,py,pz,m,par)=>{const me=new T.Mesh(new T.BoxGeometry(w,hh,d),m);me.position.set(px,py,pz);me.castShadow=Q.shadows;me.receiveShadow=Q.shadows;(par||g).add(me);return me;};
-  add(W,H,t,0,H/2,-D/2+t/2,SAFE_M.body);add(t,H,D,-W/2+t/2,H/2,0,SAFE_M.body);add(t,H,D,W/2-t/2,H/2,0,SAFE_M.body);add(W,t,D,0,H-t/2,0,SAFE_M.body);add(W,.14,D,0,.07,0,SAFE_M.body);
-  add(W-2*t,H-.2,.01,0,H/2,-D/2+t+.01,SAFE_M.inner);add(W-2*t,.03,D-t-.04,0,H*.52,-.02,SAFE_M.body);
-  const loot=[];for(let i=0;i<3;i++)for(let j=0;j<2;j++){const c=add(.2,.07,.11,-.25+i*.25,H*.52+.05+j*.075,-.05,SAFE_M.cash);loot.push(c);add(.04,.075,.115,0,0,0,SAFE_M.band,c);}
-  for(let i=0;i<3;i++)loot.push(add(.24,.07,.11,-.27+i*.27,.18,0,SAFE_M.gold));
-  const piv=new T.Group();piv.position.set(-W/2,0,D/2);g.add(piv);add(W,H,.08,W/2,H/2,.04,SAFE_M.door,piv);
-  add(W*.8,H*.8,.02,W/2,H/2,.085,SAFE_M.body,piv);
-  const dg=new T.Group();dg.position.set(W*.5,H*.6,.1);piv.add(dg);const dial=new T.Mesh(new T.CylinderGeometry(.12,.12,.05,28),SAFE_M.chrome);dial.rotation.x=Math.PI/2;dg.add(dial);add(.02,.07,.02,0,.085,.03,SAFE_M.gold,dg);
-  for(let k=0;k<3;k++){const sp=new T.Mesh(new T.CylinderGeometry(.012,.012,.26,8),SAFE_M.chrome);sp.rotation.z=k*Math.PI/3;sp.position.set(W*.5,H*.32,.12);piv.add(sp);}
-  const led=add(.05,.05,.02,W*.85,H*.85,.09,SAFE_M.red,piv);
-  return{g,piv,dg,loot,led};}
+  // merged parts: one mesh per material so a safe costs a handful of draw calls
+  const parts={};const bx=(k,w,hh,d,px,py,pz,rz)=>{const b=new T.BoxGeometry(w,hh,d);if(rz)b.rotateZ(rz);b.translate(px,py,pz);(parts[k]||(parts[k]=[])).push(b);};
+  const flush=(par,k,m)=>{if(!parts[k])return null;const me=new T.Mesh(mergeGeos(parts[k]),m);me.castShadow=me.receiveShadow=Q.shadows;par.add(me);parts[k]=null;return me;};
+  bx('b',W,H,t,0,H/2,-D/2+t/2);bx('b',t,H,D,-W/2+t/2,H/2,0);bx('b',t,H,D,W/2-t/2,H/2,0);bx('b',W,t,D,0,H-t/2,0);bx('b',W,.14,D,0,.07,0);bx('b',W-2*t,.03,D-t-.04,0,H*.52,-.02);flush(g,'b',SAFE_M.body);
+  bx('i',W-2*t,H-.2,.01,0,H/2,-D/2+t+.01);flush(g,'i',SAFE_M.inner);
+  const loot=[];for(let i=0;i<3;i++)for(let j=0;j<2;j++){const p=new T.Vector3(-.25+i*.25,H*.52+.05+j*.075,-.05);bx('c',.2,.07,.11,p.x,p.y,p.z);bx('n',.04,.075,.115,p.x,p.y,p.z);loot.push({p,m:SAFE_M.cash});}
+  for(let i=0;i<3;i++){const p=new T.Vector3(-.27+i*.27,.18,0);bx('g',.24,.07,.11,p.x,p.y,p.z);loot.push({p,m:SAFE_M.gold});}
+  const lootM=[flush(g,'c',SAFE_M.cash),flush(g,'n',SAFE_M.band),flush(g,'g',SAFE_M.gold)];
+  const piv=new T.Group();piv.position.set(-W/2,0,D/2);g.add(piv);bx('d',W,H,.08,W/2,H/2,.04);bx('d',W*.8,H*.8,.02,W/2,H/2,.085);flush(piv,'d',SAFE_M.door);
+  for(let k=0;k<3;k++)bx('s',.024,.26,.024,W*.5,H*.32,.12,k*Math.PI/3);flush(piv,'s',SAFE_M.chrome);
+  const dg=new T.Group();dg.position.set(W*.5,H*.6,.1);piv.add(dg);const dial=new T.Mesh(new T.CylinderGeometry(.12,.12,.05,28),SAFE_M.chrome);dial.rotation.x=Math.PI/2;dg.add(dial);const tk=new T.Mesh(new T.BoxGeometry(.02,.07,.02),SAFE_M.gold);tk.position.set(0,.085,.03);dg.add(tk);
+  const led=new T.Mesh(new T.BoxGeometry(.05,.05,.02),SAFE_M.red);led.position.set(W*.85,H*.85,.09);piv.add(led);
+  return{g,piv,dg,loot,lootM,led};}
 /* ---------- robbable shops ---------- */
 const ROBS=[],EXTRA_ACTS=[];let ROB=null,robLast=null,robAim=0;
 function robReg(o){const r=Object.assign({st:'idle',t:0,cool:0,y:0,pay:[160,420],spay:[700,1800]},o);ROBS.push(r);return r;}
 function robNear(){if(!P.inside||P.car)return null;let best=null,bd=1e9;for(const r of ROBS){if(r.room!==P.inside||Math.abs((r.y||0)-P.y)>2.2)continue;const d=hyp(P.x-r.cx,P.z-r.cz);if(d<bd){bd=d;best=r;}}return best?{r:best,d:bd}:null;}
 function robPose(r,k){const H=r.cash;if(!H)return;if(k==='rest'){H.root.rotation.x=0;H.root.position.y=r.y;H.armL.rotation.set(-.08,0,-.07);H.armR.rotation.set(-.08,0,.07);H.elL.rotation.x=H.elR.rotation.x=-.2;H.spine.rotation.x=0;H.head.rotation.x=0;}
   else if(k==='up'){H.armL.rotation.set(-2.95,0,-.25);H.armR.rotation.set(-2.95,0,.25);H.elL.rotation.x=H.elR.rotation.x=-.15;}}
-function robReset(r){r.st='idle';r.t=0;robPose(r,'rest');if(r.safe){r.safe.piv.rotation.y=0;for(const l of r.safe.loot)l.visible=true;r.safe.led.material=SAFE_M.red;}if(r.bag)r.bag.visible=false;}
+function robReset(r){r.st='idle';r.t=0;robPose(r,'rest');if(r.safe){r.safe.piv.rotation.y=0;for(const m of r.safe.lootM)if(m)m.visible=true;r.safe.led.material=SAFE_M.red;}if(r.bag)r.bag.visible=false;}
 function robAlarm(){const a=sfxAC;if(!a||!active)return;const t=a.currentTime;for(let i=0;i<6;i++){const o=a.createOscillator(),g=a.createGain();o.type='square';o.frequency.setValueAtTime(i%2?880:660,t+i*.22);g.gain.setValueAtTime(.0001,t+i*.22);g.gain.linearRampToValueAtTime(.07,t+i*.22+.02);g.gain.linearRampToValueAtTime(.0001,t+i*.22+.2);o.connect(g);g.connect(a.out);o.start(t+i*.22);o.stop(t+i*.22+.22);}}
 function robClick(f){const a=sfxAC;if(!a||!active)return;const t=a.currentTime,o=a.createOscillator(),g=a.createGain();o.type='square';o.frequency.value=f||rnd(1500,2100);g.gain.setValueAtTime(.06,t);g.gain.exponentialRampToValueAtTime(.001,t+.05);o.connect(g);g.connect(a.out);o.start(t);o.stop(t+.06);}
 function robDing(){const a=sfxAC;if(!a||!active)return;const t=a.currentTime;for(const[f,d]of[[988,0],[1319,.16]]){const o=a.createOscillator(),g=a.createGain();o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(.0001,t+d);g.gain.linearRampToValueAtTime(.12,t+d+.02);g.gain.exponentialRampToValueAtTime(.001,t+d+.9);o.connect(g);g.connect(a.out);o.start(t+d);o.stop(t+d+1);}}
@@ -3137,7 +3139,7 @@ function robTick(dt){const u=robUI||(hudEl?robUIEl():null);if(!u)return;
       bar=[near?L('Đang dò mã két · giữ vị trí','Cracking the combination · stay close'):L('Quay lại két sắt!','Get back to the safe!'),p];
       if(p>=1){r.st='open';r.t=0;robClick(2600);setTimeout(()=>robClick(3100),120);r.safe.led.material=SAFE_M.gold;}}
     else if(r.st==='open'){const k=Math.min(1,r.t/1.1),e=1-Math.pow(1-k,3);r.safe.piv.rotation.y=-1.95*e;if(r.t-dt<.05)sfx('heavy');
-      if(r.t>.7&&!r.paid){r.paid=1;const tot=Math.round(rnd(r.spay[0],r.spay[1])/10)*10;r.lastPay=tot;const L2=r.safe.loot;const each=Math.floor(tot/L2.length);L2.forEach((l,i)=>setTimeout(()=>{if(!l.visible)return;const wp=l.getWorldPosition(new T.Vector3());l.visible=false;robFly(wp,i===L2.length-1?tot-each*(L2.length-1):each,l.material);},i*110));}
+      if(r.t>.7&&!r.paid){r.paid=1;const tot=Math.round(rnd(r.spay[0],r.spay[1])/10)*10;r.lastPay=tot;const L2=r.safe.loot;const each=Math.floor(tot/L2.length);r.safe.g.updateMatrixWorld();const wps=L2.map(l=>l.p.clone().applyMatrix4(r.safe.g.matrixWorld));for(const m of r.safe.lootM)if(m)m.visible=false;L2.forEach((l,i)=>setTimeout(()=>robFly(wps[i],i===L2.length-1?tot-each*(L2.length-1):each,l.m),i*110));}
       if(r.t>2.4){r.st='done';r.paid=0;r.cool=Date.now()+150000;ROB=null;stars=Math.max(stars,3);evadeT=0;lastSeen={x:P.x,z:P.z};robAlarm();
         banner(L('PHÁ KÉT THÀNH CÔNG','SAFE CRACKED')+' +'+fmt$(r.lastPay||0),L('3 sao truy nã · chạy ra ngoài và cắt đuôi cảnh sát','3 wanted stars · get out and lose the cops'),3.4);}}}
   u.bar.hidden=!bar;if(bar){u.barT.textContent=bar[0];u.barI.style.width=Math.round(clamp(bar[1],0,1)*100)+'%';}
