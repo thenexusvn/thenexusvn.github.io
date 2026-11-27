@@ -366,3 +366,6 @@ Python helper scripts used during development:
 - office lobby lift act → towerLift(true) → penthouse room (x 7200, R.door moved away; lift act goes back to the office). CEO safe (makeSafe ×1.35): 7 s crack, first time $8000 + save.secretKey + waypoint, later $2500 with save.ceoCool 5 min.
 - HANG: locked hangar at airport x -400, z 695-752, keypad E (needs secretKey) → doors slide, collider off, save.hangarOpen. SJ = makePlane("sjet") (sjetGeo, SJM clearcoat, PT.sjet max 230). E by the front-right door → sjcabin room (x 7300) with cockpit act → sjFly(). Plane collision now skips colliders with off/lv.
 - NOTE: city buildVC ignores rot, pre-rotate geometries.
+
+## Two malls
+- buildMall(id,X,Z,title,lineup,tint) builds a mall; MALLS.mall (x 6300) and MALLS.plaza (x 6420). MALL is the current mall (set from P.inside). Each has its own elevator (M.elev). Nexus Plaza shop door (SP.shops clothes) → XROOM clothes:plaza. The downtown mall building converts all its doors to mall and skips buildings with SP.shops.
